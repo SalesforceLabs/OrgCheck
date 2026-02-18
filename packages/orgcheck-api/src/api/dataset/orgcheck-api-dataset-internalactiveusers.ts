@@ -1,3 +1,4 @@
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -54,7 +55,7 @@ export class DatasetInternalActiveUsers implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const userDataFactory = dataFactory.getInstance(SFDC_User);
+        const userDataFactory = dataFactory.getInstance(DataAliases.SFDC_User);
 
         // Create the map
         const userRecords = results[0];

@@ -1,7 +1,7 @@
 /**
  * @description Dependency between two items
  */
-export class DataDependency {
+export interface DataDependency {
 
     /**
      * @description Salesforce ID of the item
@@ -60,7 +60,7 @@ export class DataDependency {
     refUrl: string;
 }
 
-export class DataDependencies {
+export interface DataDependencies {
 
     /** 
      * @description List of dependencies between items
@@ -80,7 +80,7 @@ export class DataDependencies {
 /**
  * @description Dependency item using or referencing our dear main item
  */
-export class DataDependencyItem {
+export interface DataDependencyItem {
 
     /**
      * @description Salesforce ID of the item
@@ -114,7 +114,7 @@ export class DataDependencyItem {
 /**
  * @description Dependencies between data given a main item (identified by the given WhatId)
  */
-export class DataDependenciesForOneItem {
+export interface DataDependenciesForOneItem {
 
     /**
      * @description List of items that the main item (identified by the given WhatId) is using

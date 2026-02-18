@@ -164,14 +164,14 @@ export class DataCacheManager implements DataCacheManagerIntf {
      * @private
      */
     _setItemToCache = (key: any, stringValue: string): void => {
-        let hexValue: string | any[];
+        let hexValue: string = 'N/A';
         try {
             hexValue = this._compressor.compress(stringValue);
             this._storage.setItem(key, hexValue);
         } catch (error) {
             throw new Error(
                 `Error occured when trying to save the value for key ${key} with: `+
-                    `hexValue?.length=${hexValue?.length || 'N/A'}, `+
+                    `hexValue?.length=${hexValue?.length ?? 'N/A'}, `+
                     `Initiale error message was ${error.message}`
             );
         }
@@ -184,14 +184,14 @@ export class DataCacheManager implements DataCacheManagerIntf {
      * @private
      */
     _getEntryFromCache = (key: string): any => {
-        let entryFromStorage = null;
+        let entryFromStorage: string | undefined;
         try {
             const hexValue = this._storage.getItem(key);
             if (hexValue) {
                 entryFromStorage = this._compressor.decompress(hexValue);
             }
         } catch (error) {
-            console.error(`Error occured when trying to get the value for key ${key}`, error);
+            console.error(`Error occured when trying to get the value for key ${key}`, error, error?.message);
         }
         if (!entryFromStorage) return null;
         try {
@@ -199,7 +199,7 @@ export class DataCacheManager implements DataCacheManagerIntf {
             if (entry.created && Date.now() - entry.created > NB_MILLISEC_IN_ONE_DAY) return null;
             return entry;
         } catch (error) {
-            console.error(`Error occured when trying to parse the string: ${entryFromStorage}`, error);
+            console.error(`Error occured when trying to parse the string: ${entryFromStorage}`, error,  error?.message);
             return null;
         }
     }

@@ -1,18 +1,62 @@
-import { Data, DataWithDependencies, DataWithoutScoring } from './orgcheck-api-data';
+import { SFDC_ApexClass, SFDC_ApexTestMethodResult } from '../data/orgcheck-api-data-apexclass';
+import { SFDC_FlowVersion } from '../data/orgcheck-api-data-flow';
+import { SFDC_ProfileIpRangeRestriction, SFDC_ProfileLoginHourRestriction } from '../data/orgcheck-api-data-profilerestrictions';
+import { SFDC_ApexTrigger, SFDC_Application, SFDC_AppPermission, SFDC_Browser, SFDC_CollaborationGroup, SFDC_CustomLabel, SFDC_CustomTab, SFDC_Dashboard, SFDC_Document, SFDC_EmailTemplate, SFDC_Field, SFDC_FieldPermission, SFDC_FieldSet, SFDC_Flow, SFDC_Group, SFDC_HomePageComponent, SFDC_KnowledgeArticle, SFDC_LightningAuraComponent, SFDC_LightningPage, SFDC_LightningWebComponent, SFDC_Limit, SFDC_Object, SFDC_ObjectPermission, SFDC_ObjectRelationShip, SFDC_ObjectType, SFDC_Organization, SFDC_Package, SFDC_PageLayout, SFDC_PermissionSet, SFDC_PermissionSetLicense, SFDC_Profile, SFDC_ProfilePasswordPolicy, SFDC_ProfileRestrictions, SFDC_RecordType, SFDC_Report, SFDC_StaticResource, SFDC_User, SFDC_UserRole, SFDC_ValidationRule, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink, SFDC_Workflow } from '../orgcheck-api-main';
+import { DataAliases } from './orgcheck-api-data-aliases';
 import { DataDependenciesFactory } from './orgcheck-api-data-dependencies-factory';
-import { DataFactoryIntf, ScoreRule, DataFactoryInstanceIntf, DataFactoryInstanceCreateSetup, DataFactoryInstanceCreateSetup_WithDependencies } from './orgcheck-api-datafactory';
+import { DataFactoryIntf, DataFactoryInstanceIntf, ScoreRule, DataFactoryInstanceCreateSetup, DataFactoryInstanceCreateSetup_WithDependencies } from './orgcheck-api-datafactory';
 import { SecretSauce } from './orgcheck-api-secretsauce';
 
-/**
- * @description Checks if an instance extends a specific class (not necessary the direct class)
- * @param {any} instanceClass - the class of the instance to check
- * @param {any} masterClass - the class to check against
- * @returns {boolean} true if the given instance estends somehow the given class
- * @private
- */
-const IS_CLASS_EXTENDS = (instanceClass: any, masterClass: any): boolean => { 
-    return Object.prototype.isPrototypeOf.call(masterClass, instanceClass);
-}
+const DATA_METADATA = new Map([
+   [ DataAliases.SFDC_ApexClass , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_ApexClass)}],
+   [ DataAliases.SFDC_ApexTestMethodResult , { hasScore: false, hasDependencies: false, caster: (p) => (p as SFDC_ApexTestMethodResult)}],
+   [ DataAliases.SFDC_ApexTrigger , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_ApexTrigger)}],
+   [ DataAliases.SFDC_Application , { hasScore: false, hasDependencies: false, caster: (p) => (p as SFDC_Application)}],
+   [ DataAliases.SFDC_AppPermission , { hasScore: false, hasDependencies: false, caster: (p) => (p as SFDC_AppPermission)}],
+   [ DataAliases.SFDC_Browser , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_Browser)}],
+   [ DataAliases.SFDC_CollaborationGroup , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_CollaborationGroup)}],
+   [ DataAliases.SFDC_CustomLabel , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_CustomLabel)}],
+   [ DataAliases.SFDC_CustomTab , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_CustomTab)}],
+   [ DataAliases.SFDC_Dashboard , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_Dashboard)}],
+   [ DataAliases.SFDC_Document , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_Document)}],
+   [ DataAliases.SFDC_EmailTemplate , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_EmailTemplate)}],
+   [ DataAliases.SFDC_Field , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_Field)}],
+   [ DataAliases.SFDC_FieldPermission , { hasScore: false, hasDependencies: false, caster: (p) => (p as SFDC_FieldPermission)}],
+   [ DataAliases.SFDC_FieldSet , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_FieldSet)}],
+   [ DataAliases.SFDC_Flow , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_Flow)}],
+   [ DataAliases.SFDC_FlowVersion , { hasScore: false, hasDependencies: false, caster: (p) => (p as SFDC_FlowVersion)}],
+   [ DataAliases.SFDC_Group , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_Group)}],
+   [ DataAliases.SFDC_HomePageComponent , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_HomePageComponent)}],
+   [ DataAliases.SFDC_KnowledgeArticle , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_KnowledgeArticle)}],
+   [ DataAliases.SFDC_LightningAuraComponent , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_LightningAuraComponent)}],
+   [ DataAliases.SFDC_LightningPage , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_LightningPage)}],
+   [ DataAliases.SFDC_LightningWebComponent , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_LightningWebComponent)}],
+   [ DataAliases.SFDC_Limit , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_Limit)}],
+   [ DataAliases.SFDC_Object , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_Object)}],
+   [ DataAliases.SFDC_ObjectPermission , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_ObjectPermission)}],
+   [ DataAliases.SFDC_ObjectRelationShip , { hasScore: false, hasDependencies: false, caster: (p) => (p as SFDC_ObjectRelationShip)}],
+   [ DataAliases.SFDC_ObjectType , { hasScore: false, hasDependencies: false, caster: (p) => (p as SFDC_ObjectType)}],
+   [ DataAliases.SFDC_Organization , { hasScore: false, hasDependencies: false, caster: (p) => (p as SFDC_Organization)}],
+   [ DataAliases.SFDC_Package , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_Package)}],
+   [ DataAliases.SFDC_PageLayout , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_PageLayout)}],
+   [ DataAliases.SFDC_PermissionSet , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_PermissionSet)}],
+   [ DataAliases.SFDC_PermissionSetLicense , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_PermissionSetLicense)}],
+   [ DataAliases.SFDC_Profile , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_Profile)}],
+   [ DataAliases.SFDC_ProfileIpRangeRestriction , { hasScore: false, hasDependencies: false, caster: (p) => (p as SFDC_ProfileIpRangeRestriction)}],
+   [ DataAliases.SFDC_ProfileLoginHourRestriction , { hasScore: false, hasDependencies: false, caster: (p) => (p as SFDC_ProfileLoginHourRestriction)}],
+   [ DataAliases.SFDC_ProfilePasswordPolicy , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_ProfilePasswordPolicy)}],
+   [ DataAliases.SFDC_ProfileRestrictions , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_ProfileRestrictions)}],
+   [ DataAliases.SFDC_RecordType , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_RecordType)}],
+   [ DataAliases.SFDC_Report , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_Report)}],
+   [ DataAliases.SFDC_StaticResource , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_StaticResource)}],
+   [ DataAliases.SFDC_User , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_User)}],
+   [ DataAliases.SFDC_UserRole , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_UserRole)}],
+   [ DataAliases.SFDC_ValidationRule , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_ValidationRule)}],
+   [ DataAliases.SFDC_VisualForceComponent , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_VisualForceComponent)}],
+   [ DataAliases.SFDC_VisualForcePage , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_VisualForcePage)}],
+   [ DataAliases.SFDC_WebLink , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_WebLink)}],
+   [ DataAliases.SFDC_Workflow , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_Workflow)}]
+]);
 
 /**
  * @description Data factory implementation
@@ -36,29 +80,31 @@ export class DataFactory implements DataFactoryIntf {
     }
 
     /**
-     * @description Get the instance of the factiry for a given data class
+     * @description Get the instance of the factiry for a given data alias
      * @see DataFactoryIntf.getInstance
-     * @param {any} dataClass - The class of the data for which we want to get the factory instance
+     * @param {DataAliases} dataAlias - The data we want to get the factory instance for
      * @returns {DataFactoryInstanceIntf} Returns the instance of the factory for the given data class
      */
-    getInstance(dataClass: any): DataFactoryInstanceIntf {
-        const isDataWithScoring = IS_CLASS_EXTENDS(dataClass, Data);
-        const isDataWithDependencies = IS_CLASS_EXTENDS(dataClass, DataWithDependencies);
-        const isDataWithoutScoring = IS_CLASS_EXTENDS(dataClass, DataWithoutScoring);
-        // Checking dataClass
-        if (isDataWithScoring === false && isDataWithoutScoring === false && isDataWithDependencies === false) {
-            throw new TypeError('Given dataClass does not extends Data nor DataWithDependencies nor DataWithoutScoring');
+    getInstance(dataAlias: DataAliases): DataFactoryInstanceIntf {
+        const metadata = DATA_METADATA.get(dataAlias);
+        if (metadata === undefined) {
+            throw new Error(`No metadata information for dataAlias: ${dataAlias}`);
         }
         // If this dataClass was never asked before, create it and store it in the cache
-        if (this._instances.has(dataClass) === false) {
-            this._instances.set(dataClass, new DataFactoryInstance(
-                dataClass, 
-                isDataWithScoring ? SecretSauce.AllScoreRules.filter(v => v.applicable?.includes(dataClass)) : [], 
-                isDataWithDependencies
+        if (this._instances.has(dataAlias) === false) {
+            this._instances.set(dataAlias, new DataFactoryInstance(
+                dataAlias, 
+                metadata.hasScore ? SecretSauce.AllScoreRules.filter(v => v.applicable?.includes(dataAlias)) : [], 
+                metadata.hasDependencies,
+                metadata.caster
             ));
         }
+        const instance: DataFactoryInstanceIntf | undefined = this._instances.get(dataAlias);
+        if (instance === undefined) {
+            throw new Error(`Couldn't find the instance for given class`);
+        }
         // Return the instance
-        return this._instances.get(dataClass);
+        return instance;
     }
 }
 
@@ -69,10 +115,10 @@ export class DataFactory implements DataFactoryIntf {
 export class DataFactoryInstance implements DataFactoryInstanceIntf {
 
     /**
-     * @type {any} 
+     * @type {DataAliases} 
      * @private
      */
-    _dataClass: any;
+    _dataAlias: DataAliases;
 
     /**
      * @type {Array<ScoreRule>} 
@@ -87,15 +133,23 @@ export class DataFactoryInstance implements DataFactoryInstanceIntf {
     _isDependenciesNeeded: boolean;
 
     /**
+     * @type {Function}
+     * @private
+     */
+    _caster: Function;
+
+    /**
      * @description Constructor
-     * @param {any} dataClass - The class of the data for which we want to create the factory instance
+     * @param {DataAliases} dataAlias - Alias of the data for which we want to create the factory instance
      * @param {Array<ScoreRule>} scoreRules - The list of score rules to apply on the data
      * @param {boolean} isDependenciesNeeded - If true, the data will have dependencies information, otherwise it won't
+     * @param {Function} caster - The caster method to call
      */
-    constructor(dataClass: any, scoreRules: Array<ScoreRule>, isDependenciesNeeded: boolean) {
-        this._dataClass = dataClass;
+    constructor(dataAlias: DataAliases, scoreRules: Array<ScoreRule>, isDependenciesNeeded: boolean, caster: Function) {
+        this._dataAlias = dataAlias;
         this._scoreRules = scoreRules;
         this._isDependenciesNeeded = isDependenciesNeeded;
+        this._caster = caster;
     }
 
     /**
@@ -109,13 +163,8 @@ export class DataFactoryInstance implements DataFactoryInstanceIntf {
         // Checks
         if (!setup) throw new TypeError("Setup can't be null.");
         if (!setup.properties) throw new TypeError("Setup.properties can't be null.");
-        // Create a row from the protofype
-        const row = new this._dataClass();
-        // Copy properties from configuration.properties to object
-        // NB: Please note that ONLY the properties explicitely set in the class will be copied to object
-        Object.keys(row).forEach((p) => { row[p] = setup.properties[p]; });
-        // We want to make sure no new property is added to the row (there should be only the ones declared in classes!)
-        Object.seal(row);
+        // Cast the property into the row
+        const row = this._caster(setup.properties);
         // For this type if we have at least one Org Check "score rules", then score is needed
         if (this._scoreRules?.length > 0) {
             row.score = 0;
@@ -130,11 +179,11 @@ export class DataFactoryInstance implements DataFactoryInstanceIntf {
                     (setup['dependencyIdFields'] || ['id']).map((/** @type {string} */ f: string) => row[f])
                 );
             } else {
-                console.warn(`This data (of type ${this._dataClass}) is defined as with dependencies, but no dependencies were provided.`);
+                throw new TypeError(`This data (of type ${this._dataAlias}) is defined as with dependencies, but no dependencies were provided.`);
             }
         } else {
             if (setup['dependencyData']) {
-                throw new TypeError(`This data (of type ${this._dataClass}) is defined as without dependencies, but some dependencies were provided.`);
+                throw new TypeError(`This data (of type ${this._dataAlias}) is defined as without dependencies, but some dependencies were provided.`);
             }
         }
         // Return the row finally

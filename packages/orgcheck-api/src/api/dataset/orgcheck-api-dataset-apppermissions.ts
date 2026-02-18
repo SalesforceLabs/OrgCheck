@@ -1,3 +1,4 @@
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -29,7 +30,7 @@ export class DatasetAppPermissions implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const appPermissionDataFactory = dataFactory.getInstance(SFDC_AppPermission);
+        const appPermissionDataFactory = dataFactory.getInstance(DataAliases.SFDC_AppPermission);
         const appMenuItems = results[0];
         const setupEntityAccesses = results[1];
 
@@ -56,8 +57,8 @@ export class DatasetAppPermissions implements Dataset {
                     properties: {
                         appId: appId,
                         parentId: parentId,
-                        isAccessible: accesses.a,
-                        isVisible: accesses.v
+                        isAccessible: accesses?.a ?? false,
+                        isVisible: accesses?.v ?? false
                     }
                 });
 

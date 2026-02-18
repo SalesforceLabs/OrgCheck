@@ -5,10 +5,10 @@ export interface BasicLoggerIntf {
 
     /**
      * @description Check if this logger is a console fallback logger
-     * @returns {boolean | undefined} true if this logger is a console fallback logger, false otherwise
+     * @returns {boolean} true if this logger is a console fallback logger, false otherwise
      * @public
      */
-    isConsoleFallback(): boolean | undefined;
+    isConsoleFallback(): boolean;
 
     /**
      * @description The logger logs
@@ -43,9 +43,9 @@ export interface LoggerIntf extends BasicLoggerIntf {
     /**
      * @description Turn this logger into a simple logger for a specific operation
      * @param {string} operationName - the name of the operation
-     * @returns {SimpleLoggerIntf | undefined} - a simple logger
+     * @returns {SimpleLoggerIntf} - a simple logger
      */ 
-    toSimpleLogger(operationName: string): SimpleLoggerIntf | undefined;
+    toSimpleLogger(operationName: string): SimpleLoggerIntf;
 
     /**
      * @description Enable or disable the failed logging

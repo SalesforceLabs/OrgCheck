@@ -1,18 +1,18 @@
-import { Data } from '../core/orgcheck-api-data';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
+import { DataWithScore } from '../core/orgcheck-api-data';
 import { SFDC_PermissionSet } from './orgcheck-api-data-permissionset';
 import { SFDC_Profile } from './orgcheck-api-data-profile';
 
-export class SFDC_User extends Data {
+export interface SFDC_User extends DataWithScore {
     
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
      * @public
      */
-    static get label() { return 'User' };
+    dataType: DataAliases.SFDC_User;
 
-    /**
+     /**
      * @description Salesforce Id
      * @type {string}
      * @public

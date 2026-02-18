@@ -84,7 +84,7 @@ const FROM_BUFFER_TO_HEX: Function = (buffer: Uint8Array): string => {
  * @see https://www.xaymar.com/articles/2020/12/08/fastest-uint8array-to-hex-string-conversion-in-javascript/
  */
 const FROM_HEX_TO_BUFFER: Function = (hex: string): Uint8Array => {
-    const arr = [];
+    const arr: number[] = [];
     for (let i = 0; i < hex?.length; i += 2) {
         arr.push(parseInt(hex.substring(i, i+2), 16));
     }

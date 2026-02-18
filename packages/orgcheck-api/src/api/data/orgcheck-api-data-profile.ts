@@ -1,16 +1,16 @@
-import { Data } from '../core/orgcheck-api-data';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
+import { DataWithScore } from '../core/orgcheck-api-data';
 
-export class SFDC_Profile extends Data {
+export interface SFDC_Profile extends DataWithScore {
     
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
      * @public
      */
-    static get label() { return 'Profile' };
-
-    /**
+    dataType: DataAliases.SFDC_Profile;
+        
+     /**
      * @description Salesforce Id
      * @type {string}
      * @public

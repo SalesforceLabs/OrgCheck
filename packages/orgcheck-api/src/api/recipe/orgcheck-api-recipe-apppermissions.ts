@@ -1,6 +1,6 @@
 import { Recipe } from '../core/orgcheck-api-recipe';
 import { Processor } from '../core/orgcheck-api-processor';
-import { Data, DataWithoutScoring } from '../core/orgcheck-api-data';
+import { Data, DataWithoutScore } from '../core/orgcheck-api-data';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DataMatrix } from '../core/orgcheck-api-data-matrix';
 import { DataMatrixFactory } from '../core/orgcheck-api-data-matrix-factory';
@@ -34,11 +34,11 @@ export class RecipeAppPermissions implements Recipe {
      * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} _logger - Logger
      * @param {Map<string, any>} [parameters] - List of optional argument to pass
-     * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<Array<Data> | DataMatrix | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>> {
+    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrix | Data | Map<string, any>> {
 
         // Get data and parameters
         const /** @type {Map<string, SFDC_Application>} */ applications: Map<string, SFDC_Application> = data.get(DatasetAliases.APPLICATIONS);
@@ -57,14 +57,20 @@ export class RecipeAppPermissions implements Recipe {
         const workingMatrix = DataMatrixFactory.create();
         await Processor.forEach(appPermissions, (/** @type {SFDC_AppPermission} */ ap: SFDC_AppPermission) => {
             // Augment data
-            ap.appRef = applications.get(ap.appId);
-            if (ap.parentId.startsWith('0PS') === true) {
-                ap.parentRef = permissionSets.get(ap.parentId);
-            } else {
-                ap.parentRef = profiles.get(ap.parentId);
+            const applicationRef = applications.get(ap.appId);
+            if (applicationRef) {
+                ap.appRef = applicationRef;
+            }
+            const parentRef = (ap.parentId.startsWith('0PS') === true ? permissionSets : profiles).get(ap.parentId);
+            if (parentRef) {
+                ap.parentRef = parentRef;
+            }
+            // Stop there if we do not have both application and parent references
+            if (applicationRef === undefined || parentRef === undefined) {
+                return;
             }
             // Filter data
-            if (namespace === OrgCheckGlobalParameter.ALL_VALUES || ap.parentRef.package === namespace || ap.appRef.package === namespace ) {
+            if (namespace === OrgCheckGlobalParameter.ALL_VALUES || ap.parentRef?.package === namespace || ap.appRef?.package === namespace ) {
                 if (workingMatrix.hasRowHeader(ap.parentId) === false) {
                     workingMatrix.setRowHeader(ap.parentId, ap.parentRef);
                 }

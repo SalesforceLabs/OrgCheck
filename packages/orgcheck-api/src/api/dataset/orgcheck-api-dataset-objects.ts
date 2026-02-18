@@ -1,3 +1,4 @@
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -17,7 +18,7 @@ export class DatasetObjects implements Dataset {
     async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_Object>> {
 
         // Init the factory and records
-        const objectDataFactory = dataFactory.getInstance(SFDC_Object);
+        const objectDataFactory = dataFactory.getInstance(DataAliases.SFDC_Object);
 
         // Two actions to perform in parallel, global describe and an additional entity definition soql query
         logger?.log(`Performing a global describe and in parallel a SOQL query to EntityDefinition...`);            

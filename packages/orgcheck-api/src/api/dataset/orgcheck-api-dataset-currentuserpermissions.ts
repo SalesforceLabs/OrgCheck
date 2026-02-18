@@ -1,3 +1,4 @@
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
@@ -34,7 +35,7 @@ export class DatasetCurrentUserPermissions implements Dataset {
                 byPasses: ['INVALID_FIELD'] // in case the permission does not exist in this SFDC version
             }; }), logger);
         logger?.log(`Parsing the results...`);    
-        const permissionsMap = new Map();
+        const permissionsMap = new Map<string, boolean>();
         results.forEach((records) => {
             if (records?.length === 1) {
                 const record = records[0];

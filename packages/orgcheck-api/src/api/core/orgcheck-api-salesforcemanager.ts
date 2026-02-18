@@ -4,7 +4,7 @@ import { SalesforceUsageInformation } from './orgcheck-api-salesforce-watchdog';
 /**
  * @description Salesforce Query request
  */
-export class SalesforceQueryRequest {
+export interface SalesforceQueryRequest {
 
     /** 
      * @description SOQL query string
@@ -16,33 +16,33 @@ export class SalesforceQueryRequest {
     
     /** 
      * @description Use the tooling or not (false by default)
-     * @type {boolean | undefined} [tooling=false]
+     * @type {boolean} [tooling]
      * @public
      * @readonly
      */
-    tooling: boolean | undefined;
+    tooling?: boolean;
     
     /**
      * @description List of error codes to by-pass (empty by default)
-     * @type {Array<string> | undefined} [byPasses]
+     * @type {Array<string>} [byPasses]
      * @public
      * @readonly
      */
-    byPasses: Array<string> | undefined;
+    byPasses?: Array<string>;
     
     /** 
      * @description Unique field name to use for the custom QueryMore (Id by default)
-     * @type {string | undefined} [queryMoreField]
+     * @type {string} [queryMoreField]
      * @public
      * @readonly
      */
-    queryMoreField: string | undefined;
+    queryMoreField?: string;
 }
 
 /**
  * @description Salesforce Metadata API Request
  */ 
-export class SalesforceMetadataRequest {
+export interface SalesforceMetadataRequest {
     
     /**
      * @description Type of the metadata to read/retrieve
@@ -101,18 +101,18 @@ export interface SalesforceManagerIntf {
 
     /**
      * @description Numerical representation of the Salesforce API used by the manager
-     * @returns {number | undefined} API Version as a number
+     * @returns {number} API Version as a number
      * @public
      */
-    get apiVersion(): number | undefined;
+    get apiVersion(): number;
 
     /**
      * @description Make sure the given Salesforce Id is an ID15
      * @param {string} id - Salesforce ID 15 or 18
-     * @returns {string | undefined} Salesforce ID 15
+     * @returns {string} Salesforce ID 15
      * @public
      */
-    caseSafeId(id: string): string | undefined;
+    caseSafeId(id: string): string;
 
     /**
      * @description Returns the setup URL if a given item
@@ -120,26 +120,26 @@ export interface SalesforceManagerIntf {
      * @param {string} type - Type of the data to be used to choose the correct URL template
      * @param {string} [parentId] - In case the template URL has a reference to the parent, this optional property will contain the parent identification.
      * @param {string} [parentType] - In case the template URL has a reference to the parent, this optional property will contain the parent type.
-     * @returns {string | undefined} Setup URL for the given item
+     * @returns {string} Setup URL for the given item
      * @public
      */
-    setupUrl(id: string, type: string, parentId?: string, parentType?: string): string | undefined;
+    setupUrl(id: string, type: string, parentId?: string, parentType?: string): string;
 
     /**
      * @description Returns the object type of a given sobject based on its API Name (ending with extension) and isCustomSetting flag
      * @param {string} apiName - API Name of the object
      * @param {boolean} isCustomSetting - true if the object is a custom setting
-     * @returns {string | undefined} Object Type
+     * @returns {string} Object Type
      * @public
      */
-    getObjectType(apiName: string, isCustomSetting: boolean): string | undefined;
+    getObjectType(apiName: string, isCustomSetting: boolean): string;
 
     /**
      * @description Get the lastest Daily API Usage from JSForce, and the level of confidence we have in this ratio to continue using org check.
-     * @returns {SalesforceUsageInformation | undefined} Information of the current usage of the Daily Request API
+     * @returns {SalesforceUsageInformation} Information of the current usage of the Daily Request API
      * @public
      */
-    get dailyApiRequestLimitInformation(): SalesforceUsageInformation | undefined;
+    get dailyApiRequestLimitInformation(): SalesforceUsageInformation;
 
     /**
      * @description Method to call a list of SOQL queries (tooling or not)

@@ -5,7 +5,7 @@ export { DataDependenciesFactory } from './core/orgcheck-api-data-dependencies-f
 export { DataDependency, DataDependencies } from './core/orgcheck-api-data-dependencies';
 export { DataMatrixFactory } from './core/orgcheck-api-data-matrix-factory';
 export { DataMatrix } from './core/orgcheck-api-data-matrix';
-export { Data } from './core/orgcheck-api-data';
+export { DataWithScore } from './core/orgcheck-api-data';
 export { ScoreRule } from './core/orgcheck-api-datafactory';
 export { DatasetRunInformation } from './core/orgcheck-api-dataset-runinformation';
 export { Dataset } from './core/orgcheck-api-dataset';

@@ -1,4 +1,5 @@
 import { CodeScanner } from '../core/orgcheck-api-codescanner';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -28,7 +29,7 @@ export class DatasetEmailTemplates implements Dataset {
         }], logger);
             
         // Init the factories
-        const emailTemplateDataFactory = dataFactory.getInstance(SFDC_EmailTemplate);
+        const emailTemplateDataFactory = dataFactory.getInstance(DataAliases.SFDC_EmailTemplate);
         const emailTemplateRecords = results[0];
          
         // Create the map

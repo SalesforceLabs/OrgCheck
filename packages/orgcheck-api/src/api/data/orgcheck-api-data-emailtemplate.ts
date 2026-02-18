@@ -1,16 +1,16 @@
-import { Data } from '../core/orgcheck-api-data';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
+import { DataWithScore } from '../core/orgcheck-api-data';
 
-export class SFDC_EmailTemplate extends Data {
-
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
-     * @public
-     */
-    static get label() { return 'EmailTemplate' };
+export interface SFDC_EmailTemplate extends DataWithScore {
 
     /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
+     * @public
+     */
+    dataType: DataAliases.SFDC_EmailTemplate;
+
+     /**
      * @description Salesforce Id
      * @type {string}
      * @public

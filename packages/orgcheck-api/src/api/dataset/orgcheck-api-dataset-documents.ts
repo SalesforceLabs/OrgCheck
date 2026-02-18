@@ -1,4 +1,5 @@
 import { CodeScanner } from '../core/orgcheck-api-codescanner';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -27,7 +28,7 @@ export class DatasetDocuments implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const documentDataFactory = dataFactory.getInstance(SFDC_Document);
+        const documentDataFactory = dataFactory.getInstance(DataAliases.SFDC_Document);
         const documentRecords = results[0];
 
         // Create the map

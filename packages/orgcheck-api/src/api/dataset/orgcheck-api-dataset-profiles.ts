@@ -1,3 +1,4 @@
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -55,7 +56,7 @@ export class DatasetProfiles implements Dataset {
         const assignmentRecords = results[3];
 
         // Init the factory and records
-        const profileDataFactory = dataFactory.getInstance(SFDC_Profile);
+        const profileDataFactory = dataFactory.getInstance(DataAliases.SFDC_Profile);
 
         // Create the map of profiles
         logger?.log(`Parsing ${profileRecords?.length} profiles...`);
@@ -106,22 +107,22 @@ export class DatasetProfiles implements Dataset {
         await Promise.all([
             Processor.forEach(objectPermissionRecords, (/** @type {any} */ record: any) => {
                 const profileId = sfdcManager.caseSafeId(record.ProfileId); // see warning in the SOQL query (this is not a bug we use ProfileId instead of Parent.ProfileId)
-                if (profiles.has(profileId)) {
-                    const profile = profiles.get(profileId);
+                const profile = profiles.get(profileId);
+                if (profile) {
                     profile.nbObjectPermissions += record.CountObject;
                 }
             }),
             Processor.forEach(fieldPermissionRecords, (/** @type {any} */ record: any) => {
                 const profileId = sfdcManager.caseSafeId(record.ProfileId); // see warning in the SOQL query (this is not a bug we use ProfileId instead of Parent.ProfileId)
-                if (profiles.has(profileId)) {
-                    const profile = profiles.get(profileId);
+                const profile = profiles.get(profileId);
+                if (profile) {
                     profile.nbFieldPermissions += record.CountField;    
                 }
             }),
             Processor.forEach(assignmentRecords, (/** @type {any} */ record: any) => {
                 const profileId = sfdcManager.caseSafeId(record.ProfileId); // see warning in the SOQL query (this is not a bug we use ProfileId instead of PermissionSet.ProfileId)
-                if (profiles.has(profileId)) {
-                    const profile = profiles.get(profileId);
+                const profile = profiles.get(profileId);
+                if (profile) {
                     profile.memberCounts += record.CountAssignment;    
                 }
             })

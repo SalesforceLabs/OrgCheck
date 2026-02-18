@@ -1,16 +1,16 @@
-import { DataWithDependencies } from '../core/orgcheck-api-data';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
+import { DataWithScoreAndDependencies } from '../core/orgcheck-api-data';
 
-export class SFDC_VisualForceComponent extends DataWithDependencies {
-    
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
+export interface SFDC_VisualForceComponent extends DataWithScoreAndDependencies {
+        
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
      * @public
      */
-    static get label() { return 'Visualforce Component' };
-
-    /**
+    dataType: DataAliases.SFDC_VisualForceComponent;
+    
+     /**
      * @description Salesforce Id
      * @type {string}
      * @public

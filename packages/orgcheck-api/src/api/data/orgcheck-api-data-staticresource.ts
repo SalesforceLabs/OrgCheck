@@ -1,16 +1,16 @@
-import { DataWithDependencies } from '../core/orgcheck-api-data';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
+import { DataWithScoreAndDependencies } from '../core/orgcheck-api-data';
 
-export class SFDC_StaticResource extends DataWithDependencies {
+export interface SFDC_StaticResource extends DataWithScoreAndDependencies {
     
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
      * @public
      */
-    static get label() { return 'Static Resource' };
-
-    /**
+    dataType: DataAliases.SFDC_StaticResource;
+        
+     /**
      * @description Salesforce Id
      * @type {string}
      * @public

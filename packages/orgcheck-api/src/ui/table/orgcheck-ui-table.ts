@@ -1,11 +1,10 @@
 import { TableColumn, TableColumnWithModifiers, TableColumnWithOrientation } from "./orgcheck-ui-table-column";
 
-export const SortOrder = {
-    DESC: 'desc',
-    ASC: 'asc'
+export enum SortOrder {
+    DESC, ASC
 }
 
-export class Table {
+export interface Table {
 
     /**
      * @description List of columns in a table
@@ -21,13 +20,12 @@ export class Table {
 
     /**
      * @description What is the sort order: ASC or DESC?
-     * @see SortOrder
-     * @type {string}
+     * @type {SortOrder}
      */
-    orderSort: string;
+    orderSort: SortOrder;
 }
 
-export class ExportedTable {
+export interface ExportedTable {
 
     /**
      * @description Name of the exported table (like a title)

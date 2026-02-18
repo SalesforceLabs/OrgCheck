@@ -1,4 +1,4 @@
-import { Data, DataWithoutScoring } from './orgcheck-api-data';
+import { Data, DataWithoutScore, DataWithScore } from './orgcheck-api-data';
 import { DataCollectionStatistics } from './orgcheck-api-recipecollection';
 import { DataMatrix } from './orgcheck-api-data-matrix';
 import { DatasetManagerIntf } from './orgcheck-api-datasetmanager';
@@ -98,8 +98,8 @@ export class RecipeManager implements RecipeManagerIntf {
 
         this._datasetManager = datasetManager;
         this._logger = logger;
-        this._recipes = new Map();
-        this._recipeCollections = new Map();
+        this._recipes = new Map<string, Recipe>();
+        this._recipeCollections = new Map<string, RecipeCollection>();
 
         // Recipes
         this._recipes.set(RecipeAliases.INTERNAL_ACTIVE_USERS, new RecipeInternalActiveUsers());
@@ -158,15 +158,24 @@ export class RecipeManager implements RecipeManagerIntf {
      * @description Runs a designated recipe (by its alias)
      * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map<string, any>} [parameters] List of values to pass to the recipe
-     * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<Array<Data> | DataMatrix | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async run(alias: string, parameters: Map<string, any>): Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>> {
+    async run(alias: string, parameters: Map<string, any>): Promise<Array<Data> | DataMatrix | Data | Map<string, any>> {
+
         if (this._recipes.has(alias)) {
-            return this._runRecipe(alias, parameters);
+            const result = await this._runRecipe(alias, parameters);
+            if (result === undefined) {
+                throw new Error(`Running recipe ${alias} resulted in an undefined response.`)
+            }
+            return result;
         } else if (this._recipeCollections.has(alias)) {
-            return this._runRecipeCollection(alias, parameters);
+            const result = await this._runRecipeCollection(alias, parameters);
+            if (result === undefined) {
+                throw new Error(`Running recipe collection ${alias} resulted in an undefined response.`)
+            }
+            return result;
         } else {
             throw new TypeError(`The given alias (${alias}) does not correspond to a registered recipe.`);
         }
@@ -195,13 +204,16 @@ export class RecipeManager implements RecipeManagerIntf {
      *   - Step 3. Transform the retrieved data and return the final result as a Map
      * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map<string, any>} [parameters] List of values to pass to the recipe
-     * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<Array<Data> | DataMatrix | Data | Map<string, any> | undefined>} Returns the value from the recipe or undefined if something bad happens
      * @async
      */
-    async _runRecipe(alias: string, parameters: Map<string, any>): Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>> {
+    async _runRecipe(alias: string, parameters: Map<string, any>): Promise<Array<Data> | DataMatrix | Data | Map<string, any> | undefined> {
 
         const section = `Run recipe "${alias}"`;
         const recipe = this._recipes.get(alias);
+        if (recipe === undefined) {
+            throw new Error(`The recipe with alias: ${alias} was not found.`)
+        }
 
         // -------------------
         // STEP 1. Extract
@@ -220,7 +232,7 @@ export class RecipeManager implements RecipeManagerIntf {
         // -------------------
         // STEP 2. Run
         // -------------------
-        let data;
+        let data: Map<string, any>;
         try {
             data = await this._datasetManager.run(datasets);
         } catch(error) {
@@ -233,8 +245,8 @@ export class RecipeManager implements RecipeManagerIntf {
         // STEP 3. Transform
         // -------------------
         this._logger.log(section, 'This recipe will now transform all this information...');
-        /** @type {Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>} */
-        let finalData: Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>;
+        /** @type {Array<Data> | DataMatrix | Data | Map<string, any>} */
+        let finalData: Array<Data> | DataMatrix | Data | Map<string, any>;
         try {
             finalData = await recipe.transform(data, this._logger.toSimpleLogger(section), parameters);
         } catch(error) {
@@ -250,13 +262,16 @@ export class RecipeManager implements RecipeManagerIntf {
     /**
      * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map<string, any>} [parameters] - List of values to pass to the recipe
-     * @returns {Promise<Map<string, DataCollectionStatistics>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<Map<string, DataCollectionStatistics> | undefined>} Returns the value from the recipe collection or undefined if something bad happens.
      * @async
      */
-    async _runRecipeCollection(alias: string, parameters: Map<string, any>): Promise<Map<string, DataCollectionStatistics>> {
+    async _runRecipeCollection(alias: string, parameters: Map<string, any>): Promise<Map<string, DataCollectionStatistics> | undefined> {
 
         const section = `Run recipe collection "${alias}"`;
         const recipeCollection = this._recipeCollections.get(alias);
+        if (recipeCollection === undefined) {
+            throw new Error(`The recipe collection with alias: ${alias} was not found.`)
+        }
 
         // -------------------
         // STEP 1. Extract recipes in the collection
@@ -312,7 +327,7 @@ export class RecipeManager implements RecipeManagerIntf {
         const finalData: Map<string, DataCollectionStatistics> = new Map();
         try {
             // Add the successful recipes and their stats in the final list
-            await Processor.forEach(data, (/** @type {Array<Data>} */records: Array<Data>, /** @type {string} */ key: string) => {
+            await Processor.forEach(data, ( records: Array<DataWithScore>, key: string) => {
                 const onlyBadRecords = records?.filter((r) => {
                     if (r.score && r.score > 0) {
                         if (isRuleFilterOn === true) {
@@ -374,12 +389,15 @@ export class RecipeManager implements RecipeManagerIntf {
 
         const section = `Clean recipe "${alias}"`;
         const recipe = this._recipes.get(alias);
+        if (recipe === undefined) {
+            throw new Error(`The recipe with alias: ${alias} was not found.`)
+        }
 
         // -------------------
         // STEP 1. Extract
         // -------------------
         this._logger.log(section, 'How many datasets this recipe has?');
-        let datasets;
+        let datasets: Array<string | DatasetRunInformation>;
         try {
             datasets = recipe.extract(this._logger.toSimpleLogger(section), parameters);
         } catch(error) {
@@ -411,6 +429,9 @@ export class RecipeManager implements RecipeManagerIntf {
 
         const section = `Clean recipe collection "${alias}"`;
         const recipeCollection = this._recipeCollections.get(alias);
+        if (recipeCollection === undefined) {
+            throw new Error(`The recipe collection with alias: ${alias} was not found.`)
+        }
 
         // -------------------
         // STEP 1. Extract

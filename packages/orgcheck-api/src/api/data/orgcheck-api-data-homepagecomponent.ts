@@ -1,15 +1,15 @@
-import { DataWithDependencies } from '../core/orgcheck-api-data';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
+import { DataWithScoreAndDependencies } from '../core/orgcheck-api-data';
 
-export class SFDC_HomePageComponent extends DataWithDependencies {
+export interface SFDC_HomePageComponent extends DataWithScoreAndDependencies {
 
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
      * @public
      */
-    static get label() { return 'Home Page Component' };
-
+    dataType: DataAliases.SFDC_HomePageComponent;
+    
     /**
      * @description Unique identifier of this page in the org.
      * @type {string}

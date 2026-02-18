@@ -1,20 +1,20 @@
-import { DataWithDependencies } from '../core/orgcheck-api-data';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
+import { DataWithScoreAndDependencies } from '../core/orgcheck-api-data';
 import { SFDC_Object } from './orgcheck-api-data-object';
 
 /**
  * @description Representation of an Apex Trigger in Org Check
  */
-export class SFDC_ApexTrigger extends DataWithDependencies {
-    
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
-     * @public
-     */
-    static get label() { return 'Apex Trigger' };
+export interface SFDC_ApexTrigger extends DataWithScoreAndDependencies {
 
     /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
+     * @public
+     */
+    dataType: DataAliases.SFDC_ApexTrigger;
+    
+     /**
      * @description Salesforce Id
      * @type {string}
      * @public

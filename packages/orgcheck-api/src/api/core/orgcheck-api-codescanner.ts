@@ -72,7 +72,8 @@ export class CodeScanner {
             ?.filter((domain) => SALESFORCE_DOMAINS.findIndex((sfdomain) => domain.indexOf(sfdomain) >= 0) >= 0)  // filter only the salesforce domains
             .sort() // sorting the domains (if any)
             .filter((e, i, s) => i === s.indexOf(e)) // unique domains
-            .filter((domain) => domain.indexOf(SALESFORCE_MY_DOMAIN) < 0); // remove the my.salesforce.com domains
+            .filter((domain) => domain.indexOf(SALESFORCE_MY_DOMAIN) < 0) // remove the my.salesforce.com domains
+            ?? []; // return an empty array if undefined
     }
 
     /**

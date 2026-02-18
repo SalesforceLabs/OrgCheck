@@ -1,21 +1,21 @@
-import { Data } from '../core/orgcheck-api-data';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
+import { DataWithScore } from '../core/orgcheck-api-data';
 import { SFDC_PermissionSet } from './orgcheck-api-data-permissionset';
 import { SFDC_Profile } from './orgcheck-api-data-profile';
 
 /**
  * @description Representation of a SObject permissions (CRUD) for a specific parent (profile or permission set) in Org Check
  */
-export class SFDC_ObjectPermission extends Data {
-
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
+export interface SFDC_ObjectPermission extends DataWithScore {
+    
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
      * @public
      */
-    static get label() { return 'Object Permissions from Profile or Permission Set' };
-
-    /**
+    dataType: DataAliases.SFDC_ObjectPermission;
+    
+     /**
      * @description Salesforce Id of the related parent (profile or permission set)
      * @type {string}
      * @public

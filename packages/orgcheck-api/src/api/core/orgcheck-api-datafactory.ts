@@ -1,10 +1,11 @@
+import { DataAliases } from "./orgcheck-api-data-aliases";
 import { DataDependencies } from "./orgcheck-api-data-dependencies";
 
 /**
  * @description Org Check "score rule" used to qualify if an item is bad or not
  * @public
  */
-export class ScoreRule {
+export interface ScoreRule {
 
     /**
      * @description Unique identifier of that rule
@@ -46,7 +47,7 @@ export class ScoreRule {
      * @type {Array<any>}
      * @public
      */    
-    applicable: Array<any>;
+    applicable: Array<DataAliases>;
 
     /**
      * @description Category of the rule
@@ -72,7 +73,7 @@ export interface DataFactoryIntf {
     getInstance(dataClass: any): DataFactoryInstanceIntf;
 }
 
-export class DataFactoryInstanceCreateSetup {
+export interface DataFactoryInstanceCreateSetup {
 
     /** 
      * @description List of properties and values to create a new instance
@@ -81,7 +82,7 @@ export class DataFactoryInstanceCreateSetup {
     properties: any;
 }
 
-export class DataFactoryInstanceCreateSetup_WithDependencies extends DataFactoryInstanceCreateSetup {
+export interface DataFactoryInstanceCreateSetup_WithDependencies extends DataFactoryInstanceCreateSetup {
 
     /** 
      * @description Data Dependencies for the new instance
@@ -93,7 +94,7 @@ export class DataFactoryInstanceCreateSetup_WithDependencies extends DataFactory
      * @description Data Dependencies for the new instance
      * @type {Array<string>}
      */
-    dependencyIdFields: Array<string> = [];
+    dependencyIdFields: Array<string>;
 }
 
 /**

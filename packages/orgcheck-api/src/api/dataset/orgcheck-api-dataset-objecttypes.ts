@@ -1,3 +1,4 @@
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -36,7 +37,7 @@ export class DatasetObjectTypes implements Dataset {
     async run(_sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, _logger: SimpleLoggerIntf): Promise<Map<string, SFDC_ObjectType>> {
     
         // Init the factory and records
-        const objecTypeDataFactory = dataFactory.getInstance(SFDC_ObjectType);
+        const objecTypeDataFactory = dataFactory.getInstance(DataAliases.SFDC_ObjectType);
 
         // Return data
         return new Map(OBJECTTYPES.map((type) => [ 

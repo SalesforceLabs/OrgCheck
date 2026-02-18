@@ -1,16 +1,16 @@
-import { DataWithoutScoring } from '../core/orgcheck-api-data';
+import { DataWithoutScore } from '../core/orgcheck-api-data';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
 
-export class SFDC_ObjectType extends DataWithoutScoring {
+export interface SFDC_ObjectType extends DataWithoutScore {
     
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
      * @public
      */
-    static get label() { return 'SObject Types' };
-
-    /**
+    dataType: DataAliases.SFDC_ObjectType;
+        
+     /**
      * @description Technical representation of this type
      * @type {string}
      * @public

@@ -1,3 +1,4 @@
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -26,7 +27,7 @@ export class DatasetGroups implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const groupDataFactory = dataFactory.getInstance(SFDC_Group);
+        const groupDataFactory = dataFactory.getInstance(DataAliases.SFDC_Group);
 
         // Create the map
         const groupRecords = results[0];

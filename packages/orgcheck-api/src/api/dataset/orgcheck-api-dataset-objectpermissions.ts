@@ -1,3 +1,4 @@
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -27,7 +28,7 @@ export class DatasetObjectPermissions implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const permissionDataFactory = dataFactory.getInstance(SFDC_ObjectPermission);
+        const permissionDataFactory = dataFactory.getInstance(DataAliases.SFDC_ObjectPermission);
 
         // Create the map
         const permissionRecords = results[0];

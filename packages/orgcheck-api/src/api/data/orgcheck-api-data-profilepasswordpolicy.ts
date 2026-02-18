@@ -1,16 +1,16 @@
-import { Data } from '../core/orgcheck-api-data';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
+import { DataWithScore } from '../core/orgcheck-api-data';
 
-export class SFDC_ProfilePasswordPolicy extends Data {
-
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
+export interface SFDC_ProfilePasswordPolicy extends DataWithScore {
+    
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
      * @public
      */
-    static get label() { return 'Password Policy from a Profile' };
-
-    /** 
+    dataType: DataAliases.SFDC_ProfilePasswordPolicy;
+    
+     /** 
      * @description The duration of the login lockout, in minutes. If users are locked out, they 
      *                  must wait until the lockout period expires. Valid values: 0, 15, 30, 60
      * @type {number}

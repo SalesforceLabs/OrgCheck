@@ -1,5 +1,5 @@
 /**
- * @description This class represents a matrix data
+ * @description This interface represents a matrix data
  * @example Example of a DataMatrix would be:
  *               {
  *                  columnHeaders: [
@@ -15,7 +15,7 @@
  *                  ]
  *               }
  */
-export class DataMatrix {
+export interface DataMatrix {
 
     /**
      * @description Information about the columns that could be found in the rows.data structure. Keys are the name fo the properties. Values are the information for this property.
@@ -33,9 +33,9 @@ export class DataMatrix {
 }
 
 /**
- * @description This class represents a column header in a matrix data.
+ * @description This interface represents a column header in a matrix data.
  */ 
-export class DataMatrixColumnHeader {
+export interface DataMatrixColumnHeader {
     
     /**
      * @description Key to be used as a property of rows.data
@@ -53,9 +53,9 @@ export class DataMatrixColumnHeader {
 }
 
 /**
- * @description This class represents a row in a matrix data.
+ * @description This interface represents a row in a matrix data.
  */ 
-export class DataMatrixRow {
+export interface DataMatrixRow {
     
     /**
      * @description Header reference of the matrix row

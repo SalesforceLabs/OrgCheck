@@ -1,4 +1,5 @@
 import { StorageIntf } from "../../src/api/core/orgcheck-api-storage";
+import { StorageSetup } from "../../src/api/core/orgcheck-api-storage-impl";
 
 export class StorageMock_BasedOnMap implements StorageIntf {
   _cache = new Map();
@@ -7,3 +8,11 @@ export class StorageMock_BasedOnMap implements StorageIntf {
   removeItem(key: string) { this._cache.delete(key); }
   keys() { return Array.from(this._cache.keys()); }
 };
+
+export class StorageSetupMock_DoingNothing implements StorageSetup {
+  setItem(): void { }
+  getItem(): string { return '{}'; }
+  removeItem(): void { }
+  key(): string { return ''; }
+  length: number = 0;
+}

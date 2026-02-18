@@ -1,3 +1,4 @@
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -39,9 +40,9 @@ export class DatasetProfileRestrictions implements Dataset {
         const profileIds = await Processor.map(profileIdRecords, (/** @type {any} */ record: any) => record.Id);
 
         // Init the factories
-        const restrictionsFactory = dataFactory.getInstance(SFDC_ProfileRestrictions);
-        const ipRangeDataFactory = dataFactory.getInstance(SFDC_ProfileIpRangeRestriction);
-        const loginHourDataFactory = dataFactory.getInstance(SFDC_ProfileLoginHourRestriction);
+        const restrictionsFactory = dataFactory.getInstance(DataAliases.SFDC_ProfileRestrictions);
+        const ipRangeDataFactory = dataFactory.getInstance(DataAliases.SFDC_ProfileIpRangeRestriction);
+        const loginHourDataFactory = dataFactory.getInstance(DataAliases.SFDC_ProfileLoginHourRestriction);
 
         // Get information about profiles using metadata
         logger?.log(`Calling Tooling API Composite to get more information about these ${profileIds?.length} profiles...`);

@@ -75,6 +75,9 @@ export class API {
      * @public
      */
     get salesforceApiVersion(): number {
+        if (this._sfdcManager === undefined) {
+            throw new Error(`The salesforce manager was not defined in method salesforceApiVersion`);
+        }
         return this._sfdcManager.apiVersion;
     }
     
@@ -222,10 +225,10 @@ export class API {
         const workingMatrix = DataMatrixFactory.create();
         SecretSauce.AllScoreRules.forEach((rule) => {
             workingMatrix.setRowHeader(`${rule.id}`, rule);
-            rule.applicable.forEach((classs) => {
+            rule.applicable.forEach((dataAlias) => {
                 workingMatrix.addValueToProperty(
                     `${rule.id}`,
-                    classs.label,
+                    dataAlias?.toString() ?? 'N/A', 
                     'true'
                 );
             });
@@ -250,7 +253,14 @@ export class API {
      * @public
      */
     async runAllTestsAsync(): Promise<string> {
-        return this._sfdcManager.runAllTests(this._logger.toSimpleLogger('Run All Tests'));
+        if (this._logger === undefined) {
+            throw new Error(`The logger was not defined in method runAllTestsAsync`);
+        }
+        const simpleLogger = this._logger?.toSimpleLogger('Run All Tests');
+        if (simpleLogger === undefined) {
+            throw new Error(`The simple logger was not defined in method runAllTestsAsync`);
+        }
+        return this._sfdcManager?.runAllTests(simpleLogger);
     }
 
     /**
@@ -261,7 +271,14 @@ export class API {
      * @public
      */
     async compileClasses(apexClassIds: Array<string>): Promise<Map<string, { isSuccess: boolean; reasons?: Array<string>; }>> {
-        return this._sfdcManager.compileClasses(apexClassIds, this._logger.toSimpleLogger('Compile Classes'));
+        if (this._logger === undefined) {
+            throw new Error(`The logger was not defined in method compileClasses`);
+        }
+        const simpleLogger = this._logger?.toSimpleLogger('Compile Classes');
+        if (simpleLogger === undefined) {
+            throw new Error(`The simple logger was not defined in method compileClasses`);
+        }
+        return this._sfdcManager?.compileClasses(apexClassIds, simpleLogger);
     }
 
     /**
@@ -320,8 +337,9 @@ export class API {
         const /** @type {Map} */ perms: Map = (await this._recipeManager.run(RecipeAliases.CURRENT_USER_PERMISSIONS, new Map([
             [OrgCheckGlobalParameter.SYSTEM_PERMISSIONS_LIST, [ 'ModifyAllData', 'AuthorApex', 'ApiEnabled', 'InstallPackaging' ]]
         ])));
-        if (perms.get('ModifyAllData') === false || perms.get('AuthorApex')       === false ||
-            perms.get('ApiEnabled')    === false || perms.get('InstallPackaging') === false) {
+        if (perms === undefined || 
+            perms?.get('ModifyAllData') === false || perms?.get('AuthorApex')       === false ||
+            perms?.get('ApiEnabled')    === false || perms?.get('InstallPackaging') === false) {
                 throw (new TypeError(
                     'Current User Permission Access is not enough to run the application. '+
                     'Please make sure to assign ALL the following permissions to the current user: '+

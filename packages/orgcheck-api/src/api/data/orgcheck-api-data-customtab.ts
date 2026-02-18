@@ -1,16 +1,16 @@
-import { DataWithDependencies } from '../core/orgcheck-api-data';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
+import { DataWithScoreAndDependencies } from '../core/orgcheck-api-data';
 
-export class SFDC_CustomTab extends DataWithDependencies {
-
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
-     * @public
-     */
-    static get label() { return 'Custom Tab' };
+export interface SFDC_CustomTab extends DataWithScoreAndDependencies {
 
     /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
+     * @public
+     */
+    dataType: DataAliases.SFDC_CustomTab;
+
+     /**
      * @description Unique identifier of this custom tab in the org.
      * @type {string}
      * @public

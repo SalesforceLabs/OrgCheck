@@ -1,19 +1,19 @@
-import { DataWithDependencies } from '../core/orgcheck-api-data';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
+import { DataWithScoreAndDependencies } from '../core/orgcheck-api-data';
 
 /**
  * @description Representation of a Lightning Aura Component in Org Check
  */
-export class SFDC_LightningAuraComponent extends DataWithDependencies {
+export interface SFDC_LightningAuraComponent extends DataWithScoreAndDependencies {
     
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
      * @public
      */
-    static get label() { return 'Aura Component' };
-
-    /**
+    dataType: DataAliases.SFDC_LightningAuraComponent;
+        
+     /**
      * @description Salesforce Id
      * @type {string}
      * @public

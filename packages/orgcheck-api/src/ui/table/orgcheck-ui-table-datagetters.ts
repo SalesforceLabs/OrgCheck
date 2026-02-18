@@ -1,4 +1,4 @@
-export class WhereToGetData {
+export interface WhereToGetData {
 
     /**
      * @description Property containing the value
@@ -7,7 +7,7 @@ export class WhereToGetData {
     value: string;
 }
 
-export class WhereToGetScoreData {
+export interface WhereToGetScoreData {
 
     /**
      * @description Property containing the score
@@ -28,7 +28,7 @@ export class WhereToGetScoreData {
     name: string;
 }
 
-export class WhereToGetLinkData {
+export interface WhereToGetLinkData {
 
     /**
      * @description Property containing the url to be used in the link
@@ -43,7 +43,7 @@ export class WhereToGetLinkData {
     label: string;
 }
 
-export class WhereToGetLinksData extends WhereToGetLinkData {
+export interface WhereToGetLinksData extends WhereToGetLinkData {
 
     /**
      * @description Property containing the list to iterate over
@@ -52,7 +52,7 @@ export class WhereToGetLinksData extends WhereToGetLinkData {
     values: string;
 }
 
-export class WhereToGetObjectsData {
+export interface WhereToGetObjectsData {
 
     /**
      * @description Property containing the list to iterate over
@@ -64,10 +64,10 @@ export class WhereToGetObjectsData {
      * @description Template function to generate a text based on the object
      * @type {function(any): string}
      */
-    template: (arg0: any) => string;
+    template(arg0: any): string;
 }
 
-export class WhereToGetTextsData {
+export interface WhereToGetTextsData {
 
     /**
      * @description Property containing the list to iterate over

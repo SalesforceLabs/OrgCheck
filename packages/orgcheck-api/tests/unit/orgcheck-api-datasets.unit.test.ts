@@ -68,7 +68,8 @@ describe('tests.api.unit.Datasets', () => {
       const dataset = new datasetClass();
       it(`checks if ${dataset.constructor.name} runs correctly`, async () => {
         const sfdcManager = new SalesforceManagerMock_SoqlQuery();
-        let hadError = false, errorMessageIfAny = undefined;
+        let hadError = false;
+        let errorMessageIfAny: string | undefined = undefined;
         try {
           const results: any = await dataset.run(sfdcManager, new DataFactoryMock_AllIsOK(), new SimpleLoggerMock_DoingNothing(), new Map());
           expect(results).toBeDefined();

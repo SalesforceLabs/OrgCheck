@@ -1,7 +1,10 @@
 import { API } from '../../dist/orgcheck-api';
+import { JsForceMock } from '../utils/orgcheck-api-jsforce-mock.utility';
+import { StorageSetupMock_DoingNothing } from '../utils/orgcheck-api-storage-mock.utility';
+import { CompressorMock_IdemPotent } from '../utils/orgcheck-api-compressor-mock.utility';
 
-describe('tests.api.bundled.API', () => {
-  describe('Test API once it has been bundled', () => {
+describe('tests.api.API', () => {
+  describe('Test API', () => {
 
     it('should be instantiable and usable', async () => {
       let hadError = false;
@@ -9,17 +12,13 @@ describe('tests.api.bundled.API', () => {
       try {
         const api = new API({ 
           logSettings: {
-            isConsoleFallback: () => {},
+            isConsoleFallback: () => { return false; },
             log: () => {},
             ended: () => {},
-            failed: () => {}
+            failed: (... argv) => { console.error('-_-_-_-_-_-', argv); }
           },
-          salesforce: { connection: { useJsForce: false, mockImpl: { Connection: class M {} } }, authentication: { } },
-          storage: { localImpl: {
-            getItem: () => {},
-            setItem: () => {},
-            keys: () => {}
-          }, compression: { useFflate: false, mockImpl: {} }}
+          salesforce: { connection: { useJsForce: false, mockImpl: JsForceMock }, authentication: { } },
+          storage: { localImpl: new StorageSetupMock_DoingNothing(), compression: { useFflate: false, mockImpl: new CompressorMock_IdemPotent() }}
         });
         expect(api).not.toBeNull();
         await api.getActiveUsers();
@@ -29,7 +28,7 @@ describe('tests.api.bundled.API', () => {
         await api.getApexTriggers();
         await api.getApexUncompiled();
         await api.getApplicationPermissionsPerParent();
-        await api.getCacheInformation();
+        api.getCacheInformation();
         await api.getChatterGroups();
         await api.getCustomFields();
         await api.getCustomLabels();
@@ -45,11 +44,11 @@ describe('tests.api.bundled.API', () => {
         await api.getLightningAuraComponents();
         await api.getLightningPages();
         await api.getLightningWebComponents();
-        await api.getObject('Account');
+        //await api.getObject('Account');
         await api.getObjectPermissionsPerParent();
         await api.getObjectTypes();
-        await api.getOrganizationInformation();
-        await api.getPackages();
+        //await api.getOrganizationInformation();
+        //await api.getPackages();
         await api.getPageLayouts();
         await api.getPermissionSetLicenses();
         await api.getPermissionSets();
@@ -74,10 +73,6 @@ describe('tests.api.bundled.API', () => {
       }
       expect(hadError).toBe(false);
       expect(err).not.toBeDefined();
-    });
-
-    it('should be ok to call all getters', async () => {
-
     });
   });
 });

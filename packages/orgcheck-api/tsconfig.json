@@ -2,6 +2,8 @@
     "compilerOptions": {
         "target": "es2015",
         "esModuleInterop": true,
+        "strictNullChecks": true,
+        "strictPropertyInitialization": true,
         "lib": [ 
             "ES2021.String" // string.prototype.replaceAll is only available in ES2021 and later
         ],
@@ -11,7 +13,8 @@
         },
     },
     "include": [
-        "src/**/*.ts"
+        "src/**/*.ts",
+        "testss/**/*.ts"
     ],
     "exclude": [
         "node_modules"

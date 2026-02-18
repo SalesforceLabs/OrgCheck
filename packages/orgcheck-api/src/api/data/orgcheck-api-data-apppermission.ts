@@ -1,4 +1,5 @@
-import { DataWithoutScoring } from '../core/orgcheck-api-data';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
+import { DataWithoutScore } from '../core/orgcheck-api-data';
 import { SFDC_Application } from './orgcheck-api-data-application';
 import { SFDC_PermissionSet } from './orgcheck-api-data-permissionset';
 import { SFDC_Profile } from './orgcheck-api-data-profile';
@@ -6,17 +7,16 @@ import { SFDC_Profile } from './orgcheck-api-data-profile';
 /**
  * @description Representation of an Application permission for a specific parent (profile or permission set) in Org Check
  */
-export class SFDC_AppPermission extends DataWithoutScoring {
-    
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
-     * @public
-     */
-    static get label() { return 'Application Permission from Profile or Permission Set' };
+export interface SFDC_AppPermission extends DataWithoutScore {
 
     /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
+     * @public
+     */
+    dataType: DataAliases.SFDC_AppPermission;
+    
+     /**
      * @description Salesforce Id of the related parent (profile or permission set)
      * @type {string}
      * @public

@@ -1,6 +1,6 @@
 import { Recipe } from '../core/orgcheck-api-recipe';
 import { Processor } from '../core/orgcheck-api-processor';
-import { Data, DataWithoutScoring } from '../core/orgcheck-api-data';
+import { Data, DataWithoutScore } from '../core/orgcheck-api-data';
 import { DataMatrix } from '../core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
@@ -45,11 +45,11 @@ export class RecipeObject implements Recipe {
      * @description transform the data from the datasets and return the final result as an Array
      * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} _logger - Logger
-     * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<Array<Data> | DataMatrix | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>> {
+    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data> | DataMatrix | Data | Map<string, any>> {
 
         // Get data
         const /** @type {Map<string, SFDC_ObjectType>} */ types: Map<string, SFDC_ObjectType> = data.get(DatasetAliases.OBJECTTYPES);
@@ -68,22 +68,29 @@ export class RecipeObject implements Recipe {
         if (!customFields) throw new Error(`RecipeObject: Data from dataset alias 'CUSTOMFIELDS' was undefined.`);
 
         // Augment data
-        object.typeRef = types.get(object.typeId);
+        const typeRef = types.get(object.typeId);
+        if (typeRef) {
+            object.typeRef = typeRef;
+        }
         object.flexiPages = [];
         const result = await Promise.all([
             Processor.map( // returns apexTriggerRefs
                 object.apexTriggerIds,
-                (/** @type {string} */ id: string) => { 
+                (id: string) => { 
                     const apexTrigger = apexTriggers.get(id);
-                    apexTrigger.objectRef = object;
+                    if (apexTrigger) {
+                        apexTrigger.objectRef = object;
+                    } else {
+                        throw new Error(`Apex Trigger ${id} was not found for object ${object.name}`)
+                    }
                     return apexTrigger;
                 },
-                (/** @type {string} */ id: string) => apexTriggers.has(id)
+                (id: string) => apexTriggers.has(id)
             ),
             Processor.map( // returns workflowRuleRefs
                 object.workflowRuleIds,
-                (/** @type {string} */ id: string) => workflowRules.get(id),
-                (/** @type {string} */ id: string) => workflowRules.has(id)
+                (id: string) => workflowRules.get(id),
+                (id: string) => workflowRules.has(id)
             ),
             Processor.forEach(pages, (/** @type {SFDC_LightningPage} */ page: SFDC_LightningPage) => {
                 if (page.objectId === object.id) {
@@ -92,12 +99,16 @@ export class RecipeObject implements Recipe {
             }),
             Processor.map( // returns customFieldRefs
                 object.customFieldIds,
-                (/** @type {string} */ id: string) => { 
+                (id: string) => { 
                     const customField = customFields.get(id);
-                    customField.objectRef = object;
+                    if (customField) {
+                        customField.objectRef = object;
+                    } else {
+                        throw new Error(`Custom Field ${id} was not found for object ${object.name}`)
+                    }
                     return customField;
                 },
-                (/** @type {string} */ id: string) => customFields.has(id)
+                (id: string) => customFields.has(id)
             )
         ]);
         object.apexTriggerRefs = result[0];

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "@jest/globals";
 import { Compressor } from "../../src/api/core/orgcheck-api-compressor-impl";
-import * as fflate from "fflate";
+import * as fflate from 'fflate';
 
 describe('tests.api.unit.Compressor', () => {
     // @ts-ignore    

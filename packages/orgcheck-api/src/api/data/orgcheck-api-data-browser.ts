@@ -1,19 +1,19 @@
-import { Data } from '../core/orgcheck-api-data';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
+import { DataWithScore } from '../core/orgcheck-api-data';
 
 /**
  * @description Representation of a browser used by salesforce users while visiting the "Application" in this org
  */
-export class SFDC_Browser extends Data {
+export interface SFDC_Browser extends DataWithScore {
     
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
      * @public
      */
-    static get label() { return 'Browser' };
+    dataType: DataAliases.SFDC_Browser;
 
-    /**
+     /**
      * @description full name of the browser as it appears in LoginHistory (name + version)
      * @type {string}
      * @public

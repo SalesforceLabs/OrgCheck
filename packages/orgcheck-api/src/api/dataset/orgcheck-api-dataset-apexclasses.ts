@@ -1,4 +1,5 @@
 import { CodeScanner } from '../core/orgcheck-api-codescanner';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -47,8 +48,8 @@ export class DatasetApexClasses implements Dataset {
         }], logger);
         
         // Init the factory and records and records
-        const apexClassDataFactory = dataFactory.getInstance(SFDC_ApexClass);
-        const apexTestResultDataFactory = dataFactory.getInstance(SFDC_ApexTestMethodResult);
+        const apexClassDataFactory = dataFactory.getInstance(DataAliases.SFDC_ApexClass);
+        const apexTestResultDataFactory = dataFactory.getInstance(DataAliases.SFDC_ApexTestMethodResult);
         const apexClassRecords = results[0];
         const asyncApexJobRecords = results[1];
         const apexTestResultRecords = results[2];
@@ -60,8 +61,8 @@ export class DatasetApexClasses implements Dataset {
 
         // Second set of SOQL queries only for the apex classes that are editable
         // This workaround is due to the fact that we can't filter on ApexClassOrTrigger.ManageableState in these queres
-        const apexCodeCoverageQueries = [];
-        const apexCodeCoverageAggQueries = [];
+        const apexCodeCoverageQueries: any[] = [];
+        const apexCodeCoverageAggQueries: any[] = [];
         for (let i = 0; i < apexClassIds?.length; i += 500) {
             const subsetIds = `'${apexClassIds.slice(i, i + 500).join("','")}'`;
             apexCodeCoverageQueries.push({
@@ -81,7 +82,7 @@ export class DatasetApexClasses implements Dataset {
                 tooling: true
             });
         }
-        const results2 = await Promise.all([
+        const results2: any[] = await Promise.all([
             sfdcManager.soqlQuery(apexCodeCoverageQueries, logger),
             sfdcManager.soqlQuery(apexCodeCoverageAggQueries, logger)
         ]);
@@ -188,20 +189,26 @@ export class DatasetApexClasses implements Dataset {
                     // Add the relationships between class and test class
                     if (relatedTestsByApexClass.has(id) === false) relatedTestsByApexClass.set(id, new Set());
                     if (relatedClassesByApexTest.has(testId) === false) relatedClassesByApexTest.set(testId, new Set());
-                    relatedTestsByApexClass.get(id).add(testId);
-                    relatedClassesByApexTest.get(testId).add(id);
+                    relatedTestsByApexClass.get(id)?.add(testId);
+                    relatedClassesByApexTest.get(testId)?.add(id);
                 }
             }
         );
         await Promise.all([
             Processor.forEach(relatedTestsByApexClass, (/** @type {Set<string>} */ relatedTestsIds: Set<string>, /** @type {string} */ apexClassId: string) => {
                 if (apexClasses.has(apexClassId)) { // Just to be safe!
-                    apexClasses.get(apexClassId).relatedTestClassIds = Array.from(relatedTestsIds);
+                    const clazz = apexClasses.get(apexClassId);
+                    if (clazz) {
+                        clazz.relatedTestClassIds = Array.from(relatedTestsIds);
+                    }
                 }
             }),
             Processor.forEach(relatedClassesByApexTest, (/** @type {Set<string>} */ relatedClassesIds: Set<string>, /** @type {string} */apexTestId: string) => {
                 if (apexClasses.has(apexTestId)) { // In case a test from a package is covering a classe the id will not be in the Class map!
-                    apexClasses.get(apexTestId).relatedClassIds = Array.from(relatedClassesIds);
+                    const testClazz = apexClasses.get(apexTestId);
+                    if (testClazz) {
+                        testClazz.relatedClassIds = Array.from(relatedClassesIds);
+                    }
                 }
             })
         ]);
@@ -215,7 +222,10 @@ export class DatasetApexClasses implements Dataset {
                 const id = sfdcManager.caseSafeId(record.ApexClassOrTriggerId);
                 if (apexClasses.has(id)) { // make sure the id is an existing class!
                     // set the coverage of that class
-                    apexClasses.get(id).coverage = (record.NumLinesCovered / (record.NumLinesCovered + record.NumLinesUncovered));
+                    const clazz = apexClasses.get(id);
+                    if (clazz) {
+                        clazz.coverage = (record.NumLinesCovered / (record.NumLinesCovered + record.NumLinesUncovered));
+                    }
                 }
             }
         );
@@ -229,7 +239,10 @@ export class DatasetApexClasses implements Dataset {
                 const id = sfdcManager.caseSafeId(record.ApexClassId);
                 if (apexClasses.has(id)) { // make sure the id is an existing class!
                     // set the scheduled flag to true
-                    apexClasses.get(id).isScheduled = true;
+                    const clazz = apexClasses.get(id);
+                    if (clazz) {
+                        clazz.isScheduled = true;
+                    }
                 }
             }
         );
@@ -243,7 +256,7 @@ export class DatasetApexClasses implements Dataset {
                 const id = sfdcManager.caseSafeId(record.ApexClassId);
                 if (apexClasses.has(id)) { // make sure the id is an existing class
                     const tc = apexClasses.get(id);
-                    if (tc.isTest === true) { // make sure this is a Test class!
+                    if (tc?.isTest === true) { // make sure this is a Test class!
                         if (!tc.lastTestRunDate) {
                             tc.lastTestRunDate = record.ApexTestRunResult?.CreatedDate;
                             tc.testMethodsRunTime = 0;

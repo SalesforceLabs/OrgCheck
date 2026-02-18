@@ -11,6 +11,7 @@ import { SFDC_RecordType } from '../data/orgcheck-api-data-recordtype';
 import { SFDC_ObjectRelationShip } from '../data/orgcheck-api-data-objectrelationship';
 import { SalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { CodeScanner } from '../core/orgcheck-api-codescanner';
@@ -40,15 +41,15 @@ export class DatasetObject implements Dataset {
         const packageName = splittedApiName?.length === 3 ? splittedApiName[0] : '';
 
         // Init the factories
-        const fieldDataFactory = dataFactory.getInstance(SFDC_Field);
-        const fieldSetDataFactory = dataFactory.getInstance(SFDC_FieldSet);
-        const layoutDataFactory = dataFactory.getInstance(SFDC_PageLayout);
-        const limitDataFactory = dataFactory.getInstance(SFDC_Limit);
-        const validationRuleDataFactory = dataFactory.getInstance(SFDC_ValidationRule);
-        const webLinkDataFactory = dataFactory.getInstance(SFDC_WebLink);
-        const recordTypeDataFactory = dataFactory.getInstance(SFDC_RecordType);
-        const relationshipDataFactory = dataFactory.getInstance(SFDC_ObjectRelationShip);
-        const objectDataFactory = dataFactory.getInstance(SFDC_Object);
+        const fieldDataFactory = dataFactory.getInstance(DataAliases.SFDC_Field);
+        const fieldSetDataFactory = dataFactory.getInstance(DataAliases.SFDC_FieldSet);
+        const layoutDataFactory = dataFactory.getInstance(DataAliases.SFDC_PageLayout);
+        const limitDataFactory = dataFactory.getInstance(DataAliases.SFDC_Limit);
+        const validationRuleDataFactory = dataFactory.getInstance(DataAliases.SFDC_ValidationRule);
+        const webLinkDataFactory = dataFactory.getInstance(DataAliases.SFDC_WebLink);
+        const recordTypeDataFactory = dataFactory.getInstance(DataAliases.SFDC_RecordType);
+        const relationshipDataFactory = dataFactory.getInstance(DataAliases.SFDC_ObjectRelationShip);
+        const objectDataFactory = dataFactory.getInstance(DataAliases.SFDC_Object);
 
         const results = await Promise.all([
             sfdcManager.describe(fullObjectApiName, logger),
@@ -140,7 +141,8 @@ export class DatasetObject implements Dataset {
                         defaultValue: field.defaultValue,
                         formula: field.calculatedFormula,
                         url: sfdcManager.setupUrl(fieldMapper.id, SalesforceMetadataTypes.STANDARD_FIELD, entity.DurableId, sobjectType)
-                    }
+                    },
+                    dependencyData: { records: [], errors: [] }
                 });
             },
             (/** @type {any} */ field: any) => standardFieldsMapper.has(field.name)
@@ -184,7 +186,8 @@ export class DatasetObject implements Dataset {
                     name: t.Name, 
                     type: t.LayoutType,
                     url: sfdcManager.setupUrl(t.Id, SalesforceMetadataTypes.PAGE_LAYOUT, entity.DurableId)
-                }
+                },
+                dependencyData: { records: [], errors: [] }
             })
         );
         
@@ -242,7 +245,8 @@ export class DatasetObject implements Dataset {
                     lastModifiedDate: t.LastModifiedDate,
                     description: t.Description,                
                     url: sfdcManager.setupUrl(t.Id, SalesforceMetadataTypes.WEB_LINK, entity.DurableId)
-                }
+                },
+                dependencyData: { records: [], errors: [] }
             })
         );
         

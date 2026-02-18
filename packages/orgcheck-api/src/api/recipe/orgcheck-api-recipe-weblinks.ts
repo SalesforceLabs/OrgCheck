@@ -1,5 +1,5 @@
 import { Recipe } from '../core/orgcheck-api-recipe';
-import { Data, DataWithoutScoring } from '../core/orgcheck-api-data';
+import { Data, DataWithoutScore } from '../core/orgcheck-api-data';
 import { DataMatrix } from '../core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
@@ -31,11 +31,11 @@ export class RecipeWebLinks implements Recipe {
      * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} logger - Logger
      * @param {Map<string, any>} [parameters] - List of optional argument to pass
-     * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<Array<Data> | DataMatrix | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>> {
+    async transform(data: Map<string, any>, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrix | Data | Map<string, any>> {
 
         // Get data and parameters
         const /** @type {Map<string, SFDC_ObjectType>} */ types: Map<string, SFDC_ObjectType> = data.get(DatasetAliases.OBJECTTYPES);
@@ -56,10 +56,15 @@ export class RecipeWebLinks implements Recipe {
         await Processor.forEach(weblinks, (/** @type {SFDC_WebLink} */weblink: SFDC_WebLink) => {
             // Augment data
             const objectRef = objects.get(weblink.objectId);
-            if (objectRef && !objectRef.typeRef) {
-                objectRef.typeRef = types.get(objectRef.typeId);
+            if (objectRef) {
+                if (objectRef.typeRef === undefined) {
+                    const typeObjectRef = types.get(objectRef.typeId);
+                    if (typeObjectRef) {
+                        objectRef.typeRef = typeObjectRef;
+                    }
+                }
+                weblink.objectRef = objectRef;
             }
-            weblink.objectRef = objectRef;
             // Filter data
             if ((namespace === OrgCheckGlobalParameter.ALL_VALUES || weblink.package === namespace) &&
                 (objecttype === OrgCheckGlobalParameter.ALL_VALUES || weblink.objectRef?.typeRef?.id === objecttype) &&

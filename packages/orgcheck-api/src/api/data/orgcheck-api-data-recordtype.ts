@@ -1,17 +1,17 @@
-import { Data } from '../core/orgcheck-api-data';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
+import { DataWithScore } from '../core/orgcheck-api-data';
 import { SFDC_Object } from './orgcheck-api-data-object';
 
-export class SFDC_RecordType extends Data {
+export interface SFDC_RecordType extends DataWithScore {
     
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
      * @public
      */
-    static get label() { return 'Record Type' };
-
-    /**
+    dataType: DataAliases.SFDC_RecordType;
+    
+     /**
      * @description Salesforce Id
      * @type {string}
      * @public

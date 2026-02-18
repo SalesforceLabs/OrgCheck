@@ -189,10 +189,10 @@ export class DatasetManager implements DatasetManagerIntf {
                     } else {
                         this._logger.log(section, `There was no data in data cache. Let's retrieve data.`);
                         // Calling the retriever
-                        this._datasets.get(alias).run(
+                        this._datasets.get(alias)?.run(
                             this._sfdcManager, // sfdc manager
                             this._dataFactory, // data factory
-                            this._logger.toSimpleLogger(section), // local logger
+                            this._logger?.toSimpleLogger(section), // local logger
                             parameters // Send any parameters if needed
                         ).then((data) => {
                             // Cache the data (if possible and not too big)

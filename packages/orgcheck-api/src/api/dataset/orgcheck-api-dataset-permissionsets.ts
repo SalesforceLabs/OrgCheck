@@ -1,3 +1,4 @@
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -68,7 +69,7 @@ export class DatasetPermissionSets implements Dataset {
         const psAssignmentRecords = results[5];
 
         // Init the factory and records
-        const permissionSetDataFactory = dataFactory.getInstance(SFDC_PermissionSet);
+        const permissionSetDataFactory = dataFactory.getInstance(DataAliases.SFDC_PermissionSet);
 
         // Create the map of permission sets
         logger?.log(`Parsing ${permissionSetRecords?.length} permission sets...`);
@@ -128,8 +129,8 @@ export class DatasetPermissionSets implements Dataset {
             Processor.forEach(permissionSetGroupRecords, (/** @type {any} */ record: any) => {
                 const permissionSetId = sfdcManager.caseSafeId(record.Id);
                 const permissionSetGroupId = sfdcManager.caseSafeId(record.PermissionSetGroupId);
-                if (permissionSets.has(permissionSetId)) {
-                    const permissionSet = permissionSets.get(permissionSetId);
+                const permissionSet = permissionSets.get(permissionSetId);
+                if (permissionSet) {
                     permissionSet.isGroup = true;
                     permissionSet.groupId = permissionSetGroupId;
                     permissionSet.description = record.PermissionSetGroup?.Description ?? '';
@@ -139,22 +140,22 @@ export class DatasetPermissionSets implements Dataset {
             }),
             Processor.forEach(objectPermissionRecords, (/** @type {any} */ record: any) => {
                 const permissionSetId = sfdcManager.caseSafeId(record.ParentId);
-                if (permissionSets.has(permissionSetId)) {
-                    const permissionSet = permissionSets.get(permissionSetId);
+                const permissionSet = permissionSets.get(permissionSetId);
+                if (permissionSet) {
                     permissionSet.nbObjectPermissions += record.CountObject;
                 }
             }),
             Processor.forEach(fieldPermissionRecords, (/** @type {any} */ record: any) => {
                 const permissionSetId = sfdcManager.caseSafeId(record.ParentId);
-                if (permissionSets.has(permissionSetId)) {
-                    const permissionSet = permissionSets.get(permissionSetId);
+                const permissionSet = permissionSets.get(permissionSetId);
+                if (permissionSet) {
                     permissionSet.nbFieldPermissions += record.CountField;    
                 }
             }),
             Processor.forEach(userAssignmentRecords, (/** @type {any} */ record: any) => {
                 const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId);
-                if (permissionSets.has(permissionSetId)) {
-                    const permissionSet = permissionSets.get(permissionSetId);
+                const permissionSet = permissionSets.get(permissionSetId);
+                if (permissionSet) {
                     permissionSet.memberCounts += record.CountAssignment;    
                 }
             })
@@ -167,9 +168,9 @@ export class DatasetPermissionSets implements Dataset {
             const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId);
             const permissionSetGroupId = sfdcManager.caseSafeId(record.PermissionSetGroupId);
             const permissionSetGroup_psId = psgToPsIds.get(permissionSetGroupId);
-            if (permissionSets.has(permissionSetId) && permissionSets.has(permissionSetGroup_psId)) {
-                const permissionSet = permissionSets.get(permissionSetId);
-                const permissionSetGroup = permissionSets.get(permissionSetGroup_psId);
+            const permissionSet = permissionSets.get(permissionSetId);
+            const permissionSetGroup = permissionSets.get(permissionSetGroup_psId);
+            if (permissionSet && permissionSetGroup) {
                 permissionSet.permissionSetGroupIds.push(permissionSetGroup_psId);
                 permissionSetGroup.permissionSetIds.push(permissionSetId);
                 psgMemberCountSumByPermissionSetId.set(permissionSetId, psgMemberCountSumByPermissionSetId.get(permissionSetId) ?? 0 + permissionSetGroup.memberCounts);

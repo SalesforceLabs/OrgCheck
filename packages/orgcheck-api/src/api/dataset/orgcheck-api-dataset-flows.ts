@@ -1,3 +1,4 @@
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -48,8 +49,8 @@ export class DatasetFlows implements Dataset {
         }], logger);
             
         // Init the factories
-        const flowDefinitionDataFactory = dataFactory.getInstance(SFDC_Flow);
-        const flowVersionDataFactory = dataFactory.getInstance(SFDC_FlowVersion);
+        const flowDefinitionDataFactory = dataFactory.getInstance(DataAliases.SFDC_Flow);
+        const flowVersionDataFactory = dataFactory.getInstance(DataAliases.SFDC_FlowVersion);
         const flowDefRecords = results[0];
         const flowVersionsByDefRecords = results[1];
         
@@ -113,10 +114,10 @@ export class DatasetFlows implements Dataset {
             const parentId = sfdcManager.caseSafeId(record.DefinitionId);
 
             // Get the parent Flow definition
-            const flowDefinition: SFDC_Flow= flowDefinitions.get(parentId);
-
-            // Add to the version counter to the definition
+            const flowDefinition : SFDC_Flow | undefined = flowDefinitions.get(parentId);
             if (flowDefinition) {
+                
+                // Add to the version counter to the definition
                 // Using += because using custom queryMore could return multiple batches
                 flowDefinition.versionsCount += record.NbVersions;
             }
@@ -183,15 +184,17 @@ export class DatasetFlows implements Dataset {
             // Get the parent Flow definition
             const flowDefinition = flowDefinitions.get(parentId);
 
-            // Set reference only to the active flow
-            flowDefinition.currentVersionRef = activeFlowVersion;
+            if (flowDefinition) {
+                // Set reference only to the active flow
+                flowDefinition.currentVersionRef = activeFlowVersion;
 
-            // Set some fields (type and description) from the active version to the definition level
-            flowDefinition.type = activeFlowVersion.type;
-            flowDefinition.isProcessBuilder = activeFlowVersion.isProcessBuilder;
-            flowDefinition.isScreenFlow = activeFlowVersion.isScreenFlow;
-            if (!flowDefinition.description) {
-                flowDefinition.description = activeFlowVersion.description;
+                // Set some fields (type and description) from the active version to the definition level
+                flowDefinition.type = activeFlowVersion.type;
+                flowDefinition.isProcessBuilder = activeFlowVersion.isProcessBuilder;
+                flowDefinition.isScreenFlow = activeFlowVersion.isScreenFlow;
+                if (!flowDefinition.description) {
+                    flowDefinition.description = activeFlowVersion.description;
+                }
             }
         });
 

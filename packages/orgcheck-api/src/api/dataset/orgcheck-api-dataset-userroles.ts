@@ -1,3 +1,4 @@
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -27,7 +28,7 @@ export class DatasetUserRoles implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const userRoleDataFactory = dataFactory.getInstance(SFDC_UserRole);
+        const userRoleDataFactory = dataFactory.getInstance(DataAliases.SFDC_UserRole);
 
         // Create the map
         const userRoleRecords = results[0];

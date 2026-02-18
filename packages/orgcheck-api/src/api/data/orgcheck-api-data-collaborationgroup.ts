@@ -1,16 +1,16 @@
-import { Data } from '../core/orgcheck-api-data';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
+import { DataWithScore } from '../core/orgcheck-api-data';
 
-export class SFDC_CollaborationGroup extends Data {
-
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
+export interface SFDC_CollaborationGroup extends DataWithScore {
+    
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
      * @public
      */
-    static get label() { return 'Chatter Group' };
-
-    /**
+    dataType: DataAliases.SFDC_CollaborationGroup;
+    
+     /**
      * @description Unique identifier of this group in the org.
      * @type {string}
      * @public

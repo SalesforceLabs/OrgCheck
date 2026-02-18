@@ -2,7 +2,7 @@ import { Table, SortOrder, ExportedTable } from "./orgcheck-ui-table";
 import { CellFactory } from "./orgcheck-ui-table-cell";
 import { ColumnType } from './orgcheck-ui-table-column';
 
-export class Row {
+export interface Row {
 
     /** @type {number} */
     index: number;
@@ -70,9 +70,9 @@ export class RowsFactory {
      * @param {Table} tableDefintion - Definition of the table
      * @param {Array<Row>} rows - List of rows
      * @param {number} columnIndex - Index of the column to sort
-     * @param {string} order - Sort order, can be ASC or DESC
+     * @param {SortOrder} order - Sort order, can be ASC or DESC
      */ 
-    static sort(tableDefintion: Table, rows: Array<Row>,  columnIndex: number, order: string) {
+    static sort(tableDefintion: Table, rows: Array<Row>,  columnIndex: number, order: SortOrder) {
         const column = tableDefintion.columns[columnIndex];
         if (! column) return;
         const iOrder = order === SortOrder.ASC ? 1 : -1;

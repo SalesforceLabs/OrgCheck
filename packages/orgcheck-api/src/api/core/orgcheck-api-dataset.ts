@@ -1,4 +1,4 @@
-import { Data, DataWithoutScoring } from "./orgcheck-api-data";
+import { Data } from "./orgcheck-api-data";
 import { DataFactoryIntf } from "./orgcheck-api-datafactory";
 import { SimpleLoggerIntf } from "./orgcheck-api-logger";
 import { SalesforceManagerIntf } from "./orgcheck-api-salesforcemanager";
@@ -14,8 +14,8 @@ export interface Dataset {
      * @param {DataFactoryIntf} dataFactory - The instance of the data factory
      * @param {SimpleLoggerIntf} logger - The instance of the logger
      * @param {Map<string, any> | undefined } [parameters] List of optional argument to pass
-     * @returns {Promise<Map<string, Data | DataWithoutScoring> | Data | DataWithoutScoring>} The result of the dataset
+     * @returns {Promise<Map<string, Data | boolean> | Data>} The result of the dataset
      * @async
      */
-    run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf, parameters?: Map<string, any>): Promise<Map<string, Data | DataWithoutScoring> | Data | DataWithoutScoring>;
+    run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf, parameters?: Map<string, any>): Promise<Map<string, Data | boolean> | Data>;
 }

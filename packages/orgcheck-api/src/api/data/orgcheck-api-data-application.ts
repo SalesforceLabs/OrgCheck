@@ -1,18 +1,18 @@
-import { DataWithoutScoring } from '../core/orgcheck-api-data';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
+import { DataWithoutScore } from '../core/orgcheck-api-data';
 
 /**
  * @description Representation of an Application in Org Check
  */
-export class SFDC_Application extends DataWithoutScoring {
-    
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
+export interface SFDC_Application extends DataWithoutScore {
+
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
      * @public
      */
-    static get label() { return 'Application' };
-
+    dataType: DataAliases.SFDC_Application;
+    
     /**
      * @description Salesforce Id of the application
      * @type {string}

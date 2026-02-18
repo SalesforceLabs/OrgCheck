@@ -1,3 +1,4 @@
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -26,7 +27,7 @@ export class DatasetRecordTypes implements Dataset {
             string: 'SELECT Id FROM Profile '
         }], logger);
 
-        const recordTypeDataFactory = dataFactory.getInstance(SFDC_RecordType);
+        const recordTypeDataFactory = dataFactory.getInstance(DataAliases.SFDC_RecordType);
         const recordTypeRecords = results[0];
         const profileRecords = results[1];
 
@@ -71,8 +72,8 @@ export class DatasetRecordTypes implements Dataset {
             profile.Metadata?.recordTypeVisibilities?.forEach((/** @type {any} */ rtv: any) => {
                 if (recordTypeDevNameToId.has(rtv.recordType)) {
                     const id = recordTypeDevNameToId.get(rtv.recordType);
-                    if (recordTypes.has(id)) {
-                        const recordType = recordTypes.get(id);
+                    const recordType = recordTypes.get(id);
+                    if (recordType) {
                         if (recordType.isDefault === false && rtv.default === true) {
                             recordType.isDefault = true;
                         }

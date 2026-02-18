@@ -1,4 +1,5 @@
 import { CodeScanner } from '../core/orgcheck-api-codescanner';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -29,7 +30,7 @@ export class DatasetWeblinks implements Dataset {
         }], logger);
         
         // Init the factory and records
-        const webLinkDataFactory = dataFactory.getInstance(SFDC_WebLink);
+        const webLinkDataFactory = dataFactory.getInstance(DataAliases.SFDC_WebLink);
 
         // Create the map
         const webLinkRecords = results[0];

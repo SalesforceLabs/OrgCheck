@@ -1,20 +1,20 @@
-import { DataWithDependencies } from '../core/orgcheck-api-data';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
+import { DataWithScoreAndDependencies } from '../core/orgcheck-api-data';
 import { SFDC_Object } from './orgcheck-api-data-object';
 
 /**
  * @description Representation of a Lightning Page in Org Check
  */
-export class SFDC_LightningPage extends DataWithDependencies {
+export interface SFDC_LightningPage extends DataWithScoreAndDependencies {
     
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
      * @public
      */
-    static get label() { return 'Lightning Page' };
-
-    /**
+    dataType: DataAliases.SFDC_LightningPage;
+        
+     /**
      * @description Salesforce Id
      * @type {string}
      * @public

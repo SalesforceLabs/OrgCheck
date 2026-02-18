@@ -56,10 +56,10 @@ export class RecipeGlobalView implements RecipeCollection {
     /**
      * @description Filter the data items by score rule ids
      * @param {SimpleLoggerIntf} _logger - Logger
-     * @returns {Array<number> | undefined} List of score rule ids to filter by or undefined if no filtering is needed
+     * @returns {Array<number>} List of score rule ids to filter by. Empty array means no filtering
      * @public
      */ 
-    filterByScoreRuleIds(_logger: SimpleLoggerIntf): Array<number> | undefined {
-        return null;
+    filterByScoreRuleIds(_logger: SimpleLoggerIntf): Array<number> {
+        return [];
     }
 }

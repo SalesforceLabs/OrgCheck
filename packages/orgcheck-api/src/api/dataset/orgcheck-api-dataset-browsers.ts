@@ -1,3 +1,4 @@
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -27,7 +28,7 @@ export class DatasetBrowsers implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const browserDataFactory = dataFactory.getInstance(SFDC_Browser);
+        const browserDataFactory = dataFactory.getInstance(DataAliases.SFDC_Browser);
 
         // Create the map
         const browserRecords = results[0];

@@ -1,6 +1,6 @@
 import { Recipe } from '../core/orgcheck-api-recipe';
 import { Processor } from '../core/orgcheck-api-processor';
-import { Data, DataWithoutScoring } from '../core/orgcheck-api-data';
+import { Data, DataWithoutScore } from '../core/orgcheck-api-data';
 import { DataMatrix } from '../core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
@@ -29,11 +29,11 @@ export class RecipeLightningPages implements Recipe {
      * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} _logger - Logger
      * @param {Map<string, any>} [parameters] - List of optional argument to pass
-     * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<Array<Data> | DataMatrix | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>> {
+    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrix | Data | Map<string, any>> {
 
         // Get data and parameters
         const /** @type {Map<string, SFDC_LightningPage>} */ pages: Map<string, SFDC_LightningPage> = data.get(DatasetAliases.LIGHTNINGPAGES);
@@ -51,7 +51,10 @@ export class RecipeLightningPages implements Recipe {
             // Augment data
             if (page.objectId) {
                 // if objectId was specified in the page, get the reference of the object
-                page.objectRef = objects.get(page.objectId);
+                const objectRef = objects.get(page.objectId);
+                if (objectRef) {
+                    page.objectRef = objectRef;
+                }
             }
             // Filter data
             if (namespace === OrgCheckGlobalParameter.ALL_VALUES || page.package === namespace) {

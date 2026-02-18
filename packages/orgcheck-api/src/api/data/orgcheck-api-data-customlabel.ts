@@ -1,19 +1,19 @@
-import { DataWithDependencies } from '../core/orgcheck-api-data';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
+import { DataWithScoreAndDependencies } from '../core/orgcheck-api-data';
 
 /**
  * @description Representation of a Custom Label in Org Check
  */
-export class SFDC_CustomLabel extends DataWithDependencies {
-    
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
-     * @public
-     */
-    static get label() { return 'Custom Label' };
+export interface SFDC_CustomLabel extends DataWithScoreAndDependencies {
 
     /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
+     * @public
+     */
+    dataType: DataAliases.SFDC_CustomLabel;
+    
+     /**
      * @description Salesforce Id
      * @type {string}
      * @public

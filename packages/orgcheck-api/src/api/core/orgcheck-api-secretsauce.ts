@@ -1,4 +1,5 @@
-import { DataWithDependencies } from './orgcheck-api-data';
+import { DataAliases } from './orgcheck-api-data-aliases';
+import { DataWithScoreAndDependencies } from './orgcheck-api-data';
 import { ScoreRule } from './orgcheck-api-datafactory';
 import { SFDC_ApexClass } from '../data/orgcheck-api-data-apexclass';
 import { SFDC_ApexTrigger } from '../data/orgcheck-api-data-apextrigger';
@@ -116,7 +117,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_CustomLabel | SFDC_LightningPage | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_StaticResource} */ d: SFDC_CustomLabel | SFDC_LightningPage | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_StaticResource) => d?.dependencies?.hadError === false && IS_EMPTY(d.dependencies?.referenced), 
         errorMessage: `This component is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.`,
         badField: 'dependencies.referenced?.length',
-        applicable: [ SFDC_CustomLabel, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_StaticResource ],
+        applicable: [ DataAliases.SFDC_CustomLabel, DataAliases.SFDC_LightningPage, DataAliases.SFDC_LightningAuraComponent, DataAliases.SFDC_LightningWebComponent, DataAliases.SFDC_VisualForceComponent, DataAliases.SFDC_VisualForcePage, DataAliases.SFDC_StaticResource ],
         category: SCORE_RULE_CATEGORIES.DEPENDENCY
     }, {
         id: 1,
@@ -124,7 +125,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Field} */ d: SFDC_Field) => d?.isCustom === true && d?.dependencies?.hadError === false && IS_EMPTY(d.dependencies?.referenced), 
         errorMessage: `This custom field is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.`,
         badField: 'dependencies.referenced?.length',
-        applicable: [ SFDC_Field ],
+        applicable: [ DataAliases.SFDC_Field ],
         category: SCORE_RULE_CATEGORIES.DEPENDENCY
     }, {
         id: 2,
@@ -132,15 +133,15 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_ApexClass} */ d: SFDC_ApexClass) => d?.isTest === false && d?.dependencies?.hadError === false && IS_EMPTY(d.dependencies?.referenced), 
         errorMessage: `This apex class is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.`,
         badField: 'dependencies.referenced?.length',
-        applicable: [ SFDC_ApexClass ],
+        applicable: [ DataAliases.SFDC_ApexClass ],
         category: SCORE_RULE_CATEGORIES.DEPENDENCY
     }, {
         id: 3,
         description: 'Sorry, we had an issue with the Dependency API to gather the dependencies of this item',
-        formula: (/** @type {DataWithDependencies} */ d: DataWithDependencies) => d?.dependencies && d?.dependencies.hadError === true, 
+        formula: (/** @type {DataWithScoreAndDependencies} */ d: DataWithScoreAndDependencies) => d?.dependencies && d?.dependencies.hadError === true, 
         errorMessage: `Sorry, we had an issue with the Dependency API to gather the dependencies of this item.`,
         badField: 'dependencies.referenced?.length',
-        applicable: [ SFDC_Field, SFDC_ApexClass, SFDC_CustomLabel, SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForceComponent, SFDC_VisualForcePage ],
+        applicable: [ DataAliases.SFDC_Field, DataAliases.SFDC_ApexClass, DataAliases.SFDC_CustomLabel, DataAliases.SFDC_Flow, DataAliases.SFDC_LightningPage, DataAliases.SFDC_LightningAuraComponent, DataAliases.SFDC_LightningWebComponent, DataAliases.SFDC_VisualForceComponent, DataAliases.SFDC_VisualForcePage ],
         category: SCORE_RULE_CATEGORIES.DEPENDENCY
     }, {
         id: 4,
@@ -148,7 +149,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_Flow | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForcePage | SFDC_VisualForceComponent | SFDC_EmailTemplate } */ d: SFDC_ApexClass | SFDC_ApexTrigger | SFDC_Flow | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForcePage | SFDC_VisualForceComponent | SFDC_EmailTemplate) => IS_OLD_APIVERSION(SecretSauce.CurrentApiVersion, d?.apiVersion),
         errorMessage: `The API version of this component is too old. Please update it to the newest version.`,
         badField: 'apiVersion',
-        applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_Flow, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent, SFDC_EmailTemplate ],
+        applicable: [ DataAliases.SFDC_ApexClass, DataAliases.SFDC_ApexTrigger, DataAliases.SFDC_Flow, DataAliases.SFDC_LightningAuraComponent, DataAliases.SFDC_LightningWebComponent, DataAliases.SFDC_VisualForcePage, DataAliases.SFDC_VisualForceComponent, DataAliases.SFDC_EmailTemplate ],
         category: SCORE_RULE_CATEGORIES.API_VERSION
     }, {
         id: 5,
@@ -156,7 +157,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_ApexClass} */ d: SFDC_ApexClass) => d?.isTest === true && d?.nbSystemAsserts === 0,
         errorMessage: `This apex test does not contain any assertion! Best practices force you to define assertions in tests.`,
         badField: 'nbSystemAsserts',
-        applicable: [ SFDC_ApexClass ],
+        applicable: [ DataAliases.SFDC_ApexClass ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
         id: 6,
@@ -164,7 +165,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type { SFDC_LightningPage | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForcePage | SFDC_VisualForceComponent | SFDC_Workflow | SFDC_WebLink | SFDC_FieldSet | SFDC_ValidationRule | SFDC_Document | SFDC_CustomTab | SFDC_EmailTemplate | SFDC_StaticResource | SFDC_Report | SFDC_Dashboard } */ d: SFDC_LightningPage | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForcePage | SFDC_VisualForceComponent | SFDC_Workflow | SFDC_WebLink | SFDC_FieldSet | SFDC_ValidationRule | SFDC_Document | SFDC_CustomTab | SFDC_EmailTemplate | SFDC_StaticResource | SFDC_Report | SFDC_Dashboard) => IS_EMPTY(d?.description),
         errorMessage: `This component does not have a description. Best practices force you to use the Description field to give some informative context about why and how it is used/set/govern.`,
         badField: 'description',
-        applicable: [ SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent, SFDC_Workflow, SFDC_WebLink, SFDC_FieldSet, SFDC_ValidationRule, SFDC_Document, SFDC_CustomTab, SFDC_EmailTemplate, SFDC_StaticResource, SFDC_Report, SFDC_Dashboard ],
+        applicable: [ DataAliases.SFDC_LightningPage, DataAliases.SFDC_LightningAuraComponent, DataAliases.SFDC_LightningWebComponent, DataAliases.SFDC_VisualForcePage, DataAliases.SFDC_VisualForceComponent, DataAliases.SFDC_Workflow, DataAliases.SFDC_WebLink, DataAliases.SFDC_FieldSet, DataAliases.SFDC_ValidationRule, DataAliases.SFDC_Document, DataAliases.SFDC_CustomTab, DataAliases.SFDC_EmailTemplate, DataAliases.SFDC_StaticResource, DataAliases.SFDC_Report, DataAliases.SFDC_Dashboard ],
         category: SCORE_RULE_CATEGORIES.DOCUMENTATION
     }, {
         id: 7,
@@ -172,7 +173,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Field | SFDC_PermissionSet | SFDC_Profile} */ d: SFDC_Field | SFDC_PermissionSet | SFDC_Profile) => d?.isCustom === true && IS_EMPTY(d?.description),
         errorMessage: `This custom component does not have a description. Best practices force you to use the Description field to give some informative context about why and how it is used/set/govern.`,
         badField: 'description',
-        applicable: [ SFDC_Field, SFDC_PermissionSet, SFDC_Profile ],
+        applicable: [ DataAliases.SFDC_Field, DataAliases.SFDC_PermissionSet, DataAliases.SFDC_Profile ],
         category: SCORE_RULE_CATEGORIES.DOCUMENTATION
     }, {
         id: 8,
@@ -180,7 +181,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_ApexClass} */ d: SFDC_ApexClass) => d?.isTest === false && d?.isClass === true && !d.specifiedSharing,
         errorMessage: `This Apex Class does not specify a sharing model. Best practices force you to specify with, without or inherit sharing to better control the visibility of the data you process in Apex.`,
         badField: 'specifiedSharing',
-        applicable: [ SFDC_ApexClass ],
+        applicable: [ DataAliases.SFDC_ApexClass ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
         id: 9,
@@ -188,7 +189,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_ApexClass} */ d: SFDC_ApexClass) => d?.isScheduled === false && d?.isSchedulable === true,
         errorMessage: `This Apex Class implements Schedulable but is not scheduled. What is the point? Is this class still necessary?`,
         badField: 'isScheduled',
-        applicable: [ SFDC_ApexClass ],
+        applicable: [ DataAliases.SFDC_ApexClass ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
         id: 10,
@@ -196,7 +197,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_ApexClass} */ d: SFDC_ApexClass) => d?.needsRecompilation === true,
         errorMessage: `This Apex Class can not be compiled for some reason. You should try to recompile it. If the issue remains you need to consider refactoring this class or the classes that it is using.`,
         badField: 'name',
-        applicable: [ SFDC_ApexClass ],
+        applicable: [ DataAliases.SFDC_ApexClass ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
         id: 11,
@@ -204,7 +205,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_ApexClass} */ d: SFDC_ApexClass) => d?.isTest === false && (isNaN(d.coverage) || !d.coverage),
         errorMessage: `This Apex Class does not have any code coverage. Consider launching the corresponding tests that will bring some coverage. If you do not know which test to launch just run them all!`,
         badField: 'coverage',
-        applicable: [ SFDC_ApexClass ],
+        applicable: [ DataAliases.SFDC_ApexClass ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
         id: 12,
@@ -212,7 +213,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_ApexClass} */ d: SFDC_ApexClass) => d?.coverage > 0 && d?.coverage < 0.75,
         errorMessage: `This Apex Class does not have enough code coverage (less than 75% of lines are covered by successful unit tests). Maybe you ran not all the unit tests to cover this class entirely? If you did, then consider augmenting that coverage with new test methods.`,
         badField: 'coverage',
-        applicable: [ SFDC_ApexClass ],
+        applicable: [ DataAliases.SFDC_ApexClass ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
         id: 13,
@@ -220,7 +221,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_ApexClass} */ d: SFDC_ApexClass) => d?.isTest === true && d?.testFailedMethods && d?.testFailedMethods?.length > 0,
         errorMessage: `This Apex Test Class has at least one failed method.`,
         badField: 'testFailedMethods',
-        applicable: [ SFDC_ApexClass ],
+        applicable: [ DataAliases.SFDC_ApexClass ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
         id: 14,
@@ -228,7 +229,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_ApexTrigger} */ d: SFDC_ApexTrigger) => d?.hasSOQL === true,
         errorMessage: `This Apex Trigger contains at least one SOQL statement. Best practices force you to move any SOQL statement in dedicated Apex Classes that you would call from the trigger. Please update the code accordingly.`,
         badField: 'hasSOQL',
-        applicable: [ SFDC_ApexTrigger ],
+        applicable: [ DataAliases.SFDC_ApexTrigger ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
         id: 15,
@@ -236,7 +237,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_ApexTrigger} */ d: SFDC_ApexTrigger) => d?.hasDML === true,
         errorMessage: `This Apex Trigger contains at least one DML action. Best practices force you to move any DML action in dedicated Apex Classes that you would call from the trigger. Please update the code accordingly.`,
         badField: 'hasDML',
-        applicable: [ SFDC_ApexTrigger ],
+        applicable: [ DataAliases.SFDC_ApexTrigger ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
         id: 16,
@@ -244,7 +245,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_ApexTrigger} */ d: SFDC_ApexTrigger) => d?.length > 5000,
         errorMessage: `Due to the massive number of source code (more than 5000 characters) in this Apex Trigger, we suspect that it contains logic. Best practices force you to move any logic in dedicated Apex Classes that you would call from the trigger. Please update the code accordingly.`,
         badField: 'length',
-        applicable: [ SFDC_ApexTrigger ],
+        applicable: [ DataAliases.SFDC_ApexTrigger ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
         id: 17,
@@ -252,7 +253,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Group} */ d: SFDC_Group) => !d.nbDirectMembers || d?.nbDirectMembers === 0,
         errorMessage: `This public group (or queue) does not contain any direct members (users or sub groups). Is it empty on purpose? Maybe you should review its use in your org...`,
         badField: 'nbDirectMembers',
-        applicable: [ SFDC_Group ],
+        applicable: [ DataAliases.SFDC_Group ],
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
         id: 18,
@@ -260,7 +261,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Profile} */ d: SFDC_Profile) => d?.isCustom === true && d?.memberCounts === 0,
         errorMessage: `This custom profile has no active members. Is it empty on purpose? Maybe you should review its use in your org...`,
         badField: 'memberCounts',
-        applicable: [ SFDC_Profile ],
+        applicable: [ DataAliases.SFDC_Profile ],
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
         id: 19,
@@ -268,7 +269,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_UserRole} */ d: SFDC_UserRole) => d?.activeMembersCount === 0,
         errorMessage: `This role has no active users assigned to it. Is it on purpose? Maybe you should review its use in your org...`,
         badField: 'activeMembersCount',
-        applicable: [ SFDC_UserRole ],
+        applicable: [ DataAliases.SFDC_UserRole ],
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
         id: 20,
@@ -276,7 +277,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_User} */ d: SFDC_User) => d?.onLightningExperience === false,
         errorMessage: `This user is still using Classic. Time to switch to Lightning for all your users, don't you think?`,
         badField: 'onLightningExperience',
-        applicable: [ SFDC_User ],
+        applicable: [ DataAliases.SFDC_User ],
         category: SCORE_RULE_CATEGORIES.USER_ADOPTION
     }, {
         id: 21,
@@ -284,7 +285,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_User} */ d: SFDC_User) => d?.lastLogin === null,
         errorMessage: `This active user has never logged in yet. Time to optimize your licence cost!`,
         badField: 'lastLogin',
-        applicable: [ SFDC_User ],
+        applicable: [ DataAliases.SFDC_User ],
         category: SCORE_RULE_CATEGORIES.USER_ADOPTION
     }, {
         id: 22,
@@ -292,7 +293,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Workflow} */ d: SFDC_Workflow) => d?.hasAction === false,
         errorMessage: `This workflow has no action, please review it and potentially remove it.`,
         badField: 'hasAction',
-        applicable: [ SFDC_Workflow ],
+        applicable: [ DataAliases.SFDC_Workflow ],
         category: SCORE_RULE_CATEGORIES.DEPENDENCY
     }, {
         id: 23,
@@ -300,7 +301,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Workflow} */ d: SFDC_Workflow) => d?.emptyTimeTriggers?.length > 0,
         errorMessage: `This workflow is time triggered but with no time triggered action, please review it.`,
         badField: 'emptyTimeTriggers',
-        applicable: [ SFDC_Workflow ],
+        applicable: [ DataAliases.SFDC_Workflow ],
         category: SCORE_RULE_CATEGORIES.DEPENDENCY
     }, {
         id: 24,
@@ -308,7 +309,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_ProfilePasswordPolicy} */ d: SFDC_ProfilePasswordPolicy) => d?.passwordQuestion === true,
         errorMessage: `This profile password policy allows you to have a password in the question! Please change that setting as it is clearly a lack of security in your org!`,
         badField: 'passwordQuestion',
-        applicable: [ SFDC_ProfilePasswordPolicy ],
+        applicable: [ DataAliases.SFDC_ProfilePasswordPolicy ],
         category: SCORE_RULE_CATEGORIES.SECURITY
     }, {
         id: 25,
@@ -316,7 +317,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_ProfilePasswordPolicy} */ d: SFDC_ProfilePasswordPolicy) => d?.passwordExpiration > 90,
         errorMessage: `This profile password policy allows you to have a password that expires after 90 days. Please consider having a shorter period of time for expiration if you policy.`,
         badField: 'passwordExpiration',
-        applicable: [ SFDC_ProfilePasswordPolicy ],
+        applicable: [ DataAliases.SFDC_ProfilePasswordPolicy ],
         category: SCORE_RULE_CATEGORIES.SECURITY
     }, {
         id: 26,
@@ -324,7 +325,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_ProfilePasswordPolicy} */ d: SFDC_ProfilePasswordPolicy) => d?.passwordExpiration === 0,
         errorMessage: `This profile password policy allows you to have a password that never expires. Why is that? Do you have this profile for technical users? Please reconsider this setting and use JWT authentication instead for technical users.`,
         badField: 'passwordExpiration',
-        applicable: [ SFDC_ProfilePasswordPolicy ],
+        applicable: [ DataAliases.SFDC_ProfilePasswordPolicy ],
         category: SCORE_RULE_CATEGORIES.SECURITY
     }, {
         id: 27,
@@ -332,7 +333,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_ProfilePasswordPolicy} */ d: SFDC_ProfilePasswordPolicy) => d?.passwordHistory < 3,
         errorMessage: `This profile password policy allows users to set their password with a too-short memory. For example, they can keep on using the same different password every time you ask them to change it. Please increase this setting.`,
         badField: 'passwordHistory',
-        applicable: [ SFDC_ProfilePasswordPolicy ],
+        applicable: [ DataAliases.SFDC_ProfilePasswordPolicy ],
         category: SCORE_RULE_CATEGORIES.SECURITY
     }, {
         id: 28,
@@ -340,7 +341,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_ProfilePasswordPolicy} */ d: SFDC_ProfilePasswordPolicy) => d?.minimumPasswordLength < 8,
         errorMessage: `This profile password policy allows users to set passwords with less than 8 characters. That minimum length is not strong enough. Please increase this setting.`,
         badField: 'minimumPasswordLength',
-        applicable: [ SFDC_ProfilePasswordPolicy ],
+        applicable: [ DataAliases.SFDC_ProfilePasswordPolicy ],
         category: SCORE_RULE_CATEGORIES.SECURITY
     }, {
         id: 29,
@@ -348,7 +349,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_ProfilePasswordPolicy} */ d: SFDC_ProfilePasswordPolicy) => d?.passwordComplexity < 3,
         errorMessage: `This profile password policy allows users to set too-easy passwords. The complexity you choose is not strong enough. Please increase this setting.`,
         badField: 'passwordComplexity',
-        applicable: [ SFDC_ProfilePasswordPolicy ],
+        applicable: [ DataAliases.SFDC_ProfilePasswordPolicy ],
         category: SCORE_RULE_CATEGORIES.SECURITY
     }, {
         id: 30,
@@ -356,7 +357,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_ProfilePasswordPolicy} */ d: SFDC_ProfilePasswordPolicy) => d?.maxLoginAttempts === undefined,
         errorMessage: `This profile password policy allows users to try infinitely to log in without locking the access. Please review this setting.`,
         badField: 'passwordExpiration',
-        applicable: [ SFDC_ProfilePasswordPolicy ],
+        applicable: [ DataAliases.SFDC_ProfilePasswordPolicy ],
         category: SCORE_RULE_CATEGORIES.SECURITY
     }, {
         id: 31,
@@ -364,7 +365,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_ProfilePasswordPolicy} */ d: SFDC_ProfilePasswordPolicy) => d?.lockoutInterval === undefined,
         errorMessage: `This profile password policy does not set a value for any locked out period. Please review this setting.`,
         badField: 'lockoutInterval',
-        applicable: [ SFDC_ProfilePasswordPolicy ],
+        applicable: [ DataAliases.SFDC_ProfilePasswordPolicy ],
         category: SCORE_RULE_CATEGORIES.SECURITY
     }, {
         id: 32,
@@ -372,7 +373,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_ProfileRestrictions} */ d: SFDC_ProfileRestrictions) => d?.ipRanges.filter(i => i.difference > 100000).length > 0,
         errorMessage: `This profile includes an IP range that is too wide (more than 100,000 IP addresses!). If you set an IP Range it should be not that large. You could split that range into multiple ones. The risk is that you include an IP that is not part of your company. Please review this setting.`,
         badField: 'ipRanges',
-        applicable: [ SFDC_ProfileRestrictions ],
+        applicable: [ DataAliases.SFDC_ProfileRestrictions ],
         category: SCORE_RULE_CATEGORIES.SECURITY
     }, {
         id: 33,
@@ -380,7 +381,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_ProfileRestrictions} */ d: SFDC_ProfileRestrictions) => d?.loginHours.filter(i => i.difference > 1200).length > 0,
         errorMessage: `This profile includes a login hour that is too wide (more than 20 hours a day!). If you set a login hour it should reflect reality. Please review this setting.`,
         badField: 'loginHours',
-        applicable: [ SFDC_ProfileRestrictions ],
+        applicable: [ DataAliases.SFDC_ProfileRestrictions ],
         category: SCORE_RULE_CATEGORIES.SECURITY
     }, {
         id: 34,
@@ -388,7 +389,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_ValidationRule | SFDC_RecordType | SFDC_ApexTrigger | SFDC_Workflow | SFDC_EmailTemplate } */ d: SFDC_ValidationRule | SFDC_RecordType | SFDC_ApexTrigger | SFDC_Workflow | SFDC_EmailTemplate) => d?.isActive === false,
         errorMessage: `This component is inactive, so why do not you just remove it from your org?`,
         badField: 'isActive',
-        applicable: [ SFDC_ValidationRule, SFDC_RecordType, SFDC_ApexTrigger, SFDC_Workflow, SFDC_EmailTemplate ],
+        applicable: [ DataAliases.SFDC_ValidationRule, DataAliases.SFDC_RecordType, DataAliases.SFDC_ApexTrigger, DataAliases.SFDC_Workflow, DataAliases.SFDC_EmailTemplate ],
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
         id: 35,
@@ -396,7 +397,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => d?.isVersionActive === false,
         errorMessage: `This flow does not have an active version, did you forget to activate its latest version? or you do not need that flow anymore?`,
         badField: 'isVersionActive',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
         id: 36,
@@ -404,7 +405,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => d?.versionsCount > 7,
         errorMessage: `This flow has more than seven versions. Maybe it is time to do some cleaning in this flow!`,
         badField: 'versionsCount',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
         id: 37,
@@ -412,7 +413,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => d?.isProcessBuilder === true,
         errorMessage: `Time to migrate this process builder to flow!`,
         badField: 'name',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
         id: 38,
@@ -420,7 +421,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => IS_EMPTY(d?.description),
         errorMessage: `This flow does not have a description. Best practices force you to use the Description field to give some informative context about why and how it is used/set/govern.`,
         badField: 'description',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.DOCUMENTATION
     }, {
         id: 39,
@@ -428,7 +429,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => IS_OLD_APIVERSION(SecretSauce.CurrentApiVersion, d?.currentVersionRef?.apiVersion),
         errorMessage: `The API version of this flow's current version is too old. Please update it to the newest version.`,
         badField: 'currentVersionRef.apiVersion',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.API_VERSION
     }, {
         id: 40,
@@ -436,7 +437,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => d?.currentVersionRef?.runningMode === 'SystemModeWithoutSharing',
         errorMessage: `The running mode of this version without sharing. With great power comes great responsibilities. Please check if this is REALLY needed.`,
         badField: 'currentVersionRef.runningMode',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.SECURITY
     }, {
         id: 41,
@@ -444,7 +445,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => d?.currentVersionRef?.totalNodeCount > 100,
         errorMessage: `There are more than one hundred nodes in this flow. Please consider using Apex? or cut it into multiple sub flows?`,
         badField: 'currentVersionRef.totalNodeCount',
-        applicable: [ SFDC_Flow ], 
+        applicable: [ DataAliases.SFDC_Flow ], 
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
         id: 42,
@@ -452,7 +453,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Limit} */ d: SFDC_Limit) => d?.usedPercentage >= 0.80,
         errorMessage: `This limit is almost reached (>80%). Please review this.`,
         badField: 'usedPercentage',
-        applicable: [ SFDC_Limit ], 
+        applicable: [ DataAliases.SFDC_Limit ], 
         category: SCORE_RULE_CATEGORIES.OVERUSE
     }, {
         id: 43,
@@ -460,7 +461,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_PermissionSetLicense} */ d: SFDC_PermissionSetLicense) => d?.usedPercentage !== undefined && d?.usedPercentage >= 0.80,
         errorMessage: `The number of seats for this license is almost reached (>80%). Please review this.`,
         badField: 'usedPercentage',
-        applicable: [ SFDC_PermissionSetLicense ],
+        applicable: [ DataAliases.SFDC_PermissionSetLicense ],
         category: SCORE_RULE_CATEGORIES.OVERUSE
     }, {
         id: 44,
@@ -468,7 +469,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_PermissionSetLicense} */ d: SFDC_PermissionSetLicense) => d?.remainingCount > 0 && d?.distinctActiveAssigneeCount !==  d?.usedCount,
         errorMessage: `The Used count from that permission set license does not match the number of distinct active users assigned to the same license. Please check if you could free up some licenses!`,
         badField: 'distinctActiveAssigneeCount',
-        applicable: [ SFDC_PermissionSetLicense ],
+        applicable: [ DataAliases.SFDC_PermissionSetLicense ],
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
         id: 45,
@@ -476,7 +477,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_UserRole} */ d: SFDC_UserRole) => d?.level >= 7,
         errorMessage: `This role has a level in the Role Hierarchy which is seven or greater. Please reduce the maximum depth of the role hierarchy. Having that many levels has an impact on performance...`,
         badField: 'level',
-        applicable: [ SFDC_UserRole ],
+        applicable: [ DataAliases.SFDC_UserRole ],
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
         id: 46,
@@ -484,7 +485,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_CollaborationGroup | SFDC_Field | SFDC_HomePageComponent | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_WebLink | SFDC_CustomTab | SFDC_EmailTemplate } */ d: SFDC_ApexClass | SFDC_ApexTrigger | SFDC_CollaborationGroup | SFDC_Field | SFDC_HomePageComponent | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_WebLink | SFDC_CustomTab | SFDC_EmailTemplate) => d?.hardCodedURLs?.length > 0 || false,
         errorMessage: `The source code of this item contains one or more hard coded URLs pointing to domains like salesforce.com or force.*`,
         badField: 'hardCodedURLs',
-        applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_CollaborationGroup, SFDC_Field, SFDC_HomePageComponent, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink, SFDC_CustomTab, SFDC_EmailTemplate ],
+        applicable: [ DataAliases.SFDC_ApexClass, DataAliases.SFDC_ApexTrigger, DataAliases.SFDC_CollaborationGroup, DataAliases.SFDC_Field, DataAliases.SFDC_HomePageComponent, DataAliases.SFDC_VisualForceComponent, DataAliases.SFDC_VisualForcePage, DataAliases.SFDC_WebLink, DataAliases.SFDC_CustomTab, DataAliases.SFDC_EmailTemplate ],
         category: SCORE_RULE_CATEGORIES.HARDCODED_URL
     }, {
         id: 47,
@@ -492,7 +493,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_CollaborationGroup | SFDC_Field | SFDC_HomePageComponent | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_WebLink | SFDC_CustomTab | SFDC_EmailTemplate } */ d: SFDC_ApexClass | SFDC_ApexTrigger | SFDC_CollaborationGroup | SFDC_Field | SFDC_HomePageComponent | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_WebLink | SFDC_CustomTab | SFDC_EmailTemplate) => d?.hardCodedIDs?.length > 0 || false,
         errorMessage: `The source code of this item contains one or more hard coded Salesforce IDs`,
         badField: 'hardCodedIDs',
-        applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_CollaborationGroup, SFDC_Field, SFDC_HomePageComponent, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink, SFDC_CustomTab, SFDC_EmailTemplate ],
+        applicable: [ DataAliases.SFDC_ApexClass, DataAliases.SFDC_ApexTrigger, DataAliases.SFDC_CollaborationGroup, DataAliases.SFDC_Field, DataAliases.SFDC_HomePageComponent, DataAliases.SFDC_VisualForceComponent, DataAliases.SFDC_VisualForcePage, DataAliases.SFDC_WebLink, DataAliases.SFDC_CustomTab, DataAliases.SFDC_EmailTemplate ],
         category: SCORE_RULE_CATEGORIES.HARDCODED_ID
     }, {
         id: 48,
@@ -500,7 +501,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_ApexClass} */ d: SFDC_ApexClass) => d?.isTest === true && d?.testPassedButLongMethods && d?.testPassedButLongMethods?.length > 0,
         errorMessage: `This Apex Test Class has at least one successful method which took more than 20 seconds to execute`,
         badField: 'testPassedButLongMethods',
-        applicable: [ SFDC_ApexClass ],
+        applicable: [ DataAliases.SFDC_ApexClass ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
         id: 49,
@@ -508,7 +509,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_PageLayout} */ d: SFDC_PageLayout) => d?.profileAssignmentCount === 0,
         errorMessage: `This Page Layout is not assigned to any Profile. Please review this page layout and assign it to at least one profile.`,
         badField: 'profileAssignmentCount',
-        applicable: [ SFDC_PageLayout ],
+        applicable: [ DataAliases.SFDC_PageLayout ],
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
         id: 50,
@@ -516,7 +517,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Document } */ d: SFDC_Document) => d?.isHardCodedURL === true,
         errorMessage: `The URL of this document contains a hard coded URL pointing to domains like salesforce.com or force.*`,
         badField: 'documentUrl',
-        applicable: [ SFDC_Document ],
+        applicable: [ DataAliases.SFDC_Document ],
         category: SCORE_RULE_CATEGORIES.HARDCODED_URL
     }, {
         id: 51,
@@ -524,7 +525,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_RecordType} */ d: SFDC_RecordType) => d?.isDefault === false && d?.isAvailable === false,
         errorMessage: `This record type is not set as default nor as visible in any profile in this org. Please review this record type and remove it if it is not needed anymore.`,
         badField: 'isDefault',
-        applicable: [ SFDC_RecordType ],
+        applicable: [ DataAliases.SFDC_RecordType ],
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
         id: 52,
@@ -532,7 +533,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_EmailTemplate} */ d: SFDC_EmailTemplate) => d?.lastUsedDate === null,
         errorMessage: `This email template was never used. Is it really useful?`,
         badField: 'lastUsedDate',
-        applicable: [ SFDC_EmailTemplate ],
+        applicable: [ DataAliases.SFDC_EmailTemplate ],
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
         id: 53,
@@ -540,7 +541,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type { SFDC_Flow } */ d: SFDC_Flow) => d?.isProcessBuilder === false && IS_EMPTY(d?.description),
         errorMessage: `This flow does not have a description. Best practices force you to use the Description field to give some informative context about why and how it is used/set/govern.`,
         badField: 'description',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.DOCUMENTATION
     }, {
         id: 54,
@@ -548,7 +549,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type { SFDC_KnowledgeArticle } */ d: SFDC_KnowledgeArticle) => d?.isHardCodedURL === true,
         errorMessage: `This article contains text information with links that points to domains like salesforce.com or force.*`,
         badField: 'isHardCodedURL',
-        applicable: [ SFDC_KnowledgeArticle ],
+        applicable: [ DataAliases.SFDC_KnowledgeArticle ],
         category: SCORE_RULE_CATEGORIES.HARDCODED_URL
     }, {
         id: 55,
@@ -556,7 +557,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_PermissionSet} */ d: SFDC_PermissionSet) => d?.isCustom === true && d?.isGroup === false && d?.memberCounts === 0 && d?.allIncludingGroupsAreEmpty === true,
         errorMessage: `This custom permission set has no active members and is only included in empty permission set groups. Is it on purpose? Maybe you should review its use in your org...`,
         badField: 'allIncludingGroupsAreEmpty',
-        applicable: [ SFDC_PermissionSet ],
+        applicable: [ DataAliases.SFDC_PermissionSet ],
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
         id: 56,
@@ -564,7 +565,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_PermissionSet} */ d: SFDC_PermissionSet) => d?.isCustom === true && d?.isGroup === true && d?.memberCounts === 0,
         errorMessage: `This custom permission set group has no active members. Is it empty on purpose? Maybe you should review its use in your org...`,
         badField: 'memberCounts',
-        applicable: [ SFDC_PermissionSet ],
+        applicable: [ DataAliases.SFDC_PermissionSet ],
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
         id: 57,
@@ -572,7 +573,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_PermissionSet} */ d: SFDC_PermissionSet) => d?.isCustom === true && d?.isGroup === false && d?.memberCounts === 0 && d?.permissionSetGroupIds?.length === 0,
         errorMessage: `This custom permission set has no active members and is not even assigned to a permission set group. Is it on purpose? Maybe you should review its use in your org...`,
         badField: 'memberCounts',
-        applicable: [ SFDC_PermissionSet ],
+        applicable: [ DataAliases.SFDC_PermissionSet ],
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
         id: 58,
@@ -580,7 +581,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_ProfileRestrictions} */ d: SFDC_ProfileRestrictions) => d?.ipRanges.filter(i => i.difference > 16777216).length > 0,
         errorMessage: `This profile includes an IP range that is too wide (more than 16,777,216 IP addresses!). If you set an IP Range it should be not that large. You could split that range into multiple ones. The risk is that you include an IP that is not part of your company. Please review this setting.`,
         badField: 'ipRanges',
-        applicable: [ SFDC_ProfileRestrictions ],
+        applicable: [ DataAliases.SFDC_ProfileRestrictions ],
         category: SCORE_RULE_CATEGORIES.SECURITY
     }, {
         id: 59,
@@ -588,7 +589,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Object} */ d: SFDC_Object) => d?.nbCustomFields > 350,
         errorMessage: `This object has more than 350 custom fields. Please consider reducing that number as it can impact performance and usability.`,
         badField: 'nbCustomFields',
-        applicable: [ SFDC_Object ],
+        applicable: [ DataAliases.SFDC_Object ],
         category: SCORE_RULE_CATEGORIES.OVERUSE
     }, {
         id: 60,
@@ -596,7 +597,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Object} */ d: SFDC_Object) => d?.nbPageLayouts > 15,
         errorMessage: `This object has more than 15 page layouts. Please consider reducing that number as it can impact performance and usability.`,
         badField: 'nbPageLayouts',
-        applicable: [ SFDC_Object ],
+        applicable: [ DataAliases.SFDC_Object ],
         category: SCORE_RULE_CATEGORIES.OVERUSE
     }, {
         id: 61,
@@ -604,7 +605,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Object} */ d: SFDC_Object) => d?.nbWorkflowRules > 20,
         errorMessage: `This object has more than 20 workflow rules. Please consider reducing that number as it can impact performance and usability.`,
         badField: 'nbWorkflowRules',
-        applicable: [ SFDC_Object ],
+        applicable: [ DataAliases.SFDC_Object ],
         category: SCORE_RULE_CATEGORIES.OVERUSE
     }, {
         id: 62,
@@ -612,7 +613,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Object} */ d: SFDC_Object) => d?.nbValidationRules > 20,
         errorMessage: `This object has more than 20 validation rules. Please consider reducing that number as it can impact performance and usability.`,
         badField: 'nbValidationRules',
-        applicable: [ SFDC_Object ],
+        applicable: [ DataAliases.SFDC_Object ],
         category: SCORE_RULE_CATEGORIES.OVERUSE
     }, {
         id: 63,
@@ -620,7 +621,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_PageLayout} */ d: SFDC_PageLayout) => d?.nbFields > 100,
         errorMessage: `This page layout has more than 100 fields. Please consider reducing that number as it can impact user adoption.`,
         badField: 'nbFields',
-        applicable: [ SFDC_PageLayout ],
+        applicable: [ DataAliases.SFDC_PageLayout ],
         category: SCORE_RULE_CATEGORIES.USER_ADOPTION
     }, {
         id: 64,
@@ -628,7 +629,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_PageLayout} */ d: SFDC_PageLayout) => d?.nbRelatedLists > 11,
         errorMessage: `This page layout has more than 11 related lists. Please consider reducing that number as it can impact user adoption.`,
         badField: 'nbRelatedLists',
-        applicable: [ SFDC_PageLayout ],
+        applicable: [ DataAliases.SFDC_PageLayout ],
         category: SCORE_RULE_CATEGORIES.USER_ADOPTION
     }, {
         id: 65,
@@ -636,7 +637,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_PageLayout} */ d: SFDC_PageLayout) => d?.isAttachmentRelatedListIncluded === true,
         errorMessage: `This page layout has the Notes and Attachments related list in it. Please consider using the Files related list instead.`,
         badField: 'isAttachmentRelatedListIncluded',
-        applicable: [ SFDC_PageLayout ],
+        applicable: [ DataAliases.SFDC_PageLayout ],
         category: SCORE_RULE_CATEGORIES.USER_ADOPTION
     }, {
         id: 66,
@@ -644,7 +645,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Profile} */ d: SFDC_Profile) => d?.isCustom === true && d?.memberCounts <= 10,
         errorMessage: `This custom profile has a low number of active members (<= 10). Maybe you should review its use in your org...`,
         badField: 'memberCounts',
-        applicable: [ SFDC_Profile ],
+        applicable: [ DataAliases.SFDC_Profile ],
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
         id: 67,
@@ -652,7 +653,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_PermissionSet} */ d: SFDC_PermissionSet) => d?.isCustom === true && d?.isGroup === false && d?.memberCounts <= 10 && d?.allIncludingGroupsAreEmpty === true,
         errorMessage: `This custom permission set has a low number of active members (<= 10) and is only included in empty permission set groups. Is it on purpose? Maybe you should review its use in your org...`,
         badField: 'allIncludingGroupsAreEmpty',
-        applicable: [ SFDC_PermissionSet ],
+        applicable: [ DataAliases.SFDC_PermissionSet ],
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
         id: 68,
@@ -660,7 +661,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_PermissionSet} */ d: SFDC_PermissionSet) => d?.isCustom === true && d?.isGroup === true && d?.memberCounts <= 10,
         errorMessage: `This custom permission set group has a low number of active members (<= 10). Is it empty on purpose? Maybe you should review its use in your org...`,
         badField: 'memberCounts',
-        applicable: [ SFDC_PermissionSet ],
+        applicable: [ DataAliases.SFDC_PermissionSet ],
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
         id: 69,
@@ -668,7 +669,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_PermissionSet} */ d: SFDC_PermissionSet) => d?.isCustom === true && d?.isGroup === false && d?.memberCounts <= 10 && d?.permissionSetGroupIds?.length === 0,
         errorMessage: `This custom permission set has a low number of active members (<= 10) and is not even assigned to a permission set group. Is it on purpose? Maybe you should review its use in your org...`,
         badField: 'memberCounts',
-        applicable: [ SFDC_PermissionSet ],
+        applicable: [ DataAliases.SFDC_PermissionSet ],
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
         id: 70,
@@ -680,7 +681,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
             (d.name === 'Safari' && d.version < 14),
         errorMessage: `This browser is considered out-of-date by Salesforce. At this time, we consider the following list: Chrome <88, Edge <91, Firefox <88 and Safari <14. Please work with your user to make them switch to a more recent/supported browser. To identity the users you can go to the setup page "Login History" and export the data to identify them.`,
         badField: 'fullName',
-        applicable: [ SFDC_Browser ],
+        applicable: [ DataAliases.SFDC_Browser ],
         category: SCORE_RULE_CATEGORIES.USER_ADOPTION
     }, {
         id: 71,
@@ -688,7 +689,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Browser} */ d: SFDC_Browser) => d.name === 'IE',
         errorMessage: `This browser is unsupported by Salesforce. At this time, we consider only Internet Explorer whatever its version. Please work with your user to make them switch to a more recent/supported browser. To identity the users you can go to the setup page "Login History" and export the data to identify them.`,
         badField: 'name',
-        applicable: [ SFDC_Browser ],
+        applicable: [ DataAliases.SFDC_Browser ],
         category: SCORE_RULE_CATEGORIES.USER_ADOPTION
     }, {
         id: 72,
@@ -696,7 +697,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_User} */ d: SFDC_User) => d.nbDirectLoginsWithoutMFA > 0 && d.hasMfaByPass !== true,
         errorMessage: `This user is logging in directly to Salesforce without using MFA (Multi-Factor Authentication). And this user has not the MFA bypass enabled. Please work with your user to make them use MFA for better security.`,
         badField: 'nbDirectLoginsWithoutMFA',
-        applicable: [ SFDC_User ],
+        applicable: [ DataAliases.SFDC_User ],
         category: SCORE_RULE_CATEGORIES.SECURITY
     }, {
         id: 73,
@@ -704,7 +705,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_LightningPage} */ d: SFDC_LightningPage) => d?.isAttachmentRelatedListIncluded === true,
         errorMessage: `This lightning page has the Notes and Attachments related list in it. Please consider using the Files related list instead.`,
         badField: 'isAttachmentRelatedListIncluded',
-        applicable: [ SFDC_LightningPage ],
+        applicable: [ DataAliases.SFDC_LightningPage ],
         category: SCORE_RULE_CATEGORIES.USER_ADOPTION
     } , {
         id: 74,
@@ -712,7 +713,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_User} */ d: SFDC_User) => d?.hasDebugMode === true,
         errorMessage: `This user has the debug mode enabled. Please disable it for better performance and user adoption.`,
         badField: 'hasDebugMode',
-        applicable: [ SFDC_User ],
+        applicable: [ DataAliases.SFDC_User ],
         category: SCORE_RULE_CATEGORIES.USER_ADOPTION
     },
     // Lightning Flow Scanner Rules (IDs 100-125)  
@@ -722,7 +723,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => d?.currentVersionRef?.lfsViolations?.includes('InactiveFlow') || false,
         errorMessage: `This flow is inactive. Consider activating it or removing it from your org.`,
         badField: 'currentVersionRef.lfsViolations',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
         id: 101,
@@ -730,7 +731,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => d?.currentVersionRef?.lfsViolations?.includes('ProcessBuilder') || false,
         errorMessage: `Time to migrate this process builder to flow!`,
         badField: 'currentVersionRef.lfsViolations',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
         id: 102,
@@ -738,7 +739,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => d?.currentVersionRef?.lfsViolations?.includes('FlowDescription') || false,
         errorMessage: `This flow does not have a description. Add documentation about its purpose and usage.`,
         badField: 'currentVersionRef.lfsViolations',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.DOCUMENTATION
     }, {
         id: 103,
@@ -746,7 +747,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => d?.currentVersionRef?.lfsViolations?.includes('APIVersion') || false,
         errorMessage: `The API version of this flow is outdated. Update it to the newest version.`,
         badField: 'currentVersionRef.lfsViolations',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.API_VERSION
     }, {
         id: 104,
@@ -754,7 +755,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => d?.currentVersionRef?.lfsViolations?.includes('UnsafeRunningContext') || false,
         errorMessage: `This flow runs in System Mode without Sharing, which can lead to unsafe data access.`,
         badField: 'currentVersionRef.lfsViolations',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.SECURITY
     }, {
         id: 105,
@@ -762,7 +763,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => d?.currentVersionRef?.lfsViolations?.includes('SOQLQueryInLoop') || false,
         errorMessage: `This flow has SOQL queries inside loops. Consolidate queries at the end of the flow to avoid governor limits.`,
         badField: 'currentVersionRef.lfsViolations',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
         id: 106,
@@ -770,7 +771,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => d?.currentVersionRef?.lfsViolations?.includes('DMLStatementInLoop') || false,
         errorMessage: `This flow has DML operations inside loops. Consolidate DML at the end to avoid governor limits.`,
         badField: 'currentVersionRef.lfsViolations',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
         id: 107,
@@ -778,7 +779,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => d?.currentVersionRef?.lfsViolations?.includes('ActionCallsInLoop') || false,
         errorMessage: `This flow has action calls inside loops. Bulkify apex calls using collection variables.`,
         badField: 'currentVersionRef.lfsViolations',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
         id: 108,
@@ -786,7 +787,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => d?.currentVersionRef?.lfsViolations?.includes('HardcodedId') || false,
         errorMessage: `This flow contains hardcoded IDs which are org-specific. Use variables or merge fields instead.`,
         badField: 'currentVersionRef.lfsViolations',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.HARDCODED_ID
     }, {
         id: 109,
@@ -794,7 +795,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => d?.currentVersionRef?.lfsViolations?.includes('HardcodedUrl') || false,
         errorMessage: `This flow contains hardcoded URLs. Use $API formulas or custom labels instead.`,
         badField: 'currentVersionRef.lfsViolations',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.HARDCODED_URL
     }, {
         id: 110,
@@ -802,7 +803,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => d?.currentVersionRef?.lfsViolations?.includes('MissingNullHandler') || false,
         errorMessage: `This flow has Get Records operations without null checks. Use decision elements to validate results.`,
         badField: 'currentVersionRef.lfsViolations',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
         id: 111,
@@ -810,7 +811,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => d?.currentVersionRef?.lfsViolations?.includes('MissingFaultPath') || false,
         errorMessage: `This flow has DML or action operations without fault handlers. Add fault paths for better error handling.`,
         badField: 'currentVersionRef.lfsViolations',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
         id: 112,
@@ -818,7 +819,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => d?.currentVersionRef?.lfsViolations?.includes('RecursiveAfterUpdate') || false,
         errorMessage: `This after-update flow modifies the same record that triggered it, risking recursion. Use before-save flows instead.`,
         badField: 'currentVersionRef.lfsViolations',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
         id: 113,
@@ -826,7 +827,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => d?.currentVersionRef?.lfsViolations?.includes('DuplicateDMLOperation') || false,
         errorMessage: `This flow allows navigation back after DML operations, which may cause duplicate changes.`,
         badField: 'currentVersionRef.lfsViolations',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
         id: 114,
@@ -834,7 +835,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => d?.currentVersionRef?.lfsViolations?.includes('GetRecordAllFields') || false,
         errorMessage: `This flow uses Get Records with "all fields". Specify only needed fields for better performance.`,
         badField: 'currentVersionRef.lfsViolations',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
         id: 115,
@@ -842,7 +843,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => d?.currentVersionRef?.lfsViolations?.includes('RecordIdAsString') || false,
         errorMessage: `This flow uses a String recordId variable. Modern flows can receive the entire record object, eliminating Get Records queries.`,
         badField: 'currentVersionRef.lfsViolations',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
         id: 116,
@@ -850,7 +851,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => d?.currentVersionRef?.lfsViolations?.includes('UnconnectedElement') ||  false,
         errorMessage: `This flow has unconnected elements that are not in use. Remove them to maintain clarity.`,
         badField: 'currentVersionRef.lfsViolations',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
         id: 117,
@@ -858,7 +859,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => d?.currentVersionRef?.lfsViolations?.includes('UnusedVariable') || false,
         errorMessage: `This flow has unused variables. Remove them to maintain efficiency.`,
         badField: 'currentVersionRef.lfsViolations',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
         id: 118,
@@ -866,7 +867,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => d?.currentVersionRef?.lfsViolations?.includes('CopyAPIName') || false,
         errorMessage: `This flow has elements with copy-paste naming patterns like "Copy_X_Of_Element". Update API names for readability.`,
         badField: 'currentVersionRef.lfsViolations',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.DOCUMENTATION
     }, {
         id: 120,
@@ -874,7 +875,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => d?.currentVersionRef?.lfsViolations?.includes('SameRecordFieldUpdates') || false,
         errorMessage: `This before-save flow uses Update Records on $Record. Use direct assignment instead for better performance.`,
         badField: 'currentVersionRef.lfsViolations',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
         id: 122,
@@ -882,7 +883,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => d?.currentVersionRef?.lfsViolations?.includes('MissingMetadataDescription') || false,
         errorMessage: `This flow has elements or variables without descriptions. Add documentation for better maintainability.`,
         badField: 'currentVersionRef.lfsViolations',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.DOCUMENTATION
     }, {
         id: 123,
@@ -890,7 +891,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => d?.currentVersionRef?.lfsViolations?.includes('MissingFilterRecordTrigger') || false,
         errorMessage: `This record-triggered flow lacks filters on changed fields or entry conditions, causing unnecessary executions.`,
         badField: 'currentVersionRef.lfsViolations',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
         id: 124,
@@ -898,7 +899,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => d?.currentVersionRef?.lfsViolations?.includes('TransformInsteadOfLoop') || false,
         errorMessage: `This flow uses Loop + Assignment which could be replaced with Transform element (10x faster).`,
         badField: 'currentVersionRef.lfsViolations',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
         id: 125,
@@ -906,7 +907,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow} */ d: SFDC_Flow) => d?.currentVersionRef?.lfsViolations?.includes('AutoLayout') || false,
         errorMessage: `This flow doesn't use Auto-Layout mode. Enable it to keep your flow organized automatically.`,
         badField: 'currentVersionRef.lfsViolations',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.USER_ADOPTION
     },
     { 
@@ -915,7 +916,7 @@ const ALL_SCORE_RULES: Array<ScoreRule> = [
         formula: (/** @type {SFDC_Flow } */ d: SFDC_Flow) => d?.isScreenFlow === false &&d?.dependencies?.hadError === false && IS_EMPTY(d.dependencies?.referenced), 
         errorMessage: `This flow is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.`,
         badField: 'dependencies.referenced?.length',
-        applicable: [ SFDC_Flow ],
+        applicable: [ DataAliases.SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.DEPENDENCY
     }
 ];
@@ -958,7 +959,13 @@ export class SecretSauce {
      * @static
      * @readonly
      */
-    static GetScoreRule(id: number): ScoreRule { return ALL_SCORE_RULES_BY_ID.get(id); }
+    static GetScoreRule(id: number): ScoreRule { 
+        const rule = ALL_SCORE_RULES_BY_ID.get(id); 
+        if (rule === undefined) {
+            throw new Error(`Couldn't find the rule #${id}`)
+        }
+        return rule;
+    }
 
     /**
      * @description Returns the description of a given rule from its id.

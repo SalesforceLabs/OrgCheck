@@ -114,10 +114,10 @@ export class SalesforceWatchDog {
      * @description Timestamp of the last request we have made to Salesforce.
      *   Why we do this? to better appreciate the limitInfo we have from the last request.
      *   If the information is fresh then no need to ask again the API, if not we need to try calling.
-     * @type {number}
+     * @type {number | undefined}
      * @private
      */
-    _lastRequestToSalesforce: number;
+    _lastRequestToSalesforce: number | undefined;
 
     /**
      * @description Last ratio the Salesforce API gave us about the Daily API Request. 

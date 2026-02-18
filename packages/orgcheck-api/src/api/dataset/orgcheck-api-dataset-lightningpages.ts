@@ -1,3 +1,4 @@
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -29,7 +30,7 @@ export class DatasetLightningPages implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const pageDataFactory = dataFactory.getInstance(SFDC_LightningPage);
+        const pageDataFactory = dataFactory.getInstance(DataAliases.SFDC_LightningPage);
         const pageRecords = results[0];
 
         // Get the page Ids
@@ -82,10 +83,9 @@ export class DatasetLightningPages implements Dataset {
             // Get the ID15 of this lightning page
             const id = sfdcManager.caseSafeId(metadataRecord.Id);
 
-            if (pages.has(id)) {
-                // Get the page layout
-                /** @type {SFDC_LightningPage} */
-                const page: SFDC_LightningPage = pages.get(id);
+            // Get the page layout
+            const page: SFDC_LightningPage | undefined = pages.get(id);
+            if (page) {
 
                 // Set the metadata info
                 metadataRecord?.Metadata?.flexiPageRegions?.forEach((region) => {

@@ -1,4 +1,5 @@
-import { Data } from '../core/orgcheck-api-data';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
+import { DataWithScore } from '../core/orgcheck-api-data';
 import { SFDC_ApexTrigger } from './orgcheck-api-data-apextrigger';
 import { SFDC_Field } from './orgcheck-api-data-field';
 import { SFDC_FieldSet } from './orgcheck-api-data-fieldset';
@@ -15,17 +16,16 @@ import { SFDC_Workflow } from './orgcheck-api-data-workflow';
 /**
  * @description Representation of as SObject in Org Check
  */
-export class SFDC_Object extends Data {
+export interface SFDC_Object extends DataWithScore {
     
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
      * @public
      */
-    static get label() { return 'SObject' };
-
-    /**
+    dataType: DataAliases.SFDC_Object;
+        
+     /**
      * @description Salesforce Id
      * @type {string}
      * @public

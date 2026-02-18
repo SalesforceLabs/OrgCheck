@@ -56,7 +56,11 @@ export class DataMatrixWorking {
         if (this._rows.has(rowId) === false) {
             this._rows.set(rowId, { header: {}, data: {}});
         }
-        this._rows.get(rowId).data[columnId] = value;
+        const row = this._rows.get(rowId);
+        if (row === undefined) { 
+            throw new Error(`Row was not found in method addValueToProperty`); 
+        }
+        row.data[columnId] = value;
         this._columnIds.add(columnId);
     }
 
@@ -84,7 +88,14 @@ export class DataMatrixWorking {
      * @returns {boolean} Returns true if the row header has been specified, false otherwise
      */
     hasRowHeader(rowId: string): boolean {
-        return this._rows.has(rowId) && this._rows.get(rowId).header;
+        if (this._rows.has(rowId) === true) {
+            const row = this._rows.get(rowId);
+            if (row === undefined) { 
+                throw new Error(`Row was not found in method hasRowHeader`); 
+            }
+            return row.header !== undefined;
+        }
+        return false;
     }
     
     /**
@@ -94,7 +105,11 @@ export class DataMatrixWorking {
      */
     setRowHeader(rowId: string, rowRef: any) {
         if (this._rows.has(rowId) === true) {
-            this._rows.get(rowId).header = rowRef; 
+            const row = this._rows.get(rowId);
+            if (row === undefined) { 
+                throw new Error(`Row was not found in method setRowHeader`); 
+            }
+            row.header = rowRef; 
         } else {
             this._rows.set(rowId, { header: rowRef, data: {}});
         }

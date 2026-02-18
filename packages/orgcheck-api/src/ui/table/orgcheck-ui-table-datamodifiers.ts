@@ -1,4 +1,4 @@
-export class TextTruncatedModifier {
+export interface TextTruncatedModifier {
 
     /**
      * @description If text value has more than this maximum length of characters, the string will be truncated accordingly.
@@ -13,7 +13,7 @@ export class TextTruncatedModifier {
     valueIfEmpty: string;
 }
 
-export class PreformattedModifier {
+export interface PreformattedModifier {
 
     /**
      * @description If text value will be rendered as preformatted (like code or formulas etc.)
@@ -28,7 +28,7 @@ export class PreformattedModifier {
     maximumLength: number;
 }
 
-export class EmptyModifier {
+export interface EmptyModifier {
 
     /**
      * @description If value is empty (undefined, empty string, numerical zero, empty list, etc...), this is the substitute text to use
@@ -37,7 +37,7 @@ export class EmptyModifier {
     valueIfEmpty: string;
 }
 
-export class NumericMinimumModifier {
+export interface NumericMinimumModifier {
 
     /**
      * @description If the value is less that this value, the text will be substituted.
@@ -58,7 +58,7 @@ export class NumericMinimumModifier {
     valueIfEmpty: string;
 }
 
-export class NumericMaximumModifier {
+export interface NumericMaximumModifier {
 
     /**
      * @description If the value is greater that this value, the text will be substituted.
@@ -73,7 +73,7 @@ export class NumericMaximumModifier {
     valueAfterMax: string;
 }
 
-export class NumericMinMaxModifier {
+export interface NumericMinMaxModifier {
 
     /**
      * @description If the value is less that this value, the text will be substituted.

@@ -1,17 +1,17 @@
-import { Data, DataWithoutScoring } from '../core/orgcheck-api-data';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
+import { DataWithScore, DataWithoutScore } from '../core/orgcheck-api-data';
 import { SFDC_Profile } from './orgcheck-api-data-profile';
 
-export class SFDC_ProfileRestrictions extends Data {
-
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
+export interface SFDC_ProfileRestrictions extends DataWithScore {
+    
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
      * @public
      */
-    static get label() { return 'Restrictions from Profile' };
+    dataType: DataAliases.SFDC_ProfileRestrictions;
 
-    /**
+     /**
      * @description Salesforce Id of the corresponding Profile
      * @type {string}
      * @public
@@ -40,17 +40,16 @@ export class SFDC_ProfileRestrictions extends Data {
     loginHours: Array<SFDC_ProfileLoginHourRestriction>;
 }
 
-export class SFDC_ProfileIpRangeRestriction extends DataWithoutScoring {
-
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
+export interface SFDC_ProfileIpRangeRestriction extends DataWithoutScore {
+    
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
      * @public
      */
-    static get label() { return 'IP Range Restriction from Profile' };
+    dataType: DataAliases.SFDC_ProfileIpRangeRestriction;
 
-    /**
+     /**
      * @description Start IP address
      * @type {string}
      * @public
@@ -79,17 +78,16 @@ export class SFDC_ProfileIpRangeRestriction extends DataWithoutScoring {
     difference: number;
 }
 
-export class SFDC_ProfileLoginHourRestriction extends DataWithoutScoring {
-
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
+export interface SFDC_ProfileLoginHourRestriction extends DataWithoutScore {
+    
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
      * @public
      */
-    static get label() { return 'Login Hour Restriction from Profile' };
+    dataType: DataAliases.SFDC_ProfileLoginHourRestriction;
 
-    /**
+     /**
      * @description Starting hour of the restriction (HH:MM format)
      * @type {string}
      * @public

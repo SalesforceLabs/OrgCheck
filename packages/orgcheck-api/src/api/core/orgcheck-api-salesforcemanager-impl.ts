@@ -107,6 +107,9 @@ export class SalesforceManager implements SalesforceManagerIntf {
 
         // Create a JsForce Connection to the current salesforce org
         const jsConnection = new jsConnectionFactory.Connection(jsConnectionOptions);
+        if (jsConnection === undefined) {
+            throw new Error(`Couldn't instantiate a salesforce Connection with the given factory.`)
+        }
 
         // Create the WatchDog instance which knows how to retrieve the API Usage from the connection
         this._watchDog = new SalesforceWatchDog(
@@ -236,12 +239,12 @@ export class SalesforceManager implements SalesforceManagerIntf {
      */
     getObjectType(apiName: string, isCustomSetting: boolean): string {
         if (isCustomSetting === true) return OBJECTTYPE_ID_CUSTOM_SETTING;
-        if (apiName.endsWith('__c')) return OBJECTTYPE_ID_CUSTOM_SOBJECT;
-        if (apiName.endsWith('__x')) return OBJECTTYPE_ID_CUSTOM_EXTERNAL_SOBJECT;
-        if (apiName.endsWith('__mdt')) return OBJECTTYPE_ID_CUSTOM_METADATA_TYPE;
-        if (apiName.endsWith('__e')) return OBJECTTYPE_ID_CUSTOM_EVENT;
-        if (apiName.endsWith('__ka')) return OBJECTTYPE_ID_KNOWLEDGE_ARTICLE;
-        if (apiName.endsWith('__b')) return OBJECTTYPE_ID_CUSTOM_BIG_OBJECT;
+        if (apiName?.endsWith('__c')) return OBJECTTYPE_ID_CUSTOM_SOBJECT;
+        if (apiName?.endsWith('__x')) return OBJECTTYPE_ID_CUSTOM_EXTERNAL_SOBJECT;
+        if (apiName?.endsWith('__mdt')) return OBJECTTYPE_ID_CUSTOM_METADATA_TYPE;
+        if (apiName?.endsWith('__e')) return OBJECTTYPE_ID_CUSTOM_EVENT;
+        if (apiName?.endsWith('__ka')) return OBJECTTYPE_ID_KNOWLEDGE_ARTICLE;
+        if (apiName?.endsWith('__b')) return OBJECTTYPE_ID_CUSTOM_BIG_OBJECT;
         return OBJECTTYPE_ID_STANDARD_SOBJECT;
     }
 
@@ -255,23 +258,22 @@ export class SalesforceManager implements SalesforceManagerIntf {
     }
 
     /**
-     * @param {boolean} useTooling - Use the tooling or not
+     * @param {boolean | undefined} useTooling - Use the tooling or not
      * @param {string} query - SOQL query string
-     * @param {Array<string>} byPasses - List of error codes to by-pass
+     * @param {Array<string> | undefined} byPasses - List of error codes to by-pass
      * @param {Function} callback - Callback function
      * @returns {Promise<Array<any>>} List of records
      * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @private
      */
-    async _standardSOQLQuery(useTooling: boolean, query: string, byPasses: Array<string>, callback: Function): Promise<Array<any>> {
+    async _standardSOQLQuery(useTooling: boolean | undefined, query: string, byPasses: Array<string> | undefined, callback: Function): Promise<Array<any>> {
         // Each query can use the tooling or not, se based on that flag we'll use the right JsForce connection
         const conn = useTooling === true ? this._connection.tooling : this._connection;
         // the records to return
-        /** @type {Array<any>} */
         const allRecords: Array<any> = [];
         // If `locator` is undefined, it means we are calling doNextQuery() the first time
-        const doNextQuery = async (/** @type {string} */ locator: string) => {
+        const doNextQuery = async (locator?: string) => {
             // Let's start to check if we are 'allowed' to use the Salesforce API...
             this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
             let results;
@@ -299,7 +301,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
         }
         try {
             // Call the first time
-            await doNextQuery(undefined); // and then the method will chain next calls
+            await doNextQuery(); // and then the method will chain next calls
             // return the records
             return allRecords;
         } catch (error) {
@@ -324,7 +326,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
     }
 
     /**
-     * @param {boolean} useTooling - Use the tooling or not
+     * @param {boolean | undefined} useTooling - Use the tooling or not
      * @param {string} query - SOQL query string
      * @param {string} field - Field name to use for the custom QueryMore
      * @param {Function} callback - Callback function
@@ -333,7 +335,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @async
      * @private
      */
-    async _customSOQLQuery(useTooling: boolean, query: string, field: string, callback: Function): Promise<Array<any>> {
+    async _customSOQLQuery(useTooling: boolean | undefined, query: string, field: string, callback: Function): Promise<Array<any>> {
         // Each query can use the tooling or not, se based on that flag we'll use the right JsForce connection
         const conn = useTooling === true ? this._connection.tooling : this._connection;
         // the records to return
@@ -374,7 +376,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
             }
         }
         // Alternative method to queryMore based on ID ordering (inspired by Maroun IMAD!)
-        const doNextQuery = async (/** @type {string} */ startingValue: string) => {
+        const doNextQuery = async (startingValue?: string) => {
             if (!startingValue && isAggregateQuery === false) {
                 startingValue = '000000000000000000';
             }
@@ -416,7 +418,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
         }
         try {
             // Call the first time with a fake Id that will always be first
-            await doNextQuery(undefined); // and then the method will chain next calls
+            await doNextQuery(); // and then the method will chain next calls
             // return the records
             return allRecords;
         } catch (error) {
@@ -447,10 +449,9 @@ export class SalesforceManager implements SalesforceManagerIntf {
         // Now we can start, log some message
         logger?.log(`Preparing ${queries?.length} SOQL ${queries?.length>1?'queries':'query'}...`);
         let nbRecords = 0, nbQueryMore = 0;
-        const /** @type {Array<string>} */ pendingEntities: Array<string> = [], 
-              /** @type {Array<string>} */ doneEntities: Array<string> = [], 
-              /** @type {Array<string>} */ errorEntities: Array<string> = [];
-        /** @type {Array<Error>} */
+        const pendingEntities: Array<string> = [], 
+              doneEntities: Array<string> = [], 
+              errorEntities: Array<string> = [];
         const errors: Array<Error> = [];
         const updateLogInformation = () => {
             logger?.log(
@@ -462,7 +463,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
                 `❌ Error: (${errorEntities?.length}) on [${errorEntities.join(', ')}]`
             );
         }
-        const updateLogInformationOnQuery = (/** @type {number} */ nbRec: number) => {
+        const updateLogInformationOnQuery = (nbRec: number) => {
             nbQueryMore++; 
             nbRecords += nbRec;
             updateLogInformation();
@@ -568,8 +569,8 @@ export class SalesforceManager implements SalesforceManagerIntf {
         // if no ids then just return empty structure and basta!
         if ((ids?.length ?? 0) === 0) return { records: [], errors: [] };
         // Let's start with ids
-        const bodies = [];
-        let currentBody;
+        const bodies: any[] = [];
+        let currentBody: { allOrNone: boolean, compositeRequest: { method: string, url: string, referenceId: string }[]} | undefined;
         for (let i = 0; i < ids?.length; i += MAX_IDS_IN_DAPI_REQUEST_SIZE) {
             if (!currentBody || currentBody.compositeRequest?.length === MAX_COMPOSITE_REQUEST_SIZE) {
                 currentBody = { allOrNone: false, compositeRequest: [] };
@@ -588,11 +589,11 @@ export class SalesforceManager implements SalesforceManagerIntf {
             });
         }
         let nbPending = bodies?.length, nbDone = 0, nbErrors = 0, batchCount = 0;
-        const allResults = [];
+        const allResults: { compositeResponse: { httpStatusCode: number, body: { records: any[] } | { errorCode: string }[] }[] }[] = [];
         for (let i = 0; i < bodies?.length; i += MAX_DAPI_TOOLING_BATCH_SIZE) {
             const bodiesInBatch = bodies.slice(i, i + MAX_DAPI_TOOLING_BATCH_SIZE);
             batchCount++;
-            const results = await Promise.all(bodiesInBatch.map(async (body) => {
+            const results: any[] = await Promise.all(bodiesInBatch.map(async (body) => {
                 try {
                     // Call the tooling composite request
                     const results = await this._connection.tooling.request({
@@ -632,7 +633,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
         const idsInError: Array<string> = []; // ids contained in a batch that has an error
         const duplicateCheck = new Set(); // Using a set to filter duplicates
         allResults.filter((result) => result !== undefined).forEach((result) => {
-            result.compositeResponse.forEach((/** @type {any} */ response: any) => {
+            result.compositeResponse.forEach((response: any) => {
                 if (response.httpStatusCode === 200) {
                     logger?.log(`This response had a code: 200 so we add the ${response?.body?.records?.length} records`);
                     dependenciesRecords.push(... response.body.records // multiple response in one batch
@@ -653,7 +654,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
                                 refUrl: this.setupUrl(refId, r.RefMetadataComponentType)
                             }
                         })
-                        .filter((/** @type {any} */ r: any) => r !== null) // Remove duplicates
+                        .filter((r: any) => r !== null) // Remove duplicates
                     ); 
                 } else {
                     const errorCode = response.body[0].errorCode;
@@ -809,7 +810,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
             });
         });
         let nbPending = bodies?.length, nbDone = 0, nbErrors = 0, batchCount = 0;
-        const allResults = [];
+        const allResults: { compositeResponse: { httpStatusCode: number, body: { records: any[] } | { errorCode: string }[] }[] }[] = [];
         for (let i = 0; i < bodies?.length; i += MAX_ATSCALE_TOOLING_BATCH_SIZE) {
             const bodiesInBatch = bodies.slice(i, i + MAX_ATSCALE_TOOLING_BATCH_SIZE);
             batchCount++;
@@ -890,6 +891,10 @@ export class SalesforceManager implements SalesforceManagerIntf {
         logger?.log(`Describing globally all sobjects in the org.`);
         // Call the global describe
         const response = await this._connection.describeGlobal();
+        // Check the result
+        if (response === undefined || response.sobjects === undefined || Array.isArray(response.sobjects) === false) {
+            throw new Error(`The describeGlobal response was incorrect`);
+        }
         // Adding support of the Activity object from describe
         response.sobjects.push(ACTIVITY_OBJECT_THAT_SHOULD_BE_RETURNED_BY_DESCRIBE);
         // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
@@ -918,6 +923,10 @@ export class SalesforceManager implements SalesforceManagerIntf {
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         logger?.log(`Describing the sobject: ${sobjectDevName}.`);
         const object = await this._connection.describe(sobjectDevName);
+        // Check the result
+        if (object === undefined) {
+            throw new Error(`The describe response was incorrect`);
+        }
         // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
         this._watchDog?.afterRequest(); // if limit has been reached, an error will be thrown here
         // return the object as it is

@@ -1,9 +1,5 @@
-export const JsForceMock_DoingNothing = {
-  Connection: class JsForceConnectionMock_DoingNothing { }
-}
-
-export const JsForceMock_SoqlQuery = {
-  Connection: class JsForceConnectionMock_SoqlQuery {
+export const JsForceMock = {
+  Connection: class JsForceConnectionMock {
     /** @type {number} */
     nbRecordsSoFarForCustomQueryMore: number = 0;
 
@@ -67,7 +63,7 @@ export const JsForceMock_SoqlQuery = {
           realSize = maxNbRecords;
           this.nbRecordsSoFarForCustomQueryMore += maxNbRecords;
         }
-        const records = [];
+        const records: any[] = [];
         for (let i = 0; i < realSize; i++) {
           const record: any = {};
           fields?.forEach(field => record[field] = `${field}-${i}`);
@@ -96,62 +92,88 @@ export const JsForceMock_SoqlQuery = {
       }
     }
 
-    get tooling() { return this; }
-  }
-}
-
-class JsForceMetadataMock_Metadata {
-
-  async list(requests: any[]): Promise<any[]> {
-    const matchNbMembers: any = requests[0].type.match("#Members=(?<nb>[0-9]*)#");
-    const nbTotalMembers = Number.parseInt(matchNbMembers?.groups?.nb ?? '0'); // If not specified, we return 0 records
-    const members: any[] = [];
-    for (let i = 0; i<nbTotalMembers; i++ ) {
-      members.push({ fullName: `member${i}` });
-    }
-    return members;
-  }
-
-  async read(type: string, members: string[]) {
-    const matchNbMembers: any = type.match("#Members=(?<nb>[0-9]*)#");
-    const nbTotalMembers = Number.parseInt(matchNbMembers?.groups?.nb ?? '0'); // If not specified, we return 0 records
-    const allMembers = [];
-    for (let i = 0; i<nbTotalMembers; i++ ) {
-      allMembers.push({ fullName: `member${i}`, a: `a${i}`, b: `b${i}`, c: `c${i}` });
-    }
-    return allMembers?.filter((r) => members?.includes(r.fullName)) ?? [];
-  }
-}
-
-class JsForceMetadataMock_MetadataAtScale {
-  async request(httpRequest: any) {
-    const body = JSON.parse(httpRequest.body);
-    return { 
-      compositeResponse: body.compositeRequest.map((c: any) => {
-        const parts = c.url.split('/');
-        const type = parts[6];
-        const member = parts[7];
+    async request(httpRequest: any) {
+      if (httpRequest?.url?.startsWith('/limits/recordCount')) {
+        return 0;
+      }
+      if (httpRequest?.url?.startsWith('/tooling/composite') || httpRequest?.url?.startsWith('/composite')) {
+        const body = JSON.parse(httpRequest.body);
         return { 
-          httpStatusCode: 200, 
-          body: { 
-            type: type, 
-            name: member, 
-            a: 'a', b: 'b', c: 'c' 
-          } 
+          compositeResponse: body.compositeRequest.map((c: any) => {
+            const parts = c.url.split('/');
+            const type = parts[6];
+            const member = parts[7];
+            return { 
+              httpStatusCode: 200, 
+              body: { 
+                type: type, 
+                name: member, 
+                a: 'a', b: 'b', c: 'c' 
+              } 
+            }
+          })
+        };
+      }
+      console.error(httpRequest);
+    }
+
+    async describeGlobal() {
+      return { sobjects: [] }
+    }
+
+    async describe() {
+      return {
+        "activateable": false,
+        "associateEntityType": null,
+        "associateParentEntity": null,
+        "createable": true,
+        "custom": false,
+        "customSetting": false,
+        "deepCloneable": false,
+        "deletable": true,
+        "deprecatedAndHidden": false,
+        "feedEnabled": false,
+        "hasSubtypes": false,
+        "isInterface": false,
+        "isSubtype": false,
+        "keyPrefix": "001",
+        "label": "Account",
+        "labelPlural": "Accounts",
+        "layoutable": true,
+        "mergeable": true,
+        "mruEnabled": true,
+        "name": "Account",
+        "queryable": true,
+        "replicateable": true,
+        "retrieveable": true,
+        "searchable": true,
+        "triggerable": true,
+        "undeletable": true,
+        "updateable": true
+      }
+    }
+
+    get tooling() { return this; }
+ 
+    metadata = {
+      list: async (requests: any[]): Promise<any[]> => {
+        const matchNbMembers: any = requests[0].type.match("#Members=(?<nb>[0-9]*)#");
+        const nbTotalMembers = Number.parseInt(matchNbMembers?.groups?.nb ?? '0'); // If not specified, we return 0 records
+        const members: any[] = [];
+        for (let i = 0; i<nbTotalMembers; i++ ) {
+          members.push({ fullName: `member${i}` });
         }
-      })
-    };
-  }
-}
-
-export const JsForceMock_MetadataAPI = {
-  Connection: class JsForceConnectionMock_Metadata {
-    metadata = new JsForceMetadataMock_Metadata();
-  }
-}
-
-export const JsForceMock_MetadataAtScale = {
-  Connection: class JsForceConnectionMock_MetadataAtScale {
-    tooling = new JsForceMetadataMock_MetadataAtScale();
+        return members;
+      },
+      read: async (type: string, members: string[]) => {
+        const matchNbMembers: any = type.match("#Members=(?<nb>[0-9]*)#");
+        const nbTotalMembers = Number.parseInt(matchNbMembers?.groups?.nb ?? '0'); // If not specified, we return 0 records
+        const allMembers: {fullName: string, a: string, b: string, c: string}[] = [];
+        for (let i = 0; i<nbTotalMembers; i++ ) {
+          allMembers.push({ fullName: `member${i}`, a: `a${i}`, b: `b${i}`, c: `c${i}` });
+        }
+        return allMembers?.filter((r) => members?.includes(r.fullName)) ?? [];
+      }
+    }
   }
 }

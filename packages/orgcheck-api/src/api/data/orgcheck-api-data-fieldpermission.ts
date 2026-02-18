@@ -1,21 +1,21 @@
-import { DataWithoutScoring } from '../core/orgcheck-api-data';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
+import { DataWithoutScore } from '../core/orgcheck-api-data';
 import { SFDC_PermissionSet } from './orgcheck-api-data-permissionset';
 import { SFDC_Profile } from './orgcheck-api-data-profile';
 
 /**
- * @description Representation of an Application permission for a specific parent (profile or permission set) in Org Check
+ * @description Representation of a Field permission for a specific parent (profile or permission set) in Org Check
  */
-export class SFDC_FieldPermission extends DataWithoutScoring {
+export interface SFDC_FieldPermission extends DataWithoutScore {
     
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
      * @public
      */
-    static get label() { return 'Field Level Security from Profile or Permission Set' };
-
-    /**
+    dataType: DataAliases.SFDC_FieldPermission;
+        
+     /**
      * @description Salesforce Id of the related parent (profile or permission set)
      * @type {string}
      * @public

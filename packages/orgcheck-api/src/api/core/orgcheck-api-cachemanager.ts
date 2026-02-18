@@ -1,7 +1,7 @@
 /**
- * @description Cache item class
+ * @description Cache item interface
  */ 
-export class DataCacheItem {
+export interface DataCacheItem {
 
     /** 
      * @type {string}
@@ -32,7 +32,7 @@ export class DataCacheItem {
 /**
  * @description Global information stored in cache (both for data and metdata!)
  */ 
-export class ItemInCache {
+export interface ItemInCache {
 
     /** 
      * @type {number}
@@ -43,7 +43,7 @@ export class ItemInCache {
 /**
  * @description Data information stored in cache (not the metadata!)
  */ 
-export class DataItemInCache extends ItemInCache {
+export interface DataItemInCache extends ItemInCache {
 
     /** 
      * @type {Array<any>}
@@ -54,7 +54,7 @@ export class DataItemInCache extends ItemInCache {
 /**
  * @description Metadata information stored in cache (not the data!)
  */ 
-export class MetadataItemInCache extends ItemInCache {
+export interface MetadataItemInCache extends ItemInCache {
 
     /** 
      * @type {string}

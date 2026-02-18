@@ -1,4 +1,5 @@
 import { CodeScanner } from '../core/orgcheck-api-codescanner';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -29,7 +30,7 @@ export class DatasetCustomTabs implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const customTabDataFactory = dataFactory.getInstance(SFDC_CustomTab);
+        const customTabDataFactory = dataFactory.getInstance(DataAliases.SFDC_CustomTab);
 
         // Create the map
         const customTabRecords = results[0];

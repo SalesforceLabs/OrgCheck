@@ -1,6 +1,6 @@
 import { Recipe } from '../core/orgcheck-api-recipe';
 import { Processor } from '../core/orgcheck-api-processor';
-import { Data, DataWithoutScoring } from '../core/orgcheck-api-data';
+import { Data, DataWithoutScore } from '../core/orgcheck-api-data';
 import { DataMatrix } from '../core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
@@ -27,11 +27,11 @@ export class RecipeUserRoles implements Recipe {
      * @description transform the data from the datasets and return the final result as a Map
      * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} _logger - Logger
-     * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<Array<Data> | DataMatrix | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>> {
+    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data> | DataMatrix | Data | Map<string, any>> {
 
         // Get data
         const /** @type {Map<string, SFDC_UserRole>} */ userRoles: Map<string, SFDC_UserRole> = data.get(DatasetAliases.USERROLES);
@@ -48,7 +48,10 @@ export class RecipeUserRoles implements Recipe {
                 userRole.activeMemberRefs = await Processor.map(userRole.activeMemberIds, (/** @type {string} */ id: string) => users.get(id));
             }
             if (userRole.hasParent === true) {
-                userRole.parentRef = userRoles.get(userRole.parentId);
+                const parentRef = userRoles.get(userRole.parentId);
+                if (parentRef) {
+                    userRole.parentRef = parentRef;
+                }
             }
         });
 

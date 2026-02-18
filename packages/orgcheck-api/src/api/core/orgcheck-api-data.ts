@@ -1,18 +1,27 @@
+import { DataAliases } from "./orgcheck-api-data-aliases";
 import { DataDependenciesForOneItem } from "./orgcheck-api-data-dependencies";
 
 /**
- * @description This class represents a set of information around a unique instance of a specific artefact (like User, Profile, UserRole, ...) 
- *   Such class are created by a "data factory" (see DataFactory) which also computes its "score" based on specific best practices rules. 
+ * @description This interface represents a data in Org Check
+ * @see DataWithScore
+ * @see DataWithoutScore
+ * @see DataWithScoreAndDependencies
  */
-export abstract class Data {
-    
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
+export interface Data {
+
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
      * @public
      */
-    static get label() { console.error('Need to implement static label() method for', this, JSON.stringify(this), this.name); return this.name; };
+    dataType: DataAliases;
+}
+
+/**
+ * @description This interface represents a set of information around a unique instance of a specific artefact (like User, Profile, UserRole, ...) 
+ *   Such interface are created by a "data factory" (see DataFactory) which also computes its "score" based on specific best practices rules. 
+ */
+export interface DataWithScore extends Data {
 
     /**
      * @description Badness score of the data. Zero means the data follows best practices. Positive value means some areas need to be corrected.
@@ -39,7 +48,7 @@ export abstract class Data {
 /**
  * @description In some cases, the DAPI can retrieve dependencies for org check data and having dependencies participate in the computation of the score.
  */
-export abstract class DataWithDependencies extends Data {
+export interface DataWithScoreAndDependencies extends DataWithScore {
 
     /**
      * @description Optionnal dependencies information for this data.
@@ -50,7 +59,7 @@ export abstract class DataWithDependencies extends Data {
 }
 
 /**
- * @description This class represents a set of information around a unique instance of a specific artefact (like User, Profile, UserRole, ...) 
- *   Such class are created by a "data factory" (see DataFactory) BUT do not need any scoring. 
+ * @description This interface represents a set of information around a unique instance of a specific artefact (like User, Profile, UserRole, ...) 
+ *   Such interface are created by a "data factory" (see DataFactory) BUT do not need any scoring. 
  */
-export abstract class DataWithoutScoring {}
+export interface DataWithoutScore extends Data {}

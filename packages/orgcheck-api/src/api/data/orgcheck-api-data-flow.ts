@@ -1,17 +1,17 @@
-import { DataWithDependencies, DataWithoutScoring } from '../core/orgcheck-api-data';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
+import { DataWithScoreAndDependencies, DataWithoutScore } from '../core/orgcheck-api-data';
 
 /**
  * Represents a Flow Definition and its Flow Version children
  */
-export class SFDC_Flow extends DataWithDependencies {
+export interface SFDC_Flow extends DataWithScoreAndDependencies {
     
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
      * @public
      */
-    static get label() { return 'Flow or Process Builder' };
+    dataType: DataAliases.SFDC_Flow;
 
     /**
      * @description Salesforce Id
@@ -122,8 +122,15 @@ export class SFDC_Flow extends DataWithDependencies {
 /**
  * Represents a Flow Version
  */
-export class SFDC_FlowVersion extends DataWithoutScoring {
+export interface SFDC_FlowVersion extends DataWithoutScore {
     
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
+     * @public
+     */
+    dataType: DataAliases.SFDC_FlowVersion;
+
     /**
      * @description Salesforce Id
      * @type {string}

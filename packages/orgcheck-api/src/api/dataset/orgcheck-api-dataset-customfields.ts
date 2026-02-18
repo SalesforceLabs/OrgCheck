@@ -1,4 +1,5 @@
 import { CodeScanner } from '../core/orgcheck-api-codescanner';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
@@ -41,7 +42,7 @@ export class DatasetCustomFields implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const fieldDataFactory = dataFactory.getInstance(SFDC_Field);
+        const fieldDataFactory = dataFactory.getInstance(DataAliases.SFDC_Field);
         const customFieldRecords = results[0];
 
         logger?.log(`Parsing ${customFieldRecords?.length} custom fields...`);        

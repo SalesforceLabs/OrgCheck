@@ -1,19 +1,19 @@
-import { Data } from '../core/orgcheck-api-data';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
+import { DataWithScore } from '../core/orgcheck-api-data';
 
 /**
  * @description Representation of a Field Set in Org Check
  */
-export class SFDC_FieldSet extends Data {
+export interface SFDC_FieldSet extends DataWithScore {
     
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
      * @public
      */
-    static get label() { return 'Field Set' };
-
-    /**
+    dataType: DataAliases.SFDC_FieldSet;
+        
+     /**
      * @description Salesforce Id
      * @type {string}
      * @public

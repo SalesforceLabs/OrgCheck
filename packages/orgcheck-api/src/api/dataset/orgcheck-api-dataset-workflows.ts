@@ -1,3 +1,4 @@
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -31,7 +32,7 @@ export class DatasetWorkflows implements Dataset {
         const workflowRuleIds = await Processor.map(workflowRuleRecords, (/** @type {any} */ record: any) => record.Id);
 
         // Init the factory and records
-        const workflowDataFactory = dataFactory.getInstance(SFDC_Workflow);
+        const workflowDataFactory = dataFactory.getInstance(DataAliases.SFDC_Workflow);
 
         // Get information about flows and process builders using metadata
         logger?.log(`Calling Tooling API Composite to get more information about these ${workflowRuleIds?.length} workflow rules...`);

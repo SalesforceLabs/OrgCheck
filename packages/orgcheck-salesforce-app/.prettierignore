@@ -2,5 +2,10 @@
 # More information: https://prettier.io/docs/en/ignore.html
 #
 
-.sfdx
+**/staticresources/**
 .localdevserver
+.sfdx
+.sf
+.vscode
+
+coverage/

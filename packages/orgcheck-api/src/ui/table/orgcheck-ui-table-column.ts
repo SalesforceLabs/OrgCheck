@@ -2,27 +2,26 @@ import { WhereToGetData, WhereToGetScoreData, WhereToGetLinkData, WhereToGetLink
 import { TextTruncatedModifier, PreformattedModifier, EmptyModifier, NumericMinimumModifier, NumericMaximumModifier, NumericMinMaxModifier } from "./orgcheck-ui-table-datamodifiers";
 
 
-export const Orientation = {
-    HORIZONTAL: 'horizontal',
-    VERTICAL: 'vertical'
+export enum Orientation {
+    HORIZONTAL, VERTICAL
 }
 
-export const ColumnType = {
-    IDX:  'index',
-    SCR:  'score',
-    TXT:  'text',
-    TXTS: 'texts',
-    NUM:  'numeric',
-    PRC:  'percentage',
-    URL:  'id',
-    URLS: 'ids',
-    CHK:  'boolean',
-    DTM:  'datetime',
-    DEP:  'dependencies',
-    OBJS: 'objects'
+export enum ColumnType {
+    IDX  = 'index',
+    SCR  = 'score',
+    TXT  = 'text',
+    TXTS = 'texts',
+    NUM  = 'numeric',
+    PRC  = 'percentage',
+    URL  = 'id',
+    URLS = 'ids',
+    CHK  = 'boolean',
+    DTM  = 'datetime',
+    DEP  = 'dependencies',
+    OBJS = 'objects'
 }
 
-export class TableColumn {
+export interface TableColumn {
 
     /** 
      * @description Label used in the header of the column
@@ -32,10 +31,9 @@ export class TableColumn {
 
     /** 
      * @description Type used in the header of the column
-     * @see ColumnType
-     * @type {string}
+     * @type {ColumnType}
      */ 
-    type: string;
+    type: ColumnType;
 
     /**
      * @description Defines how to retrieve the data -- in which property
@@ -44,7 +42,7 @@ export class TableColumn {
     data?: WhereToGetData | WhereToGetScoreData | WhereToGetLinkData | WhereToGetLinksData | WhereToGetObjectsData | WhereToGetTextsData;
 }
 
-export class TableColumnWithModifiers extends TableColumn {
+export interface TableColumnWithModifiers extends TableColumn {
 
     /** 
      * @description 
@@ -53,12 +51,11 @@ export class TableColumnWithModifiers extends TableColumn {
     modifier: TextTruncatedModifier | PreformattedModifier | EmptyModifier | NumericMinimumModifier | NumericMaximumModifier | NumericMinMaxModifier;
 }
 
-export class TableColumnWithOrientation extends TableColumn {
+export interface TableColumnWithOrientation extends TableColumn {
 
     /** 
      * @description In which orientation the column should be.
-     * @see Orientation
-     * @type {string}
+     * @type {Orientation}
      */
-    orientation: string;
+    orientation: Orientation;
 }

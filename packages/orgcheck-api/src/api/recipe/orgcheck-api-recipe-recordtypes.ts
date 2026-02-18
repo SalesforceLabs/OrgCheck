@@ -1,6 +1,6 @@
 import { Recipe } from '../core/orgcheck-api-recipe';
 import { Processor } from '../core/orgcheck-api-processor';
-import { Data, DataWithoutScoring } from '../core/orgcheck-api-data';
+import { Data, DataWithoutScore } from '../core/orgcheck-api-data';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
@@ -30,11 +30,11 @@ export class RecipeRecordType implements Recipe {
      * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} logger - Logger
      * @param {Map<string, any>} [parameters] - List of optional argument to pass
-     * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<Array<Data> | DataMatrix | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>> {
+    async transform(data: Map<string, any>, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrix | Data | Map<string, any>> {
 
         // Get data and parameters
         const /** @type {Map<string, SFDC_RecordType>} */ recordTypes: Map<string, SFDC_RecordType> = data.get(DatasetAliases.RECORDTYPES);
@@ -56,11 +56,15 @@ export class RecipeRecordType implements Recipe {
         await Processor.forEach(recordTypes, (/** @type {SFDC_RecordType} */ recordType: SFDC_RecordType) => {
             // Augment data
             const objectRef = objects.get(recordType.objectId);
-            logger.log(`ObjectId: ${recordType.objectId}`);
-            if (objectRef && !objectRef.typeRef) {
-                objectRef.typeRef = types.get(objectRef.typeId);
+            if (objectRef) {
+                if (objectRef.typeRef === undefined) {
+                    const typeObjectRef = types.get(objectRef.typeId);
+                    if (typeObjectRef) {
+                        objectRef.typeRef = typeObjectRef;
+                    }
+                }
+                recordType.objectRef = objectRef;
             }
-            recordType.objectRef = objectRef;
             // Filter data
             if ((namespace === OrgCheckGlobalParameter.ALL_VALUES || recordType.package === namespace) &&
                 (objecttype === OrgCheckGlobalParameter.ALL_VALUES || recordType.objectRef?.typeRef?.id === objecttype) &&

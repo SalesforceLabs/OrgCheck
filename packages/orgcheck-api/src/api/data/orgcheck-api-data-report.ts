@@ -1,17 +1,17 @@
 
-import { Data } from '../core/orgcheck-api-data';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
+import { DataWithScore } from '../core/orgcheck-api-data';
 
-export class SFDC_Report extends Data {
-
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
+export interface SFDC_Report extends DataWithScore {
+    
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
      * @public
      */
-    static get label() { return 'Report' };
-
-    /**
+    dataType: DataAliases.SFDC_Report;
+    
+     /**
      * @description Unique identifier of this report in the org.
      * @type {string}
      * @public

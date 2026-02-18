@@ -3,7 +3,7 @@ import { API } from "../../src/api/orgcheck-api";
 import { SecretSauce } from "../../src/api/core/orgcheck-api-secretsauce";
 import { DataMatrix } from "../../src/api/core/orgcheck-api-data-matrix";
 import { ScoreRule } from "../../src/api/core/orgcheck-api-datafactory";
-import { JsForceMock_SoqlQuery } from "../utils/orgcheck-api-jsforce-mock.utility";
+import { JsForceMock } from "../utils/orgcheck-api-jsforce-mock.utility";
 import { StorageMock_BasedOnMap } from "../utils/orgcheck-api-storage-mock.utility";
 import { CompressorMock_IdemPotent } from "../utils/orgcheck-api-compressor-mock.utility";
 import { LoggerMock_DoingNothing } from "../utils/orgcheck-api-logger-mock.utility";
@@ -18,7 +18,7 @@ describe('orgcheck-api-scorerules', () => {
 
         const api = new API({ 
             logSettings: new LoggerMock_DoingNothing(),
-            salesforce: { connection: { useJsForce: false, mockImpl: JsForceMock_SoqlQuery }, authentication: { } },
+            salesforce: { connection: { useJsForce: false, mockImpl: JsForceMock }, authentication: { } },
             storage: { localImpl: new StorageMock_BasedOnMap(), compression: { useFflate: false, mockImpl: new CompressorMock_IdemPotent() }}
         });
 

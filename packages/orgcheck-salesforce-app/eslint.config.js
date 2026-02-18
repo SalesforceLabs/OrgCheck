@@ -43,8 +43,6 @@ module.exports = defineConfig([
   },
   { // JSdoc plugin
     files: [
-      'build/src/api/**/*.js',
-      'build/src/ui/**/*.js',
       'force-app/main/default/lwc/**/*.js',
     ],
     extends: [ jsdocPlugIn.configs['flat/recommended'] ]
@@ -52,7 +50,6 @@ module.exports = defineConfig([
   { // Jest plugin
     files: [ 
       'force-app/main/default/lwc/**/__tests__/*.test.js',
-      'build/test/**/*.test.js',
     ],
     extends: [ jestPlugIn.configs['flat/recommended'] ]
   }

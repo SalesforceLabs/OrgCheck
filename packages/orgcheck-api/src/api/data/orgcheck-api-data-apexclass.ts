@@ -1,16 +1,16 @@
-import { DataWithDependencies, DataWithoutScoring } from '../core/orgcheck-api-data';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
+import { DataWithScoreAndDependencies, DataWithoutScore } from '../core/orgcheck-api-data';
 
-export class SFDC_ApexTestMethodResult extends DataWithoutScoring {
-
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
-     * @public
-     */
-    static get label() { return 'Apex Test Result' };
+export interface SFDC_ApexTestMethodResult extends DataWithoutScore {
 
     /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
+     * @public
+     */
+    dataType: DataAliases.SFDC_ApexTestMethodResult;
+
+     /**
      * @description Name of this method
      * @type {string}
      * @public
@@ -91,17 +91,16 @@ export class SFDC_ApexTestMethodResult extends DataWithoutScoring {
 /**
  * @description Representation of an Apex Class in Org Check
  */
-export class SFDC_ApexClass extends DataWithDependencies {
-
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
-     * @public
-     */
-    static get label() { return 'Apex Class' };
+export interface SFDC_ApexClass extends DataWithScoreAndDependencies {
 
     /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
+     * @public
+     */
+    dataType: DataAliases.SFDC_ApexClass;
+
+     /**
      * @description Salesforce Id
      * @type {string}
      * @public
@@ -218,7 +217,7 @@ export class SFDC_ApexClass extends DataWithDependencies {
      * @type {Array<string>}
      * @public
      */
-    extends: Array<string>;
+   extends: Array<string>;
 
     /**
      * @description Number of methods in this class (Note: if the class is a test, this not only the testing methods, this is ALL the methods)

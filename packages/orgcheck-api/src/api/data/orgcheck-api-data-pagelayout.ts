@@ -1,17 +1,17 @@
-import { DataWithDependencies } from '../core/orgcheck-api-data';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
+import { DataWithScoreAndDependencies } from '../core/orgcheck-api-data';
 import { SFDC_Object } from './orgcheck-api-data-object';
 
-export class SFDC_PageLayout extends DataWithDependencies {
+export interface SFDC_PageLayout extends DataWithScoreAndDependencies {
     
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
      * @public
      */
-    static get label() { return 'Page Layout' };
-
-    /**
+    dataType: DataAliases.SFDC_PageLayout;
+        
+     /**
      * @description Salesforce Id
      * @type {string}
      * @public

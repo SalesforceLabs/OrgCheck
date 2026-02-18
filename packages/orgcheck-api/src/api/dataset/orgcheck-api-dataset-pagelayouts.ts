@@ -1,3 +1,4 @@
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -34,7 +35,7 @@ export class DatasetPageLayouts implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const pageLayoutDataFactory = dataFactory.getInstance(SFDC_PageLayout);
+        const pageLayoutDataFactory = dataFactory.getInstance(DataAliases.SFDC_PageLayout);
 
         // Create the map
         const pageLayoutRecords = results[0];
@@ -84,9 +85,9 @@ export class DatasetPageLayouts implements Dataset {
             // Get the ID15 of this page layout
             const id = sfdcManager.caseSafeId(record.LayoutId);
 
-            if (pageLayouts.has(id)) {
-                // Get the page layout
-                const pageLayout = pageLayouts.get(id);
+            // Get the page layout
+            const pageLayout = pageLayouts.get(id);
+            if (pageLayout) {
 
                 // Set the assignment count
                 pageLayout.profileAssignmentCount += record.CountAssignment;
@@ -103,9 +104,9 @@ export class DatasetPageLayouts implements Dataset {
             // Get the ID15 of this page layout
             const id = sfdcManager.caseSafeId(metadataRecord.Id);
 
-            if (pageLayouts.has(id)) {
-                // Get the page layout
-                const pageLayout = pageLayouts.get(id);
+            // Get the page layout
+            const pageLayout = pageLayouts.get(id);
+            if (pageLayout) {
 
                 // Set the metadata info
                 pageLayout.nbRelatedLists = metadataRecord?.Metadata?.relatedLists?.length ?? 0;

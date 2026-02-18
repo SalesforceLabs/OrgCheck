@@ -4,10 +4,10 @@ import { SalesforceManagerIntf, SalesforceMetadataRequest, SalesforceQueryReques
 
 export class SalesforceManagerMock_DoingNothing implements SalesforceManagerIntf {
     get apiVersion() { return 53; }
-    caseSafeId(id: string | undefined) { return id; }
-    setupUrl(_id: string, _type: string, _parentId?: string, _parentType?: string): string | undefined { return '/'; }
+    caseSafeId(id: string) { return id; }
+    setupUrl(_id: string, _type: string, _parentId?: string, _parentType?: string): string { return '/'; }
     getObjectType(_objectName: any, isCustomSetting: any) { return isCustomSetting ? 'CustomSetting' : 'StandardObject'; }
-    get dailyApiRequestLimitInformation(): SalesforceUsageInformation | undefined { return { currentUsageRatio: 0, currentUsagePercentage: "0%", 
+    get dailyApiRequestLimitInformation(): SalesforceUsageInformation { return { currentUsageRatio: 0, currentUsagePercentage: "0%", 
       yellowThresholdPercentage: 0, redThresholdPercentage: 0, isGreenZone: true, isYellowZone: false,isRedZone: false }; }
     async soqlQuery(_queries: Array<SalesforceQueryRequest | any>, _logger: SimpleLoggerIntf): Promise<Array<Array<any>>> { return [[]]; }
     async soslQuery(_queries: Array<SalesforceQueryRequest | any>, _logger: SimpleLoggerIntf): Promise<Array<Array<any>>> { return [[]]; }

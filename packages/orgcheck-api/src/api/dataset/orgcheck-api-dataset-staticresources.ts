@@ -1,4 +1,5 @@
 import { SFDC_StaticResource } from '../data/orgcheck-api-data-staticresource';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -26,7 +27,7 @@ export class DatasetStaticResources implements Dataset {
         }], logger);
 
         // Init the factory and records and records
-        const staticResourceDataFactory = dataFactory.getInstance(SFDC_StaticResource);
+        const staticResourceDataFactory = dataFactory.getInstance(DataAliases.SFDC_StaticResource);
         const staticResourceRecords = results[0];
 
         // Then retreive dependencies

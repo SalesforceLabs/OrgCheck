@@ -1,3 +1,4 @@
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -38,7 +39,7 @@ export class DatasetPermissionSetLicenses implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const permissionSetLicenseDataFactory = dataFactory.getInstance(SFDC_PermissionSetLicense);
+        const permissionSetLicenseDataFactory = dataFactory.getInstance(DataAliases.SFDC_PermissionSetLicense);
         const permissionSetLicenseRecords = results[0];
         const permissionSetsWithLicenseRecords = results[1];
         const assigneePermSetsWithLicenseRecords = results[2];
@@ -85,7 +86,10 @@ export class DatasetPermissionSetLicenses implements Dataset {
                     assigneePermSetLicense.set(licenseId, new Set());
                 }
                 assigneePermSetLicense.get(licenseId).add(assigneeId);
-                permissionSetLicenses.get(licenseId).distinctActiveAssigneeCount = assigneePermSetLicense.get(licenseId).size;
+                const permissionSeLicense = permissionSetLicenses.get(licenseId);
+                if (permissionSeLicense) {
+                    permissionSeLicense.distinctActiveAssigneeCount = assigneePermSetLicense.get(licenseId).size;
+                }
             }
         });
 
@@ -93,8 +97,9 @@ export class DatasetPermissionSetLicenses implements Dataset {
         await Processor.forEach(permissionSetsWithLicenseRecords, (/** @type {any} */ record: any) => {
             const permissionSetId = sfdcManager.caseSafeId(record.Id);
             const licenseId = sfdcManager.caseSafeId(record.LicenseId);
-            if (permissionSetLicenses.has(licenseId)) {
-                permissionSetLicenses.get(licenseId).permissionSetIds.push(permissionSetId);
+            const permissionSeLicense = permissionSetLicenses.get(licenseId);
+            if (permissionSeLicense) {
+                permissionSeLicense.permissionSetIds.push(permissionSetId);
             }
         });
 

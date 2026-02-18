@@ -1,3 +1,4 @@
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -28,7 +29,7 @@ export class DatasetProfilePasswordPolicies implements Dataset {
         if (!profilePasswordPolicies) return new Map();
 
         // Init the factory and records
-        const policyDataFactory = dataFactory.getInstance(SFDC_ProfilePasswordPolicy);
+        const policyDataFactory = dataFactory.getInstance(DataAliases.SFDC_ProfilePasswordPolicy);
 
         // Create the map
         logger?.log(`Parsing ${profilePasswordPolicies?.length} profile password policies...`);        

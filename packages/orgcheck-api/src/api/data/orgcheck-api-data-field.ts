@@ -1,18 +1,18 @@
-import { DataWithDependencies } from '../core/orgcheck-api-data';
+import { DataAliases } from '../core/orgcheck-api-data-aliases';
+import { DataWithScoreAndDependencies } from '../core/orgcheck-api-data';
 import { SFDC_Object } from './orgcheck-api-data-object';
 
 /**
  * @description Representation of a Standard Field or a Custom Field in Org Check
  */
-export class SFDC_Field extends DataWithDependencies {
+export interface SFDC_Field extends DataWithScoreAndDependencies {
     
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
      * @public
      */
-    static get label() { return 'Standard or Custom Field' };
+    dataType: DataAliases.SFDC_Field;
 
     /**
      * @description Salesforce Id

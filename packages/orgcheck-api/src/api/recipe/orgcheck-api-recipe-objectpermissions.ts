@@ -1,6 +1,6 @@
 import { Recipe } from '../core/orgcheck-api-recipe';
 import { Processor } from '../core/orgcheck-api-processor';
-import { Data, DataWithoutScoring } from '../core/orgcheck-api-data';
+import { Data, DataWithoutScore } from '../core/orgcheck-api-data';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DataMatrix } from '../core/orgcheck-api-data-matrix';
 import { DataMatrixFactory } from '../core/orgcheck-api-data-matrix-factory';
@@ -32,11 +32,11 @@ export class RecipeObjectPermissions implements Recipe {
      * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} _logger - Logger
      * @param {Map<string, any>} [parameters] - List of optional argument to pass
-     * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<Array<Data> | DataMatrix | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>> {
+    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrix | Data | Map<string, any>> {
 
         // Get data and parameters
         const /** @type {Map<string, SFDC_ObjectPermission>} */ objectPermissions: Map<string, SFDC_ObjectPermission> = data.get(DatasetAliases.OBJECTPERMISSIONS);
@@ -54,10 +54,13 @@ export class RecipeObjectPermissions implements Recipe {
         /** @type {Map<string, SFDC_Profile | SFDC_PermissionSet>} */
         await Processor.forEach(objectPermissions, (/** @type {SFDC_ObjectPermission} */ op: SFDC_ObjectPermission) => {
             // Augment data
-            if (op.parentId.startsWith('0PS') === true) {
-                op.parentRef = permissionSets.get(op.parentId);
-            } else {
-                op.parentRef = profiles.get(op.parentId);
+            const parentRef = (op.parentId.startsWith('0PS') === true ? permissionSets : profiles).get(op.parentId);
+            if (parentRef) {
+                op.parentRef = parentRef;
+            }
+            // Stop there if we do not have parent reference
+            if (parentRef === undefined) {
+                return;
             }
             // Filter data
             if (namespace === OrgCheckGlobalParameter.ALL_VALUES || op.parentRef.package === namespace) {
