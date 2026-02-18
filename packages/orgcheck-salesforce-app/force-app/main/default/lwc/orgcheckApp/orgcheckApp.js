@@ -1679,19 +1679,19 @@ export default class OrgcheckApp extends LightningElement {
             header: 'General information',
             columns: [ 'Label', 'Value' ],
             rows: [
-                [ 'API Name', this.objectData.apiname ],
-                [ 'Package', this.objectData.package ],
-                [ 'Singular Label', this.objectData.label ],
-                [ 'Plural Label', this.objectData.labelPlural ],
-                [ 'Description', this.objectData.description ],
-                [ 'Key Prefix', this.objectData.keyPrefix ],
+                [ 'API Name', `${this.objectData.apinam ?? ''}` ],
+                [ 'Package', `${this.objectData.package ?? ''}` ],
+                [ 'Singular Label', `${this.objectData.label ?? ''}` ],
+                [ 'Plural Label', `${this.objectData.labelPlural ?? ''}` ],
+                [ 'Description', `${this.objectData.description ?? ''}` ],
+                [ 'Key Prefix', `${this.objectData.keyPrefix ?? ''}` ],
                 [ 'Record Count (including deleted ones)', `${this.objectData.recordCount}` ],
                 [ 'Is Custom?', `${this.objectData.isCustom?'true':'false'}` ],
                 [ 'Feed Enable?', `${this.objectData.isFeedEnabled?'true':'false'}` ],
                 [ 'Most Recent Enabled?', `${this.objectData.isMostRecentEnabled?'true':'false'}` ],
                 [ 'Global Search Enabled?', `${this.objectData.isSearchable?'true':'false'}` ],
-                [ 'Internal Sharing', this.objectData.internalSharingModel ],
-                [ 'External Sharing', this.objectData.externalSharingModel ]
+                [ 'Internal Sharing', `${this.objectData.internalSharingModel ?? ''}` ],
+                [ 'External Sharing', `${this.objectData.externalSharingModel ?? ''}` ]
             ]
         });
         sheets.push(ocui.RowsFactory.createAndExport(TableDefinitions.StandardFieldsInObject, this.objectData.standardFields, 'Standard Fields', ocapi.SecretSauce.GetScoreRuleDescription));
