@@ -72,32 +72,68 @@ describe('tests.api.unit.CodeScanner', () => {
       expect(hardCodedUrls?.length).toBe(0);
     });
 
-    it('checks if the hard coded url is detected in a code that contains only one sfdc url', () => {
-      const hardCodedUrls = CodeScanner.FindHardCodedURLs('String url = "https://www.salesforce.com";');
-      expect(hardCodedUrls).toBeDefined();
-      expect(hardCodedUrls?.length).toBe(1);
-      expect(hardCodedUrls[0]).toBe('www.salesforce.com');
+    it('checks if generic salesforce urls are not detected and tagged as BAD', () => {
+      [ 
+        'lightning.force.com',
+        'file.force.com',
+        'www.salesforce.com',
+        'salesforce.com',
+        'test.salesforce.com',
+        'login.salesforce.com',
+        'visual.force.com',
+      ].forEach((domain) => {
+        const hardCodedUrls = CodeScanner.FindHardCodedURLs(`String url = "https://${domain}";`);
+        expect(hardCodedUrls).toBeDefined();
+        if (hardCodedUrls.length > 0) {
+          console.error(`Found: domain: ${domain}, length: ${hardCodedUrls.length} and first url: ${hardCodedUrls[0]}`);
+        }
+        expect(hardCodedUrls.length).toBe(0);
+      });
     });
 
-    it('checks if the hard coded url is detected in a code that contains only one sfdc url with instance', () => {
-      const hardCodedUrls = CodeScanner.FindHardCodedURLs('String url = "https://na1.salesforce.com";');
-      expect(hardCodedUrls).toBeDefined();
-      expect(hardCodedUrls?.length).toBe(1);
-      expect(hardCodedUrls[0]).toBe('na1.salesforce.com');
+    it('checks if "my" salesforce urls are not detected and tagged as BAD', () => {
+      [ 
+        'xyz.file.force.com',
+        'xyz.lightning.force.com',
+        'xyz.my.salesforce.com',
+        'xyz--abc.sandbox.my.salesforce.com',
+        'orgcheck.my.salesforce.com'
+      ].forEach((domain) => {
+        const hardCodedUrls = CodeScanner.FindHardCodedURLs(`String url = "https://${domain}";`);
+        expect(hardCodedUrls).toBeDefined();
+        if (hardCodedUrls.length > 0) {
+          console.error(`Found: domain: ${domain}, length: ${hardCodedUrls.length} and first url: ${hardCodedUrls[0]}`);
+        }
+        expect(hardCodedUrls.length).toBe(0);
+      });
     });
 
-    it('checks if the hard coded url is NOT detected in a code that contains only one sfdc my-domain url', () => {
-      const hardCodedUrls = CodeScanner.FindHardCodedURLs('String url = "https://orgcheck.my.salesforce.com";');
-      expect(hardCodedUrls).toBeDefined();
-      expect(hardCodedUrls?.length).toBe(0);
+    it('checks if real hard coded salesforce url are detected and tagged as BAD', () => {
+      [ 
+        'na1.salesforce.com',
+        'na2.salesforce.com',
+        'na3.salesforce.com',
+        'eu1.salesforce.com',
+        'eu2.salesforce.com',
+        'eu3.salesforce.com',
+        'xyz--c.na1.content.force.com',
+        'xyz--c.na2.content.force.com',
+        'xyz--c.eu3.content.force.com',
+        'xyz--c.na89.content.force.com'
+      ].forEach((domain) => {
+        const hardCodedUrls = CodeScanner.FindHardCodedURLs(`String url = "https://${domain}";`);
+        expect(hardCodedUrls).toBeDefined();
+        expect(hardCodedUrls.length).toBe(1);
+        expect(hardCodedUrls[0]).toBe(domain);
+      });
     });
 
-    it('checks if the hard coded url is detected in a code that contains two sfdc urls', () => {
-      const hardCodedUrls = CodeScanner.FindHardCodedURLs('String url1 = "https://www.salesforce.com"; String url2 = "https://na1.salesforce.com";');
+    it('checks if the hard coded url is detected in a code that contains two bad sfdc urls', () => {
+      const hardCodedUrls = CodeScanner.FindHardCodedURLs('String url1 = "https://xyz--c.na89.content.force.com"; String url2 = "https://na1.salesforce.com";');
       expect(hardCodedUrls).toBeDefined();
-      expect(hardCodedUrls?.length).toBe(2);
+      expect(hardCodedUrls.length).toBe(2);
       expect(hardCodedUrls[0]).toBe('na1.salesforce.com'); // array is alphabetically sorted!!
-      expect(hardCodedUrls[1]).toBe('www.salesforce.com');
+      expect(hardCodedUrls[1]).toBe('xyz--c.na89.content.force.com');
     });
 
     it('checks if the hard coded url is detected in a code that contains two sfdc urls the first one being a my domain', () => {
@@ -108,18 +144,16 @@ describe('tests.api.unit.CodeScanner', () => {
     });
 
     it('checks if the hard coded url is detected in a code that contains two sfdc urls the second one being a my domain', () => {
-      const hardCodedUrls = CodeScanner.FindHardCodedURLs('String url1 = "https://www.salesforce.com"; String url2 = "https://orgcheck.my.salesforce.com";');
+      const hardCodedUrls = CodeScanner.FindHardCodedURLs('String url1 = "https://na1.salesforce.com"; String url2 = "https://orgcheck.my.salesforce.com";');
       expect(hardCodedUrls).toBeDefined();
-      expect(hardCodedUrls?.length).toBe(1);
-      expect(hardCodedUrls[0]).toBe('www.salesforce.com');
+      expect(hardCodedUrls.length).toBe(1);
+      expect(hardCodedUrls[0]).toBe('na1.salesforce.com');
     });
 
     it('checks if the hard coded url is detected in a code that contains multiple urls with one force domain and on salesforce domain', () => {
       const hardCodedUrls = CodeScanner.FindHardCodedURLs('String url1 = "https://abc.force.com"; String url2 = "https://www.salesforce.com";');
       expect(hardCodedUrls).toBeDefined();
-      expect(hardCodedUrls?.length).toBe(2);
-      expect(hardCodedUrls[0]).toBe('abc.force.com');
-      expect(hardCodedUrls[1]).toBe('www.salesforce.com');
+      expect(hardCodedUrls?.length).toBe(0);
     });
   });
 

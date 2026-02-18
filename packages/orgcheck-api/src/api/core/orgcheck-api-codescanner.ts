@@ -9,7 +9,7 @@ const REGEX_XML_COMMENTS_AND_NEWLINES = new RegExp('(<!--[\\s\\S]*?-->|\\n)', 'g
 const REGEX_HARDCODEDURLS = new RegExp("([A-Za-z0-9-]{1,63}\\.)+[A-Za-z]{2,6}", 'ig');
 const REGEX_HARDCODEDIDS = new RegExp("[,\"'\\s][a-zA-Z0-9]{5}0[a-zA-Z0-9]{9}([a-zA-Z0-9]{3})?[,\"'\\s]", 'ig');
 const SALESFORCE_DOMAINS = [ 'salesforce.com', '.force.' ];
-const SALESFORCE_MY_DOMAIN = '.my.salesforce.com';
+const SALESFORCE_WITH_INSTANCE = new RegExp("(^|[^A-Za-z])[A-Za-z]{1,4}[0-9]{1,4}S{0,1}\.", 'ig');
 
 /**
  * @description Code Scanner class
@@ -72,7 +72,7 @@ export class CodeScanner {
             ?.filter((domain) => SALESFORCE_DOMAINS.findIndex((sfdomain) => domain.indexOf(sfdomain) >= 0) >= 0)  // filter only the salesforce domains
             .sort() // sorting the domains (if any)
             .filter((e, i, s) => i === s.indexOf(e)) // unique domains
-            .filter((domain) => domain.indexOf(SALESFORCE_MY_DOMAIN) < 0) // remove the my.salesforce.com domains
+            .filter((domain) => domain?.match(SALESFORCE_WITH_INSTANCE) !== null || false) // finally only the url with instances
             ?? []; // return an empty array if undefined
     }
 
