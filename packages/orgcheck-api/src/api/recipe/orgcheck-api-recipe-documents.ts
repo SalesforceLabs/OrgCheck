@@ -1,6 +1,6 @@
 import { Recipe } from '../core/orgcheck-api-recipe';
 import { Processor } from '../core/orgcheck-api-processor';
-import { Data, DataWithoutScore } from '../core/orgcheck-api-data';
+import { Data } from '../core/orgcheck-api-data';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
@@ -41,7 +41,7 @@ export class RecipeDocuments implements Recipe {
         // Filter data
         /** @type {Array<SFDC_Document>} */
         const array: Array<SFDC_Document> = [];
-        await Processor.forEach(documents, (/** @type {SFDC_Document} */ document: SFDC_Document) => {
+        await Processor.forEach(documents, async (/** @type {SFDC_Document} */ document: SFDC_Document) => {
             if (namespace === OrgCheckGlobalParameter.ALL_VALUES || document.package === namespace) {
                 array.push(document);
             }

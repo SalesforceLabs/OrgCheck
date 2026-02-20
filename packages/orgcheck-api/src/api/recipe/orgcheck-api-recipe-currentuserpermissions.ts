@@ -2,7 +2,7 @@ import { Recipe } from '../core/orgcheck-api-recipe';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
-import { Data, DataWithoutScore } from '../core/orgcheck-api-data';
+import { Data } from '../core/orgcheck-api-data';
 import { DataMatrix } from '../core/orgcheck-api-data-matrix';
 
 export class RecipeCurrentUserPermissions implements Recipe {

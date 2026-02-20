@@ -1,6 +1,6 @@
 import { Recipe } from '../core/orgcheck-api-recipe';
 import { Processor } from '../core/orgcheck-api-processor';
-import { Data, DataWithoutScore } from '../core/orgcheck-api-data';
+import { Data } from '../core/orgcheck-api-data';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DataMatrix } from '../core/orgcheck-api-data-matrix';
 import { DataMatrixFactory } from '../core/orgcheck-api-data-matrix-factory';
@@ -57,7 +57,7 @@ export class RecipeFieldPermissions implements Recipe {
         // Augment and filter data
         const workingMatrix = DataMatrixFactory.create();
 
-        await Processor.forEach(fieldPermissions, (/** @type {SFDC_FieldPermission} */ fp: SFDC_FieldPermission) => {
+        await Processor.forEach(fieldPermissions, async (/** @type {SFDC_FieldPermission} */ fp: SFDC_FieldPermission) => {
             // Augment data
             const parentRef = (fp.parentId.startsWith('0PS') === true ? permissionSets : profiles).get(fp.parentId);
             if (parentRef) {

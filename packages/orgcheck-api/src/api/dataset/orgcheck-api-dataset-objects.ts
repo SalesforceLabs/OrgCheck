@@ -117,12 +117,12 @@ export class DatasetObjects implements Dataset {
             }
         }
         await Promise.all([
-            Processor.forEach(nbCustomFieldsPerEntity, (/** @type {any} */ r: any) => SetCounter(r.EntityDefinitionId, 'cf', r.NbCustomFields)),
-            Processor.forEach(nbPageLayoutsPerEntity, (/** @type {any} */ r: any) => SetCounter(r.EntityDefinitionId, 'pl', r.NbPageLayouts)),
-            Processor.forEach(nbRecordTypesPerEntity, (/** @type {any} */ r: any) => SetCounter(r.EntityDefinitionId, 'rt', r.NbRecordTypes)),
-            Processor.forEach(nbWorkflowRulesPerEntity, (/** @type {any} */ r: any) => SetCounter(r.TableEnumOrId, 'wf', r.NbWorkflowRules)),
-            Processor.forEach(nbValidationRulesPerEntity, (/** @type {any} */ r: any) => SetCounter(r.EntityDefinitionId, 'vr', r.NbValidationRules)),
-            Processor.forEach(nbTriggersPerEntityStatus, (/** @type {any} */ r: any) => SetCounter(r.EntityDefinitionId, 'ap', r.NbTriggers))
+            Processor.forEach(nbCustomFieldsPerEntity, async (/** @type {any} */ r: any) => SetCounter(r.EntityDefinitionId, 'cf', r.NbCustomFields)),
+            Processor.forEach(nbPageLayoutsPerEntity, async (/** @type {any} */ r: any) => SetCounter(r.EntityDefinitionId, 'pl', r.NbPageLayouts)),
+            Processor.forEach(nbRecordTypesPerEntity, async (/** @type {any} */ r: any) => SetCounter(r.EntityDefinitionId, 'rt', r.NbRecordTypes)),
+            Processor.forEach(nbWorkflowRulesPerEntity, async (/** @type {any} */ r: any) => SetCounter(r.TableEnumOrId, 'wf', r.NbWorkflowRules)),
+            Processor.forEach(nbValidationRulesPerEntity, async (/** @type {any} */ r: any) => SetCounter(r.EntityDefinitionId, 'vr', r.NbValidationRules)),
+            Processor.forEach(nbTriggersPerEntityStatus, async (/** @type {any} */ r: any) => SetCounter(r.EntityDefinitionId, 'ap', r.NbTriggers))
         ]) 
 
         // Create the map

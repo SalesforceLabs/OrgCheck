@@ -1,6 +1,6 @@
 import { Recipe } from '../core/orgcheck-api-recipe';
 import { Processor } from '../core/orgcheck-api-processor';
-import { Data, DataWithoutScore } from '../core/orgcheck-api-data';
+import { Data } from '../core/orgcheck-api-data';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
@@ -53,7 +53,7 @@ export class RecipeValidationRules implements Recipe {
         // Augment and filter data
         /** @type {Array<SFDC_ValidationRule>} */ 
         const array: Array<SFDC_ValidationRule> = [];
-        await Processor.forEach(validationRules, (/** @type {SFDC_ValidationRule} */ validationRule: SFDC_ValidationRule) => {
+        await Processor.forEach(validationRules, async (/** @type {SFDC_ValidationRule} */ validationRule: SFDC_ValidationRule) => {
             // Augment
             const objectRef = objects.get(validationRule.objectId);
             if (objectRef) {

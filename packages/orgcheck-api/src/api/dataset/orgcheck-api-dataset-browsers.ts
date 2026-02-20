@@ -35,7 +35,7 @@ export class DatasetBrowsers implements Dataset {
 
         logger?.log(`Parsing ${browserRecords?.length} browsers...`);
         const browsers = new Map();
-        await Processor.forEach(browserRecords, (/** @type {any} */ record: any) => {
+        await Processor.forEach(browserRecords, async (/** @type {any} */ record: any) => {
 
             const browserElements = record.Browser.split(' ', 2);
             const name = browserElements && browserElements?.length > 0 ? browserElements[0] : record.Browser;

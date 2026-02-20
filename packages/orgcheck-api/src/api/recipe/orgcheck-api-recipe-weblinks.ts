@@ -1,5 +1,5 @@
 import { Recipe } from '../core/orgcheck-api-recipe';
-import { Data, DataWithoutScore } from '../core/orgcheck-api-data';
+import { Data } from '../core/orgcheck-api-data';
 import { DataMatrix } from '../core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
@@ -53,7 +53,7 @@ export class RecipeWebLinks implements Recipe {
         // Augment and filter data
         /** @type {Array<SFDC_WebLink>} */ 
         const array: Array<SFDC_WebLink> = [];
-        await Processor.forEach(weblinks, (/** @type {SFDC_WebLink} */weblink: SFDC_WebLink) => {
+        await Processor.forEach(weblinks, async (/** @type {SFDC_WebLink} */weblink: SFDC_WebLink) => {
             // Augment data
             const objectRef = objects.get(weblink.objectId);
             if (objectRef) {

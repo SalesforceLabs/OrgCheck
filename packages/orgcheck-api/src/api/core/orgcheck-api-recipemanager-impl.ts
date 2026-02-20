@@ -1,4 +1,4 @@
-import { Data, DataWithoutScore, DataWithScore } from './orgcheck-api-data';
+import { Data, DataWithScore } from './orgcheck-api-data';
 import { DataCollectionStatistics } from './orgcheck-api-recipecollection';
 import { DataMatrix } from './orgcheck-api-data-matrix';
 import { DatasetManagerIntf } from './orgcheck-api-datasetmanager';
@@ -327,7 +327,7 @@ export class RecipeManager implements RecipeManagerIntf {
         const finalData: Map<string, DataCollectionStatistics> = new Map();
         try {
             // Add the successful recipes and their stats in the final list
-            await Processor.forEach(data, ( records: Array<DataWithScore>, key: string) => {
+            await Processor.forEach(data, async ( records: Array<DataWithScore>, key: string) => {
                 const onlyBadRecords = records?.filter((r) => {
                     if (r.score && r.score > 0) {
                         if (isRuleFilterOn === true) {

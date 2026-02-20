@@ -126,7 +126,7 @@ export class DatasetPermissionSets implements Dataset {
         logger?.log(`Parsing ${permissionSetGroupRecords?.length} permission set groups, ${objectPermissionRecords?.length} object permissions and ${fieldPermissionRecords?.length} field permissions...`);
         const psgToPsIds = new Map();
         await Promise.all([
-            Processor.forEach(permissionSetGroupRecords, (/** @type {any} */ record: any) => {
+            Processor.forEach(permissionSetGroupRecords, async (/** @type {any} */ record: any) => {
                 const permissionSetId = sfdcManager.caseSafeId(record.Id);
                 const permissionSetGroupId = sfdcManager.caseSafeId(record.PermissionSetGroupId);
                 const permissionSet = permissionSets.get(permissionSetId);
@@ -138,21 +138,21 @@ export class DatasetPermissionSets implements Dataset {
                     psgToPsIds.set(permissionSetGroupId, permissionSetId);
                 }
             }),
-            Processor.forEach(objectPermissionRecords, (/** @type {any} */ record: any) => {
+            Processor.forEach(objectPermissionRecords, async (/** @type {any} */ record: any) => {
                 const permissionSetId = sfdcManager.caseSafeId(record.ParentId);
                 const permissionSet = permissionSets.get(permissionSetId);
                 if (permissionSet) {
                     permissionSet.nbObjectPermissions += record.CountObject;
                 }
             }),
-            Processor.forEach(fieldPermissionRecords, (/** @type {any} */ record: any) => {
+            Processor.forEach(fieldPermissionRecords, async (/** @type {any} */ record: any) => {
                 const permissionSetId = sfdcManager.caseSafeId(record.ParentId);
                 const permissionSet = permissionSets.get(permissionSetId);
                 if (permissionSet) {
                     permissionSet.nbFieldPermissions += record.CountField;    
                 }
             }),
-            Processor.forEach(userAssignmentRecords, (/** @type {any} */ record: any) => {
+            Processor.forEach(userAssignmentRecords, async (/** @type {any} */ record: any) => {
                 const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId);
                 const permissionSet = permissionSets.get(permissionSetId);
                 if (permissionSet) {
@@ -164,7 +164,7 @@ export class DatasetPermissionSets implements Dataset {
         // Once all the ps and psg are in the map we can check the following:
         logger?.log(`Checking the ${psAssignmentRecords?.length} Permission Set assignments to Permission Set Groups...`);
         const psgMemberCountSumByPermissionSetId = new Map();        
-        await Processor.forEach(psAssignmentRecords, (/** @type {any} */ record: any) => {
+        await Processor.forEach(psAssignmentRecords, async (/** @type {any} */ record: any) => {
             const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId);
             const permissionSetGroupId = sfdcManager.caseSafeId(record.PermissionSetGroupId);
             const permissionSetGroup_psId = psgToPsIds.get(permissionSetGroupId);
@@ -179,7 +179,7 @@ export class DatasetPermissionSets implements Dataset {
 
         // Compute scores for all permission sets
         logger?.log(`Computing the score for ${permissionSets.size} permission sets...`);
-        await Processor.forEach(permissionSets, (/** @type {SFDC_PermissionSet} */ permissionSet: SFDC_PermissionSet) => {
+        await Processor.forEach(permissionSets, async (/** @type {SFDC_PermissionSet} */ permissionSet: SFDC_PermissionSet) => {
             if (psgMemberCountSumByPermissionSetId.get(permissionSet.id) === 0) {
                 permissionSet.allIncludingGroupsAreEmpty = true;
             }

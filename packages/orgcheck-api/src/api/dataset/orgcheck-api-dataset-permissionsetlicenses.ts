@@ -78,7 +78,7 @@ export class DatasetPermissionSetLicenses implements Dataset {
 
         logger?.log(`Parsing ${assigneePermSetsWithLicenseRecords?.length} Permission Sets with a link to a License...`);    
         const assigneePermSetLicense = new Map();    
-        await Processor.forEach(assigneePermSetsWithLicenseRecords, (/** @type {any} */ record: any) => {
+        await Processor.forEach(assigneePermSetsWithLicenseRecords, async (/** @type {any} */ record: any) => {
             if (record.PermissionSet && record.PermissionSet.LicenseId && record.PermissionSet.LicenseId.startsWith('0PL')) {
                 const licenseId = sfdcManager.caseSafeId(record.PermissionSet.LicenseId);
                 const assigneeId = sfdcManager.caseSafeId(record.AssigneeId);
@@ -94,7 +94,7 @@ export class DatasetPermissionSetLicenses implements Dataset {
         });
 
         logger?.log(`Parsing ${permissionSetsWithLicenseRecords?.length} Permission Sets with a link to a License...`);
-        await Processor.forEach(permissionSetsWithLicenseRecords, (/** @type {any} */ record: any) => {
+        await Processor.forEach(permissionSetsWithLicenseRecords, async (/** @type {any} */ record: any) => {
             const permissionSetId = sfdcManager.caseSafeId(record.Id);
             const licenseId = sfdcManager.caseSafeId(record.LicenseId);
             const permissionSeLicense = permissionSetLicenses.get(licenseId);
@@ -105,7 +105,7 @@ export class DatasetPermissionSetLicenses implements Dataset {
 
         // Compute scores for all permission set licenses
         logger?.log(`Computing the score for ${permissionSetLicenses.size} permission set licenses...`);
-        await Processor.forEach(permissionSetLicenses, (/** @type {any} */ record: any) => {
+        await Processor.forEach(permissionSetLicenses, async (/** @type {any} */ record: any) => {
             permissionSetLicenseDataFactory.computeScore(/** @type {any} */ record);
         });
         

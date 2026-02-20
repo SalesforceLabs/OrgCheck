@@ -1,4 +1,3 @@
-import { describe, it, expect } from "@jest/globals";
 import { Processor } from "../../src/api/core/orgcheck-api-processor";
 
 describe('tests.api.unit.Processor', () => {
@@ -13,7 +12,7 @@ describe('tests.api.unit.Processor', () => {
 
     it ('checks if the array is processed when calling forEach with a sync iteratee', async () => {
       const results: string[] = [];
-      await Processor.forEach(array, (i: number) => { results.push(`Processing ${i}...`); });
+      await Processor.forEach(array, async (i: number) => { results.push(`Processing ${i}...`); });
       expect(results).toBeDefined();
       expect(results?.length).toBe(array?.length);
       results.forEach((result) => expect(result.includes('Processing')).toBeTruthy());
@@ -38,7 +37,7 @@ describe('tests.api.unit.Processor', () => {
 
     it ('checks if the map is processed when calling forEach() with a sync iteratee', async () => {
       const results: string[] = [];
-      await Processor.forEach(map, (v: string, k: string) => { results.push(`Processing ${k}: ${v}...`); });
+      await Processor.forEach(map, async (v: string, k: string) => { results.push(`Processing ${k}: ${v}...`); });
       expect(results).toBeDefined();
       expect(results?.length).toBe(map.size);
       results.forEach((result) => expect(result.includes('Processing')).toBeTruthy());

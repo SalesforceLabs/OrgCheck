@@ -1,0 +1,16 @@
+{
+    "name": "orgcheck",
+    "description": "Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt.",
+    "version": "8.0.0",
+    "author": "VinceFINET",
+    "bugs": "https://github.com/SalesforceLabs/OrgCheck/issues",
+    "homepage": "https://github.com/SalesforceLabs/OrgCheck",
+    "license": "MIT",
+    "private": true,
+    "workspaces": [
+        "packages/*"
+    ],
+    "devDependencies": {
+        "lerna": "^6.0.1"
+    }
+}

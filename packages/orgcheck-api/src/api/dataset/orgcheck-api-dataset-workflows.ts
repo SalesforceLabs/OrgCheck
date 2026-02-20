@@ -73,7 +73,7 @@ export class DatasetWorkflows implements Dataset {
             const timeTriggers = record.Metadata.workflowTimeTriggers;
             await Processor.forEach(
                 timeTriggers, 
-                (/** @type {any} */ tt: any) => {
+                async (/** @type {any} */ tt: any) => {
                     const field = tt.offsetFromField || 'TriggerDate';
                     if (tt.actions?.length === 0) {
                         workflow.emptyTimeTriggers.push({

@@ -68,7 +68,7 @@ export class DatasetUserRoles implements Dataset {
             // compute the numbers of users
             await Processor.forEach(
                 record?.Users?.records, 
-                (/** @type {any} */ user: any) => {
+                async (/** @type {any} */ user: any) => {
                     userRole.activeMemberIds.push(sfdcManager.caseSafeId(user.Id));
                 }
             );
@@ -80,13 +80,13 @@ export class DatasetUserRoles implements Dataset {
         }));
 
         // Compute levels 
-        await Processor.forEach(roots, (/** @type {any} */ root: any) => {
+        await Processor.forEach(roots, async (/** @type {any} */ root: any) => {
             root.level = 1;
             RECURSIVE_LEVEL_CALCULUS(root, childrenByParent);
         });
 
         // Then compute the score of roles 
-        await Processor.forEach(roles, (/** @type {any} */ userRole: any) => {
+        await Processor.forEach(roles, async (/** @type {any} */ userRole: any) => {
             userRoleDataFactory.computeScore(userRole);
         });
 

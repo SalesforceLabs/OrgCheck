@@ -1,5 +1,13 @@
 {
     "compilerOptions": {
+        "alwaysStrict": false, // to switch to true asap
+        "allowSyntheticDefaultImports": true,
+        "module": "ESNext",
+        "moduleResolution": "node",
+        "noImplicitAny": false, // to switch to true asap
+        "noImplicitReturns": true,
+        "noUnusedLocals": true,
+        "pretty": true,
         "target": "es2015",
         "esModuleInterop": true,
         "strictNullChecks": true,
@@ -7,14 +15,14 @@
         "lib": [ 
             "ES2021.String" // string.prototype.replaceAll is only available in ES2021 and later
         ],
-        "baseUrl": "./",
+        "baseUrl": ".",
         "paths": {
-            "tslib" : ["node_modules/tslib/tslib.d.ts"]
+            "tslib" : ["./node_modules/tslib/tslib.d.ts"]
         },
     },
     "include": [
         "src/**/*.ts",
-        "testss/**/*.ts"
+        "tests/**/*.ts"
     ],
     "exclude": [
         "node_modules"

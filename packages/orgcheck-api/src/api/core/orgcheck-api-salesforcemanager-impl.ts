@@ -53,6 +53,18 @@ const MAX_MEMBERS_IN_METADATAAPI_REQUEST_SIZE: number = 10;
  */
 const MAX_COMPOSITE_REQUEST_SIZE: number = 5;
 
+export interface SalesforceAuthenticationOptions {
+    accessToken?: string; 
+    clientId?: string; 
+    clientSecret?: string; 
+    redirectUri?: string;
+}
+
+export interface SalesforceManagerSetup {
+    connection?: any;
+    authenticationOptions?: SalesforceAuthenticationOptions;
+}
+
 /** 
  * @description Salesforce APIs Manager Implementation with JsForce Connection
  * @public
@@ -60,78 +72,110 @@ const MAX_COMPOSITE_REQUEST_SIZE: number = 5;
 export class SalesforceManager implements SalesforceManagerIntf {
 
     /**
-     * @description API Version used to make the connection
+     * @description API Version used
      * @type {number}
-     * @private
+     * @public
      */
-    _apiVersion: number;
+    public readonly apiVersion: number = SecretSauce.CurrentApiVersion;
 
     /**
      * @description WatchDog to monitor the API Usage
      * @type {SalesforceWatchDog}
      * @private
      */ 
-    _watchDog: SalesforceWatchDog;
+    private _watchDog: SalesforceWatchDog;
 
     /**
      * @description JsForce Connection
      * @type {any}
      * @private
      */ 
-    _connection: any;
+    private _connection: any;
 
     /**
-     * @description Construct the connection manager from a ConnectionFactory (like JSForce) and a VFP accesstoken
-     * @param {any} jsConnectionFactory - Connection factory to inject
-     * @param {{accessToken?: string, clientId?: string, clientSecret?: string, redirectUri?: string}} authenticationOptions - Authentication options to use
+     * @description Construct the connection manager
+     * @param {SalesforceManagerSetup} setup - Setup information to initialiaze this class
      * @public
      */
-    constructor(jsConnectionFactory: any, authenticationOptions: { accessToken?: string; clientId?: string; clientSecret?: string; redirectUri?: string; }) {
+    constructor(setup: SalesforceManagerSetup) {
 
-        this._apiVersion = SecretSauce.CurrentApiVersion;
-        
-        // Connection options
-        const jsConnectionOptions: any = {
-            version: this._apiVersion + '.0',
-            maxRequest: 15 // making sure we set it to a reasonable value = 15
+        if (!setup) {
+            throw new Error(`Can't instanciate a SalesforceManager from an undefined setup.`)
         }
-        if (authenticationOptions?.accessToken) {
-            jsConnectionOptions.accessToken = authenticationOptions.accessToken;
+
+        // The connection we use or create
+        let connection: any | undefined;
+
+        if (setup.connection) {
+
+            // ----------------------------------------------------------------------------
+            // We will use an existing connection (usefull for SFDX PlugIn)
+            // ----------------------------------------------------------------------------
+
+            connection = setup.connection;
+
         } else {
-            jsConnectionOptions.oauth2 = {
-                clientId: authenticationOptions?.clientId,
-                clientSecret: authenticationOptions?.clientSecret,
-                redirectUri: authenticationOptions?.redirectUri
-            }
-        }
 
-        // Create a JsForce Connection to the current salesforce org
-        const jsConnection = new jsConnectionFactory.Connection(jsConnectionOptions);
-        if (jsConnection === undefined) {
-            throw new Error(`Couldn't instantiate a salesforce Connection with the given factory.`)
+            // ----------------------------------------------------------------------------
+            // We are going to create a new connection based on information in the setup
+            // ----------------------------------------------------------------------------
+
+            if (!setup.authenticationOptions) {
+                throw new Error(`Can't instanciate a SalesforceManager if a authenticationOptions is undefined in the setup.`)
+            }
+            if (Object.keys(setup.authenticationOptions).length === 0) {
+                throw new Error(`Can't instanciate a SalesforceManager if a authenticationOptions is totally empty in the setup.`)
+            }
+
+            // 1. Connection options
+            const connectionOptions: { version: string, maxRequest: number, accessToken?: string, oauth2?: { clientId: string, clientSecret: string, redirectUri: string } } = {
+                version: `${this.apiVersion}.0`,
+                maxRequest: 15 // making sure we set it to a reasonable value = 15
+            }
+            if (setup.authenticationOptions.accessToken) {
+                connectionOptions.accessToken = setup.authenticationOptions.accessToken;
+            } else {
+                if (setup.authenticationOptions.clientId === undefined) {
+                    throw new Error(`Can't instanciate a SalesforceManager if a authenticationOptions.clientId is undefined in the setup.`)
+                }
+                if (setup.authenticationOptions.clientSecret === undefined) {
+                    throw new Error(`Can't instanciate a SalesforceManager if a authenticationOptions.clientSecret is undefined in the setup.`)
+                }
+                if (setup.authenticationOptions.redirectUri === undefined) {
+                    throw new Error(`Can't instanciate a SalesforceManager if a authenticationOptions.redirectUri is undefined in the setup.`)
+                }
+                connectionOptions.oauth2 = {
+                    clientId: setup.authenticationOptions.clientId,
+                    clientSecret: setup.authenticationOptions.clientSecret,
+                    redirectUri: setup.authenticationOptions.redirectUri
+                }
+            }
+
+            // 2. Create a JsForce Connection to the current salesforce org
+            // @ts-ignore
+            const jsforce = typeof window !== 'undefined' ? window?.jsforce : globalThis?.jsforce ?? null;
+            if (!jsforce) {
+                throw new Error(`jsforce not available`);
+            }
+            connection = new jsforce.Connection(connectionOptions);
+            if (!connection) {
+                throw new Error(`Couldn't instantiate a salesforce Connection with the given factory and options`)
+            }
         }
 
         // Create the WatchDog instance which knows how to retrieve the API Usage from the connection
         this._watchDog = new SalesforceWatchDog(
             () => {
                 return { 
-                    used: jsConnection.limitInfo?.apiUsage?.used, 
-                    max: jsConnection.limitInfo?.apiUsage?.limit
+                    // please note here we do not use this._connection on purpose
+                    used: connection.limitInfo?.apiUsage?.used ?? 0, 
+                    max: connection.limitInfo?.apiUsage?.limit ?? 0
                 };
             }
         );
 
         // Link the connection to the manager
-        this._connection = jsConnection;
-    }
-
-    /**
-     * @see SalesforceManagerIntf.apiVersion
-     * @returns {number} - Api version
-     * @public
-     */
-    get apiVersion(): number {
-        return this._apiVersion;
+        this._connection = connection;
     }
 
     /**
@@ -140,7 +184,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @returns {string} Salesforce ID 15
      * @public
      */
-    caseSafeId(id: string): string {
+    public caseSafeId(id: string): string {
         if (id && id?.length === 18) return id.substr(0, 15);
         return id;
     }
@@ -154,7 +198,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @returns {string} Setup URL for the given item
      * @public
      */
-    setupUrl(id: string, type: string, parentId?: string, parentType?: string): string {
+    public setupUrl(id: string, type: string, parentId?: string, parentType?: string): string {
         // If the salesforce identifier is not set, just return a blank url!
         if (!id) {
             return '';
@@ -237,7 +281,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @returns {string} A string representation of the object type
      * @public
      */
-    getObjectType(apiName: string, isCustomSetting: boolean): string {
+    public getObjectType(apiName: string, isCustomSetting: boolean): string {
         if (isCustomSetting === true) return OBJECTTYPE_ID_CUSTOM_SETTING;
         if (apiName?.endsWith('__c')) return OBJECTTYPE_ID_CUSTOM_SOBJECT;
         if (apiName?.endsWith('__x')) return OBJECTTYPE_ID_CUSTOM_EXTERNAL_SOBJECT;
@@ -253,7 +297,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @returns {SalesforceUsageInformation} Information of the current usage of the Daily Request API
      * @public
      */
-    get dailyApiRequestLimitInformation(): SalesforceUsageInformation {
+    public get dailyApiRequestLimitInformation(): SalesforceUsageInformation {
         return this._watchDog.dailyApiRequestLimitInformation;
     }
 
@@ -267,7 +311,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @async
      * @private
      */
-    async _standardSOQLQuery(useTooling: boolean | undefined, query: string, byPasses: Array<string> | undefined, callback: Function): Promise<Array<any>> {
+    private async _standardSOQLQuery(useTooling: boolean | undefined, query: string, byPasses: Array<string> | undefined, callback: Function): Promise<Array<any>> {
         // Each query can use the tooling or not, se based on that flag we'll use the right JsForce connection
         const conn = useTooling === true ? this._connection.tooling : this._connection;
         // the records to return
@@ -335,7 +379,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @async
      * @private
      */
-    async _customSOQLQuery(useTooling: boolean | undefined, query: string, field: string, callback: Function): Promise<Array<any>> {
+    private async _customSOQLQuery(useTooling: boolean | undefined, query: string, field: string, callback: Function): Promise<Array<any>> {
         // Each query can use the tooling or not, se based on that flag we'll use the right JsForce connection
         const conn = useTooling === true ? this._connection.tooling : this._connection;
         // the records to return
@@ -445,7 +489,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @throws {SalesforceError} If an error occurs during the query
      * @public
      */
-    async soqlQuery(queries: Array<SalesforceQueryRequest>, logger: SimpleLoggerIntf): Promise<Array<Array<any>>> {
+    public async soqlQuery(queries: Array<SalesforceQueryRequest>, logger: SimpleLoggerIntf): Promise<Array<Array<any>>> {
         // Now we can start, log some message
         logger?.log(`Preparing ${queries?.length} SOQL ${queries?.length>1?'queries':'query'}...`);
         let nbRecords = 0, nbQueryMore = 0;
@@ -518,7 +562,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @async
      * @public
      */
-    async soslQuery(queries: Array<SalesforceQueryRequest | any>, logger: SimpleLoggerIntf): Promise<Array<Array<any>>> { 
+    public async soslQuery(queries: Array<SalesforceQueryRequest | any>, logger: SimpleLoggerIntf): Promise<Array<Array<any>>> { 
         // Now we can start, log some message
         logger?.log(`Preparing ${queries?.length} SOSL ${queries?.length>1?'queries':'query'}...`);
         const allSettledPromisesResult = await Promise.allSettled(queries.map(async (query) => {
@@ -579,7 +623,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
             const subsetIds = `'${ids.slice(i, i + MAX_IDS_IN_DAPI_REQUEST_SIZE).join("','")}'`;
             currentBody.compositeRequest.push({
                 method: 'GET',
-                url: `/services/data/v${this._apiVersion}.0/tooling/query?q=`+ // here we need to have the full URI
+                url: `/services/data/v${this.apiVersion}.0/tooling/query?q=`+ // here we need to have the full URI
                         'SELECT MetadataComponentId, MetadataComponentName, MetadataComponentType, '+
                             'RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType '+
                         'FROM MetadataComponentDependency '+
@@ -612,6 +656,8 @@ export class SalesforceManager implements SalesforceManagerIntf {
                     logger.log(`Error here: ${error}`);
                     // Update the stats
                     nbErrors++;
+                    // Returning undefined (it will be filtered out afterwards)
+                    return undefined;
                 } finally {
                     // Update the stats
                     nbPending--;
@@ -624,7 +670,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
                     );
                 }
             }));
-            allResults.push(... results);
+            allResults.push(... results.filter((result) => result !== undefined));
         }
         logger?.log(`Got all the results`);
         /** @type {Array<any>} */
@@ -632,7 +678,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
         /** @type {Array<string>} */
         const idsInError: Array<string> = []; // ids contained in a batch that has an error
         const duplicateCheck = new Set(); // Using a set to filter duplicates
-        allResults.filter((result) => result !== undefined).forEach((result) => {
+        allResults.forEach((result) => {
             result.compositeResponse.forEach((response: any) => {
                 if (response.httpStatusCode === 200) {
                     logger?.log(`This response had a code: 200 so we add the ${response?.body?.records?.length} records`);
@@ -689,7 +735,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @public
      * @async
      */
-    async readMetadata(metadatas: Array<SalesforceMetadataRequest>, logger: SimpleLoggerIntf): Promise<Map<string, Array<any>>> {
+    public async readMetadata(metadatas: Array<SalesforceMetadataRequest>, logger: SimpleLoggerIntf): Promise<Map<string, Array<any>>> {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         // Now we can start, log some message
@@ -702,7 +748,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
             .map(async (metadata) => { // using async as we just want to run parallel processes without manipulating their return values
                 try {
                     // each promise will call the List metadata api operation for a specific type
-                    const members = await this._connection.metadata.list([{ type: metadata.type }], this._apiVersion);
+                    const members = await this._connection.metadata.list([{ type: metadata.type }]);
                     // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
                     this._watchDog?.afterRequest(); // if limit has been reached, we reject the promise with a specific error and stop the process
                     // clear the members (remove the stars)
@@ -719,7 +765,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
                         'METADATA_LIST',
                         { 
                             'Type': metadata.type ?? '(empty)', 
-                            'ApiVersion': this._apiVersion,
+                            'ApiVersion': this.apiVersion,
                             'Cause': JSON.stringify(error ?? {}) || 'N/A',
                             'Where': 'SalesforceManagerImpl.readMetadata'
                         }
@@ -788,7 +834,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @public
      * @async
      */
-    async readMetadataAtScale(type: string, ids: any[], byPasses: string[], logger: SimpleLoggerIntf): Promise<Array<any>> {
+    public async readMetadataAtScale(type: string, ids: any[], byPasses: string[], logger: SimpleLoggerIntf): Promise<Array<any>> {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         logger?.log(`Reading metadata at scale for type=${type} and ${ids?.length ?? 0} id(s).`);
@@ -805,7 +851,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
             }
             currentBody.compositeRequest.push({ 
                 method: 'GET',
-                url: `/services/data/v${this._apiVersion}.0/tooling/sobjects/${type}/${id}`, // here we need to have the full URI
+                url: `/services/data/v${this.apiVersion}.0/tooling/sobjects/${type}/${id}`, // here we need to have the full URI
                 referenceId: `chunk${i}`
             });
         });
@@ -833,6 +879,8 @@ export class SalesforceManager implements SalesforceManagerIntf {
                     logger.log(`Error here: ${error}`);
                     // Update the stats
                     nbErrors++;
+                    // In case of error we return undefined specifically
+                    return undefined;
                 } finally {
                     // Update the stats
                     nbPending--;
@@ -845,11 +893,11 @@ export class SalesforceManager implements SalesforceManagerIntf {
                     );
                 }
             }));
-            allResults.push(... results);
+            allResults.push(... results.filter((result) => result !== undefined)); // only add the non empty results
         }
         /** @type {Array<any>} */
         const records: Array<any> = [];
-        allResults.filter((result) => result !== undefined).forEach((result) => {
+        allResults.forEach((result) => {
             result.compositeResponse.forEach((/** @type {any} */ response: any) => {
                 if (response.httpStatusCode === 200) {
                     records.push(response.body); // here only one record per response 
@@ -885,7 +933,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @public
      * @async
      */
-    async describeGlobal(logger: SimpleLoggerIntf): Promise<Array<any>> {
+    public async describeGlobal(logger: SimpleLoggerIntf): Promise<Array<any>> {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         logger?.log(`Describing globally all sobjects in the org.`);
@@ -913,7 +961,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @public
      * @async
      */
-    async describe(sobjectDevName: string, logger: SimpleLoggerIntf): Promise<any> {
+    public async describe(sobjectDevName: string, logger: SimpleLoggerIntf): Promise<any> {
         // Adding support of the Activity object from describe
         if (sobjectDevName === 'Activity') {
             logger?.log(`Describing the "activity" sobject :D`);
@@ -943,7 +991,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @public
      * @async
      */
-    async recordCount(sobjectDevName: string, logger: SimpleLoggerIntf): Promise<number> {
+    public async recordCount(sobjectDevName: string, logger: SimpleLoggerIntf): Promise<number> {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         logger?.log(`Counting the nb records for the sobject: ${sobjectDevName}.`);
@@ -966,7 +1014,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @public
      * @async
      */ 
-    async runAllTests(logger: SimpleLoggerIntf): Promise<string> {
+    public async runAllTests(logger: SimpleLoggerIntf): Promise<string> {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         logger?.log(`Asking to run asynchronously all tests in this org.`);
@@ -992,7 +1040,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @public
      * @async
      */ 
-    async compileClasses(apexClassIds: Array<string>, logger: SimpleLoggerIntf): Promise<Map<string, { isSuccess: boolean; reasons?: Array<string>; }>> {
+    public async compileClasses(apexClassIds: Array<string>, logger: SimpleLoggerIntf): Promise<Map<string, { isSuccess: boolean; reasons?: Array<string>; }>> {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         logger?.log(`Compiling all classes in this org.`);
@@ -1014,13 +1062,13 @@ export class SalesforceManager implements SalesforceManagerIntf {
                     compositeRequest: [
                         {
                             method: 'POST',
-                            url: `/services/data/v${this._apiVersion}.0/tooling/sobjects/MetadataContainer`,
+                            url: `/services/data/v${this.apiVersion}.0/tooling/sobjects/MetadataContainer`,
                             referenceId: 'container',
                             body: { Name : `container-${timestamp}-${countBatches}` }
                         },
                         {
                             method: 'POST',
-                            url: `/services/data/v${this._apiVersion}.0/tooling/sobjects/ContainerAsyncRequest`,
+                            url: `/services/data/v${this.apiVersion}.0/tooling/sobjects/ContainerAsyncRequest`,
                             referenceId: 'request',
                             body: { MetadataContainerId: '@{container.id}', IsCheckOnly: true }
                         }
@@ -1030,7 +1078,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
             }
             currentBody.compositeRequest.push({ 
                 method: 'POST',
-                url: `/services/data/v${this._apiVersion}.0/tooling/sobjects/ApexClassMember`, 
+                url: `/services/data/v${this.apiVersion}.0/tooling/sobjects/ApexClassMember`, 
                 referenceId: apexClass.Id,
                 body: { MetadataContainerId: '@{container.id}', ContentEntityId: apexClass.Id, Body: apexClass.Body }
             });

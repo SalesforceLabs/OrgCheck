@@ -1,6 +1,6 @@
 import { Recipe } from '../core/orgcheck-api-recipe';
 import { Processor } from '../core/orgcheck-api-processor';
-import { Data, DataWithoutScore } from '../core/orgcheck-api-data';
+import { Data } from '../core/orgcheck-api-data';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
@@ -46,7 +46,7 @@ export class RecipeApexTriggers implements Recipe {
 
         // Augment and filter data
         const array: Array<SFDC_ApexTrigger> = [];
-        await Processor.forEach(apexTriggers, (apexTrigger: SFDC_ApexTrigger) => {
+        await Processor.forEach(apexTriggers, async (apexTrigger: SFDC_ApexTrigger) => {
             // Augment data
             const objectRef = objects.get(apexTrigger.objectId);
             if (objectRef) {

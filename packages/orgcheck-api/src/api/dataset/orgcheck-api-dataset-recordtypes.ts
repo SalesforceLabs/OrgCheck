@@ -68,7 +68,7 @@ export class DatasetRecordTypes implements Dataset {
         const profiles = await sfdcManager.readMetadataAtScale('Profile', profileIds, [], logger);
 
         logger?.log(`Parsing ${profiles?.length} profiles looking for record types information...`);
-        await Processor.forEach(profiles, (/** @type {any} */ profile: any) => {
+        await Processor.forEach(profiles, async (/** @type {any} */ profile: any) => {
             profile.Metadata?.recordTypeVisibilities?.forEach((/** @type {any} */ rtv: any) => {
                 if (recordTypeDevNameToId.has(rtv.recordType)) {
                     const id = recordTypeDevNameToId.get(rtv.recordType);
@@ -86,7 +86,7 @@ export class DatasetRecordTypes implements Dataset {
         });
 
         // Then compute the score of record types 
-        await Processor.forEach(recordTypes, (/** @type {SFDC_RecordType} */ recordType: SFDC_RecordType) => {
+        await Processor.forEach(recordTypes, async (/** @type {SFDC_RecordType} */ recordType: SFDC_RecordType) => {
             recordTypeDataFactory.computeScore(recordType);
         });
 

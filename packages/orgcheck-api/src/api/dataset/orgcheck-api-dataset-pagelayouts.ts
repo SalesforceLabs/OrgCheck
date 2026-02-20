@@ -80,7 +80,7 @@ export class DatasetPageLayouts implements Dataset {
         }));
 
         logger?.log(`Parsing ${pageLayoutProfileAssignRecords?.length} page layout assignment counts...`);
-        await Processor.forEach(pageLayoutProfileAssignRecords, (/** @type {any} */ record: any) => {
+        await Processor.forEach(pageLayoutProfileAssignRecords, async (/** @type {any} */ record: any) => {
 
             // Get the ID15 of this page layout
             const id = sfdcManager.caseSafeId(record.LayoutId);
@@ -99,7 +99,7 @@ export class DatasetPageLayouts implements Dataset {
         const pageLayoutMetadataRecords = await sfdcManager.readMetadataAtScale('Layout', pageLayoutIds, [ 'FIELD_INTEGRITY_EXCEPTION', 'UNKNOWN_EXCEPTION' ], logger);
 
         logger?.log(`Parsing ${pageLayoutMetadataRecords?.length} page layout metadata information...`);
-        await Processor.forEach(pageLayoutMetadataRecords, (/** @type {any} */ metadataRecord: any) => {
+        await Processor.forEach(pageLayoutMetadataRecords, async (/** @type {any} */ metadataRecord: any) => {
 
             // Get the ID15 of this page layout
             const id = sfdcManager.caseSafeId(metadataRecord.Id);
@@ -123,7 +123,7 @@ export class DatasetPageLayouts implements Dataset {
         });
 
         // Compute the score of all items
-        await Processor.forEach(pageLayouts, (/** @type {SFDC_PageLayout} */ pageLayout: SFDC_PageLayout) => {
+        await Processor.forEach(pageLayouts, async (/** @type {SFDC_PageLayout} */ pageLayout: SFDC_PageLayout) => {
             pageLayoutDataFactory.computeScore(pageLayout);
         });
 

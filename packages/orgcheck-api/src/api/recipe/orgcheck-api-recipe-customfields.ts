@@ -1,6 +1,6 @@
 import { Recipe } from '../core/orgcheck-api-recipe';
 import { Processor } from '../core/orgcheck-api-processor';
-import { Data, DataWithoutScore } from '../core/orgcheck-api-data';
+import { Data } from '../core/orgcheck-api-data';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
@@ -53,7 +53,7 @@ export class RecipeCustomFields implements Recipe {
         // Augment and filter data
         /** @type {Array<SFDC_Field>} */
         const array: Array<SFDC_Field> = [];
-        await Processor.forEach(customFields, (/** @type {SFDC_Field} */customField: SFDC_Field) => {
+        await Processor.forEach(customFields, async (/** @type {SFDC_Field} */customField: SFDC_Field) => {
             // Augment data
             const objectRef = objects.get(customField.objectId);
             if (objectRef) {

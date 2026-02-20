@@ -78,7 +78,7 @@ export class DatasetLightningPages implements Dataset {
         const flexipageMetadataRecords = await sfdcManager.readMetadataAtScale('FlexiPage', pageIds, [ 'FIELD_INTEGRITY_EXCEPTION', 'UNKNOWN_EXCEPTION' ], logger);
 
         logger?.log(`Parsing ${flexipageMetadataRecords?.length} lightning pages metadata information...`);
-        await Processor.forEach(flexipageMetadataRecords, (/** @type {any} */ metadataRecord: any) => {
+        await Processor.forEach(flexipageMetadataRecords, async (/** @type {any} */ metadataRecord: any) => {
 
             // Get the ID15 of this lightning page
             const id = sfdcManager.caseSafeId(metadataRecord.Id);
@@ -120,7 +120,7 @@ export class DatasetLightningPages implements Dataset {
         });
 
         // Compute the score of all items
-        await Processor.forEach(pages, (/** @type {SFDC_LightningPage} */ page: SFDC_LightningPage) => {
+        await Processor.forEach(pages, async (/** @type {SFDC_LightningPage} */ page: SFDC_LightningPage) => {
             pageDataFactory.computeScore(page);
         });
 

@@ -1,10 +1,13 @@
 import { API } from '../../src/api/orgcheck-api';
-import { JsForceMock } from '../utils/orgcheck-api-jsforce-mock.utility';
 import { StorageSetupMock_DoingNothing } from '../utils/orgcheck-api-storage-mock.utility';
 import { CompressorMock_IdemPotent } from '../utils/orgcheck-api-compressor-mock.utility';
+import { jsforce } from "../utils/orgcheck-api-jsforce-mock.utility";
 
 describe('tests.api.API', () => {
+
   describe('Test API', () => {
+    // @ts-ignore    
+    globalThis.jsforce = jsforce;
 
     it('should be instantiable and usable', async () => {
       let hadError = false;
@@ -15,10 +18,19 @@ describe('tests.api.API', () => {
             isConsoleFallback: () => { return false; },
             log: () => {},
             ended: () => {},
-            failed: (... argv) => { console.error('-_-_-_-_-_-', argv); }
+            failed: (... argv) => { console.error('-_-_-_-_-_--_-_-_-_-_--_-_-_-_-_--_-_-_-_-_--_-_-_-_-_-', argv); }
           },
-          salesforce: { connection: { useJsForce: false, mockImpl: JsForceMock }, authentication: { } },
-          storage: { localImpl: new StorageSetupMock_DoingNothing(), compression: { useFflate: false, mockImpl: new CompressorMock_IdemPotent() }}
+          salesforce: { 
+            authenticationOptions: {
+              accessToken: 'TESTING-API'
+            } 
+          },
+          storage: { 
+            localImpl: new StorageSetupMock_DoingNothing(), 
+            compression: { 
+              useFflate: false, 
+              mockImpl: new CompressorMock_IdemPotent()
+            }}
         });
         expect(api).not.toBeNull();
         await api.getActiveUsers();
@@ -69,6 +81,7 @@ describe('tests.api.API', () => {
       } catch(error) {
         hadError = true;
         err = error;
+        console.error(error);
       }
       expect(hadError).toBe(false);
       expect(err).not.toBeDefined();

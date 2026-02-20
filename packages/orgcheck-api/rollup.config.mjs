@@ -7,7 +7,7 @@ export default [
     {
         input: './src/api/orgcheck-api-main.ts',
         plugins: [
-            resolve(),
+            resolve({ preferBuiltins: false }),
             commonjs(),
             typescript()
         ],
@@ -23,7 +23,7 @@ export default [
     {
         input: './src/ui/orgcheck-ui-main.ts',
         plugins: [
-            resolve(),
+            resolve({ preferBuiltins: false }),
             commonjs(),
             typescript()
         ],

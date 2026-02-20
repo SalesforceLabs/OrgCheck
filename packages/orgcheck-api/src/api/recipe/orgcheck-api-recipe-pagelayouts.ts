@@ -53,7 +53,7 @@ export class RecipePageLayouts implements Recipe {
         // Augment and filter data
         /** @type {Array<SFDC_PageLayout>} */
         const array: Array<SFDC_PageLayout> = [];
-        await Processor.forEach(pageLayouts, (/** @type {SFDC_PageLayout} */ pageLayout: SFDC_PageLayout) => {
+        await Processor.forEach(pageLayouts, async (/** @type {SFDC_PageLayout} */ pageLayout: SFDC_PageLayout) => {
             // Augment data
             const objectRef = objects.get(pageLayout.objectId);
             if (objectRef) {

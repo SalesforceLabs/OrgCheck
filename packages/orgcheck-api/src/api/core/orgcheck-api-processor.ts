@@ -3,15 +3,15 @@ export class Processor {
     /**
      * @description Runs in parallel a function for each item of a given array or map.
      * @param {Array<any> | Map<string, any>} iterable - An array or a map to iterate over
-     * @param {Function} iteratee - A function to call on each item in the array. Invoked with (item). Not supposed to return anything.
+     * @param {(item: any, key?: string)} iteratee - A function to call on each item in the array. Invoked with (item). Not supposed to return anything.
      * @public
      * @async
      */
-    static async forEach(iterable: Array<any> | Map<string, any>, iteratee: Function): Promise<void> {
-        if (!iterable) return;
+    static forEach(iterable: Array<any> | Map<string, any>, iteratee: (item: any, key?: string) => Promise<void>): Promise<void> {
+        if (!iterable) return Promise.resolve();
         if (typeof iteratee !== 'function') throw new TypeError(`Given iteratee is not a proper function.`);
         if (Array.isArray(iterable) === true) {
-            await Promise.all(iterable.map(
+            return Promise.all(iterable.map(
                 /** 
                  * @description Launch the iteratee function for each item in the array asynchronously
                  * @param {any} item - The item
@@ -22,12 +22,11 @@ export class Processor {
                     await iteratee(item); 
                     return null; 
                 }
-            ));
-            return;
+            )).then(() => {});
         }
         if (iterable instanceof Map) {
             const keys = Array.from(iterable.keys());
-            await Promise.all(keys.map(
+            return Promise.all(keys.map(
                 /** 
                  * @description Launch the iteratee function for each item in the array asynchronously
                  * @param {string} key - The key
@@ -38,10 +37,9 @@ export class Processor {
                     await iteratee(iterable.get(key), key); 
                     return null; 
                 }
-            ));
-            return;
+            )).then(() => {});
         }
-        throw new TypeError(`Given iterable is not a proper Array nor Map.`);
+        return Promise.reject(new TypeError(`Given iterable is not a proper Array nor Map.`));
     }
 
     /**
@@ -54,7 +52,7 @@ export class Processor {
      * @public
      * @async
      */
-    static async map(iterable: Array<any>, iteratee: Function, filterIteratee?: Function): Promise<Array<any>> {
+    static map(iterable: Array<any>, iteratee: Function, filterIteratee?: Function): Promise<Array<any>> {
         if (!iterable) return Promise.resolve([]);
         if (Array.isArray(iterable) === false) throw new TypeError(`Given iterable is not a proper Array.`);
         if (typeof iteratee !== 'function') throw new TypeError(`Given iteratee is not a proper function.`);

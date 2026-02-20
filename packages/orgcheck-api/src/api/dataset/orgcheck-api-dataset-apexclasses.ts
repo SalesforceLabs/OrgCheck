@@ -133,7 +133,7 @@ export class DatasetApexClasses implements Dataset {
                 apexClass.extends = record.SymbolTable.parentClass;
                 if (record.SymbolTable.tableDeclaration) {
                     apexClass.annotations = record.SymbolTable.tableDeclaration.annotations?.map((/** @type {any} */ a: any) => a?.name ?? a);
-                    await Processor.forEach(record.SymbolTable.tableDeclaration.modifiers, (/** @type {any} */ m: any) => {
+                    await Processor.forEach(record.SymbolTable.tableDeclaration.modifiers, async (/** @type {any} */ m: any) => {
                         switch (m) {
                             case 'with sharing':      apexClass.specifiedSharing = 'with';      break;
                             case 'without sharing':   apexClass.specifiedSharing = 'without';   break;
@@ -181,7 +181,7 @@ export class DatasetApexClasses implements Dataset {
         const relatedClassesByApexTest: Map<string, Set<string>> = new Map();
         await Processor.forEach(
             apexCodeCoverageRecords,
-            (/** @type {any} */ record: any) => {
+            async (/** @type {any} */ record: any) => {
                 // Get the ID15 of the class that is tested and the test class
                 const id = sfdcManager.caseSafeId(record.ApexClassOrTriggerId);
                 const testId = sfdcManager.caseSafeId(record.ApexTestClassId);
@@ -195,7 +195,7 @@ export class DatasetApexClasses implements Dataset {
             }
         );
         await Promise.all([
-            Processor.forEach(relatedTestsByApexClass, (/** @type {Set<string>} */ relatedTestsIds: Set<string>, /** @type {string} */ apexClassId: string) => {
+            Processor.forEach(relatedTestsByApexClass, async (/** @type {Set<string>} */ relatedTestsIds: Set<string>, /** @type {string} */ apexClassId: string) => {
                 if (apexClasses.has(apexClassId)) { // Just to be safe!
                     const clazz = apexClasses.get(apexClassId);
                     if (clazz) {
@@ -203,7 +203,7 @@ export class DatasetApexClasses implements Dataset {
                     }
                 }
             }),
-            Processor.forEach(relatedClassesByApexTest, (/** @type {Set<string>} */ relatedClassesIds: Set<string>, /** @type {string} */apexTestId: string) => {
+            Processor.forEach(relatedClassesByApexTest, async (/** @type {Set<string>} */ relatedClassesIds: Set<string>, /** @type {string} */apexTestId: string) => {
                 if (apexClasses.has(apexTestId)) { // In case a test from a package is covering a classe the id will not be in the Class map!
                     const testClazz = apexClasses.get(apexTestId);
                     if (testClazz) {
@@ -217,7 +217,7 @@ export class DatasetApexClasses implements Dataset {
         logger?.log(`Parsing ${apexCodeCoverageAggRecords?.length} apex code coverage aggregates...`);
         await Processor.forEach(
             apexCodeCoverageAggRecords,
-            (/** @type {any} */ record: any) => {
+            async (/** @type {any} */ record: any) => {
                 // Get the ID15 of the class that is tested
                 const id = sfdcManager.caseSafeId(record.ApexClassOrTriggerId);
                 if (apexClasses.has(id)) { // make sure the id is an existing class!
@@ -234,7 +234,7 @@ export class DatasetApexClasses implements Dataset {
         logger?.log(`Parsing ${asyncApexJobRecords?.length} schedule apex classes...`);
         await Processor.forEach(
             asyncApexJobRecords,
-            (/** @type {any} */ record: any) => {
+            async (/** @type {any} */ record: any) => {
                 // Get the ID15 of the class that is scheduled
                 const id = sfdcManager.caseSafeId(record.ApexClassId);
                 if (apexClasses.has(id)) { // make sure the id is an existing class!
@@ -251,7 +251,7 @@ export class DatasetApexClasses implements Dataset {
         logger?.log(`Parsing ${apexTestResultRecords?.length} test results...`);
         await Processor.forEach(
             apexTestResultRecords,
-            (/** @type {any} */ record: any) => {
+            async (/** @type {any} */ record: any) => {
                 // Get the ID15 of the related test class
                 const id = sfdcManager.caseSafeId(record.ApexClassId);
                 if (apexClasses.has(id)) { // make sure the id is an existing class
@@ -293,7 +293,7 @@ export class DatasetApexClasses implements Dataset {
 
         // FINALLY!!!! Compute the score of all items
         logger?.log(`Computing scores for ${apexClasses.size} Apex classes...`);
-        await Processor.forEach(apexClasses, (/** @type {SFDC_ApexClass} */ apexClass: SFDC_ApexClass) => {
+        await Processor.forEach(apexClasses, async (/** @type {SFDC_ApexClass} */ apexClass: SFDC_ApexClass) => {
             apexClassDataFactory.computeScore(apexClass);
         });
 

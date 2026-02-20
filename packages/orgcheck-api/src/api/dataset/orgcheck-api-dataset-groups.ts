@@ -74,7 +74,7 @@ export class DatasetGroups implements Dataset {
             if (record.GroupMembers && record.GroupMembers.records && record.GroupMembers.records?.length > 0) {
                 await Processor.forEach(
                     record.GroupMembers.records, 
-                    (/** @type {any} */ m: any) => {
+                    async (/** @type {any} */ m: any) => {
                         const groupMemberId = sfdcManager.caseSafeId(m.UserOrGroupId);
                         (groupMemberId.startsWith('005') ? groupDirectUserIds : groupDirectGroupIds).push(groupMemberId);
                     }

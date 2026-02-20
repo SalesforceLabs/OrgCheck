@@ -1,6 +1,6 @@
 import { Recipe } from '../core/orgcheck-api-recipe';
 import { Processor } from '../core/orgcheck-api-processor';
-import { Data, DataWithoutScore } from '../core/orgcheck-api-data';
+import { Data } from '../core/orgcheck-api-data';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
@@ -69,7 +69,7 @@ export class RecipeInternalActiveUsers implements Recipe {
                     .filter((permName) => user.profileRef.importantPermissions[permName] === true)
                     .forEach((permName) => user.importantPermissionsGrantedBy[permName].push(user.profileRef));
             }
-            await Processor.forEach(user.permissionSetRefs, (/** @type {SFDC_PermissionSet} */ permissionSet: SFDC_PermissionSet) => {
+            await Processor.forEach(user.permissionSetRefs, async (/** @type {SFDC_PermissionSet} */ permissionSet: SFDC_PermissionSet) => {
                 Object.keys(permissionSet.importantPermissions)
                     .filter((permName) => permissionSet.importantPermissions[permName] === true)
                     .forEach((permName) => user.importantPermissionsGrantedBy[permName].push(permissionSet));

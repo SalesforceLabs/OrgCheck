@@ -1,6 +1,6 @@
 import { Recipe } from '../core/orgcheck-api-recipe';
 import { Processor } from '../core/orgcheck-api-processor';
-import { Data, DataWithoutScore } from '../core/orgcheck-api-data';
+import { Data } from '../core/orgcheck-api-data';
 import { DataMatrix } from '../core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
@@ -47,7 +47,7 @@ export class RecipeProfileRestrictions implements Recipe {
         // Augment and Filter data
         /** @type {Array<SFDC_ProfileRestrictions>} */
         const array: Array<SFDC_ProfileRestrictions> = [];
-        await Processor.forEach(profileRestrictions, (/** @type {SFDC_ProfileRestrictions} */ restriction: SFDC_ProfileRestrictions) => {
+        await Processor.forEach(profileRestrictions, async (/** @type {SFDC_ProfileRestrictions} */ restriction: SFDC_ProfileRestrictions) => {
             // Augment data
             const profileRef = profiles.get(restriction.profileId);
             if (profileRef) {

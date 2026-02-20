@@ -1,6 +1,6 @@
 import { Recipe } from '../core/orgcheck-api-recipe';
 import { Processor } from '../core/orgcheck-api-processor';
-import { Data, DataWithoutScore } from '../core/orgcheck-api-data';
+import { Data } from '../core/orgcheck-api-data';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
@@ -53,7 +53,7 @@ export class RecipeRecordType implements Recipe {
         // Augment and filter data
         /** @type {Array<SFDC_RecordType>} */ 
         const array: Array<SFDC_RecordType> = [];
-        await Processor.forEach(recordTypes, (/** @type {SFDC_RecordType} */ recordType: SFDC_RecordType) => {
+        await Processor.forEach(recordTypes, async (/** @type {SFDC_RecordType} */ recordType: SFDC_RecordType) => {
             // Augment data
             const objectRef = objects.get(recordType.objectId);
             if (objectRef) {

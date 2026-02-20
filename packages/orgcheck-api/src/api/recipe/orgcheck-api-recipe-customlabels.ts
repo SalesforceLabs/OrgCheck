@@ -1,6 +1,6 @@
 import { Recipe } from '../core/orgcheck-api-recipe';
 import { Processor } from '../core/orgcheck-api-processor';
-import { Data, DataWithoutScore } from '../core/orgcheck-api-data';
+import { Data } from '../core/orgcheck-api-data';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
@@ -41,7 +41,7 @@ export class RecipeCustomLabels implements Recipe {
         // Filter data
         /** @type {Array<SFDC_CustomLabel>} */
         const array: Array<SFDC_CustomLabel> = [];
-        await Processor.forEach(customLabels, (/** @type {SFDC_CustomLabel} */ customLabel: SFDC_CustomLabel) => {
+        await Processor.forEach(customLabels, async (/** @type {SFDC_CustomLabel} */ customLabel: SFDC_CustomLabel) => {
             if (namespace === OrgCheckGlobalParameter.ALL_VALUES || customLabel.package === namespace) {
                 array.push(customLabel);
             }

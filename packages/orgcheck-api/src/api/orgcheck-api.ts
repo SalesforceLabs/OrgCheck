@@ -11,7 +11,7 @@ import { OrgCheckGlobalParameter } from './core/orgcheck-api-globalparameter';
 import { RecipeAliases } from './core/orgcheck-api-recipes-aliases';
 import { RecipeManager } from './core/orgcheck-api-recipemanager-impl';
 import { RecipeManagerIntf } from './core/orgcheck-api-recipemanager';
-import { SalesforceManager } from './core/orgcheck-api-salesforcemanager-impl';
+import { SalesforceManager, SalesforceManagerSetup } from './core/orgcheck-api-salesforcemanager-impl';
 import { SalesforceManagerIntf } from './core/orgcheck-api-salesforcemanager';
 import { SalesforceUsageInformation } from './core/orgcheck-api-salesforce-watchdog';
 import { SecretSauce } from './core/orgcheck-api-secretsauce';
@@ -52,8 +52,20 @@ import { SFDC_WebLink } from './data/orgcheck-api-data-weblink';
 import { SFDC_Workflow } from './data/orgcheck-api-data-workflow';
 import { SFDC_CustomTab } from './data/orgcheck-api-data-customtab';
 import { SFDC_Dashboard } from './data/orgcheck-api-data-dashboard';
-import { Storage } from './core/orgcheck-api-storage-impl';
+import { Storage, StorageSetup } from './core/orgcheck-api-storage-impl';
 import { Compressor } from './core/orgcheck-api-compressor-impl';
+
+export interface ApiSetup { 
+    logSettings: BasicLoggerIntf; 
+    salesforce: SalesforceManagerSetup;
+    storage: { 
+        compression: { 
+            useFflate: boolean; 
+            mockImpl?: any; 
+        }; 
+        localImpl: StorageSetup; 
+    }; 
+}
 
 /**
  * @description Org Check API main class
@@ -65,9 +77,7 @@ export class API {
      * @type {string}
      * @public
      */
-    get version(): string {
-        return 'Nitrogen [N,7]';
-    }
+    public readonly version = 'Nitrogen [N,7]';
 
     /**
      * @description Numerical representation of the Salesforce API Version we use
@@ -86,48 +96,48 @@ export class API {
      * @type {RecipeManagerIntf} 
      * @private
      */
-    _recipeManager: RecipeManagerIntf;
+    private _recipeManager: RecipeManagerIntf;
 
     /**
      * @description Private Dataset Manager property used to run a dataset given its alias
      * @type {DatasetManagerIntf}
      * @private
      */
-    _datasetManager: DatasetManagerIntf;
+    private _datasetManager: DatasetManagerIntf;
 
     /**
      * @description Private Salesforce Manager property used to call the salesforce APIs using JsForce framework
      * @type {SalesforceManagerIntf}
      * @private
      */
-    _sfdcManager: SalesforceManagerIntf;
+    private _sfdcManager: SalesforceManagerIntf;
 
     /**
      * @description Private data cache manager to store data from datasetManager
      * @type {DataCacheManagerIntf}
      * @private
      */
-    _cacheManager: DataCacheManagerIntf;
+    private _cacheManager: DataCacheManagerIntf;
 
     /**
      * @description Private Logger property used to send log information to the UI (if any)
      * @type {LoggerIntf}
      * @private
      */
-    _logger: LoggerIntf;
+    private _logger: LoggerIntf;
 
     /**
      * @description Is the current user accepted the terms manually to use Org Check in this org?
      * @type {boolean}
      * @private
      */
-    _usageTermsAcceptedManually: boolean;
+    private _usageTermsAcceptedManually: boolean;
 
     /**
      * @description Org Check constructor
-     * @param {{logSettings: BasicLoggerIntf, salesforce: {connection: {useJsForce: boolean, mockImpl?: any}, authentication: any}, storage: {compression: {useFflate: boolean, mockImpl?: any}, localImpl: any}}} setup - the setup object to configure the Org Check API
+     * @param {ApiSetup} setup - the setup object to configure the Org Check API
      */    
-    constructor(setup: { logSettings: BasicLoggerIntf; salesforce: { connection: { useJsForce: boolean; mockImpl?: any; }; authentication: any; }; storage: { compression: { useFflate: boolean; mockImpl?: any; }; localImpl: any; }; }) {
+    constructor(setup: ApiSetup) {
         
         // --------------------
         // Logger
@@ -143,21 +153,7 @@ export class API {
         if (!setup?.salesforce) { 
             throw new Error(`Setup is missing a salesforce property`); 
         }
-        if (!setup?.salesforce?.connection) { 
-            throw new Error(`Setup is missing a salesforce.connection property`); 
-        }
-        if (setup?.salesforce?.connection?.useJsForce === true) {
-            if (!setup?.salesforce?.authentication) { 
-                throw new Error(`Setup is missing a salesforce.authentication property`); 
-            }
-            // @ts-ignore 
-            this._sfdcManager = new SalesforceManager(window?.jsforce ?? globalThis?.jsforce ?? null, setup?.salesforce?.authentication);
-        } else {
-            if (!setup?.salesforce?.connection?.mockImpl) { 
-                throw new Error(`Setup is missing a salesforce.connection.mockImpl property`); 
-            }
-            this._sfdcManager = new SalesforceManager(setup?.salesforce?.connection?.mockImpl, {});
-        }
+        this._sfdcManager = new SalesforceManager(setup?.salesforce);
         
         // --------------------
         // Cache Manager

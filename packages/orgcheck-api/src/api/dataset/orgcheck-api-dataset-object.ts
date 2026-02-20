@@ -106,7 +106,7 @@ export class DatasetObject implements Dataset {
         /** @type {Array<string>} */
         const customFieldIds: Array<string> = []; 
         const standardFieldsMapper = new Map();
-        await Processor.forEach(fields, (/** @type {any} */f: any) => {
+        await Processor.forEach(fields, async (/** @type {any} */f: any) => {
             if (f && f.DurableId && f.DurableId.split && f.DurableId.includes) {
                 const id = sfdcManager.caseSafeId(f.DurableId.split('.')[1]);
                 if (f.DurableId?.includes('.00N')) {

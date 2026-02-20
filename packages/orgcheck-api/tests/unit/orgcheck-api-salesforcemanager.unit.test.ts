@@ -1,14 +1,18 @@
-import { describe, it, expect } from "@jest/globals";
 import { SalesforceManager } from "../../src/api/core/orgcheck-api-salesforcemanager-impl";
 import { SimpleLoggerMock_DoingNothing } from "../utils/orgcheck-api-logger-mock.utility";
-import { JsForceMock } from "../utils/orgcheck-api-jsforce-mock.utility";
+import { jsforce } from "../utils/orgcheck-api-jsforce-mock.utility";
 
 describe('tests.api.unit.SalesforceManager', () => {
   const simpleLogger = new SimpleLoggerMock_DoingNothing();
+  // @ts-ignore    
+  globalThis.jsforce = jsforce;
   
   describe('soqlQuery use cases', () => {
-    const manager = new SalesforceManager(JsForceMock, {});
-
+    const manager = new SalesforceManager({
+      authenticationOptions: {
+        accessToken: 'ABC'
+      }
+    });
     it('checks if the salesforce manager implementation runs soqlQuery correctly with a good query', async () => {
       const results = await manager.soqlQuery([{ string: 'SELECT Id FROM Account #Records=10# #Wait900ms#' }], simpleLogger);
       expect(results).toBeDefined();
@@ -115,7 +119,11 @@ describe('tests.api.unit.SalesforceManager', () => {
   });
 
   describe('metadataApi use cases', () => {
-    const manager = new SalesforceManager(JsForceMock, {});
+    const manager = new SalesforceManager({
+      authenticationOptions: {
+        accessToken: 'ABC'
+      }
+    });
 
     it('checks if the salesforce manager implementation runs readMetadata correctly with explicit members', async () => {
       const results = await manager.readMetadata([{ type: 'ProfilePasswordPolicy #Members=4#', members: [ 'member0', 'member999' ] }], simpleLogger);
@@ -139,7 +147,11 @@ describe('tests.api.unit.SalesforceManager', () => {
   });
 
   describe('readMetadataAtScale use cases', () => {
-    const manager = new SalesforceManager(JsForceMock, {});
+    const manager = new SalesforceManager({
+      authenticationOptions: {
+        accessToken: 'ABC'
+      }
+    });
 
     it('checks if the salesforce manager implementation runs readMetadataAtScale correctly', async () => {
       const results = await manager.readMetadataAtScale('PageLayout', ['A','B','C'], [], simpleLogger);

@@ -1,4 +1,3 @@
-import { DataAliases } from '../core/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';

@@ -1,6 +1,6 @@
 import { Recipe } from '../core/orgcheck-api-recipe';
 import { Processor } from '../core/orgcheck-api-processor';
-import { Data, DataWithoutScore } from '../core/orgcheck-api-data';
+import { Data } from '../core/orgcheck-api-data';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
@@ -41,7 +41,7 @@ export class RecipeLightningAuraComponents implements Recipe {
         // Filter data
         /** @type {Array<SFDC_LightningAuraComponent>} */
         const array: Array<SFDC_LightningAuraComponent> = [];
-        await Processor.forEach(components, (/** @type {SFDC_LightningAuraComponent} */ component: SFDC_LightningAuraComponent) => {
+        await Processor.forEach(components, async (/** @type {SFDC_LightningAuraComponent} */ component: SFDC_LightningAuraComponent) => {
             if (namespace === OrgCheckGlobalParameter.ALL_VALUES || component.package === namespace) {
                 array.push(component);
             }

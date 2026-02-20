@@ -58,7 +58,7 @@ export class DatasetFlows implements Dataset {
         logger?.log(`Retrieving dependencies of ${flowDefRecords?.length} flow versions...`);
         /** @type {Array<string>} */ 
         const flowDependenciesIds: Array<string> = [];
-        await Processor.forEach(flowDefRecords, (/** @type {any} */ record: any) => {
+        await Processor.forEach(flowDefRecords, async (/** @type {any} */ record: any) => {
             // Add the ID15 of the most interesting flow version
             flowDependenciesIds.push(sfdcManager.caseSafeId(record.ActiveVersionId ?? record.LatestVersionId));
             // Add the ID15 of the flow definition
@@ -108,7 +108,7 @@ export class DatasetFlows implements Dataset {
 
         // Add count of Flow verions (whatever they are active or not)
         logger?.log(`Parsing ${flowVersionsByDefRecords?.length} flow versions...`);
-        await Processor.forEach(flowVersionsByDefRecords, (/** @type {any} */ record: any) => {
+        await Processor.forEach(flowVersionsByDefRecords, async (/** @type {any} */ record: any) => {
                 
             // Get the ID15s of the parent flow definition
             const parentId = sfdcManager.caseSafeId(record.DefinitionId);
@@ -134,7 +134,7 @@ export class DatasetFlows implements Dataset {
 
         // Lets parse the flow versions by ourselves
         logger?.log(`Parsing ${records?.length} flow versions from Tooling API...`);
-        await Processor.forEach(records, (/** @type {any} */ record: any)=> {
+        await Processor.forEach(records, async (/** @type {any} */ record: any)=> {
 
             // Get the ID15s of this flow version and parent flow definition
             const id = sfdcManager.caseSafeId(record.Id);
@@ -199,7 +199,7 @@ export class DatasetFlows implements Dataset {
         });
 
         // Compute the score of all definitions
-        await Processor.forEach(flowDefinitions, (/** @type {SFDC_Flow} */ flowDefinition: SFDC_Flow) => flowDefinitionDataFactory.computeScore(flowDefinition));
+        await Processor.forEach(flowDefinitions, async (/** @type {SFDC_Flow} */ flowDefinition: SFDC_Flow) => flowDefinitionDataFactory.computeScore(flowDefinition));
 
         // Return data as map
         logger?.log(`Done`);

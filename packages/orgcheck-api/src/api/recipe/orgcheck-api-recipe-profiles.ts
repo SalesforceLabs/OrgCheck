@@ -1,6 +1,6 @@
 import { Recipe } from '../core/orgcheck-api-recipe';
 import { Processor } from '../core/orgcheck-api-processor';
-import { Data, DataWithoutScore } from '../core/orgcheck-api-data';
+import { Data } from '../core/orgcheck-api-data';
 import { DataMatrix } from '../core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
@@ -41,7 +41,7 @@ export class RecipeProfiles implements Recipe {
         // Filter data
         /** @type {Array<SFDC_Profile>} */ 
         const array: Array<SFDC_Profile> = [];
-        await Processor.forEach(profiles, (/** @type {SFDC_Profile} */ profile: SFDC_Profile) => {
+        await Processor.forEach(profiles, async (/** @type {SFDC_Profile} */ profile: SFDC_Profile) => {
             if (namespace === OrgCheckGlobalParameter.ALL_VALUES || profile.package === namespace) {
                 array.push(profile);
             }

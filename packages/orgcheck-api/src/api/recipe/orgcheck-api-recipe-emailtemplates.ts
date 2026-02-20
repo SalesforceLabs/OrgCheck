@@ -1,5 +1,5 @@
 import { Recipe } from '../core/orgcheck-api-recipe';
-import { Data, DataWithoutScore } from '../core/orgcheck-api-data';
+import { Data } from '../core/orgcheck-api-data';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
@@ -41,7 +41,7 @@ export class RecipeEmailTemplates implements Recipe {
         // Filter data
         /** @type {Array<SFDC_EmailTemplate>} */
         const array: Array<SFDC_EmailTemplate> = [];
-        await Processor.forEach(emailTemplates, (/** @type {SFDC_EmailTemplate} */ emailTemplate: SFDC_EmailTemplate) => {
+        await Processor.forEach(emailTemplates, async (/** @type {SFDC_EmailTemplate} */ emailTemplate: SFDC_EmailTemplate) => {
             if (namespace === OrgCheckGlobalParameter.ALL_VALUES || emailTemplate.package === namespace) {
                 array.push(emailTemplate);
             }

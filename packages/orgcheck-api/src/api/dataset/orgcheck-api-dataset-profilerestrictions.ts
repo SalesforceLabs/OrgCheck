@@ -4,9 +4,7 @@ import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { Processor } from '../core/orgcheck-api-processor';
 import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
-import { SFDC_ProfileRestrictions, 
-            SFDC_ProfileIpRangeRestriction,
-            SFDC_ProfileLoginHourRestriction } from '../data/orgcheck-api-data-profilerestrictions';
+import { SFDC_ProfileRestrictions } from '../data/orgcheck-api-data-profilerestrictions';
 
 const COMPUTE_NUMBER_FROM_IP = (/** @type {string} */ ip: string) => {
     return ip?.split('.').reduce((prev, currentItem, currentIndex, array) => { 
