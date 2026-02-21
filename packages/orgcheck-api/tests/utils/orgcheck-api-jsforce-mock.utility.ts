@@ -6,11 +6,13 @@ const __queryMock = jest.fn(async function (soql: string) {
 
   // If the Query contains a wait instruction, we wait the specified time before returning the result. This is useful to test the timeout of the API calls.
   const matchWait: any = soql.match("#Wait=(?<wait>[0-9]*)#");
-  const step1_sleep = new Promise((resolve) => setTimeout(resolve, matchWait ? Number.parseInt(matchWait?.groups.wait) : 0));
+  await new Promise((resolve) => setTimeout(resolve, matchWait ? Number.parseInt(matchWait?.groups.wait) : 0));
 
   // If the Query contains an error instruction, we throw an error with the specified message. This is useful to test the error handling of the API calls.
   const matchError: any = soql.match("#Error=(?<message>.*)#");
-  const step2_error = new Promise((resolve, reject) => matchError ? reject(matchError?.groups.message) : resolve('ok'));
+  if (matchError) {
+    throw new Error(matchError?.groups.message);
+  }
 
   // If the Query contains a Records instruction, we should return that amount of recrods
   const matchNbRecords: any = soql.match("#Records=(?<nb>[0-9]*)#");
@@ -21,57 +23,49 @@ const __queryMock = jest.fn(async function (soql: string) {
 
   // If the query contains a not queryMore instruction, we get the max records before the error blows
   const matchNoSupportQueryMore: any = soql.match("#NoSupportQueryMore,max=(?<nb>[0-9]*)#"); 
-  const step3_return = new Promise((resolve, reject) => {
-    if (matchNoSupportQueryMore) {
-      const maxBeforeError = Number.parseInt(matchNoSupportQueryMore?.groups?.nb ?? '0'); // If not specified, we consider that there is no max 
+  if (matchNoSupportQueryMore) {
+    const maxBeforeError = Number.parseInt(matchNoSupportQueryMore?.groups?.nb ?? '0'); // If not specified, we consider that there is no max 
 
-      // If the query contains a LMIT statement
-      const matchLimit: any = soql.match(" LIMIT (?<size>[0-9]*)");
-      const maxNbRecords = Number.parseInt(matchLimit?.groups?.size ?? '0'); // If not specified, we should consider that there is no limit
-      if (matchLimit && maxNbRecords > maxBeforeError) {
-          reject('This entity does not support query more');
-          return;
-      }
-      let realSize: number;
-      if (nbRecordsSoFarForCustomQueryMore + maxNbRecords > nbTotalRecords) {
-        realSize = nbTotalRecords - nbRecordsSoFarForCustomQueryMore;
-        nbRecordsSoFarForCustomQueryMore = 0;
-      } else {
-        realSize = maxNbRecords;
-        nbRecordsSoFarForCustomQueryMore += maxNbRecords;
-      }
-      const records: any[] = [];
-      for (let i = 0; i < realSize; i++) {
-        const record: any = {};
-        fields?.forEach(field => record[field] = `${field}-${i}`);
-        records.push(record);
-      }
-      resolve({
-        records: records,
-        done: true
-      });
-      return;
+    // If the query contains a LMIT statement
+    const matchLimit: any = soql.match(" LIMIT (?<size>[0-9]*)");
+    const maxNbRecords = Number.parseInt(matchLimit?.groups?.size ?? '0'); // If not specified, we should consider that there is no limit
+    if (matchLimit && maxNbRecords > maxBeforeError) {
+        throw new Error('This entity does not support query more');
     }
-    const matchSupportQueryMore = soql.match("#SupportQueryMore,batchSize=(?<size>[0-9]*)#");
-    const batchSize = Number.parseInt(matchSupportQueryMore?.groups?.size ?? '2000');
-    const currentBatchSize = nbTotalRecords > batchSize ? batchSize : nbTotalRecords;
-    const remaining = nbTotalRecords - currentBatchSize;
-    const records: any = [];
-    for (let i = 0; i < currentBatchSize; i++) {
+    let realSize: number;
+    if (nbRecordsSoFarForCustomQueryMore + maxNbRecords > nbTotalRecords) {
+      realSize = nbTotalRecords - nbRecordsSoFarForCustomQueryMore;
+      nbRecordsSoFarForCustomQueryMore = 0;
+    } else {
+      realSize = maxNbRecords;
+      nbRecordsSoFarForCustomQueryMore += maxNbRecords;
+    }
+    const records: any[] = [];
+    for (let i = 0; i < realSize; i++) {
       const record: any = {};
       fields?.forEach(field => record[field] = `${field}-${i}`);
       records.push(record);
     }
-    resolve({
+    return({
       records: records,
-      done: remaining <= 0,
-      nextRecordsUrl: `/next #Remaining=${remaining}# #SupportQueryMore,batchSize=${batchSize}# #Fields=${fields?.join(',')}#`
+      done: true
     });
-  })
-  
-  await step1_sleep;
-  await step2_error;
-  return await step3_return;
+  }
+  const matchSupportQueryMore = soql.match("#SupportQueryMore,batchSize=(?<size>[0-9]*)#");
+  const batchSize = Number.parseInt(matchSupportQueryMore?.groups?.size ?? '2000');
+  const currentBatchSize = nbTotalRecords > batchSize ? batchSize : nbTotalRecords;
+  const remaining = nbTotalRecords - currentBatchSize;
+  const records: any = [];
+  for (let i = 0; i < currentBatchSize; i++) {
+    const record: any = {};
+    fields?.forEach(field => record[field] = `${field}-${i}`);
+    records.push(record);
+  }
+  return({
+    records: records,
+    done: remaining <= 0,
+    nextRecordsUrl: `/next #Remaining=${remaining}# #SupportQueryMore,batchSize=${batchSize}# #Fields=${fields?.join(',')}#`
+  });
 });
 
 const __queryMoreMock = jest.fn(async function (locator: string) {
