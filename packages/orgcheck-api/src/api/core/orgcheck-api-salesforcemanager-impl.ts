@@ -1,9 +1,10 @@
-import { OBJECTTYPE_ID_CUSTOM_SETTING, OBJECTTYPE_ID_CUSTOM_SOBJECT, OBJECTTYPE_ID_CUSTOM_EXTERNAL_SOBJECT, OBJECTTYPE_ID_CUSTOM_METADATA_TYPE, OBJECTTYPE_ID_CUSTOM_EVENT, OBJECTTYPE_ID_KNOWLEDGE_ARTICLE, OBJECTTYPE_ID_CUSTOM_BIG_OBJECT, OBJECTTYPE_ID_STANDARD_SOBJECT } from "../data/orgcheck-api-data-objecttype";
-import { SimpleLoggerIntf } from "./orgcheck-api-logger";
-import { SalesforceMetadataTypes } from "./orgcheck-api-salesforce-metadatatypes";
-import { SalesforceWatchDog, SalesforceUsageInformation } from "./orgcheck-api-salesforce-watchdog";
-import { SalesforceError, SalesforceManagerIntf, SalesforceMetadataRequest, SalesforceQueryRequest } from "./orgcheck-api-salesforcemanager";
-import { SecretSauce } from "./orgcheck-api-secretsauce";
+import { SObjectTypes } from 'src/api/data/orgcheck-api-data-objecttype';
+import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
+import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
+import { SalesforceWatchDog, SalesforceUsageInformation } from 'src/api/core/orgcheck-api-salesforce-watchdog';
+import { SalesforceError, SalesforceManagerIntf, SalesforceMetadataRequest, SalesforceQueryRequest } from 'src/api/core/orgcheck-api-salesforcemanager';
+import { SecretSauce } from 'src/api/core/orgcheck-api-secretsauce';
+import { SalesforceManagerSetup } from 'src/api/core/orgcheck-api-setup-salesforcemanager';
 
 /**
  * @description Maximum number of Ids that is contained per DAPI query
@@ -52,18 +53,6 @@ const MAX_MEMBERS_IN_METADATAAPI_REQUEST_SIZE: number = 10;
  * @see https://developer.salesforce.com/docs/atlas.en-us.232.0.api_rest.meta/api_rest/resources_composite_composite.htm
  */
 const MAX_COMPOSITE_REQUEST_SIZE: number = 5;
-
-export interface SalesforceAuthenticationOptions {
-    accessToken?: string; 
-    clientId?: string; 
-    clientSecret?: string; 
-    redirectUri?: string;
-}
-
-export interface SalesforceManagerSetup {
-    connection?: any;
-    authenticationOptions?: SalesforceAuthenticationOptions;
-}
 
 /** 
  * @description Salesforce APIs Manager Implementation with JsForce Connection
@@ -282,14 +271,14 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @public
      */
     public getObjectType(apiName: string, isCustomSetting: boolean): string {
-        if (isCustomSetting === true) return OBJECTTYPE_ID_CUSTOM_SETTING;
-        if (apiName?.endsWith('__c')) return OBJECTTYPE_ID_CUSTOM_SOBJECT;
-        if (apiName?.endsWith('__x')) return OBJECTTYPE_ID_CUSTOM_EXTERNAL_SOBJECT;
-        if (apiName?.endsWith('__mdt')) return OBJECTTYPE_ID_CUSTOM_METADATA_TYPE;
-        if (apiName?.endsWith('__e')) return OBJECTTYPE_ID_CUSTOM_EVENT;
-        if (apiName?.endsWith('__ka')) return OBJECTTYPE_ID_KNOWLEDGE_ARTICLE;
-        if (apiName?.endsWith('__b')) return OBJECTTYPE_ID_CUSTOM_BIG_OBJECT;
-        return OBJECTTYPE_ID_STANDARD_SOBJECT;
+        if (isCustomSetting === true) return SObjectTypes.CUSTOM_SETTING;
+        if (apiName?.endsWith('__c')) return SObjectTypes.CUSTOM_SOBJECT;
+        if (apiName?.endsWith('__x')) return SObjectTypes.CUSTOM_EXTERNAL_SOBJECT;
+        if (apiName?.endsWith('__mdt')) return SObjectTypes.CUSTOM_METADATA_TYPE;
+        if (apiName?.endsWith('__e')) return SObjectTypes.CUSTOM_EVENT;
+        if (apiName?.endsWith('__ka')) return SObjectTypes.KNOWLEDGE_ARTICLE;
+        if (apiName?.endsWith('__b')) return SObjectTypes.CUSTOM_BIG_OBJECT;
+        return SObjectTypes.STANDARD_SOBJECT;
     }
 
     /**

@@ -1,7 +1,7 @@
-import { RecipeCollection } from '../core/orgcheck-api-recipecollection';
-import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
-import { RecipeAliases } from '../core/orgcheck-api-recipes-aliases';
-import { SecretSauce } from '../core/orgcheck-api-secretsauce';
+import { RecipeCollection } from 'src/api/core/orgcheck-api-recipecollection';
+import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
+import { RecipeAliases } from 'src/api/core/orgcheck-api-recipes-aliases';
+import { SecretSauce } from 'src/api/core/orgcheck-api-secretsauce';
 
 export class RecipeHardcodedURLsView implements RecipeCollection {
 

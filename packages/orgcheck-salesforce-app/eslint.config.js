@@ -9,7 +9,6 @@ const jestPlugIn = require('eslint-plugin-jest');
 module.exports = defineConfig([
   globalIgnores([ 
     'build/libs/**/*.js', 
-    'build/dist/**/*.js',
     'force-app/main/default/lwc/**/libs/*.js',
   ]),
   {

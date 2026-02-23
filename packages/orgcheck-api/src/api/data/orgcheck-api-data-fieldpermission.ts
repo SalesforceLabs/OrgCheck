@@ -1,7 +1,7 @@
-import { DataAliases } from '../core/orgcheck-api-data-aliases';
-import { DataWithoutScore } from '../core/orgcheck-api-data';
-import { SFDC_PermissionSet } from './orgcheck-api-data-permissionset';
-import { SFDC_Profile } from './orgcheck-api-data-profile';
+import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
+import { DataWithoutScore } from 'src/api/core/orgcheck-api-data';
+import { SFDC_PermissionSet } from 'src/api/data/orgcheck-api-data-permissionset';
+import { SFDC_Profile } from 'src/api/data/orgcheck-api-data-profile';
 
 /**
  * @description Representation of a Field permission for a specific parent (profile or permission set) in Org Check

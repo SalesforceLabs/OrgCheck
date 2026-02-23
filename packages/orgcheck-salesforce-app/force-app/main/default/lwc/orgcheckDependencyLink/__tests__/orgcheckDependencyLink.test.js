@@ -1,4 +1,3 @@
-// @ts-ignore
 import { createElement } from '@lwc/engine-dom';
 import OrgcheckDependencyLink from '../orgcheckDependencyLink';
 

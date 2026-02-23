@@ -1,4 +1,4 @@
-import { ColumnType, TableColumn, TableColumnWithModifiers } from "./orgcheck-ui-table-column";
+import { ColumnType, TableColumn, TableColumnWithModifiers } from 'src/ui/table/orgcheck-ui-table-column';
 
 export class CellFactory {
 

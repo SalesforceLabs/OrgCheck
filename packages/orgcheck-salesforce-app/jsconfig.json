@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es2015",
+        "baseUrl": ".",
+        "paths": {
+            "@dist/*":   [ "../orgcheck-api/dist/*" ]
+        }
+    },
+    "include": [
+        "**/*.js"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}

@@ -1,4 +1,4 @@
-export const jsforce: any = jest.mock('jsforce');
+const jsforce: any = jest.mock('jsforce');
 
 let nbRecordsSoFarForCustomQueryMore = 0;
 
@@ -162,3 +162,5 @@ jsforce.Connection = jest.fn().mockImplementation(() => {
       }
   };
 });
+
+export default jsforce;

@@ -1,5 +1,17 @@
-import { WhereToGetData, WhereToGetScoreData, WhereToGetLinkData, WhereToGetLinksData, WhereToGetObjectsData, WhereToGetTextsData } from "./orgcheck-ui-table-datagetters";
-import { TextTruncatedModifier, PreformattedModifier, EmptyModifier, NumericMinimumModifier, NumericMaximumModifier, NumericMinMaxModifier } from "./orgcheck-ui-table-datamodifiers";
+import { 
+    WhereToGetData, 
+    WhereToGetScoreData, 
+    WhereToGetLinkData, 
+    WhereToGetLinksData, 
+    WhereToGetObjectsData, 
+    WhereToGetTextsData } from 'src/ui/table/orgcheck-ui-table-datagetters';
+import { 
+    TextTruncatedModifier, 
+    PreformattedModifier, 
+    EmptyModifier,
+    NumericMinimumModifier, 
+    NumericMaximumModifier, 
+    NumericMinMaxModifier } from 'src/ui/table/orgcheck-ui-table-datamodifiers';
 
 
 export enum Orientation {

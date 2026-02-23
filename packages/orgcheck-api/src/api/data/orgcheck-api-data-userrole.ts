@@ -1,6 +1,6 @@
-import { DataAliases } from '../core/orgcheck-api-data-aliases';
-import { DataWithScore } from '../core/orgcheck-api-data';
-import { SFDC_User } from './orgcheck-api-data-user';
+import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
+import { DataWithScore } from 'src/api/core/orgcheck-api-data';
+import { SFDC_User } from 'src/api/data/orgcheck-api-data-user';
 
 export interface SFDC_UserRole extends DataWithScore {
     

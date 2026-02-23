@@ -1,7 +1,7 @@
-import { Data } from "./orgcheck-api-data";
-import { DataMatrix } from "./orgcheck-api-data-matrix";
-import { DatasetRunInformation } from "./orgcheck-api-dataset-runinformation";
-import { SimpleLoggerIntf } from "./orgcheck-api-logger";
+import { Data } from 'src/api/core/orgcheck-api-data';
+import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
+import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
+import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 
 /**
  * @description The interface for recipes that needs to extract datasets and transform them into an array of items. 
@@ -22,9 +22,9 @@ export interface Recipe {
      * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} logger - Logger
      * @param {Map<string, any>} [parameters] - List of optional argument to pass
-     * @returns {Promise<Array<Data> | DataMatrix | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    transform(data: Map<string, any>, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrix | Data | Map<string, any>>;
+    transform(data: Map<string, any>, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>>;
 }

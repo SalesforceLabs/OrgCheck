@@ -1,4 +1,4 @@
-import { CodeScanner } from "../../src/api/core/orgcheck-api-codescanner";
+import { CodeScanner } from 'src/api/core/orgcheck-api-codescanner';
 
 describe('tests.api.unit.CodeScanner', () => {
 

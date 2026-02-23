@@ -1,28 +1,20 @@
-import { DataAliases } from '../core/orgcheck-api-data-aliases';
-import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
-import { Dataset } from '../core/orgcheck-api-dataset';
-import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
-import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
-import { SFDC_ObjectType,
-    OBJECTTYPE_ID_STANDARD_SOBJECT, 
-    OBJECTTYPE_ID_CUSTOM_SOBJECT, 
-    OBJECTTYPE_ID_CUSTOM_EXTERNAL_SOBJECT,
-    OBJECTTYPE_ID_CUSTOM_SETTING, 
-    OBJECTTYPE_ID_CUSTOM_METADATA_TYPE, 
-    OBJECTTYPE_ID_CUSTOM_EVENT,
-    OBJECTTYPE_ID_KNOWLEDGE_ARTICLE, 
-    OBJECTTYPE_ID_CUSTOM_BIG_OBJECT } from '../data/orgcheck-api-data-objecttype';
+import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
+import { DataFactoryIntf } from 'src/api/core/orgcheck-api-datafactory';
+import { Dataset } from 'src/api/core/orgcheck-api-dataset';
+import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
+import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
+import { SFDC_ObjectType, SObjectTypes } from 'src/api/data/orgcheck-api-data-objecttype';
 
 /** @type {Array<{id: string, label: string}>} */ 
 const OBJECTTYPES: Array<{ id: string; label: string; }> = [
-    { id: OBJECTTYPE_ID_STANDARD_SOBJECT,        label: 'Standard Object' },
-    { id: OBJECTTYPE_ID_CUSTOM_SOBJECT,          label: 'Custom Object' },
-    { id: OBJECTTYPE_ID_CUSTOM_EXTERNAL_SOBJECT, label: 'External Object' },
-    { id: OBJECTTYPE_ID_CUSTOM_SETTING,          label: 'Custom Setting' },
-    { id: OBJECTTYPE_ID_CUSTOM_METADATA_TYPE,    label: 'Custom Metadata Type' },
-    { id: OBJECTTYPE_ID_CUSTOM_EVENT,            label: 'Platform Event' },
-    { id: OBJECTTYPE_ID_KNOWLEDGE_ARTICLE,       label: 'Knowledge Article' },
-    { id: OBJECTTYPE_ID_CUSTOM_BIG_OBJECT,       label: 'Big Object' }
+    { id: SObjectTypes.STANDARD_SOBJECT,        label: 'Standard Object' },
+    { id: SObjectTypes.CUSTOM_SOBJECT,          label: 'Custom Object' },
+    { id: SObjectTypes.CUSTOM_EXTERNAL_SOBJECT, label: 'External Object' },
+    { id: SObjectTypes.CUSTOM_SETTING,          label: 'Custom Setting' },
+    { id: SObjectTypes.CUSTOM_METADATA_TYPE,    label: 'Custom Metadata Type' },
+    { id: SObjectTypes.CUSTOM_EVENT,            label: 'Platform Event' },
+    { id: SObjectTypes.KNOWLEDGE_ARTICLE,       label: 'Knowledge Article' },
+    { id: SObjectTypes.CUSTOM_BIG_OBJECT,       label: 'Big Object' }
 ];
 
 export class DatasetObjectTypes implements Dataset {

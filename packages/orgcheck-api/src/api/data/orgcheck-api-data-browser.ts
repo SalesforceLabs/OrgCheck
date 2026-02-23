@@ -1,5 +1,5 @@
-import { DataAliases } from '../core/orgcheck-api-data-aliases';
-import { DataWithScore } from '../core/orgcheck-api-data';
+import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
+import { DataWithScore } from 'src/api/core/orgcheck-api-data';
 
 /**
  * @description Representation of a browser used by salesforce users while visiting the "Application" in this org

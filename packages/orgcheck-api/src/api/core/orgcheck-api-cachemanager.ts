@@ -1,33 +1,4 @@
-/**
- * @description Cache item interface
- */ 
-export interface DataCacheItem {
-
-    /** 
-     * @type {string}
-     */
-    name: string;
-
-    /** 
-     * @type {boolean}
-     */
-    isEmpty: boolean;
-
-    /** 
-     * @type {boolean}
-     */
-    isMap: boolean;
-
-    /** 
-     * @type {number}
-     */
-    length: number;
-
-    /** 
-     * @type {number}
-     */
-    created: number;
-}
+import { DataCacheItemIntf } from 'src/api/core/orgcheck-api-cache-item';
 
 /**
  * @description Global information stored in cache (both for data and metdata!)
@@ -90,9 +61,9 @@ export interface DataCacheManagerIntf {
 
     /**
      * @description Get details of the cache.
-     * @returns {Array<DataCacheItem> | undefined} an array of objects that contains the name, the type, the size and the creation date of each entry.
+     * @returns {Array<DataCacheItemIntf> | undefined} an array of objects that contains the name, the type, the size and the creation date of each entry.
      */
-    details(): DataCacheItem[]
+    details(): DataCacheItemIntf[]
 
     /**
      * @description Remove an entry of the cache.

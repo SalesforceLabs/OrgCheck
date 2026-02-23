@@ -1,6 +1,6 @@
-import { DataAliases } from '../core/orgcheck-api-data-aliases';
-import { DataWithScore } from '../core/orgcheck-api-data';
-import { SFDC_PermissionSet } from './orgcheck-api-data-permissionset';
+import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
+import { DataWithScore } from 'src/api/core/orgcheck-api-data';
+import { SFDC_PermissionSet } from 'src/api/data/orgcheck-api-data-permissionset';
 
 export interface SFDC_PermissionSetLicense extends DataWithScore {
     

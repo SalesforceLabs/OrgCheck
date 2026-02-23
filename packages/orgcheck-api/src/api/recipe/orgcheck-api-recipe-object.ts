@@ -1,17 +1,17 @@
-import { Recipe } from '../core/orgcheck-api-recipe';
-import { Processor } from '../core/orgcheck-api-processor';
-import { Data } from '../core/orgcheck-api-data';
-import { DataMatrix } from '../core/orgcheck-api-data-matrix';
-import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
-import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
-import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
-import { SFDC_ApexTrigger } from '../data/orgcheck-api-data-apextrigger';
-import { SFDC_Field } from '../data/orgcheck-api-data-field';
-import { SFDC_Object } from '../data/orgcheck-api-data-object';
-import { SFDC_ObjectType } from '../data/orgcheck-api-data-objecttype';
-import { SFDC_LightningPage } from '../data/orgcheck-api-data-lightningpage';
-import { SFDC_Workflow } from '../data/orgcheck-api-data-workflow';
-import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
+import { Recipe } from 'src/api/core/orgcheck-api-recipe';
+import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { Data } from 'src/api/core/orgcheck-api-data';
+import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
+import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
+import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
+import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
+import { SFDC_ApexTrigger }from 'src/api/data/orgcheck-api-data-apextrigger';
+import { SFDC_Field }from 'src/api/data/orgcheck-api-data-field';
+import { SFDC_Object }from 'src/api/data/orgcheck-api-data-object';
+import { SFDC_ObjectType }from 'src/api/data/orgcheck-api-data-objecttype';
+import { SFDC_LightningPage }from 'src/api/data/orgcheck-api-data-lightningpage';
+import { SFDC_Workflow }from 'src/api/data/orgcheck-api-data-workflow';
+import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
 export class RecipeObject implements Recipe {
 
@@ -45,11 +45,11 @@ export class RecipeObject implements Recipe {
      * @description transform the data from the datasets and return the final result as an Array
      * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} _logger - Logger
-     * @returns {Promise<Array<Data> | DataMatrix | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data> | DataMatrix | Data | Map<string, any>> {
+    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data
         const /** @type {Map<string, SFDC_ObjectType>} */ types: Map<string, SFDC_ObjectType> = data.get(DatasetAliases.OBJECTTYPES);

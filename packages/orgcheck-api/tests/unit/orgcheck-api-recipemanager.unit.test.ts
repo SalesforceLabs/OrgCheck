@@ -1,6 +1,6 @@
-import { RecipeManager } from "../../src/api/core/orgcheck-api-recipemanager-impl";
-import { LoggerMock_DoingNothing } from "../utils/orgcheck-api-logger-mock.utility";
-import { DatasetManagerMock_DoingNothing } from "../utils/orgcheck-api-dataset-mock.utility";
+import { RecipeManager } from 'src/api/core/orgcheck-api-recipemanager-impl';
+import { LoggerMock_DoingNothing } from 'tests/utils/orgcheck-api-logger-mock.utility';
+import { DatasetManagerMock_DoingNothing } from 'tests/utils/orgcheck-api-dataset-mock.utility';
 
 describe('tests.api.unit.RecipeManager', () => {
   it('checks if the recipe manager implementation runs correctly', async () => {

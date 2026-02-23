@@ -1,6 +1,7 @@
-import { DataCacheItem, DataCacheManagerIntf, MetadataItemInCache, DataItemInCache } from "./orgcheck-api-cachemanager";
-import { CompressorIntf } from "./orgcheck-api-compressor";
-import { StorageIntf } from "./orgcheck-api-storage";
+import { DataCacheItemIntf } from 'src/api/core/orgcheck-api-cache-item';
+import { DataCacheManagerIntf, MetadataItemInCache, DataItemInCache } from 'src/api/core/orgcheck-api-cachemanager';
+import { CompressorIntf } from 'src/api/core/orgcheck-api-compressor';
+import { StorageIntf } from 'src/api/core/orgcheck-api-storage';
 
 /** 
  * @description Cache Manager class implementation
@@ -116,9 +117,9 @@ export class DataCacheManager implements DataCacheManagerIntf {
 
     /**
      * @description Get details of the cache.
-     * @returns {Array<DataCacheItem>} an array of objects that contains the name, the type, the size and the creation date of each entry.
+     * @returns {Array<DataCacheItemIntf>} an array of objects that contains the name, the type, the size and the creation date of each entry.
      */
-    details(): DataCacheItem[] {
+    details(): DataCacheItemIntf[] {
         return this._storage.keys()
             .filter((key: string) => key.startsWith(METADATA_CACHE_PREFIX))
             .map((key: string) => {

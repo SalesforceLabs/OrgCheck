@@ -1,6 +1,6 @@
-import { RecipeCollection } from '../core/orgcheck-api-recipecollection';
-import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
-import { RecipeAliases } from '../core/orgcheck-api-recipes-aliases';
+import { RecipeCollection } from 'src/api/core/orgcheck-api-recipecollection';
+import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
+import { RecipeAliases } from 'src/api/core/orgcheck-api-recipes-aliases';
 
 export class RecipeGlobalView implements RecipeCollection {
 

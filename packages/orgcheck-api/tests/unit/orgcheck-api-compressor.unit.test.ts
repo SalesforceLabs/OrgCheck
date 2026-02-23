@@ -1,10 +1,10 @@
-import { Compressor } from "../../src/api/core/orgcheck-api-compressor-impl";
-import * as fflate from 'fflate';
+import { Compressor } from 'src/api/core/orgcheck-api-compressor-impl';
+import fflate from 'fflate';
 
 describe('tests.api.unit.Compressor', () => {
 
-    // @ts-ignore    
     globalThis.fflate = fflate;
+
     it('checks if the compression implementation runs correctly', async () => {
         const compressor = new Compressor();
         const compressed = compressor.compress('This is a test string');

@@ -17,8 +17,10 @@
         ],
         "baseUrl": ".",
         "paths": {
-            "tslib" : ["./node_modules/tslib/tslib.d.ts"]
-        },
+            "tslib" :   [ "./node_modules/tslib/tslib.d.ts" ],
+            "src/*":    [ "./src/*" ],
+            "tests/*":  [ "./tests/*" ]
+        }
     },
     "include": [
         "src/**/*.ts",
@@ -26,5 +28,5 @@
     ],
     "exclude": [
         "node_modules"
-    ],
+    ]
 }

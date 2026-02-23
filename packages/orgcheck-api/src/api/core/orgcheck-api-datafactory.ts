@@ -1,5 +1,5 @@
-import { DataAliases } from "./orgcheck-api-data-aliases";
-import { DataDependencies } from "./orgcheck-api-data-dependencies";
+import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
+import { DataDependencies } from 'src/api/core/orgcheck-api-data-dependencies';
 
 /**
  * @description Org Check "score rule" used to qualify if an item is bad or not

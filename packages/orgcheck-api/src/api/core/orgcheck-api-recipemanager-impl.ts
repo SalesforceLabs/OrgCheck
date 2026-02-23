@@ -1,60 +1,60 @@
-import { Data, DataWithScore } from './orgcheck-api-data';
-import { DataCollectionStatistics } from './orgcheck-api-recipecollection';
-import { DataMatrix } from './orgcheck-api-data-matrix';
-import { DatasetManagerIntf } from './orgcheck-api-datasetmanager';
-import { DatasetRunInformation } from './orgcheck-api-dataset-runinformation';
-import { LoggerIntf } from './orgcheck-api-logger';
-import { Processor } from './orgcheck-api-processor';
-import { Recipe } from './orgcheck-api-recipe';
-import { RecipeAliases } from './orgcheck-api-recipes-aliases';
-import { RecipeApexClasses, RecipeApexTests, RecipeApexUncompiled } from '../recipe/orgcheck-api-recipe-apexclasses';
-import { RecipeApexTriggers } from '../recipe/orgcheck-api-recipe-apextriggers';
-import { RecipeAppPermissions } from '../recipe/orgcheck-api-recipe-apppermissions';
-import { RecipeBrowsers } from '../recipe/orgcheck-api-recipe-browsers';
-import { RecipeCollaborationGroups } from '../recipe/orgcheck-api-recipe-collaborationgroups';
-import { RecipeCollection } from './orgcheck-api-recipecollection';
-import { RecipeCurrentUserPermissions } from '../recipe/orgcheck-api-recipe-currentuserpermissions';
-import { RecipeCustomFields } from '../recipe/orgcheck-api-recipe-customfields';
-import { RecipeCustomLabels } from '../recipe/orgcheck-api-recipe-customlabels';
-import { RecipeCustomTabs } from '../recipe/orgcheck-api-recipe-customtabs';
-import { RecipeDashboards } from '../recipe/orgcheck-api-recipe-dashboards';
-import { RecipeDocuments } from '../recipe/orgcheck-api-recipe-documents';
-import { RecipeEmailTemplates } from '../recipe/orgcheck-api-recipe-emailtemplates';
-import { RecipeFieldPermissions } from '../recipe/orgcheck-api-recipe-fieldpermissions';
-import { RecipeFlows } from '../recipe/orgcheck-api-recipe-flows';
-import { RecipeGlobalView } from '../recipecollection/orgcheck-api-recipe-globalview';
-import { RecipeHardcodedURLsView } from '../recipecollection/orgcheck-api-recipe-hardcodedurlsview';
-import { RecipeHomePageComponents } from '../recipe/orgcheck-api-recipe-homepagecomponents';
-import { RecipeInternalActiveUsers } from '../recipe/orgcheck-api-recipe-internalactiveusers';
-import { RecipeKnowledgeArticles } from '../recipe/orgcheck-api-recipe-knowledgearticles';
-import { RecipeLightningAuraComponents } from '../recipe/orgcheck-api-recipe-lightningauracomponents';
-import { RecipeLightningPages } from '../recipe/orgcheck-api-recipe-lightningpages';
-import { RecipeLightningWebComponents } from '../recipe/orgcheck-api-recipe-lightningwebcomponents';
-import { RecipeManagerIntf } from './orgcheck-api-recipemanager';
-import { RecipeObject } from '../recipe/orgcheck-api-recipe-object';
-import { RecipeObjectPermissions } from '../recipe/orgcheck-api-recipe-objectpermissions';
-import { RecipeObjects } from '../recipe/orgcheck-api-recipe-objects';
-import { RecipeObjectTypes } from '../recipe/orgcheck-api-recipe-objecttypes';
-import { RecipeOrganization } from '../recipe/orgcheck-api-recipe-organization';
-import { RecipePackages } from '../recipe/orgcheck-api-recipe-packages';
-import { RecipePageLayouts } from '../recipe/orgcheck-api-recipe-pagelayouts';
-import { RecipePermissionSetLicenses } from '../recipe/orgcheck-api-recipe-permissionsetlicenses';
-import { RecipePermissionSets } from '../recipe/orgcheck-api-recipe-permissionsets';
-import { RecipeProcessBuilders } from '../recipe/orgcheck-api-recipe-processbuilders';
-import { RecipeProfilePasswordPolicies } from '../recipe/orgcheck-api-recipe-profilepasswordpolicies';
-import { RecipeProfileRestrictions } from '../recipe/orgcheck-api-recipe-profilerestrictions';
-import { RecipeProfiles } from '../recipe/orgcheck-api-recipe-profiles';
-import { RecipeQueues, RecipePublicGroups } from '../recipe/orgcheck-api-recipe-groups';
-import { RecipeRecordType } from '../recipe/orgcheck-api-recipe-recordtypes';
-import { RecipeReports } from '../recipe/orgcheck-api-recipe-reports';
-import { RecipeStaticResources } from '../recipe/orgcheck-api-recipe-staticresources';
-import { RecipeUserRoles } from '../recipe/orgcheck-api-recipe-userroles';
-import { RecipeValidationRules } from '../recipe/orgcheck-api-recipe-validationrules';
-import { RecipeVisualForceComponents } from '../recipe/orgcheck-api-recipe-visualforcecomponents';
-import { RecipeVisualForcePages } from '../recipe/orgcheck-api-recipe-visualforcepages';
-import { RecipeWebLinks } from '../recipe/orgcheck-api-recipe-weblinks';
-import { RecipeWorkflows } from '../recipe/orgcheck-api-recipe-workflows';
-import { SecretSauce } from './orgcheck-api-secretsauce';
+import { Data, DataWithScore } from 'src/api/core/orgcheck-api-data';
+import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
+import { DatasetManagerIntf } from 'src/api/core/orgcheck-api-datasetmanager';
+import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
+import { LoggerIntf } from 'src/api/core/orgcheck-api-logger';
+import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { Recipe } from 'src/api/core/orgcheck-api-recipe';
+import { RecipeAliases } from 'src/api/core/orgcheck-api-recipes-aliases';
+import { RecipeApexClasses, RecipeApexTests, RecipeApexUncompiled } from 'src/api/recipe/orgcheck-api-recipe-apexclasses';
+import { RecipeApexTriggers } from 'src/api/recipe/orgcheck-api-recipe-apextriggers';
+import { RecipeAppPermissions } from 'src/api/recipe/orgcheck-api-recipe-apppermissions';
+import { RecipeBrowsers } from 'src/api/recipe/orgcheck-api-recipe-browsers';
+import { RecipeCollaborationGroups } from 'src/api/recipe/orgcheck-api-recipe-collaborationgroups';
+import { DataCollectionStatistics, RecipeCollection } from 'src/api/core/orgcheck-api-recipecollection';
+import { RecipeCurrentUserPermissions } from 'src/api/recipe/orgcheck-api-recipe-currentuserpermissions';
+import { RecipeCustomFields } from 'src/api/recipe/orgcheck-api-recipe-customfields';
+import { RecipeCustomLabels } from 'src/api/recipe/orgcheck-api-recipe-customlabels';
+import { RecipeCustomTabs } from 'src/api/recipe/orgcheck-api-recipe-customtabs';
+import { RecipeDashboards } from 'src/api/recipe/orgcheck-api-recipe-dashboards';
+import { RecipeDocuments } from 'src/api/recipe/orgcheck-api-recipe-documents';
+import { RecipeEmailTemplates } from 'src/api/recipe/orgcheck-api-recipe-emailtemplates';
+import { RecipeFieldPermissions } from 'src/api/recipe/orgcheck-api-recipe-fieldpermissions';
+import { RecipeFlows } from 'src/api/recipe/orgcheck-api-recipe-flows';
+import { RecipeGlobalView } from 'src/api/recipecollection/orgcheck-api-recipe-globalview';
+import { RecipeHardcodedURLsView } from 'src/api/recipecollection/orgcheck-api-recipe-hardcodedurlsview';
+import { RecipeHomePageComponents } from 'src/api/recipe/orgcheck-api-recipe-homepagecomponents';
+import { RecipeInternalActiveUsers } from 'src/api/recipe/orgcheck-api-recipe-internalactiveusers';
+import { RecipeKnowledgeArticles } from 'src/api/recipe/orgcheck-api-recipe-knowledgearticles';
+import { RecipeLightningAuraComponents } from 'src/api/recipe/orgcheck-api-recipe-lightningauracomponents';
+import { RecipeLightningPages } from 'src/api/recipe/orgcheck-api-recipe-lightningpages';
+import { RecipeLightningWebComponents } from 'src/api/recipe/orgcheck-api-recipe-lightningwebcomponents';
+import { RecipeManagerIntf } from 'src/api/core/orgcheck-api-recipemanager';
+import { RecipeObject } from 'src/api/recipe/orgcheck-api-recipe-object';
+import { RecipeObjectPermissions } from 'src/api/recipe/orgcheck-api-recipe-objectpermissions';
+import { RecipeObjects } from 'src/api/recipe/orgcheck-api-recipe-objects';
+import { RecipeObjectTypes } from 'src/api/recipe/orgcheck-api-recipe-objecttypes';
+import { RecipeOrganization } from 'src/api/recipe/orgcheck-api-recipe-organization';
+import { RecipePackages } from 'src/api/recipe/orgcheck-api-recipe-packages';
+import { RecipePageLayouts } from 'src/api/recipe/orgcheck-api-recipe-pagelayouts';
+import { RecipePermissionSetLicenses } from 'src/api/recipe/orgcheck-api-recipe-permissionsetlicenses';
+import { RecipePermissionSets } from 'src/api/recipe/orgcheck-api-recipe-permissionsets';
+import { RecipeProcessBuilders } from 'src/api/recipe/orgcheck-api-recipe-processbuilders';
+import { RecipeProfilePasswordPolicies } from 'src/api/recipe/orgcheck-api-recipe-profilepasswordpolicies';
+import { RecipeProfileRestrictions } from 'src/api/recipe/orgcheck-api-recipe-profilerestrictions';
+import { RecipeProfiles } from 'src/api/recipe/orgcheck-api-recipe-profiles';
+import { RecipeQueues, RecipePublicGroups } from 'src/api/recipe/orgcheck-api-recipe-groups';
+import { RecipeRecordType } from 'src/api/recipe/orgcheck-api-recipe-recordtypes';
+import { RecipeReports } from 'src/api/recipe/orgcheck-api-recipe-reports';
+import { RecipeStaticResources } from 'src/api/recipe/orgcheck-api-recipe-staticresources';
+import { RecipeUserRoles } from 'src/api/recipe/orgcheck-api-recipe-userroles';
+import { RecipeValidationRules } from 'src/api/recipe/orgcheck-api-recipe-validationrules';
+import { RecipeVisualForceComponents } from 'src/api/recipe/orgcheck-api-recipe-visualforcecomponents';
+import { RecipeVisualForcePages } from 'src/api/recipe/orgcheck-api-recipe-visualforcepages';
+import { RecipeWebLinks } from 'src/api/recipe/orgcheck-api-recipe-weblinks';
+import { RecipeWorkflows } from 'src/api/recipe/orgcheck-api-recipe-workflows';
+import { SecretSauce } from 'src/api/core/orgcheck-api-secretsauce';
+import { DataCollectionStatisticsIntf } from 'src/api/core/orgcheck-api-data-datacollectionstats';
 
 /**
  * @description Recipe Manager
@@ -158,11 +158,11 @@ export class RecipeManager implements RecipeManagerIntf {
      * @description Runs a designated recipe (by its alias)
      * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map<string, any>} [parameters] List of values to pass to the recipe
-     * @returns {Promise<Array<Data> | DataMatrix | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async run(alias: string, parameters: Map<string, any>): Promise<Array<Data> | DataMatrix | Data | Map<string, any>> {
+    async run(alias: string, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         if (this._recipes.has(alias)) {
             const result = await this._runRecipe(alias, parameters);
@@ -204,10 +204,10 @@ export class RecipeManager implements RecipeManagerIntf {
      *   - Step 3. Transform the retrieved data and return the final result as a Map
      * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map<string, any>} [parameters] List of values to pass to the recipe
-     * @returns {Promise<Array<Data> | DataMatrix | Data | Map<string, any> | undefined>} Returns the value from the recipe or undefined if something bad happens
+     * @returns {Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any> | undefined>} Returns the value from the recipe or undefined if something bad happens
      * @async
      */
-    async _runRecipe(alias: string, parameters: Map<string, any>): Promise<Array<Data> | DataMatrix | Data | Map<string, any> | undefined> {
+    async _runRecipe(alias: string, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any> | undefined> {
 
         const section = `Run recipe "${alias}"`;
         const recipe = this._recipes.get(alias);
@@ -245,8 +245,8 @@ export class RecipeManager implements RecipeManagerIntf {
         // STEP 3. Transform
         // -------------------
         this._logger.log(section, 'This recipe will now transform all this information...');
-        /** @type {Array<Data> | DataMatrix | Data | Map<string, any>} */
-        let finalData: Array<Data> | DataMatrix | Data | Map<string, any>;
+        /** @type {Array<Data> | DataMatrixIntf | Data | Map<string, any>} */
+        let finalData: Array<Data> | DataMatrixIntf | Data | Map<string, any>;
         try {
             finalData = await recipe.transform(data, this._logger.toSimpleLogger(section), parameters);
         } catch(error) {
@@ -262,10 +262,10 @@ export class RecipeManager implements RecipeManagerIntf {
     /**
      * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map<string, any>} [parameters] - List of values to pass to the recipe
-     * @returns {Promise<Map<string, DataCollectionStatistics> | undefined>} Returns the value from the recipe collection or undefined if something bad happens.
+     * @returns {Promise<Map<string, DataCollectionStatisticsIntf> | undefined>} Returns the value from the recipe collection or undefined if something bad happens.
      * @async
      */
-    async _runRecipeCollection(alias: string, parameters: Map<string, any>): Promise<Map<string, DataCollectionStatistics> | undefined> {
+    async _runRecipeCollection(alias: string, parameters: Map<string, any>): Promise<Map<string, DataCollectionStatisticsIntf> | undefined> {
 
         const section = `Run recipe collection "${alias}"`;
         const recipeCollection = this._recipeCollections.get(alias);
@@ -323,8 +323,8 @@ export class RecipeManager implements RecipeManagerIntf {
         this._logger.log(section, 'This recipe collection will now transform all this information...');
         const listRuleIds = recipeCollection.filterByScoreRuleIds(this._logger.toSimpleLogger(section), parameters);
         const isRuleFilterOn = listRuleIds?.length > 0 || false;
-        /** @type {Map<string, DataCollectionStatistics>} */
-        const finalData: Map<string, DataCollectionStatistics> = new Map();
+        /** @type {Map<string, DataCollectionStatisticsIntf>} */
+        const finalData: Map<string, DataCollectionStatisticsIntf> = new Map();
         try {
             // Add the successful recipes and their stats in the final list
             await Processor.forEach(data, async ( records: Array<DataWithScore>, key: string) => {
@@ -347,7 +347,7 @@ export class RecipeManager implements RecipeManagerIntf {
                         series.set(id, series.has(id) ? (series.get(id) + 1) : 1);
                     });
                 });
-                const stats = new DataCollectionStatistics();
+                const stats: DataCollectionStatisticsIntf = new DataCollectionStatistics();
                 stats.hadError = false;
                 stats.countAll = (records?.length ?? 0);
                 stats.countBad = (onlyBadRecords?.length ?? 0);
@@ -362,7 +362,7 @@ export class RecipeManager implements RecipeManagerIntf {
 
             // Add the recipes in error in the final list
             recipesInError.forEach((lastError, recipe) => {
-                const stats = new DataCollectionStatistics();
+                const stats: DataCollectionStatisticsIntf = new DataCollectionStatistics();
                 stats.hadError = true;
                 stats.lastErrorMessage = lastError?.message || 'Unknown error';
                 finalData.set(recipe, stats);

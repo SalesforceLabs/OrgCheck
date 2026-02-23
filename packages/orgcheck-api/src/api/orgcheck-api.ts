@@ -1,206 +1,100 @@
-import { BasicLoggerIntf, LoggerIntf } from './core/orgcheck-api-logger';
-import { DataCacheItem, DataCacheManagerIntf } from './core/orgcheck-api-cachemanager';
-import { DataCacheManager } from './core/orgcheck-api-cachemanager-impl';
-import { DataCollectionStatistics } from './core/orgcheck-api-recipecollection';
-import { DataMatrix } from './core/orgcheck-api-data-matrix';
-import { DataMatrixFactory } from './core/orgcheck-api-data-matrix-factory';
-import { DatasetManager } from './core/orgcheck-api-datasetmanager-impl';
-import { DatasetManagerIntf } from './core/orgcheck-api-datasetmanager';
-import { Logger } from './core/orgcheck-api-logger-impl';
-import { OrgCheckGlobalParameter } from './core/orgcheck-api-globalparameter';
-import { RecipeAliases } from './core/orgcheck-api-recipes-aliases';
-import { RecipeManager } from './core/orgcheck-api-recipemanager-impl';
-import { RecipeManagerIntf } from './core/orgcheck-api-recipemanager';
-import { SalesforceManager, SalesforceManagerSetup } from './core/orgcheck-api-salesforcemanager-impl';
-import { SalesforceManagerIntf } from './core/orgcheck-api-salesforcemanager';
-import { SalesforceUsageInformation } from './core/orgcheck-api-salesforce-watchdog';
-import { SecretSauce } from './core/orgcheck-api-secretsauce';
-import { SFDC_ApexClass } from './data/orgcheck-api-data-apexclass';
-import { SFDC_ApexTrigger } from './data/orgcheck-api-data-apextrigger';
-import { SFDC_Browser } from './data/orgcheck-api-data-browser';
-import { SFDC_CollaborationGroup } from './data/orgcheck-api-data-collaborationgroup';
-import { SFDC_CustomLabel } from './data/orgcheck-api-data-customlabel';
-import { SFDC_Document } from './data/orgcheck-api-data-document';
-import { SFDC_EmailTemplate } from './data/orgcheck-api-data-emailtemplate';
-import { SFDC_Field } from './data/orgcheck-api-data-field';
-import { SFDC_Flow } from './data/orgcheck-api-data-flow';
-import { SFDC_Group } from './data/orgcheck-api-data-group';
-import { SFDC_HomePageComponent } from './data/orgcheck-api-data-homepagecomponent';
-import { SFDC_KnowledgeArticle } from './data/orgcheck-api-data-knowledgearticle';
-import { SFDC_LightningAuraComponent } from './data/orgcheck-api-data-lightningauracomponent';
-import { SFDC_LightningPage } from './data/orgcheck-api-data-lightningpage';
-import { SFDC_LightningWebComponent } from './data/orgcheck-api-data-lightningwebcomponent';
-import { SFDC_Object } from './data/orgcheck-api-data-object';
-import { SFDC_ObjectType } from './data/orgcheck-api-data-objecttype';
-import { SFDC_Organization } from './data/orgcheck-api-data-organization';
-import { SFDC_Package } from './data/orgcheck-api-data-package';
-import { SFDC_PageLayout } from './data/orgcheck-api-data-pagelayout';
-import { SFDC_PermissionSet } from './data/orgcheck-api-data-permissionset';
-import { SFDC_PermissionSetLicense } from './data/orgcheck-api-data-permissionsetlicense';
-import { SFDC_Profile } from './data/orgcheck-api-data-profile';
-import { SFDC_ProfilePasswordPolicy } from './data/orgcheck-api-data-profilepasswordpolicy';
-import { SFDC_ProfileRestrictions } from './data/orgcheck-api-data-profilerestrictions';
-import { SFDC_RecordType } from './data/orgcheck-api-data-recordtype';
-import { SFDC_Report } from './data/orgcheck-api-data-report';
-import { SFDC_StaticResource } from './data/orgcheck-api-data-staticresource';
-import { SFDC_User } from './data/orgcheck-api-data-user';
-import { SFDC_UserRole } from './data/orgcheck-api-data-userrole';
-import { SFDC_ValidationRule } from './data/orgcheck-api-data-validationrule';
-import { SFDC_VisualForceComponent } from './data/orgcheck-api-data-visualforcecomponent';
-import { SFDC_VisualForcePage } from './data/orgcheck-api-data-visualforcepage';
-import { SFDC_WebLink } from './data/orgcheck-api-data-weblink';
-import { SFDC_Workflow } from './data/orgcheck-api-data-workflow';
-import { SFDC_CustomTab } from './data/orgcheck-api-data-customtab';
-import { SFDC_Dashboard } from './data/orgcheck-api-data-dashboard';
-import { Storage, StorageSetup } from './core/orgcheck-api-storage-impl';
-import { Compressor } from './core/orgcheck-api-compressor-impl';
+import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
+import { DataCollectionStatisticsIntf } from 'src/api/core/orgcheck-api-data-datacollectionstats';
+import { SalesforceUsageInformationIntf } from 'src/api/core/orgcheck-api-limit-usageinformation';
+import { LoggerSetup } from 'src/api/core/orgcheck-api-setup-logger';
+import { SalesforceManagerSetup } from 'src/api/core/orgcheck-api-setup-salesforcemanager';
+import { StorageSetup } from 'src/api/core/orgcheck-api-setup-storage';
+import { SFDC_ApexClass } from 'src/api/data/orgcheck-api-data-apexclass';
+import { SFDC_ApexTrigger } from 'src/api/data/orgcheck-api-data-apextrigger';
+import { SFDC_Browser } from 'src/api/data/orgcheck-api-data-browser';
+import { SFDC_CollaborationGroup } from 'src/api/data/orgcheck-api-data-collaborationgroup';
+import { SFDC_CustomLabel } from 'src/api/data/orgcheck-api-data-customlabel';
+import { SFDC_CustomTab } from 'src/api/data/orgcheck-api-data-customtab';
+import { SFDC_Dashboard } from 'src/api/data/orgcheck-api-data-dashboard';
+import { SFDC_Document } from 'src/api/data/orgcheck-api-data-document';
+import { SFDC_EmailTemplate } from 'src/api/data/orgcheck-api-data-emailtemplate';
+import { SFDC_Field } from 'src/api/data/orgcheck-api-data-field';
+import { SFDC_Flow } from 'src/api/data/orgcheck-api-data-flow';
+import { SFDC_Group } from 'src/api/data/orgcheck-api-data-group';
+import { SFDC_HomePageComponent } from 'src/api/data/orgcheck-api-data-homepagecomponent';
+import { SFDC_KnowledgeArticle } from 'src/api/data/orgcheck-api-data-knowledgearticle';
+import { SFDC_LightningAuraComponent } from 'src/api/data/orgcheck-api-data-lightningauracomponent';
+import { SFDC_LightningPage } from 'src/api/data/orgcheck-api-data-lightningpage';
+import { SFDC_LightningWebComponent } from 'src/api/data/orgcheck-api-data-lightningwebcomponent';
+import { SFDC_Object } from 'src/api/data/orgcheck-api-data-object';
+import { SFDC_ObjectType } from 'src/api/data/orgcheck-api-data-objecttype';
+import { SFDC_Organization } from 'src/api/data/orgcheck-api-data-organization';
+import { SFDC_Package } from 'src/api/data/orgcheck-api-data-package';
+import { SFDC_PageLayout } from 'src/api/data/orgcheck-api-data-pagelayout';
+import { SFDC_PermissionSet } from 'src/api/data/orgcheck-api-data-permissionset';
+import { SFDC_PermissionSetLicense } from 'src/api/data/orgcheck-api-data-permissionsetlicense';
+import { SFDC_Profile } from 'src/api/data/orgcheck-api-data-profile';
+import { SFDC_ProfilePasswordPolicy } from 'src/api/data/orgcheck-api-data-profilepasswordpolicy';
+import { SFDC_ProfileRestrictions } from 'src/api/data/orgcheck-api-data-profilerestrictions';
+import { SFDC_RecordType } from 'src/api/data/orgcheck-api-data-recordtype';
+import { SFDC_Report } from 'src/api/data/orgcheck-api-data-report';
+import { SFDC_StaticResource } from 'src/api/data/orgcheck-api-data-staticresource';
+import { SFDC_User } from 'src/api/data/orgcheck-api-data-user';
+import { SFDC_UserRole } from 'src/api/data/orgcheck-api-data-userrole';
+import { SFDC_ValidationRule } from 'src/api/data/orgcheck-api-data-validationrule';
+import { SFDC_VisualForceComponent } from 'src/api/data/orgcheck-api-data-visualforcecomponent';
+import { SFDC_VisualForcePage } from 'src/api/data/orgcheck-api-data-visualforcepage';
+import { SFDC_WebLink } from 'src/api/data/orgcheck-api-data-weblink';
+import { SFDC_Workflow } from 'src/api/data/orgcheck-api-data-workflow';
+import { DataCacheItemIntf } from 'src/api/core/orgcheck-api-cache-item';
 
 export interface ApiSetup { 
-    logSettings: BasicLoggerIntf; 
+    
+    /**
+     * @description Setup for the logger
+     * @type {LoggerSetup}
+     * @public
+     */
+    logSettings: LoggerSetup; 
+    
+    /**
+     * @description Setup for the salesforce manager
+     * @type {SalesforceManagerSetup}
+     * @public
+     */
     salesforce: SalesforceManagerSetup;
-    storage: { 
-        compression: { 
-            useFflate: boolean; 
-            mockImpl?: any; 
-        }; 
-        localImpl: StorageSetup; 
-    }; 
+
+    /**
+     * @description Setup for the storage
+     * @type {StorageSetup}
+     * @public
+     */
+    storage: StorageSetup; 
 }
 
-/**
- * @description Org Check API main class
- */
-export class API {
+export interface ApiIntf {
 
     /**
      * @description String representation of the Org Check version in a form of Element [El,n]
      * @type {string}
      * @public
      */
-    public readonly version = 'Nitrogen [N,7]';
+    version: string;
 
     /**
      * @description Numerical representation of the Salesforce API Version we use
      * @type {number}
      * @public
      */
-    get salesforceApiVersion(): number {
-        if (this._sfdcManager === undefined) {
-            throw new Error(`The salesforce manager was not defined in method salesforceApiVersion`);
-        }
-        return this._sfdcManager.apiVersion;
-    }
-    
-    /**
-     * @description Private Recipe Manager property used to run a recipe given its alias
-     * @type {RecipeManagerIntf} 
-     * @private
-     */
-    private _recipeManager: RecipeManagerIntf;
+    salesforceApiVersion: number;
 
-    /**
-     * @description Private Dataset Manager property used to run a dataset given its alias
-     * @type {DatasetManagerIntf}
-     * @private
-     */
-    private _datasetManager: DatasetManagerIntf;
-
-    /**
-     * @description Private Salesforce Manager property used to call the salesforce APIs using JsForce framework
-     * @type {SalesforceManagerIntf}
-     * @private
-     */
-    private _sfdcManager: SalesforceManagerIntf;
-
-    /**
-     * @description Private data cache manager to store data from datasetManager
-     * @type {DataCacheManagerIntf}
-     * @private
-     */
-    private _cacheManager: DataCacheManagerIntf;
-
-    /**
-     * @description Private Logger property used to send log information to the UI (if any)
-     * @type {LoggerIntf}
-     * @private
-     */
-    private _logger: LoggerIntf;
-
-    /**
-     * @description Is the current user accepted the terms manually to use Org Check in this org?
-     * @type {boolean}
-     * @private
-     */
-    private _usageTermsAcceptedManually: boolean;
-
-    /**
-     * @description Org Check constructor
-     * @param {ApiSetup} setup - the setup object to configure the Org Check API
-     */    
-    constructor(setup: ApiSetup) {
-        
-        // --------------------
-        // Logger
-        // --------------------
-        if (!setup?.logSettings) { 
-            throw new Error(`Setup is missing a logSettings property`); 
-        }
-        this._logger = new Logger(setup?.logSettings);
-
-        // --------------------
-        // Salesforce Manager
-        // --------------------
-        if (!setup?.salesforce) { 
-            throw new Error(`Setup is missing a salesforce property`); 
-        }
-        this._sfdcManager = new SalesforceManager(setup?.salesforce);
-        
-        // --------------------
-        // Cache Manager
-        // --------------------
-        if (!setup?.storage) { 
-            throw new Error(`Setup is missing a storage property`); 
-        }
-        if (!setup?.storage?.localImpl) { 
-            throw new Error(`Setup is missing a storage.localImpl property`); 
-        }
-        const storage = new Storage(setup?.storage?.localImpl);
-        if (!setup?.storage?.compression) { 
-            throw new Error(`Setup is missing a storage.compression property`); 
-        }
-        if (setup?.storage?.compression?.useFflate === true) {
-            this._cacheManager = new DataCacheManager(new Compressor(), storage);
-        } else {
-            if (!setup?.storage?.compression?.mockImpl) { 
-                throw new Error(`Setup is missing a storage.compression.mockImpl property`); 
-            }
-            this._cacheManager = new DataCacheManager(setup?.storage?.compression?.mockImpl, storage);
-        }
-
-        // --------------------
-        // Other
-        // --------------------
-        this._datasetManager = new DatasetManager(this._sfdcManager, this._cacheManager, this._logger);
-        this._recipeManager = new RecipeManager(this._datasetManager, this._logger);
-        this._usageTermsAcceptedManually = false;
-    }
-    
     /**
      * @description Remove all cache from dataset manager
      * @public
      */
-    removeAllFromCache() {
-        this._cacheManager.clear();
-    }
+    removeAllFromCache(): void;
 
     /**
      * @description Get cache information from dataset manager
-     * @returns {Array<DataCacheItem>} list of cache information 
+     * @returns {Array<DataCacheItemIntf>} list of cache information 
      * @public
      */
-    getCacheInformation(): Array<DataCacheItem> {
-        return this._cacheManager.details();
-    }
+    getCacheInformation(): Array<DataCacheItemIntf>;
 
     /**
      * @description Get cache data from dataset manager
@@ -208,38 +102,21 @@ export class API {
      * @returns {any} cached data 
      * @public
      */
-    getCacheData(itemName: string): any {
-        return this._cacheManager.get(itemName);
-    }
+    getCacheData(itemName: string): any;
 
     /**
      * @description Get the list of all Org Check "score rules" as a matrix
-     * @returns {DataMatrix} Information about score rules as a matrix
+     * @returns {DataMatrixIntf} Information about score rules as a matrix
      * @public
      */
-    getAllScoreRulesAsDataMatrix(): DataMatrix {
-        const workingMatrix = DataMatrixFactory.create();
-        SecretSauce.AllScoreRules.forEach((rule) => {
-            workingMatrix.setRowHeader(`${rule.id}`, rule);
-            rule.applicable.forEach((dataAlias) => {
-                workingMatrix.addValueToProperty(
-                    `${rule.id}`,
-                    dataAlias?.toString() ?? 'N/A', 
-                    'true'
-                );
-            });
-        });
-        return workingMatrix.toDataMatrix();
-    }
+    getAllScoreRulesAsDataMatrix(): DataMatrixIntf;
 
     /**
      * @description Get the lastest Daily API Usage from JSForce, and the level of confidence we have in this ratio to continue using org check.
-     * @returns {SalesforceUsageInformation} Percentage of the daily api usage and a confidence precentage.
+     * @returns {SalesforceUsageInformationIntf} Percentage of the daily api usage and a confidence precentage.
      * @public
      */
-    get dailyApiRequestLimitInformation(): SalesforceUsageInformation {
-        return this._sfdcManager.dailyApiRequestLimitInformation;
-    }
+    dailyApiRequestLimitInformation: SalesforceUsageInformationIntf;
 
     /**
      * @description Send a request to run all tests in the org. When this method is finished, it does not mean all tests are run.
@@ -248,16 +125,7 @@ export class API {
      * @async
      * @public
      */
-    async runAllTestsAsync(): Promise<string> {
-        if (this._logger === undefined) {
-            throw new Error(`The logger was not defined in method runAllTestsAsync`);
-        }
-        const simpleLogger = this._logger?.toSimpleLogger('Run All Tests');
-        if (simpleLogger === undefined) {
-            throw new Error(`The simple logger was not defined in method runAllTestsAsync`);
-        }
-        return this._sfdcManager?.runAllTests(simpleLogger);
-    }
+    runAllTestsAsync(): Promise<string>;
 
     /**
      * @description Compile the given list of Apex Classes and return the status of the compilation
@@ -266,16 +134,7 @@ export class API {
      * @async
      * @public
      */
-    async compileClasses(apexClassIds: Array<string>): Promise<Map<string, { isSuccess: boolean; reasons?: Array<string>; }>> {
-        if (this._logger === undefined) {
-            throw new Error(`The logger was not defined in method compileClasses`);
-        }
-        const simpleLogger = this._logger?.toSimpleLogger('Compile Classes');
-        if (simpleLogger === undefined) {
-            throw new Error(`The simple logger was not defined in method compileClasses`);
-        }
-        return this._sfdcManager?.compileClasses(apexClassIds, simpleLogger);
-    }
+    compileClasses(apexClassIds: Array<string>): Promise<Map<string, { isSuccess: boolean; reasons?: Array<string>; }>>;
 
     /**
      * @description Get information about the organization
@@ -284,10 +143,7 @@ export class API {
      * @async
      * @public
      */
-    async getOrganizationInformation(): Promise<SFDC_Organization> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.ORGANIZATION));
-    }
+    getOrganizationInformation(): Promise<SFDC_Organization>;
 
     /**
      * @description Check if we can use the current org according to the terms (specially if this is a production org)
@@ -296,30 +152,20 @@ export class API {
      * @async
      * @public
      */
-    async checkUsageTerms(): Promise<boolean> {
-        const orgInfo = (await this.getOrganizationInformation());
-        if (orgInfo.isProduction === true && this._usageTermsAcceptedManually === false) {
-            return false;
-        }
-        return true;
-    }
+    checkUsageTerms(): Promise<boolean>;
 
     /**
      * @description Returns if the usage terms were accepted manually
      * @returns {boolean} true if the usage terms were accepted manually, false otherwise
      * @public
      */
-    wereUsageTermsAcceptedManually(): boolean {
-        return this._usageTermsAcceptedManually;
-    }
+    wereUsageTermsAcceptedManually(): boolean;
 
     /**
      * @description Accept manually the usage terms
      * @public
      */
-    acceptUsageTermsManually() {
-        this._usageTermsAcceptedManually = true;
-    }
+    acceptUsageTermsManually(): void;
 
     /**
      * @description Check if the current user can run the application
@@ -328,22 +174,7 @@ export class API {
      * @async
      * @public
      */
-    async checkCurrentUserPermissions(): Promise<boolean> {
-        // @ts-ignore
-        const /** @type {Map} */ perms: Map = (await this._recipeManager.run(RecipeAliases.CURRENT_USER_PERMISSIONS, new Map([
-            [OrgCheckGlobalParameter.SYSTEM_PERMISSIONS_LIST, [ 'ModifyAllData', 'AuthorApex', 'ApiEnabled', 'InstallPackaging' ]]
-        ])));
-        if (perms === undefined || 
-            perms?.get('ModifyAllData') === false || perms?.get('AuthorApex')       === false ||
-            perms?.get('ApiEnabled')    === false || perms?.get('InstallPackaging') === false) {
-                throw (new TypeError(
-                    'Current User Permission Access is not enough to run the application. '+
-                    'Please make sure to assign ALL the following permissions to the current user: '+
-                    `Modify All Data, Author Apex, API Enabled and Download AppExchange Packages.`
-                ));
-        }
-        return true;
-    }
+    checkCurrentUserPermissions(): Promise<boolean>;
 
     /**
      * @description Get information about the packages
@@ -352,18 +183,13 @@ export class API {
      * @async
      * @public
      */
-    async getPackages(): Promise<Array<SFDC_Package>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.PACKAGES));
-    }
+    getPackages(): Promise<Array<SFDC_Package>>;
 
     /**
      * @description Remove all the cached information about packages
      * @public
      */
-    removeAllPackagesFromCache() {
-        this._recipeManager.clean(RecipeAliases.PACKAGES);
-    }
+    removeAllPackagesFromCache(): void;
 
     /**
      * @description Get information about the page layouts
@@ -375,22 +201,13 @@ export class API {
      * @async
      * @public
      */
-    async getPageLayouts(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_PageLayout>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.PAGE_LAYOUTS, new Map([
-            [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
-            [OrgCheckGlobalParameter.PACKAGE_NAME, namespace],
-            [OrgCheckGlobalParameter.SOBJECT_TYPE_NAME, sobjectType]
-        ])));
-    }
+    getPageLayouts(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_PageLayout>>;
 
     /**
      * @description Remove all the cached information about page layouts
      * @public
      */
-    removeAllPageLayoutsFromCache() {
-        this._recipeManager.clean(RecipeAliases.PAGE_LAYOUTS);
-    }
+    removeAllPageLayoutsFromCache(): void;
 
     /**
      * @description Get information about the object types
@@ -399,10 +216,7 @@ export class API {
      * @async
      * @public
      */
-    async getObjectTypes(): Promise<Array<SFDC_ObjectType>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.OBJECT_TYPES));
-    }
+    getObjectTypes(): Promise<Array<SFDC_ObjectType>>;
 
     /**
      * @description Get information about the objects 
@@ -413,21 +227,13 @@ export class API {
      * @async
      * @public
      */
-    async getObjects(namespace: string, sobjectType: string): Promise<Array<SFDC_Object>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.OBJECTS, new Map([
-            [OrgCheckGlobalParameter.PACKAGE_NAME, namespace],
-            [OrgCheckGlobalParameter.SOBJECT_TYPE_NAME, sobjectType],
-        ])));
-    }
+    getObjects(namespace: string, sobjectType: string): Promise<Array<SFDC_Object>>;
 
     /**
      * @description Remove all the cached information about objects
      * @public
      */
-    removeAllObjectsFromCache() {
-        this._recipeManager.clean(RecipeAliases.OBJECTS);
-    }
+    removeAllObjectsFromCache(): void;
 
     /**
      * @description Get information about a specific sobject
@@ -437,67 +243,46 @@ export class API {
      * @async
      * @public
      */
-    async getObject(sobject: string): Promise<SFDC_Object> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.OBJECT, new Map([
-            [OrgCheckGlobalParameter.SOBJECT_NAME, sobject]
-        ])));
-    }
+    getObject(sobject: string): Promise<SFDC_Object>;
 
     /**
      * @description Remove all the cached information about a specific sobject
      * @param {string} sobject - the name of the sobject to remove from cache
      * @public
      */
-    removeObjectFromCache(sobject: string) {
-        this._recipeManager.clean(RecipeAliases.OBJECT, new Map([[OrgCheckGlobalParameter.SOBJECT_NAME, sobject]]));
-    }
+    removeObjectFromCache(sobject: string): void;
 
     /**
      * @description Get information about object permissions per parent (kind of matrix view)
      * @param {string} namespace - the namespace of the package to filter the object permissions
-     * @returns {Promise<DataMatrix>} Information about objects (list of string) and permissions (list of SFDC_ObjectPermissionsPerParent)
+     * @returns {Promise<DataMatrixIntf>} Information about objects (list of string) and permissions (list of SFDC_ObjectPermissionsPerParent)
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    async getObjectPermissionsPerParent(namespace: string): Promise<DataMatrix> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.OBJECT_PERMISSIONS, new Map([
-            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
-        ])));
-    }
+    getObjectPermissionsPerParent(namespace: string): Promise<DataMatrixIntf>;
 
     /**
      * @description Remove all the cached information about object permissions
      * @public
      */
-    removeAllObjectPermissionsFromCache() {
-        this._recipeManager.clean(RecipeAliases.OBJECT_PERMISSIONS);
-    }
+    removeAllObjectPermissionsFromCache(): void;
 
     /**
      * @description Get information about application permissions per parent (kind of matrix view)
      * @param {string} namespace - the namespace of the package to filter the application permissions
-     * @returns {Promise<DataMatrix>} Information about applications (list of string) and permissions (list of SFDC_AppPermissionsPerParent)
+     * @returns {Promise<DataMatrixIntf>} Information about applications (list of string) and permissions (list of SFDC_AppPermissionsPerParent)
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    async getApplicationPermissionsPerParent(namespace: string): Promise<DataMatrix> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.APP_PERMISSIONS, new Map([
-            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
-        ])));
-    }
+    getApplicationPermissionsPerParent(namespace: string): Promise<DataMatrixIntf>;
 
     /**
      * @description Remove all the cached information about application permissions
      * @public
      */
-    removeAllAppPermissionsFromCache() {
-        this._recipeManager.clean(RecipeAliases.APP_PERMISSIONS);
-    }
+    removeAllAppPermissionsFromCache(): void;
 
     /**
      * @description Get information about knowledge articles
@@ -506,18 +291,13 @@ export class API {
      * @async
      * @public
      */
-    async getKnowledgeArticles(): Promise<Array<SFDC_KnowledgeArticle>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.KNOWLEDGE_ARTICLES));
-    }
+    getKnowledgeArticles(): Promise<Array<SFDC_KnowledgeArticle>>;
 
     /**
      * @description Remove all the cached information about knowledge articles
      * @public
      */
-    removeAllKnowledgeArticlesFromCache() {
-        this._recipeManager.clean(RecipeAliases.KNOWLEDGE_ARTICLES);
-    }    
+    removeAllKnowledgeArticlesFromCache(): void;
 
     /**
      * @description Get information about Chatter groups
@@ -526,18 +306,13 @@ export class API {
      * @async
      * @public
      */
-    async getChatterGroups(): Promise<Array<SFDC_CollaborationGroup>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.COLLABORATION_GROUPS));
-    }
+    getChatterGroups(): Promise<Array<SFDC_CollaborationGroup>>;
 
     /**
      * @description Remove all the cached information about Chatter groups
      * @public
      */
-    removeAllChatterGroupsFromCache() {
-        this._recipeManager.clean(RecipeAliases.COLLABORATION_GROUPS);
-    }    
+    removeAllChatterGroupsFromCache(): void;
 
     /**
      * @description Get information about custom fields (filtered out by namespace/pakage, type and sobject)
@@ -549,22 +324,13 @@ export class API {
      * @async
      * @public
      */
-    async getCustomFields(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_Field>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.CUSTOM_FIELDS, new Map([
-            [OrgCheckGlobalParameter.PACKAGE_NAME, namespace], 
-            [OrgCheckGlobalParameter.SOBJECT_TYPE_NAME, sobjectType],
-            [OrgCheckGlobalParameter.SOBJECT_NAME, sobject]
-        ])));
-    }
+    getCustomFields(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_Field>>;
 
     /**
      * @description Remove all the cached information about custom fields
      * @public
      */
-    removeAllCustomFieldsFromCache() {
-        this._recipeManager.clean(RecipeAliases.CUSTOM_FIELDS);
-    }
+    removeAllCustomFieldsFromCache(): void;
 
     /**
      * @description Get information about permission sets (filtered out by namespace/pakage)
@@ -574,20 +340,13 @@ export class API {
      * @async
      * @public
      */
-    async getPermissionSets(namespace: string): Promise<Array<SFDC_PermissionSet>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.PERMISSION_SETS, new Map([
-            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
-        ])));
-    }
+    getPermissionSets(namespace: string): Promise<Array<SFDC_PermissionSet>> ;
     
     /**
      * @description Remove all the cached information about permission sets
      * @public
      */
-    removeAllPermSetsFromCache() {
-        this._recipeManager.clean(RecipeAliases.PERMISSION_SETS);
-    }
+    removeAllPermSetsFromCache(): void;
 
     /**
      * @description Get information about permission set licenses
@@ -596,18 +355,13 @@ export class API {
      * @async
      * @public
      */
-    async getPermissionSetLicenses(): Promise<Array<SFDC_PermissionSetLicense>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.PERMISSION_SET_LICENSES));
-    }
+    getPermissionSetLicenses(): Promise<Array<SFDC_PermissionSetLicense>>;
     
     /**
      * @description Remove all the cached information about permission set licenses
      * @public
      */
-    removeAllPermSetLicensesFromCache() {
-        this._recipeManager.clean(RecipeAliases.PERMISSION_SET_LICENSES);
-    }
+    removeAllPermSetLicensesFromCache(): void;
 
     /**
      * @description Get information about profiles (filtered out by namespace/pakage)
@@ -617,20 +371,13 @@ export class API {
      * @async
      * @public
      */
-    async getProfiles(namespace: string): Promise<Array<SFDC_Profile>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.PROFILES, new Map([
-            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
-        ])));
-    }
+    getProfiles(namespace: string): Promise<Array<SFDC_Profile>>;
 
     /**
      * @description Remove all the cached information about profiles
      * @public
      */
-    removeAllProfilesFromCache() {
-        this._recipeManager.clean(RecipeAliases.PROFILES);
-    }
+    removeAllProfilesFromCache(): void;
 
     /**
      * @description Get information about profile restrictions (filtered out by namespace/pakage)
@@ -640,20 +387,13 @@ export class API {
      * @async
      * @public
      */
-    async getProfileRestrictions(namespace: string): Promise<Array<SFDC_ProfileRestrictions>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.PROFILE_RESTRICTIONS, new Map([
-            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
-        ])));
-    }
+    getProfileRestrictions(namespace: string): Promise<Array<SFDC_ProfileRestrictions>>;
 
     /**
      * @description Remove all the cached information about profile restrictions
      * @public
      */
-    removeAllProfileRestrictionsFromCache() {
-        this._recipeManager.clean(RecipeAliases.PROFILE_RESTRICTIONS);
-    }
+    removeAllProfileRestrictionsFromCache(): void;
 
     /**
      * @description Get information about profile password policies
@@ -662,18 +402,13 @@ export class API {
      * @async
      * @public
      */
-    async getProfilePasswordPolicies(): Promise<Array<SFDC_ProfilePasswordPolicy>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.PROFILE_PWD_POLICIES));
-    }
+    getProfilePasswordPolicies(): Promise<Array<SFDC_ProfilePasswordPolicy>>;
 
     /**
      * @description Remove all the cached information about profile password policies
      * @public
      */
-    removeAllProfilePasswordPoliciesFromCache() {
-        this._recipeManager.clean(RecipeAliases.PROFILE_PWD_POLICIES);
-    }
+    removeAllProfilePasswordPoliciesFromCache(): void;
 
     /**
      * @description Get information about active users
@@ -682,18 +417,13 @@ export class API {
      * @async
      * @public
      */
-    async getActiveUsers(): Promise<Array<SFDC_User>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.INTERNAL_ACTIVE_USERS));
-    }
+    getActiveUsers(): Promise<Array<SFDC_User>>;
 
     /**
      * @description Remove all the cached information about active users
      * @public
      */
-    removeAllActiveUsersFromCache() {
-        this._recipeManager.clean(RecipeAliases.INTERNAL_ACTIVE_USERS);
-    }
+    removeAllActiveUsersFromCache(): void;
 
     /**
      * @description Get information about browsers
@@ -702,18 +432,13 @@ export class API {
      * @async
      * @public
      */
-    async getBrowsers(): Promise<Array<SFDC_Browser>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.BROWSERS));
-    }
+    getBrowsers(): Promise<Array<SFDC_Browser>>;
 
     /**
      * @description Remove all the cached information about browsers
      * @public
      */
-    removeAllBrowsersFromCache() {
-        this._recipeManager.clean(RecipeAliases.BROWSERS);
-    }
+    removeAllBrowsersFromCache(): void;
 
     /**
      * @description Get information about custom labels (filtered out by namespace/pakage)
@@ -723,20 +448,13 @@ export class API {
      * @async
      * @public
      */
-    async getCustomLabels(namespace: string): Promise<Array<SFDC_CustomLabel>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.CUSTOM_LABELS, new Map([
-            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
-        ])));
-    }
+    getCustomLabels(namespace: string): Promise<Array<SFDC_CustomLabel>>;
 
     /**
      * @description Remove all the cached information about custom labels
      * @public
      */
-    removeAllCustomLabelsFromCache() {
-        this._recipeManager.clean(RecipeAliases.CUSTOM_LABELS);
-    }
+    removeAllCustomLabelsFromCache(): void;
 
     /**
      * @description Get information about custom tabs (filtered out by namespace/pakage)
@@ -746,20 +464,13 @@ export class API {
      * @async
      * @public
      */
-    async getCustomTabs(namespace: string): Promise<Array<SFDC_CustomTab>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.CUSTOM_TABS, new Map([
-            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
-        ])));
-    }
+    getCustomTabs(namespace: string): Promise<Array<SFDC_CustomTab>>;
 
     /**
      * @description Remove all the cached information about custom tabs
      * @public
      */
-    removeAllCustomTabsFromCache() {
-        this._recipeManager.clean(RecipeAliases.CUSTOM_TABS);
-    }
+    removeAllCustomTabsFromCache(): void;
 
     /**
      * @description Get information about documents (filtered out by namespace/pakage)
@@ -769,21 +480,14 @@ export class API {
      * @async
      * @public
      */
-    async getDocuments(namespace: string): Promise<Array<SFDC_Document>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.DOCUMENTS, new Map([
-            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
-        ])));
-    }
+    getDocuments(namespace: string): Promise<Array<SFDC_Document>>;
 
     /**
      * @description Remove all the cached information about documents
      * @public
      */
-    removeAllDocumentsFromCache() {
-        this._recipeManager.clean(RecipeAliases.DOCUMENTS);
-    }
-
+    removeAllDocumentsFromCache(): void;
+    
     /**
      * @description Get information about LWCs (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the lightning web components
@@ -792,20 +496,13 @@ export class API {
      * @async
      * @public
      */
-    async getLightningWebComponents(namespace: string): Promise<Array<SFDC_LightningWebComponent>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.LIGHTNING_WEB_COMPONENTS, new Map([
-            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
-        ])));
-    }
+    getLightningWebComponents(namespace: string): Promise<Array<SFDC_LightningWebComponent>>;
     
     /**
      * @description Remove all the cached information about lightning web components
      * @public
      */
-    removeAllLightningWebComponentsFromCache() {
-        this._recipeManager.clean(RecipeAliases.LIGHTNING_WEB_COMPONENTS);
-    }
+    removeAllLightningWebComponentsFromCache(): void;
 
     /**
      * @description Get information about Aura Components (filtered out by namespace/pakage)
@@ -815,20 +512,13 @@ export class API {
      * @async
      * @public
      */
-    async getLightningAuraComponents(namespace: string): Promise<Array<SFDC_LightningAuraComponent>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.LIGHTNING_AURA_COMPONENTS, new Map([
-            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
-        ])));
-    }
+    getLightningAuraComponents(namespace: string): Promise<Array<SFDC_LightningAuraComponent>>;
 
     /**
      * @description Remove all the cached information about lightning aura components
      * @public
      */
-    removeAllLightningAuraComponentsFromCache() {
-        this._recipeManager.clean(RecipeAliases.LIGHTNING_AURA_COMPONENTS);
-    }
+    removeAllLightningAuraComponentsFromCache(): void;
 
     /**
      * @description Get information about flexipages (filtered out by namespace/pakage)
@@ -838,20 +528,13 @@ export class API {
      * @async
      * @public
      */
-    async getLightningPages(namespace: string): Promise<Array<SFDC_LightningPage>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.LIGHTNING_PAGES, new Map([
-            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
-        ])));
-    }
+    getLightningPages(namespace: string): Promise<Array<SFDC_LightningPage>>;
 
     /**
      * @description Remove all the cached information about lightning pages
      * @public
      */
-    removeAllLightningPagesFromCache() {
-        this._recipeManager.clean(RecipeAliases.LIGHTNING_PAGES);
-    }
+    removeAllLightningPagesFromCache(): void;
     
     /**
      * @description Get information about VFCs (filtered out by namespace/pakage)
@@ -861,20 +544,13 @@ export class API {
      * @async
      * @public
      */
-    async getVisualForceComponents(namespace: string): Promise<Array<SFDC_VisualForceComponent>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.VISUALFORCE_COMPONENTS, new Map([
-            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
-        ])));
-    }
+    getVisualForceComponents(namespace: string): Promise<Array<SFDC_VisualForceComponent>>;
     
     /**
      * @description Remove all the cached information about Visualforce Components
      * @public
      */
-    removeAllVisualForceComponentsFromCache() {
-        this._recipeManager.clean(RecipeAliases.VISUALFORCE_COMPONENTS);
-    }
+    removeAllVisualForceComponentsFromCache(): void;
 
     /**
      * @description Get information about VFPs (filtered out by namespace/pakage)
@@ -884,20 +560,13 @@ export class API {
      * @async
      * @public
      */
-    async getVisualForcePages(namespace: string): Promise<Array<SFDC_VisualForcePage>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.VISUALFORCE_PAGES, new Map([
-            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
-        ])));
-    }
+    getVisualForcePages(namespace: string): Promise<Array<SFDC_VisualForcePage>>;
 
     /**
      * @description Remove all the cached information about Visualforce Pages
      * @public
      */
-    removeAllVisualForcePagesFromCache() {
-        this._recipeManager.clean(RecipeAliases.VISUALFORCE_PAGES);
-    }
+    removeAllVisualForcePagesFromCache(): void;
     
     /**
      * @description Get information about Public Groups
@@ -906,18 +575,13 @@ export class API {
      * @async
      * @public
      */
-    async getPublicGroups(): Promise<Array<SFDC_Group>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.PUBLIC_GROUPS));
-    }
+    getPublicGroups(): Promise<Array<SFDC_Group>>;
 
     /**
      * @description Remove all the cached information about public groups
      * @public
      */
-    removeAllPublicGroupsFromCache() {
-        this._recipeManager.clean(RecipeAliases.PUBLIC_GROUPS);
-    }
+    removeAllPublicGroupsFromCache(): void;
 
     /**
      * @description Get information about Queues
@@ -926,18 +590,13 @@ export class API {
      * @async
      * @public
      */
-    async getQueues(): Promise<Array<SFDC_Group>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.QUEUES));
-    }
+    getQueues(): Promise<Array<SFDC_Group>>;
 
     /**
      * @description Remove all the cached information about queues
      * @public
      */
-    removeAllQueuesFromCache() {
-        this._recipeManager.clean(RecipeAliases.QUEUES);
-    }
+    removeAllQueuesFromCache(): void;
 
     /**
      * @description Get information about Apex Classes (filtered out by namespace/pakage)
@@ -947,20 +606,13 @@ export class API {
      * @async
      * @public
      */
-    async getApexClasses(namespace: string): Promise<Array<SFDC_ApexClass>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.APEX_CLASSES, new Map([
-            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
-        ])));
-    }
+    getApexClasses(namespace: string): Promise<Array<SFDC_ApexClass>>;
 
     /**
      * @description Remove all the cached information about apex classes
      * @public
      */
-    removeAllApexClassesFromCache() {
-        this._recipeManager.clean(RecipeAliases.APEX_CLASSES);
-    }
+    removeAllApexClassesFromCache(): void;
 
     /**
      * @description Get information about Apex Tests (filtered out by namespace/pakage)
@@ -970,20 +622,13 @@ export class API {
      * @async
      * @public
      */
-    async getApexTests(namespace: string): Promise<Array<SFDC_ApexClass>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.APEX_TESTS, new Map([
-            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
-        ])));
-    }
+    getApexTests(namespace: string): Promise<Array<SFDC_ApexClass>>;
 
     /**
      * @description Remove all the cached information about apex tests
      * @public
      */
-    removeAllApexTestsFromCache() {
-        this._recipeManager.clean(RecipeAliases.APEX_TESTS);
-    }
+    removeAllApexTestsFromCache(): void;
 
     /**
      * @description Get information about Apex Uncompiled Classes (filtered out by namespace/pakage)
@@ -993,20 +638,13 @@ export class API {
      * @async
      * @public
      */
-    async getApexUncompiled(namespace: string): Promise<Array<SFDC_ApexClass>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.APEX_UNCOMPILED, new Map([
-            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
-        ])));
-    }
+    getApexUncompiled(namespace: string): Promise<Array<SFDC_ApexClass>>;
 
     /**
      * @description Remove all the cached information about apex uncompiled classes
      * @public
      */
-    removeAllApexUncompiledFromCache() {
-        this._recipeManager.clean(RecipeAliases.APEX_UNCOMPILED);
-    }
+    removeAllApexUncompiledFromCache(): void;
 
     /**
      * @description Get information about Apex triggers (filtered out by namespace/pakage)
@@ -1016,20 +654,13 @@ export class API {
      * @async
      * @public
      */
-    async getApexTriggers(namespace: string): Promise<Array<SFDC_ApexTrigger>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.APEX_TRIGGERS, new Map([
-            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
-        ])));
-    }
+    getApexTriggers(namespace: string): Promise<Array<SFDC_ApexTrigger>>;
 
     /**
      * @description Remove all the cached information about apex triggers
      * @public
      */
-    removeAllApexTriggersFromCache() {
-        this._recipeManager.clean(RecipeAliases.APEX_TRIGGERS);
-    }
+    removeAllApexTriggersFromCache(): void;
 
     /**
      * @description Get information about User roles in a tabular view
@@ -1038,18 +669,13 @@ export class API {
      * @async
      * @public
      */
-    async getRoles(): Promise<Array<SFDC_UserRole>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.USER_ROLES));
-    }
+    getRoles(): Promise<Array<SFDC_UserRole>>;
 
     /**
      * @description Remove all the cached information about roles
      * @public
      */
-    removeAllRolesFromCache() {
-        this._recipeManager.clean(RecipeAliases.USER_ROLES);
-    }
+    removeAllRolesFromCache(): void;
 
     /**
      * @description Get information about User Roles in a tree view
@@ -1058,42 +684,7 @@ export class API {
      * @async
      * @public
      */
-    async getRolesTree(): Promise<SFDC_UserRole> {
-        // Get data
-        const allRoles = (await this.getRoles());
-        // @ts-ignore
-        // Create a map that stores all nodes
-        // Where:
-        //   - key is the id of the node (string)
-        //   - value is the node with properties: 
-        //        * 'id' (mandatory string), 
-        //        * 'children' (optional array), and,
-        //        * 'record' (undefined for root, mandatory for other than root -- of type: SFDC_UserRole)
-        const allNodes = new Map();
-        // Key for artificial ROOT
-        const ROOT_KEY = '__i am root__';
-        // Note that 'allRoles' is an 'Array'
-        allRoles?.forEach((role) => { 
-            // is this node already registered? if false create (with no children!) and set in the map
-            if (allNodes.has(role.id) === false) { allNodes.set(role.id, { id: role.id }) }
-            // get a reference to this node
-            const node = allNodes.get(role.id);
-            // if that node just got registered, it has no 'record' yet
-            // if that node was previously a parent (and got registered at that time), it has no 'record' yet
-            if (!node.record) node.record = role; // for this reasons, we set the record property if not set
-            // get the id of its parent (if no parent using the artificial 'root' node)
-            const parentId = role.hasParent === true ? role.parentId : ROOT_KEY;
-            // is the parent already registered? if false create (with no record!) and set in the map
-            if (allNodes.has(parentId) === false) { allNodes.set(parentId, { id: parentId }) }
-            // get a reference to this parent node
-            const parentNode = allNodes.get(parentId);
-            // if that parent just got registered, it has no 'children' yet
-            // if that parent was previously a child (and got registered at that time), it has no 'children' yet
-            if (!parentNode.children) parentNode.children = []; // for this reasons, we set the children property if not set
-            parentNode.children.push(node);
-        });
-        return allNodes.get(ROOT_KEY);
-    }
+    getRolesTree(): Promise<SFDC_UserRole>;
 
     /**
      * @description Get information about Static Resources
@@ -1103,20 +694,13 @@ export class API {
      * @async
      * @public
      */
-    async getStaticResources(namespace: string): Promise<Array<SFDC_StaticResource>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.STATIC_RESOURCES, new Map([
-            [OrgCheckGlobalParameter.PACKAGE_NAME, namespace]
-        ])));
-    }
+    getStaticResources(namespace: string): Promise<Array<SFDC_StaticResource>>;
 
     /**
      * @description Remove all the cached information about Static Resources
      * @public
      */
-    removeAllStaticResourcesFromCache() {
-        this._recipeManager.clean(RecipeAliases.STATIC_RESOURCES);
-    }
+    removeAllStaticResourcesFromCache(): void;
 
     /**
      * @description Get information about WebLinks
@@ -1128,22 +712,13 @@ export class API {
      * @async
      * @public
      */
-    async getWeblinks(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_WebLink>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.WEBLINKS, new Map([
-            [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
-            [OrgCheckGlobalParameter.PACKAGE_NAME, namespace],
-            [OrgCheckGlobalParameter.SOBJECT_TYPE_NAME, sobjectType]
-        ])));
-    }
+    getWeblinks(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_WebLink>>;
 
     /**
      * @description Remove all the cached information about WebLinks
      * @public
      */
-    removeAllWeblinksFromCache() {
-        this._recipeManager.clean(RecipeAliases.WEBLINKS);
-    }    
+    removeAllWeblinksFromCache(): void;
 
     /**
      * @description Get information about Workflows
@@ -1152,18 +727,13 @@ export class API {
      * @async
      * @public
      */
-    async getWorkflows(): Promise<Array<SFDC_Workflow>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.WORKFLOWS));
-    }
+    getWorkflows(): Promise<Array<SFDC_Workflow>>;
 
     /**
      * @description Remove all the cached information about workflows
      * @public
      */
-    removeAllWorkflowsFromCache() {
-        this._recipeManager.clean(RecipeAliases.WORKFLOWS);
-    }
+    removeAllWorkflowsFromCache(): void;
 
     /**
      * @description Get information about record types
@@ -1175,47 +745,30 @@ export class API {
      * @async
      * @public
      */
-    async getRecordTypes(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_RecordType>> {
-        // @ts-ignore    
-        return (await this._recipeManager.run(RecipeAliases.RECORD_TYPES, new Map([
-            [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
-            [OrgCheckGlobalParameter.PACKAGE_NAME, namespace],
-            [OrgCheckGlobalParameter.SOBJECT_TYPE_NAME, sobjectType]
-        ])));
-    }
+    getRecordTypes(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_RecordType>>;
 
     /**
      * @description Remove all the cached information about record types
      * @public
      */
-    removeAllRecordTypesFromCache() {
-        this._recipeManager.clean(RecipeAliases.RECORD_TYPES);
-    }
+    removeAllRecordTypesFromCache(): void;
 
     /**
      * @description Get information about field permissions per parent (kind of matrix view) for a specific sobject
      * @param {string} sobject - the name of the sobject to get information about
      * @param {string} namespace - the namespace of the package to filter the field permissions
-     * @returns {Promise<DataMatrix>} Information about fields (list of string) and permissions (list of SFDC_FieldPermissionsPerParent)
+     * @returns {Promise<DataMatrixIntf>} Information about fields (list of string) and permissions (list of SFDC_FieldPermissionsPerParent)
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    async getFieldPermissionsPerParent(sobject: string, namespace: string): Promise<DataMatrix> {
-        // @ts-ignore    
-        return (await this._recipeManager.run(RecipeAliases.FIELD_PERMISSIONS, new Map([
-            [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
-            [OrgCheckGlobalParameter.PACKAGE_NAME, namespace]
-        ])));
-    }
+    getFieldPermissionsPerParent(sobject: string, namespace: string): Promise<DataMatrixIntf>;
 
     /**
      * @description Remove all the cached information about field permissions
      * @public
      */
-    removeAllFieldPermissionsFromCache() {
-        this._recipeManager.clean(RecipeAliases.FIELD_PERMISSIONS);
-    }
+    removeAllFieldPermissionsFromCache(): void;
 
     /**
      * @description Get information about Flows
@@ -1224,18 +777,13 @@ export class API {
      * @async
      * @public
      */
-    async getFlows(): Promise<Array<SFDC_Flow>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.FLOWS));
-    }
+    getFlows(): Promise<Array<SFDC_Flow>>;
 
     /**
      * @description Remove all the cached information about flows
      * @public
      */
-    removeAllFlowsFromCache() {
-        this._recipeManager.clean(RecipeAliases.FLOWS);
-    }
+    removeAllFlowsFromCache(): void;
     
     /**
      * @description Get information about EmailTemplate
@@ -1245,20 +793,13 @@ export class API {
      * @async
      * @public
      */
-    async getEmailTemplates(namespace: string): Promise<Array<SFDC_EmailTemplate>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.EMAIL_TEMPLATES, new Map([
-            [OrgCheckGlobalParameter.PACKAGE_NAME, namespace]
-        ])));
-    }
+    getEmailTemplates(namespace: string): Promise<Array<SFDC_EmailTemplate>>;
 
     /**
      * @description Remove all the cached information about email template
      * @public
      */
-    removeAllEmailTemplatesFromCache() {
-        this._recipeManager.clean(RecipeAliases.EMAIL_TEMPLATES);
-    }
+    removeAllEmailTemplatesFromCache(): void;
 
     /**
      * @description Get information about home page components
@@ -1267,18 +808,13 @@ export class API {
      * @async
      * @public
      */
-    async getHomePageComponents(): Promise<Array<SFDC_HomePageComponent>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.HOME_PAGE_COMPONENTS));
-    }
+    getHomePageComponents(): Promise<Array<SFDC_HomePageComponent>>;
 
     /**
      * @description Remove all the cached information about home page components
      * @public
      */
-    removeAllHomePageComponentsFromCache() {
-        this._recipeManager.clean(RecipeAliases.HOME_PAGE_COMPONENTS);
-    }
+    removeAllHomePageComponentsFromCache(): void;
 
     /**
      * @description Get information about Process Builders
@@ -1287,18 +823,13 @@ export class API {
      * @async
      * @public
      */
-    async getProcessBuilders(): Promise<Array<SFDC_Flow>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.PROCESS_BUILDERS));
-    }
+    getProcessBuilders(): Promise<Array<SFDC_Flow>>;
 
     /**
      * @description Remove all the cached information about process builders
      * @public
      */
-    removeAllProcessBuildersFromCache() {
-        this._recipeManager.clean(RecipeAliases.PROCESS_BUILDERS);
-    }
+    removeAllProcessBuildersFromCache(): void;
     
     /**
      * @description Get information about Validation rules
@@ -1310,22 +841,13 @@ export class API {
      * @async
      * @public
      */
-    async getValidationRules(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_ValidationRule>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.VALIDATION_RULES, new Map([
-            [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
-            [OrgCheckGlobalParameter.PACKAGE_NAME, namespace],
-            [OrgCheckGlobalParameter.SOBJECT_TYPE_NAME, sobjectType]
-        ])));
-    }
+    getValidationRules(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_ValidationRule>>;
     
     /**
      * @description Remove all the cached information about validation rules
      * @public
      */
-    removeAllValidationRulesFromCache() {
-        this._recipeManager.clean(RecipeAliases.VALIDATION_RULES);
-    }
+    removeAllValidationRulesFromCache(): void;
 
     /**
      * @description Get information about dashboards
@@ -1334,18 +856,13 @@ export class API {
      * @async
      * @public
      */
-    async getDashboards(): Promise<Array<SFDC_Dashboard>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.DASHBOARDS));
-    }
+    getDashboards(): Promise<Array<SFDC_Dashboard>>;
     
     /**
      * @description Remove all the cached information about dashboards
      * @public
      */
-    removeAllDashboardsFromCache() {
-        this._recipeManager.clean(RecipeAliases.DASHBOARDS);
-    }
+    removeAllDashboardsFromCache(): void;
 
     /**
      * @description Get information about reports
@@ -1354,56 +871,41 @@ export class API {
      * @async
      * @public
      */
-    async getReports(): Promise<Array<SFDC_Report>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.REPORTS));
-    }
+    getReports(): Promise<Array<SFDC_Report>>;
     
     /**
      * @description Remove all the cached information about reports
      * @public
      */
-    removeAllReportsFromCache() {
-        this._recipeManager.clean(RecipeAliases.REPORTS);
-    }
+    removeAllReportsFromCache(): void;
 
     /**
      * @description Get global view of the org
-     * @returns {Promise<Map<string, DataCollectionStatistics>>} List of items to return
+     * @returns {Promise<Map<string, DataCollectionStatisticsIntf>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    async getGlobalView(): Promise<Map<string, DataCollectionStatistics>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.GLOBAL_VIEW));
-    }
+    getGlobalView(): Promise<Map<string, DataCollectionStatisticsIntf>>;
 
     /**
      * @description Remove all the cached information about global view
      * @public
      */
-    removeGlobalViewFromCache() {
-        this._recipeManager.clean(RecipeAliases.GLOBAL_VIEW);
-    }
+    removeGlobalViewFromCache(): void;
 
     /**
      * @description Get hardcoded URLs view of the org
-     * @returns {Promise<Map<string, DataCollectionStatistics>>} List of items to return
+     * @returns {Promise<Map<string, DataCollectionStatisticsIntf>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    async getHardcodedURLsView(): Promise<Map<string, DataCollectionStatistics>> {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.HARDCODED_URLS_VIEW));
-    }
+    getHardcodedURLsView(): Promise<Map<string, DataCollectionStatisticsIntf>>;
 
     /**
      * @description Remove all the cached information about hardcoded URLs view
      * @public
      */
-    removeHardcodedURLsFromCache() {
-        this._recipeManager.clean(RecipeAliases.HARDCODED_URLS_VIEW);
-    }
+    removeHardcodedURLsFromCache(): void;
 }

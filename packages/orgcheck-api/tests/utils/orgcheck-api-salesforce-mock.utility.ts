@@ -1,6 +1,6 @@
-import { SimpleLoggerIntf } from "../../src/api/core/orgcheck-api-logger";
-import { SalesforceUsageInformation } from "../../src/api/core/orgcheck-api-salesforce-watchdog";
-import { SalesforceManagerIntf, SalesforceMetadataRequest, SalesforceQueryRequest } from "../../src/api/core/orgcheck-api-salesforcemanager";
+import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
+import { SalesforceUsageInformation } from 'src/api/core/orgcheck-api-salesforce-watchdog';
+import { SalesforceManagerIntf, SalesforceMetadataRequest, SalesforceQueryRequest } from 'src/api/core/orgcheck-api-salesforcemanager';
 
 export class SalesforceManagerMock_DoingNothing implements SalesforceManagerIntf {
     get apiVersion() { return 53; }

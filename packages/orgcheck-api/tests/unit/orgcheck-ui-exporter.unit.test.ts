@@ -1,4 +1,4 @@
-import { Exporter } from "../../src/ui/exporter/orgcheck-ui-exporter";
+import { Exporter } from 'src/ui/exporter/orgcheck-ui-exporter';
 import * as XLSX from "xlsx";
 
 describe('tests.ui.unit.Exporter', () => {

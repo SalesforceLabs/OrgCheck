@@ -1,11 +1,11 @@
-import { SalesforceManager } from "../../src/api/core/orgcheck-api-salesforcemanager-impl";
-import { SimpleLoggerMock_DoingNothing } from "../utils/orgcheck-api-logger-mock.utility";
-import { jsforce } from "../utils/orgcheck-api-jsforce-mock.utility";
+import { SalesforceManager } from 'src/api/core/orgcheck-api-salesforcemanager-impl';
+import { SimpleLoggerMock_DoingNothing } from 'tests/utils/orgcheck-api-logger-mock.utility';
+import jsforce from 'tests/utils/orgcheck-api-jsforce-mock.utility';
 
 describe('tests.api.unit.SalesforceManager', () => {
-  const simpleLogger = new SimpleLoggerMock_DoingNothing();
-  // @ts-ignore    
+
   globalThis.jsforce = jsforce;
+  const simpleLogger = new SimpleLoggerMock_DoingNothing();
   
   describe('soqlQuery use cases', () => {
     const manager = new SalesforceManager({

@@ -1,5 +1,5 @@
-import { CellFactory } from "../../src/ui/table/orgcheck-ui-table-cell";
-import { ColumnType, TableColumn, TableColumnWithModifiers } from "../../src/ui/table/orgcheck-ui-table-column";
+import { CellFactory } from 'src/ui/table/orgcheck-ui-table-cell';
+import { ColumnType, TableColumn, TableColumnWithModifiers } from 'src/ui/table/orgcheck-ui-table-column';
 
 describe('tests.ui.unit.CellFactory', () => {
 

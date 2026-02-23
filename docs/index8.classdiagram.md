@@ -17,7 +17,7 @@ API *-- SalesforceManagerIntf : composition
 API *-- DataCacheManagerIntf : composition
 API *-- LoggerIntf : composition
 DataCacheManager --|> DataCacheManagerIntf : implements
-DataCacheManagerIntf --> DataCacheItem : uses
+DataCacheManagerIntf --> DataCacheItemIntf : uses
 Compressor --|> CompressorIntf : implements
 DataCacheManagerIntf --> CompressorIntf : uses
 DataCacheManagerIntf --> StorageIntf : uses
@@ -46,9 +46,9 @@ classDiagram
         +version() string
         +salesforceApiVersion() number
         +removeAllFromCache()
-        +getCacheInformation() Array~DataCacheItem~
+        +getCacheInformation() Array~DataCacheItemIntf~
         +getCacheData(string itemName) any
-        +getAllScoreRulesAsDataMatrix() DataMatrix
+        +getAllScoreRulesAsDataMatrix() DataMatrixIntf
         +dailyApiRequestLimitInformation() SalesforceUsageInformation
         +runAllTestsAsync() string
         +compileClasses(Array~string~ apexClassIds) Map~string, any~
@@ -124,8 +124,8 @@ classDiagram
         +getObjectTypes() Array~SFDC_ObjectType~
         +getObjects(namespace, sobjectType) Array~SFDC_Object~
         +getObject(sobject) SFDC_Object
-        +getObjectPermissionsPerParent(namespace) DataMatrix
-        +getApplicationPermissionsPerParent(namespace) DataMatrix
+        +getObjectPermissionsPerParent(namespace) DataMatrixIntf
+        +getApplicationPermissionsPerParent(namespace) DataMatrixIntf
         +getKnowledgeArticles() Array~SFDC_KnowledgeArticle~
         +getChatterGroups() Array~SFDC_CollaborationGroup~
         +getCustomFields(namespace, sobjectType, sobject) Array~SFDC_Fiel~
@@ -156,7 +156,7 @@ classDiagram
         +getWeblinks(namespace, sobjectType, sobject) Array~SFDC_WebLink~
         +getWorkflows() Array~SFDC_Workflow~
         +getRecordTypes(namespace, sobjectType, sobject) Array~SFDC_RecordType~
-        +getFieldPermissionsPerParent(sobject, namespace) DataMatrix
+        +getFieldPermissionsPerParent(sobject, namespace) DataMatrixIntf
         +getFlows() Array~SFDC_Flow~
         +getEmailTemplates(namespace) Array~SFDC_EmailTemplate~
         +getHomePageComponents() Array~SFDC_HomePageComponent~
@@ -164,8 +164,8 @@ classDiagram
         +getValidationRules(namespace, sobjectType, sobject) Array~SFDC_ValidationRule~
         +getDashboards() Array~SFDC_Dashboard~
         +getReports() Array~SFDC_Report~
-        +getGlobalView() Map~string, DataCollectionStatistics~
-        +getHardcodedURLsView() Map~string, DataCollectionStatistics~
+        +getGlobalView() Map~string, DataCollectionStatisticsIntf~
+        +getHardcodedURLsView() Map~string, DataCollectionStatisticsIntf~
 }
 ```
 

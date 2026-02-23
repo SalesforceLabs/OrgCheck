@@ -1,10 +1,10 @@
-import { DataAliases } from '../core/orgcheck-api-data-aliases';
-import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
-import { Dataset } from '../core/orgcheck-api-dataset';
-import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
-import { Processor } from '../core/orgcheck-api-processor';
-import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
-import { SFDC_Application } from '../data/orgcheck-api-data-application';
+import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
+import { DataFactoryIntf } from 'src/api/core/orgcheck-api-datafactory';
+import { Dataset } from 'src/api/core/orgcheck-api-dataset';
+import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
+import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
+import { SFDC_Application } from 'src/api/data/orgcheck-api-data-application';
 
 export class DatasetApplications implements Dataset {
 

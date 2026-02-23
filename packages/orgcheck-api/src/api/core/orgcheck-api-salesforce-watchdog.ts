@@ -1,4 +1,5 @@
-import { SalesforceError } from "./orgcheck-api-salesforcemanager";
+import { SalesforceUsageInformationIntf } from 'src/api/core/orgcheck-api-limit-usageinformation';
+import { SalesforceError } from 'src/api/core/orgcheck-api-salesforcemanager';
 
 /**
  * @description Threshold value when percentage is reaching a "warning" zone (not yet a "critical" zone)
@@ -24,7 +25,7 @@ const IF_LIMIT_INFO_ARE_OLDER_THAN_THIS_FORCE_REFRESH: number = 1*60*1000; // =1
 /**
  * @description Information about the current Daily API Request usage limit
  */
-export class SalesforceUsageInformation {
+export class SalesforceUsageInformation implements SalesforceUsageInformationIntf {
 
     /**
      * @description Current ratio (not percentage!) of Daily API Request limit usage
@@ -121,10 +122,10 @@ export class SalesforceWatchDog {
 
     /**
      * @description Last ratio the Salesforce API gave us about the Daily API Request. 
-     * @type {SalesforceUsageInformation}
+     * @type {SalesforceUsageInformationIntf}
      * @private
      */
-    _lastApiUsage: SalesforceUsageInformation;
+    _lastApiUsage: SalesforceUsageInformationIntf;
 
     /**
      * @description Before calling the Salesforce API, this is a watch dog to make sure we don't exceed the daily API request limit

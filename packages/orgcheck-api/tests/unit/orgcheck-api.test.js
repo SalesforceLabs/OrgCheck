@@ -1,13 +1,13 @@
-import { API } from '../../src/api/orgcheck-api';
-import { StorageSetupMock_DoingNothing } from '../utils/orgcheck-api-storage-mock.utility';
-import { CompressorMock_IdemPotent } from '../utils/orgcheck-api-compressor-mock.utility';
-import { jsforce } from "../utils/orgcheck-api-jsforce-mock.utility";
+import { API } from 'src/api/orgcheck-api-impl';
+import jsforce from 'tests/utils/orgcheck-api-jsforce-mock.utility';
+import fflate from 'tests/utils/orgcheck-api-fflate-mock.utility';
+import { StorageSetupMock_BasedOnMap } from 'tests/utils/orgcheck-api-storage-mock.utility'
 
 describe('tests.api.API', () => {
 
   describe('Test API', () => {
-    // @ts-ignore    
     globalThis.jsforce = jsforce;
+    globalThis.fflate = fflate;
 
     it('should be instantiable and usable', async () => {
       let hadError = false;
@@ -22,15 +22,10 @@ describe('tests.api.API', () => {
           },
           salesforce: { 
             authenticationOptions: {
-              accessToken: 'TESTING-API'
+              accessToken: 'TESTING-BUNDLE'
             } 
           },
-          storage: { 
-            localImpl: new StorageSetupMock_DoingNothing(), 
-            compression: { 
-              useFflate: false, 
-              mockImpl: new CompressorMock_IdemPotent()
-            }}
+          storage: new StorageSetupMock_BasedOnMap()
         });
         expect(api).not.toBeNull();
         await api.getActiveUsers();

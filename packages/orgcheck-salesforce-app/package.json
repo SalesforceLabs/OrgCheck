@@ -5,14 +5,13 @@
     "private": true,
   "scripts": {
 
+    "build": "node ./build/static-resource/build-static-resource.js",
+    "test": "sfdx-lwc-jest",
 
 
 
 
     "lint": "eslint force-app/main/default/lwc",
-    "build:sr": "node ./build/static-resource/build-static-resource.js",
-    "import:orgchecklibs": "node ./build/orgcheck-libs/import-orgcheck-libs.js",
-    "test": "sfdx-lwc-jest",
     "sf:deploy": "sf project deploy start --metadata ApexPage --metadata AuraDefinitionBundle --metadata ContentAsset --metadata CustomApplication --metadata CustomTab --metadata LightningComponentBundle --metadata PermissionSet --metadata Prompt --metadata StaticResource",
     "sf:deploy:sr": "sf project deploy start --metadata StaticResource",
     "sf:deploy:lwc": "sf project deploy start --metadata LightningComponentBundle",
@@ -56,8 +55,5 @@
     "**/lwc/**": [
       "sfdx-lwc-jest -- --bail --findRelatedTests --passWithNoTests"
     ]
-  },
-  "engines": {
-    "node": ">=20.0.0 <21.0.0"
   }
 }

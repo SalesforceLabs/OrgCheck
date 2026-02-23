@@ -1,17 +1,17 @@
-import { DataAliases } from '../core/orgcheck-api-data-aliases';
-import { DataWithScore } from '../core/orgcheck-api-data';
-import { SFDC_ApexTrigger } from './orgcheck-api-data-apextrigger';
-import { SFDC_Field } from './orgcheck-api-data-field';
-import { SFDC_FieldSet } from './orgcheck-api-data-fieldset';
-import { SFDC_LightningPage } from './orgcheck-api-data-lightningpage';
-import { SFDC_Limit } from './orgcheck-api-data-limit';
-import { SFDC_ObjectRelationShip } from './orgcheck-api-data-objectrelationship';
-import { SFDC_ObjectType } from './orgcheck-api-data-objecttype';
-import { SFDC_PageLayout } from './orgcheck-api-data-pagelayout';
-import { SFDC_RecordType } from './orgcheck-api-data-recordtype';
-import { SFDC_ValidationRule } from './orgcheck-api-data-validationrule';
-import { SFDC_WebLink } from './orgcheck-api-data-weblink';
-import { SFDC_Workflow } from './orgcheck-api-data-workflow';
+import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
+import { DataWithScore } from 'src/api/core/orgcheck-api-data';
+import { SFDC_ApexTrigger } from 'src/api/data/orgcheck-api-data-apextrigger';
+import { SFDC_Field } from 'src/api/data/orgcheck-api-data-field';
+import { SFDC_FieldSet } from 'src/api/data/orgcheck-api-data-fieldset';
+import { SFDC_LightningPage } from 'src/api/data/orgcheck-api-data-lightningpage';
+import { SFDC_Limit } from 'src/api/data/orgcheck-api-data-limit';
+import { SFDC_ObjectRelationShip } from 'src/api/data/orgcheck-api-data-objectrelationship';
+import { SFDC_ObjectType } from 'src/api/data/orgcheck-api-data-objecttype';
+import { SFDC_PageLayout } from 'src/api/data/orgcheck-api-data-pagelayout';
+import { SFDC_RecordType } from 'src/api/data/orgcheck-api-data-recordtype';
+import { SFDC_ValidationRule } from 'src/api/data/orgcheck-api-data-validationrule';
+import { SFDC_WebLink } from 'src/api/data/orgcheck-api-data-weblink';
+import { SFDC_Workflow } from 'src/api/data/orgcheck-api-data-workflow';
 
 /**
  * @description Representation of as SObject in Org Check

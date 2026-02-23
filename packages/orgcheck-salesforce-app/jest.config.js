@@ -4,5 +4,8 @@ setupFilesAfterEnv.push('<rootDir>/jest-sa11y-setup.js');
 module.exports = {
     ...jestConfig,
     setupFilesAfterEnv,
-    testTimeout: 10000
+    testTimeout: 10000,
+    moduleNameMapper: {
+        "^@dist/(.*)$": "<rootDir>/../orgcheck-api/dist/$1"
+    }
 };

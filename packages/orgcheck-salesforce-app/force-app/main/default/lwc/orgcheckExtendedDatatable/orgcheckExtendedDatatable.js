@@ -1,6 +1,12 @@
 import { LightningElement, api, track } from 'lwc';
-import * as ocui from './libs/orgcheck-ui.js';
-import * as ocapi from './libs/orgcheck-api.js';
+import { 
+    SecretSauce,
+    SortOrder, 
+    Table, 
+    ColumnType, 
+    Orientation, 
+    RowsFactory, 
+    ExportedTable } from '@dist/orgcheck';
 
 export default class OrgcheckExtentedDatatable extends LightningElement {
 
@@ -185,7 +191,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @type {string}
      */
     get sortingOrder() {
-        return this._sortingOrder === ocui.SortOrder.ASC ? 'ascending' : 'descending';
+        return this._sortingOrder === SortOrder.ASC ? 'ascending' : 'descending';
     }
 
 
@@ -213,7 +219,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
 
     /**
      * @description Table definition with ordering ad columns information
-     * @type {ocui.Table}
+     * @type {Table}
      * @private
      */
     _tableDefinition;
@@ -239,7 +245,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
 
     /**
      * @description Setter for the columns (it will set the internal <code>_columns</code> property)
-     * @param {ocui.Table} tableDefinition - Defintion of the table
+     * @param {Table} tableDefinition - Defintion of the table
      */
     @api set tableDefinition(tableDefinition) {
 
@@ -251,21 +257,21 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
         this._sortingIndex = tableDefinition.orderIndex;
         this._sortingOrder = tableDefinition.orderSort;
         this.columnHeaders = tableDefinition.columns.map((c, i) => {
-            if (c.type === ocui.ColumnType.SCR) {
+            if (c.type === ColumnType.SCR) {
                 // if we show score column, bad cell will be highlighted as well so that we can understand the score (= nb of bad cells)
                 this._showScoreColumn = true; 
             }
-            if (c.type === ocui.ColumnType.DEP && this.usesDependencyViewer === false) {
+            if (c.type === ColumnType.DEP && this.usesDependencyViewer === false) {
                 this.usesDependencyViewer = true;
             };
             return {
                 index: (i + 1),
                 label: c.label,
-                isIterative: c.type === ocui.ColumnType.TXTS || c.type === ocui.ColumnType.URLS || c.type === ocui.ColumnType.OBJS,
-                cssClass: (this._sortingIndex === i ? `sorted ${this._sortingOrder === ocui.SortOrder.ASC ? 'sorted-asc' : 'sorted-desc'} ` : '') + 
+                isIterative: c.type === ColumnType.TXTS || c.type === ColumnType.URLS || c.type === ColumnType.OBJS,
+                cssClass: (this._sortingIndex === i ? `sorted ${this._sortingOrder === SortOrder.ASC ? 'sorted-asc' : 'sorted-desc'} ` : '') + 
                           (this.isStickyHeaders ? 'sticky ': '') + 
                           // eslint-disable-next-line dot-notation
-                          (c['orientation'] === ocui.Orientation.VERTICAL ? 'vertical ' : ' ')
+                          (c['orientation'] === Orientation.VERTICAL ? 'vertical ' : ' ')
                           // Note: can't use instanceof on 'c'
             }
         });
@@ -297,7 +303,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
         
         // Parse the rows
         this.nbBadRows = 0;
-        this._allRows = ocui.RowsFactory.create(
+        this._allRows = RowsFactory.create(
             this.tableDefinition, 
             rows, 
             (row, isBad, rowIndex) => { 
@@ -332,11 +338,11 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
 
     /**
      * @description Convert this table into an Excel data
-     * @returns {ocui.ExportedTable} The exported table
+     * @returns {ExportedTable} The exported table
      */ 
     get exportedRows() {
         if (this._tableDefinition && this._tableDefinition.columns && this._allRows) {
-            return ocui.RowsFactory.export(this._tableDefinition, this._allRows, this.exportBasename, ocapi.SecretSauce.GetScoreRuleDescription);
+            return RowsFactory.export(this._tableDefinition, this._allRows, this.exportBasename, SecretSauce.GetScoreRuleDescription);
         }
         return undefined;
     }
@@ -394,14 +400,14 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
         // Setting the sorting order accordingly
         if (previousSortingColumnIndex === newSortingColumnIndex) { 
             // If the previous and new are the same, we just switch the order!
-            if (this._sortingOrder === ocui.SortOrder.ASC) {
-                this._sortingOrder = ocui.SortOrder.DESC;
+            if (this._sortingOrder === SortOrder.ASC) {
+                this._sortingOrder = SortOrder.DESC;
             } else {
-                this._sortingOrder = ocui.SortOrder.ASC
+                this._sortingOrder = SortOrder.ASC
             }
         } else { 
             // if they are different, by default, the ordering is ASC
-            this._sortingOrder = ocui.SortOrder.ASC;
+            this._sortingOrder = SortOrder.ASC;
         }
 
         // Remove the style for the old column
@@ -413,7 +419,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
         // Add the sorting style to the new column
         const newColumn = this.columnHeaders[newSortingColumnIndex];
         if (newColumn) {
-            newColumn.cssClass += (this._sortingOrder === ocui.SortOrder.ASC ? 'sorted sorted-asc' : 'sorted sorted-desc');
+            newColumn.cssClass += (this._sortingOrder === SortOrder.ASC ? 'sorted sorted-asc' : 'sorted sorted-desc');
         }
 
         this._sortAllRows();
@@ -457,7 +463,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @private
      */
     _filterAllRows() {
-        ocui.RowsFactory.filter(this._allRows, this._filteringSearchInput);
+        RowsFactory.filter(this._allRows, this._filteringSearchInput);
     }
 
     /**
@@ -465,7 +471,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @private
      */
     _sortAllRows() {
-        ocui.RowsFactory.sort(this._tableDefinition, this._allRows, this._sortingIndex, this._sortingOrder);
+        RowsFactory.sort(this._tableDefinition, this._allRows, this._sortingIndex, this._sortingOrder);
     }
 
     /**

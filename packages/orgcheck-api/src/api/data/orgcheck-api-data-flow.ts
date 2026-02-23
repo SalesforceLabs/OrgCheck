@@ -1,5 +1,5 @@
-import { DataAliases } from '../core/orgcheck-api-data-aliases';
-import { DataWithScoreAndDependencies, DataWithoutScore } from '../core/orgcheck-api-data';
+import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
+import { DataWithScoreAndDependencies, DataWithoutScore } from 'src/api/core/orgcheck-api-data';
 
 /**
  * Represents a Flow Definition and its Flow Version children

@@ -1,4 +1,4 @@
-import { DataFactoryIntf } from "../../src/api/core/orgcheck-api-datafactory";
+import { DataFactoryIntf } from 'src/api/core/orgcheck-api-datafactory';
 
 export class DataFactoryMock_AllIsOK implements DataFactoryIntf { 
 

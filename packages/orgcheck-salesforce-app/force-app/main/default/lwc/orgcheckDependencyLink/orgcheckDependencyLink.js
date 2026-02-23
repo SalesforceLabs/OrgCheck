@@ -1,6 +1,5 @@
 import { LightningElement, api } from 'lwc';
-import * as ocapi from './libs/orgcheck-api.js';
-
+import { DataDependenciesForOneItem } from '@dist/orgcheck';
 
 export default class OrgcheckDependencyLink extends LightningElement {
 
@@ -20,7 +19,7 @@ export default class OrgcheckDependencyLink extends LightningElement {
 
     /**
      * @description Data dependencies of the item
-     * @type {ocapi.DataDependenciesForOneItem}
+     * @type {DataDependenciesForOneItem}
      * @public
      */ 
     @api dependencies;

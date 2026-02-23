@@ -1,5 +1,5 @@
-import { DataAliases } from "./orgcheck-api-data-aliases";
-import { DataDependenciesForOneItem } from "./orgcheck-api-data-dependencies";
+import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
+import { DataDependenciesForOneItem } from 'src/api/core/orgcheck-api-data-dependencies';
 
 /**
  * @description This interface represents a data in Org Check

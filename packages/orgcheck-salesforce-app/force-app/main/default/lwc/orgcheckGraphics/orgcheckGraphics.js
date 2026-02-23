@@ -1,6 +1,5 @@
 import { LightningElement, api } from 'lwc';
 import OrgCheckStaticResource from '@salesforce/resourceUrl/OrgCheck_SR';
-// @ts-ignore
 import { loadScript } from 'lightning/platformResourceLoader';
 
 export default class OrgcheckGraphics extends LightningElement {

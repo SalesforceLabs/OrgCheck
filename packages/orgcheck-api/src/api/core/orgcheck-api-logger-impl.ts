@@ -1,4 +1,4 @@
-import { BasicLoggerIntf, LoggerIntf, SimpleLoggerIntf } from "./orgcheck-api-logger";
+import { BasicLoggerIntf, LoggerIntf, SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 
 export const LOG_OPERATION_IN_PROGRESS = 0;
 export const LOG_OPERATION_DONE = 1;

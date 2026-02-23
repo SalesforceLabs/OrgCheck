@@ -1,13 +1,13 @@
-import { CodeScanner } from '../core/orgcheck-api-codescanner';
-import { DataAliases } from '../core/orgcheck-api-data-aliases';
-import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
-import { Dataset } from '../core/orgcheck-api-dataset';
-import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
-import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
-import { Processor } from '../core/orgcheck-api-processor';
-import { SalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadatatypes';
-import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
-import { SFDC_Field } from '../data/orgcheck-api-data-field';
+import { CodeScanner } from 'src/api/core/orgcheck-api-codescanner';
+import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
+import { DataFactoryIntf } from 'src/api/core/orgcheck-api-datafactory';
+import { Dataset } from 'src/api/core/orgcheck-api-dataset';
+import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
+import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
+import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
+import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
+import { SFDC_Field } from 'src/api/data/orgcheck-api-data-field';
 
 const EXCLUDED_OBJECT_PREFIXES = [ 
     '00a', // Comment for custom objects

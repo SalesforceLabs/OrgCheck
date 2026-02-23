@@ -1,49 +1,48 @@
-import { SimpleLoggerMock_DoingNothing } from "../utils/orgcheck-api-logger-mock.utility";
-import { DataFactoryMock_AllIsOK } from "../utils/orgcheck-api-datafactory-mock.utility";
-import { SalesforceManagerMock_SoqlQuery } from "../utils/orgcheck-api-salesforce-mock.utility";
-import { DatasetApexClasses } from '../../src/api/dataset/orgcheck-api-dataset-apexclasses';
-import { DatasetApexTriggers } from '../../src/api/dataset/orgcheck-api-dataset-apextriggers';
-import { DatasetAppPermissions } from '../../src/api/dataset/orgcheck-api-dataset-apppermissions';
-import { DatasetCurrentUserPermissions } from '../../src/api/dataset/orgcheck-api-dataset-currentuserpermissions';
-import { DatasetCustomFields } from '../../src/api/dataset/orgcheck-api-dataset-customfields';
-import { DatasetCustomLabels } from '../../src/api/dataset/orgcheck-api-dataset-customlabels';
-import { DatasetDocuments } from '../../src/api/dataset/orgcheck-api-dataset-documents';
-import { DatasetFieldPermissions } from '../../src/api/dataset/orgcheck-api-dataset-fieldpermissions';
-import { DatasetFlows } from '../../src/api/dataset/orgcheck-api-dataset-flows';
-import { DatasetGroups } from '../../src/api/dataset/orgcheck-api-dataset-groups';
-import { DatasetLightningAuraComponents } from '../../src/api/dataset/orgcheck-api-dataset-lightningauracomponents';
-import { DatasetLightningPages } from '../../src/api/dataset/orgcheck-api-dataset-lightningpages';
-import { DatasetLightningWebComponents } from '../../src/api/dataset/orgcheck-api-dataset-lightningwebcomponents';
-import { DatasetObject } from '../../src/api/dataset/orgcheck-api-dataset-object';
-import { DatasetObjectPermissions } from '../../src/api/dataset/orgcheck-api-dataset-objectpermissions';
-import { DatasetObjects } from '../../src/api/dataset/orgcheck-api-dataset-objects';
-import { DatasetObjectTypes } from '../../src/api/dataset/orgcheck-api-dataset-objecttypes';
-import { DatasetOrganization } from '../../src/api/dataset/orgcheck-api-dataset-organization';
-import { DatasetPackages } from '../../src/api/dataset/orgcheck-api-dataset-packages';
-import { DatasetPageLayouts } from '../../src/api/dataset/orgcheck-api-dataset-pagelayouts';
-import { DatasetPermissionSetLicenses } from '../../src/api/dataset/orgcheck-api-dataset-permissionsetlicenses';
-import { DatasetPermissionSets } from '../../src/api/dataset/orgcheck-api-dataset-permissionsets';
-import { DatasetProfilePasswordPolicies } from '../../src/api/dataset/orgcheck-api-dataset-profilepasswordpolicies';
-import { DatasetProfileRestrictions } from '../../src/api/dataset/orgcheck-api-dataset-profilerestrictions';
-import { DatasetProfiles } from '../../src/api/dataset/orgcheck-api-dataset-profiles';
-import { DatasetUserRoles } from '../../src/api/dataset/orgcheck-api-dataset-userroles';
-import { DatasetInternalActiveUsers } from '../../src/api/dataset/orgcheck-api-dataset-internalactiveusers';
-import { DatasetValidationRules } from '../../src/api/dataset/orgcheck-api-dataset-validationrules';
-import { DatasetVisualForceComponents } from '../../src/api/dataset/orgcheck-api-dataset-visualforcecomponents';
-import { DatasetVisualForcePages } from '../../src/api/dataset/orgcheck-api-dataset-visualforcepages';
-import { DatasetWorkflows } from '../../src/api/dataset/orgcheck-api-dataset-workflows';
-import { DatasetRecordTypes } from '../../src/api/dataset/orgcheck-api-dataset-recordtypes';
-import { DatasetCollaborationGroups } from '../../src/api/dataset/orgcheck-api-dataset-collaborationgroups';
-import { DatasetHomePageComponents } from '../../src/api/dataset/orgcheck-api-dataset-homepagecomponents';
-import { DatasetCustomTabs } from '../../src/api/dataset/orgcheck-api-dataset-customtabs';
-import { DatasetEmailTemplates } from '../../src/api/dataset/orgcheck-api-dataset-emailtemplates';
+import { SimpleLoggerMock_DoingNothing } from 'tests/utils/orgcheck-api-logger-mock.utility';
+import { DataFactoryMock_AllIsOK } from 'tests/utils/orgcheck-api-datafactory-mock.utility';
+import { SalesforceManagerMock_SoqlQuery } from 'tests/utils/orgcheck-api-salesforce-mock.utility';
+import { DatasetApexClasses } from 'src/api/dataset/orgcheck-api-dataset-apexclasses';
+import { DatasetApexTriggers } from 'src/api/dataset/orgcheck-api-dataset-apextriggers';
+import { DatasetAppPermissions } from 'src/api/dataset/orgcheck-api-dataset-apppermissions';
+import { DatasetCurrentUserPermissions } from 'src/api/dataset/orgcheck-api-dataset-currentuserpermissions';
+import { DatasetCustomFields } from 'src/api/dataset/orgcheck-api-dataset-customfields';
+import { DatasetCustomLabels } from 'src/api/dataset/orgcheck-api-dataset-customlabels';
+import { DatasetDocuments } from 'src/api/dataset/orgcheck-api-dataset-documents';
+import { DatasetFieldPermissions } from 'src/api/dataset/orgcheck-api-dataset-fieldpermissions';
+import { DatasetFlows } from 'src/api/dataset/orgcheck-api-dataset-flows';
+import { DatasetGroups } from 'src/api/dataset/orgcheck-api-dataset-groups';
+import { DatasetLightningAuraComponents } from 'src/api/dataset/orgcheck-api-dataset-lightningauracomponents';
+import { DatasetLightningPages } from 'src/api/dataset/orgcheck-api-dataset-lightningpages';
+import { DatasetLightningWebComponents } from 'src/api/dataset/orgcheck-api-dataset-lightningwebcomponents';
+import { DatasetObject } from 'src/api/dataset/orgcheck-api-dataset-object';
+import { DatasetObjectPermissions } from 'src/api/dataset/orgcheck-api-dataset-objectpermissions';
+import { DatasetObjects } from 'src/api/dataset/orgcheck-api-dataset-objects';
+import { DatasetObjectTypes } from 'src/api/dataset/orgcheck-api-dataset-objecttypes';
+import { DatasetOrganization } from 'src/api/dataset/orgcheck-api-dataset-organization';
+import { DatasetPackages } from 'src/api/dataset/orgcheck-api-dataset-packages';
+import { DatasetPageLayouts } from 'src/api/dataset/orgcheck-api-dataset-pagelayouts';
+import { DatasetPermissionSetLicenses } from 'src/api/dataset/orgcheck-api-dataset-permissionsetlicenses';
+import { DatasetPermissionSets } from 'src/api/dataset/orgcheck-api-dataset-permissionsets';
+import { DatasetProfilePasswordPolicies } from 'src/api/dataset/orgcheck-api-dataset-profilepasswordpolicies';
+import { DatasetProfileRestrictions } from 'src/api/dataset/orgcheck-api-dataset-profilerestrictions';
+import { DatasetProfiles } from 'src/api/dataset/orgcheck-api-dataset-profiles';
+import { DatasetUserRoles } from 'src/api/dataset/orgcheck-api-dataset-userroles';
+import { DatasetInternalActiveUsers } from 'src/api/dataset/orgcheck-api-dataset-internalactiveusers';
+import { DatasetValidationRules } from 'src/api/dataset/orgcheck-api-dataset-validationrules';
+import { DatasetVisualForceComponents } from 'src/api/dataset/orgcheck-api-dataset-visualforcecomponents';
+import { DatasetVisualForcePages } from 'src/api/dataset/orgcheck-api-dataset-visualforcepages';
+import { DatasetWorkflows } from 'src/api/dataset/orgcheck-api-dataset-workflows';
+import { DatasetRecordTypes } from 'src/api/dataset/orgcheck-api-dataset-recordtypes';
+import { DatasetCollaborationGroups } from 'src/api/dataset/orgcheck-api-dataset-collaborationgroups';
+import { DatasetHomePageComponents } from 'src/api/dataset/orgcheck-api-dataset-homepagecomponents';
+import { DatasetCustomTabs } from 'src/api/dataset/orgcheck-api-dataset-customtabs';
+import { DatasetEmailTemplates } from 'src/api/dataset/orgcheck-api-dataset-emailtemplates';
 
 describe('tests.api.unit.Datasets', () => {
 
   describe('Basic test for all datasets', () => {
     // Mocking Lightning Flow Scanner to avoid errors in tests for datasets that do
     //  not use it, but still test that the integration does not cause issues
-    // @ts-ignore
     globalThis.lightningflowscanner = {
       Flow: function() { return {}; },
       scan: function() { return [];}

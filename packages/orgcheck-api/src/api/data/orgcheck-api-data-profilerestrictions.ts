@@ -1,6 +1,6 @@
-import { DataAliases } from '../core/orgcheck-api-data-aliases';
-import { DataWithScore, DataWithoutScore } from '../core/orgcheck-api-data';
-import { SFDC_Profile } from './orgcheck-api-data-profile';
+import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
+import { DataWithScore, DataWithoutScore } from 'src/api/core/orgcheck-api-data';
+import { SFDC_Profile } from 'src/api/data/orgcheck-api-data-profile';
 
 export interface SFDC_ProfileRestrictions extends DataWithScore {
     

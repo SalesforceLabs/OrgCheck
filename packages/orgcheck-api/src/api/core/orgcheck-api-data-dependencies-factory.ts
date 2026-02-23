@@ -1,4 +1,4 @@
-import { DataDependenciesForOneItem, DataDependencies } from "./orgcheck-api-data-dependencies";
+import { DataDependenciesForOneItem, DataDependencies } from 'src/api/core/orgcheck-api-data-dependencies';
 
 /**
  * @description Factory of dependencies

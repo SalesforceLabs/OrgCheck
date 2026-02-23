@@ -1,4 +1,4 @@
-import { ExportedTable } from "../table/orgcheck-ui-table";
+import { ExportedTable } from 'src/ui/table/orgcheck-ui-table';
 
 const TITLE_MAX_SIZE = 31;
 const CELL_MAX_SIZE = 32767;

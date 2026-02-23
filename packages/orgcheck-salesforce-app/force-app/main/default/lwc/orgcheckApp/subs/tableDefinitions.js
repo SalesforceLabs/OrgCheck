@@ -1,5 +1,10 @@
-import { Table, ColumnType, SortOrder, Orientation } from '../libs/orgcheck-ui';
-import { SalesforceMetadataTypes, DataMatrix } from '../libs/orgcheck-api';
+import { 
+    Table, 
+    ColumnType, 
+    SortOrder, 
+    Orientation, 
+    SalesforceMetadataTypes, 
+    DataMatrix } from '@dist/orgcheck';
 
 const PAGELAYOUT = SalesforceMetadataTypes.PAGE_LAYOUT;
 const APEXCLASS = SalesforceMetadataTypes.APEX_CLASS;

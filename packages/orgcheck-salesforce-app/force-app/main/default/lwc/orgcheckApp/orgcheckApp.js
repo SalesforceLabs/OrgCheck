@@ -1,8 +1,5 @@
 import { LightningElement, api } from 'lwc';
 import OrgCheckStaticResource from '@salesforce/resourceUrl/OrgCheck_SR';
-import * as ocapi from './libs/orgcheck-api.js';
-import * as ocui from './libs/orgcheck-ui.js';
-// @ts-ignore
 import { loadScript } from 'lightning/platformResourceLoader';
 import { TableDefinitions } from './subs/tableDefinitions.js';
 
@@ -310,7 +307,7 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description list of items stored in org check cache
-     * @type {Array<ocapi.DataCacheItem>}
+     * @type {Array<DataCacheItemIntf>}
      * @public 
      */ 
     cacheManagerData = [];
@@ -379,13 +376,6 @@ export default class OrgcheckApp extends LightningElement {
      * @private
      */
     _childrenReady = false;
-
-    /**
-     * @description This flag checks that the third party libraries were loaded correctly
-     * @type {boolean}
-     * @private
-     */
-    _thirdPartyLibsReady = false;
 
     /**
      * @description Spinner component
@@ -464,7 +454,9 @@ export default class OrgcheckApp extends LightningElement {
                 await Promise.all([
                     loadScript(this, OrgCheckStaticResource + '/js/jsforce.js'),
                     loadScript(this, OrgCheckStaticResource + '/js/fflate.js'),
-                    loadScript(this, OrgCheckStaticResource + '/js/lfs.js')
+                    loadScript(this, OrgCheckStaticResource + '/js/lfs.js'),
+                    loadScript(this, OrgCheckStaticResource + '/js/orgcheck-api.js'),
+                    loadScript(this, OrgCheckStaticResource + '/js/orgcheck-ui.js')
                 ]);
                 this._spinner?.sectionEnded(SECTION_02, `Done.`);
             } catch (error) {
@@ -475,7 +467,7 @@ export default class OrgcheckApp extends LightningElement {
             // Load the Org Check API
             this._spinner?.sectionLog(SECTION_03, `Start loading...`);
             try {
-                this._api = new ocapi.API({
+                this._api = new API({
                     salesforce: {
                         authentication: {
                             // -- Using given session information to authenticate ----

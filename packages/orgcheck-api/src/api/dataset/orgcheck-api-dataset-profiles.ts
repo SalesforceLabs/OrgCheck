@@ -1,11 +1,11 @@
-import { DataAliases } from '../core/orgcheck-api-data-aliases';
-import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
-import { Dataset } from '../core/orgcheck-api-dataset';
-import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
-import { Processor } from '../core/orgcheck-api-processor';
-import { SalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadatatypes';
-import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
-import { SFDC_Profile } from '../data/orgcheck-api-data-profile';
+import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
+import { DataFactoryIntf } from 'src/api/core/orgcheck-api-datafactory';
+import { Dataset } from 'src/api/core/orgcheck-api-dataset';
+import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
+import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
+import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
+import { SFDC_Profile } from 'src/api/data/orgcheck-api-data-profile';
 
 export class DatasetProfiles implements Dataset {
 

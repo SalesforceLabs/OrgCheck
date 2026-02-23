@@ -1,5 +1,6 @@
-import { Data } from "./orgcheck-api-data";
-import { SimpleLoggerIntf } from "./orgcheck-api-logger";
+import { DataCollectionStatisticsIntf } from 'src/api/core/orgcheck-api-data-datacollectionstats';
+import { Data } from 'src/api/core/orgcheck-api-data';
+import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 
 /**
  * @description The super class for recipe collections that are defined only by executing a set of other recipes
@@ -25,7 +26,7 @@ export interface RecipeCollection {
     filterByScoreRuleIds(logger: SimpleLoggerIntf, parameters?: Map<string, any>): Array<number>;
 }
 
-export class DataCollectionStatistics {
+export class DataCollectionStatistics implements DataCollectionStatisticsIntf {
 
     /** 
      * @description Indicates if an error occurred while building the collection

@@ -1,4 +1,4 @@
-import { DataMatrix, DataMatrixRow } from "./orgcheck-api-data-matrix";
+import { DataMatrixIntf, DataMatrixRowIntf } from 'src/api/core/orgcheck-api-data-matrix';
 
 /**
  * @description This class represents a factory to create DataMatrixWorking objects.
@@ -31,16 +31,11 @@ export class DataMatrixWorking {
     
     /**
      * @description Convert this working object into a data matrix object
-     * @returns {DataMatrix} Returns a DataMatrix object containing the column headers and rows
+     * @returns {DataMatrixIntf} Returns a DataMatrix object containing the column headers and rows
      */
-    toDataMatrix(): DataMatrix {
-        /** @type {Array<any>} */
-        const columnHeaders: Array<any> = [];
-        this._columnIds.forEach((columnId) => {
-            columnHeaders.push(this._columns.has(columnId) ? this._columns.get(columnId) : columnId);
-        });
+    toDataMatrix(): DataMatrixIntf {
         return { 
-            columnHeaders: columnHeaders,
+            columnHeaders: Array.from(this._columnIds).map((columnId) => this._columns.get(columnId) ?? columnId),
             rows: Array.from(this._rows.values()) 
         };
     }
@@ -128,8 +123,8 @@ export class DataMatrixWorking {
     _columns: Map<string, any>;
 
     /**
-     * @type {Map<string, DataMatrixRow>}
+     * @type {Map<string, DataMatrixRowIntf>}
      * @private
      */
-    _rows: Map<string, DataMatrixRow>;
+    _rows: Map<string, DataMatrixRowIntf>;
 }

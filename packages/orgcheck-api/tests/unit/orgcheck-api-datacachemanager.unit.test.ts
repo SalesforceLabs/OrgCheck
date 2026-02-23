@@ -1,6 +1,6 @@
-import { DataCacheManager } from "../../src/api/core/orgcheck-api-cachemanager-impl";
-import { StorageMock_BasedOnMap } from "../utils/orgcheck-api-storage-mock.utility";
-import { CompressorMock_IdemPotent } from "../utils/orgcheck-api-compressor-mock.utility";
+import { DataCacheManager } from 'src/api/core/orgcheck-api-cachemanager-impl';
+import { StorageMock_BasedOnMap } from 'tests/utils/orgcheck-api-storage-mock.utility';
+import { CompressorMock_IdemPotent } from 'tests/utils/orgcheck-api-compressor-mock.utility';
 
 describe('tests.api.unit.DataCacheManager', () => {
   it('checks if the cache manager implementation runs correctly', async () => {

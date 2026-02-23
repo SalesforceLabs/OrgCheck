@@ -1,6 +1,6 @@
-import { RecipeGlobalView } from "../../src/api/recipecollection/orgcheck-api-recipe-globalview";
-import { RecipeHardcodedURLsView } from "../../src/api/recipecollection/orgcheck-api-recipe-hardcodedurlsview";
-import { SimpleLoggerMock_DoingNothing } from "../utils/orgcheck-api-logger-mock.utility";
+import { RecipeGlobalView } from 'src/api/recipecollection/orgcheck-api-recipe-globalview';
+import { RecipeHardcodedURLsView } from 'src/api/recipecollection/orgcheck-api-recipe-hardcodedurlsview';
+import { SimpleLoggerMock_DoingNothing } from 'tests/utils/orgcheck-api-logger-mock.utility';
 
 describe('tests.api.unit.RecipeCollections', () => {
   describe('checks if all recipe collections are working fine', () => {

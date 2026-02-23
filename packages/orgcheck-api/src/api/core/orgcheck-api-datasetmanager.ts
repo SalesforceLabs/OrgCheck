@@ -1,4 +1,4 @@
-import { DatasetRunInformation } from './orgcheck-api-dataset-runinformation';
+import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 
 /**
  * @description Dataset manager interface

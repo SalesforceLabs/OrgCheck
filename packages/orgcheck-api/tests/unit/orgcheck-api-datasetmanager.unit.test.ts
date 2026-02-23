@@ -1,8 +1,8 @@
-import { DatasetManager } from "../../src/api/core/orgcheck-api-datasetmanager-impl";
-import { DatasetAliases } from "../../src/api/core/orgcheck-api-datasets-aliases";
-import { SalesforceManagerMock_DoingNothing } from "../utils/orgcheck-api-salesforce-mock.utility";
-import { CacheManagerMock_UsingMap } from "../utils/orgcheck-api-cache-mock.utility";
-import { LoggerMock_DoingNothing } from "../utils/orgcheck-api-logger-mock.utility";
+import { DatasetManager } from 'src/api/core/orgcheck-api-datasetmanager-impl';
+import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
+import { SalesforceManagerMock_DoingNothing } from 'tests/utils/orgcheck-api-salesforce-mock.utility';
+import { CacheManagerMock_UsingMap } from 'tests/utils/orgcheck-api-cache-mock.utility';
+import { LoggerMock_DoingNothing } from 'tests/utils/orgcheck-api-logger-mock.utility';
 
 describe('tests.api.unit.DatasetManager', () => {
   it('checks if the dataset manager implementation runs correctly', async () => {

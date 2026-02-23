@@ -1,12 +1,12 @@
-import { DataAliases } from '../core/orgcheck-api-data-aliases';
-import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
-import { Dataset } from '../core/orgcheck-api-dataset';
-import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
-import { Processor } from '../core/orgcheck-api-processor';
-import { SalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadatatypes';
-import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
-import { SFDC_Flow, SFDC_FlowVersion } from '../data/orgcheck-api-data-flow';
-import { LFSScanner } from '../scanner/orgcheck-api-lfs-scanner';
+import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
+import { DataFactoryIntf } from 'src/api/core/orgcheck-api-datafactory';
+import { Dataset } from 'src/api/core/orgcheck-api-dataset';
+import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
+import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
+import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
+import { SFDC_Flow, SFDC_FlowVersion } from 'src/api/data/orgcheck-api-data-flow';
+import { LFSScanner } from 'src/api/scanner/orgcheck-api-lfs-scanner';
 
 // Limited list of known types of Flow ProcessType
 // see all the list at https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_visual_workflow.htm

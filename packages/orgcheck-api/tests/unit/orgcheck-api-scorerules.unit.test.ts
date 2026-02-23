@@ -1,15 +1,15 @@
-import { API } from "../../src/api/orgcheck-api";
-import { SecretSauce } from "../../src/api/core/orgcheck-api-secretsauce";
-import { DataMatrix } from "../../src/api/core/orgcheck-api-data-matrix";
-import { ScoreRule } from "../../src/api/core/orgcheck-api-datafactory";
-import { StorageSetupMock_DoingNothing } from "../utils/orgcheck-api-storage-mock.utility";
-import { CompressorMock_IdemPotent } from "../utils/orgcheck-api-compressor-mock.utility";
-import { LoggerMock_DoingNothing } from "../utils/orgcheck-api-logger-mock.utility";
-import { jsforce } from "../utils/orgcheck-api-jsforce-mock.utility";
+import { API } from 'src/api/orgcheck-api-impl';
+import { SecretSauce } from 'src/api/core/orgcheck-api-secretsauce';
+import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
+import { ScoreRule } from 'src/api/core/orgcheck-api-datafactory';
+import { StorageSetupMock_BasedOnMap } from 'tests/utils/orgcheck-api-storage-mock.utility';
+import { LoggerMock_DoingNothing } from 'tests/utils/orgcheck-api-logger-mock.utility';
+import jsforce from 'tests/utils/orgcheck-api-jsforce-mock.utility';
+import fflate from 'tests/utils/orgcheck-api-fflate-mock.utility';
 
 describe('orgcheck-api-scorerules', () => {
-    // @ts-ignore    
     globalThis.jsforce = jsforce;
+    globalThis.fflate = fflate;
 
     it('Check if getAllScoreRulesAsDataMatrix() is returning something good', () => {
         const numberOfRules = SecretSauce.AllScoreRules?.length;
@@ -24,17 +24,11 @@ describe('orgcheck-api-scorerules', () => {
                     accessToken: 'Booo'
                 }
             },
-            storage: { 
-                localImpl: new StorageSetupMock_DoingNothing(), 
-                compression: { 
-                    useFflate: false, 
-                    mockImpl: new CompressorMock_IdemPotent()
-                }
-            }
+            storage: new StorageSetupMock_BasedOnMap()
         });
 
-        /** @type {DataMatrix} */
-        const matrix: DataMatrix = api.getAllScoreRulesAsDataMatrix();
+        /** @type {DataMatrixIntf} */
+        const matrix: DataMatrixIntf = api.getAllScoreRulesAsDataMatrix();
         expect(matrix).toBeDefined();
         const items = matrix.columnHeaders;
         expect(items).toBeDefined();

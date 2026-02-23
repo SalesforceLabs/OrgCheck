@@ -2,38 +2,32 @@ import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import typescript from 'rollup-plugin-typescript2';
 import terser from '@rollup/plugin-terser';
+import dts from "rollup-plugin-dts";
 
 export default [
     {
-        input: './src/api/orgcheck-api-main.ts',
+        input: './src/orgcheck.ts',
         plugins: [
             resolve({ preferBuiltins: false }),
             commonjs(),
             typescript()
         ],
         output: {
-            file: './dist/orgcheck-api.js',
+            file: './dist/orgcheck.js',
             format: 'es',
-            name: 'OrgCheckAPI',
-            plugins: [
-                terser()
-            ]
+            plugins: [ terser() ]
         }
-    },
-    {
-        input: './src/ui/orgcheck-ui-main.ts',
+    }, {
+        input: './src/orgcheck.d.ts',
         plugins: [
             resolve({ preferBuiltins: false }),
             commonjs(),
             typescript()
         ],
         output: {
-            file: './dist/orgcheck-ui.js',
+            file: './dist/orgcheck.d.ts',
             format: 'es',
-            name: 'OrgCheckUI',
-            plugins: [
-                terser()
-            ]
+            plugins: [ dts() ]
         }
     }
 ];

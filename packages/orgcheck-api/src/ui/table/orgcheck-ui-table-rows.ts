@@ -1,30 +1,7 @@
-import { Table, SortOrder, ExportedTable } from "./orgcheck-ui-table";
-import { CellFactory } from "./orgcheck-ui-table-cell";
-import { ColumnType } from './orgcheck-ui-table-column';
-
-export interface Row {
-
-    /** @type {number} */
-    index: number;
-
-    /** @type {string} */
-    name: string;
-
-    /** @type {number} */
-    score: number;
-
-    /** @type {Array<string>} */
-    badFields: Array<string>;
-
-    /** @type {Array<string>} */
-    badReasonIds: Array<string>;
-
-    /** @type {Array<any>} */
-    cells: Array<any>;
-
-    /** @type {boolean} */
-    isVisible: boolean;
-}
+import { Table, SortOrder, ExportedTable } from 'src/ui/table/orgcheck-ui-table';
+import { CellFactory } from 'src/ui/table/orgcheck-ui-table-cell';
+import { ColumnType } from 'src/ui/table/orgcheck-ui-table-column';
+import { Row } from 'src/ui/table/orgcheck-ui-table-row';
 
 export class RowsFactory {
 

@@ -1,4 +1,4 @@
-import { Processor } from "../../src/api/core/orgcheck-api-processor";
+import { Processor } from 'src/api/core/orgcheck-api-processor';
 
 describe('tests.api.unit.Processor', () => {
 

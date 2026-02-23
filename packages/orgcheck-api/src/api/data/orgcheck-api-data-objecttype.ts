@@ -1,5 +1,5 @@
-import { DataWithoutScore } from '../core/orgcheck-api-data';
-import { DataAliases } from '../core/orgcheck-api-data-aliases';
+import { DataWithoutScore } from 'src/api/core/orgcheck-api-data';
+import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
 
 export interface SFDC_ObjectType extends DataWithoutScore {
     
@@ -25,11 +25,16 @@ export interface SFDC_ObjectType extends DataWithoutScore {
     label: string;
 }
 
-export const OBJECTTYPE_ID_STANDARD_SOBJECT = 'StandardEntity';
-export const OBJECTTYPE_ID_CUSTOM_SOBJECT = 'CustomObject';
-export const OBJECTTYPE_ID_CUSTOM_EXTERNAL_SOBJECT = 'ExternalObject';
-export const OBJECTTYPE_ID_CUSTOM_SETTING = 'CustomSetting';
-export const OBJECTTYPE_ID_CUSTOM_METADATA_TYPE = 'CustomMetadataType';
-export const OBJECTTYPE_ID_CUSTOM_EVENT = 'CustomEvent';
-export const OBJECTTYPE_ID_KNOWLEDGE_ARTICLE = 'KnowledgeArticle';
-export const OBJECTTYPE_ID_CUSTOM_BIG_OBJECT = 'CustomBigObject';
+/**
+ * @description Data aliases
+ */
+export enum SObjectTypes {
+    STANDARD_SOBJECT = 'StandardEntity',
+    CUSTOM_SOBJECT = 'CustomObject',
+    CUSTOM_EXTERNAL_SOBJECT = 'ExternalObject',
+    CUSTOM_SETTING = 'CustomSetting',
+    CUSTOM_METADATA_TYPE = 'CustomMetadataType',
+    CUSTOM_EVENT = 'CustomEvent',
+    KNOWLEDGE_ARTICLE = 'KnowledgeArticle',
+    CUSTOM_BIG_OBJECT = 'CustomBigObject'
+}

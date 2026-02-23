@@ -1,7 +1,8 @@
 import { LightningElement, api } from 'lwc';
 import OrgCheckStaticResource from "@salesforce/resourceUrl/OrgCheck_SR";
-import * as ocui from './libs/orgcheck-ui.js';
-// @ts-ignore
+import { 
+    ExportedTable, 
+    Exporter } from '@dist/orgcheck';
 import { loadScript } from 'lightning/platformResourceLoader';
 
 export default class OrgcheckExportButton extends LightningElement {
@@ -57,7 +58,7 @@ export default class OrgcheckExportButton extends LightningElement {
     }
 
     /**
-     * @type {Array<ocui.ExportedTable> | ocui.ExportedTable}
+     * @type {Array<ExportedTable> | ExportedTable}
      */
     @api source;
     
@@ -85,7 +86,7 @@ export default class OrgcheckExportButton extends LightningElement {
     async handleClickExportXLS() {
         this.isExporting = true;
         try {
-            const url = URL.createObjectURL(new Blob([ocui.Exporter.exportAsXls(this.source)], { type: 'application/octet-stream' }));
+            const url = URL.createObjectURL(new Blob([Exporter.exportAsXls(this.source)], { type: 'application/octet-stream' }));
             const a = this.template.querySelector('a');
             a.href = url;
             a.download = `${this.basename}.xlsx`; // Filename Here

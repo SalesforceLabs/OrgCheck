@@ -1,7 +1,11 @@
-import { TableColumn, TableColumnWithModifiers, TableColumnWithOrientation } from "./orgcheck-ui-table-column";
+import { 
+    TableColumn, 
+    TableColumnWithModifiers, 
+    TableColumnWithOrientation } from 'src/ui/table/orgcheck-ui-table-column';
 
 export enum SortOrder {
-    DESC, ASC
+    DESC = 'desc', 
+    ASC = 'asc'
 }
 
 export interface Table {

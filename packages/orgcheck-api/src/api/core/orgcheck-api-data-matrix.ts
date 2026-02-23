@@ -15,7 +15,7 @@
  *                  ]
  *               }
  */
-export interface DataMatrix {
+export interface DataMatrixIntf {
 
     /**
      * @description Information about the columns that could be found in the rows.data structure. Keys are the name fo the properties. Values are the information for this property.
@@ -26,36 +26,16 @@ export interface DataMatrix {
 
     /** 
      * @description List of data for each "row". A row will have a headerId (used as row header in the matrix view). And data is an object with as many properties.
-     * @type {Array<DataMatrixRow>}
+     * @type {Array<DataMatrixRowIntf>}
      * @public
      */
-    rows: Array<DataMatrixRow>;
-}
-
-/**
- * @description This interface represents a column header in a matrix data.
- */ 
-export interface DataMatrixColumnHeader {
-    
-    /**
-     * @description Key to be used as a property of rows.data
-     * @type {string}
-     * @public
-     */
-    id: string;
-    
-    /** 
-     * @description If specify this describe the columns better than just an id
-     * @type {any}
-     * @public
-     */
-    ref: any;
+    rows: Array<DataMatrixRowIntf>;
 }
 
 /**
  * @description This interface represents a row in a matrix data.
  */ 
-export interface DataMatrixRow {
+export interface DataMatrixRowIntf {
     
     /**
      * @description Header reference of the matrix row

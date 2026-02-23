@@ -1,7 +1,7 @@
-import { DataAliases } from '../core/orgcheck-api-data-aliases';
-import { DataWithScore } from '../core/orgcheck-api-data';
-import { SFDC_PermissionSet } from './orgcheck-api-data-permissionset';
-import { SFDC_Profile } from './orgcheck-api-data-profile';
+import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
+import { DataWithScore } from 'src/api/core/orgcheck-api-data';
+import { SFDC_PermissionSet } from 'src/api/data/orgcheck-api-data-permissionset';
+import { SFDC_Profile } from 'src/api/data/orgcheck-api-data-profile';
 
 /**
  * @description Representation of a SObject permissions (CRUD) for a specific parent (profile or permission set) in Org Check

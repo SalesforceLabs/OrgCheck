@@ -1,5 +1,5 @@
-import { SimpleLoggerIntf } from './orgcheck-api-logger';
-import { SalesforceUsageInformation } from './orgcheck-api-salesforce-watchdog';
+import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
+import { SalesforceUsageInformationIntf } from 'src/api/core/orgcheck-api-limit-usageinformation';
 
 /**
  * @description Salesforce Query request
@@ -136,10 +136,10 @@ export interface SalesforceManagerIntf {
 
     /**
      * @description Get the lastest Daily API Usage from JSForce, and the level of confidence we have in this ratio to continue using org check.
-     * @returns {SalesforceUsageInformation} Information of the current usage of the Daily Request API
+     * @returns {SalesforceUsageInformationIntf} Information of the current usage of the Daily Request API
      * @public
      */
-    get dailyApiRequestLimitInformation(): SalesforceUsageInformation;
+    get dailyApiRequestLimitInformation(): SalesforceUsageInformationIntf;
 
     /**
      * @description Method to call a list of SOQL queries (tooling or not)
