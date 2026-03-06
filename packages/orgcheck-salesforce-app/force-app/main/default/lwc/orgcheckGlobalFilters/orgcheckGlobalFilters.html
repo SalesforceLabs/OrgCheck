@@ -3,7 +3,7 @@
         <li class="slds-button-group-item">
             <lightning-combobox
                 data-id="package"
-                label="Package"
+                variant="label-hidden" 
                 value={package}
                 options={packageOptions}
                 disabled={unavailable}
@@ -12,7 +12,7 @@
         <li class="slds-button-group-item">
             <lightning-combobox
                 data-id="sobjectType"
-                label="SObject Type"
+                variant="label-hidden" 
                 value={sobjectType}
                 disabled={unavailable}
                 options={sobjectTypeOptions}
@@ -21,41 +21,37 @@
         <li class="slds-button-group-item">
             <lightning-combobox 
                 data-id="sobjectApiName"
-                label="SObject"
+                variant="label-hidden" 
                 value={sobjectApiName}
                 disabled={unavailable}
                 options={sobjectApiNameOptions}
                 onchange={handleChangeValue}></lightning-combobox>
         </li>
         <li class="slds-button-group-item">
-            <label class="slds-form-element__label">Actions</label><br />
             <template lwc:if={filtersChanged}>
-                <lightning-button 
+                <lightning-button-icon 
                     variant="brand" 
-                    icon-name="utility:play"
-                    label={applyButtonLabel}
+                    icon-name="action:check"
                     disabled={unavailable}
                     title="You are ready to apply these filters in the app..."
-                    onclick={handleClickValidate}></lightning-button>
+                    onclick={handleClickValidate}></lightning-button-icon>
                 &nbsp;
             </template>
             <template lwc:if={filtersOriginallyChanged}>
-                <lightning-button 
-                    variant="destructive" 
-                    icon-name="utility:reply_all" 
-                    label="Remove all filters" 
+                <lightning-button-icon 
+                    variant="border" 
+                    icon-name="utility:clear" 
                     disabled={unavailable}
                     title="Remove all filters..." 
-                    onclick={handleClickReset}></lightning-button>
+                    onclick={handleClickReset}></lightning-button-icon>
                 &nbsp;
             </template>
-            <lightning-button 
-                variant="brand-outline" 
-                icon-name="utility:refresh"
-                label="Refresh" 
+            <lightning-button-icon 
+                variant="border" 
+                icon-name="utility:sync"
                 disabled={unavailable}
                 title="Refresh the list of objects and packages..."
-                onclick={handleClickRefresh}></lightning-button>
+                onclick={handleClickRefresh}></lightning-button-icon>
         </li>
         <li>
             <template if:true={unavailable}>

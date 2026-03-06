@@ -1,5 +1,6 @@
-import { CellFactory } from 'src/ui/table/orgcheck-ui-table-cell';
-import { ColumnType, TableColumn, TableColumnWithModifiers } from 'src/ui/table/orgcheck-ui-table-column';
+import { CellFactory } from 'src/ui/table/orgcheck-ui-table-cellfactory';
+import { TableColumn } from 'src/ui/table/orgcheck-ui-table-column';
+import { ColumnType } from 'src/ui/table/orgcheck-ui-table-columntype';
 
 describe('tests.ui.unit.CellFactory', () => {
 
@@ -246,7 +247,7 @@ describe('tests.ui.unit.CellFactory', () => {
     describe('Test Cell Factory with only one objects column type (see ColumnType.OBJS)', () => {
 
         /** @type {TableColumn} */
-        const column: TableColumn = { label: 'Ip Ranges', type: ColumnType.OBJS, data: { values: 'ipRanges', template: (r) => `${r.description}: from ${r.startAddress} to ${r.endAddress} --> ${r.difference*1} address(es)` }};
+        const column: TableColumn = { label: 'Ip Ranges', type: ColumnType.OBJS, data: { values: 'ipRanges', value: '.', template: (r) => `${r.description}: from ${r.startAddress} to ${r.endAddress} --> ${r.difference*1} address(es)` }};
 
         /** @type {Array<any>} */
         const data: Array<any> = [ 
@@ -284,7 +285,7 @@ describe('tests.ui.unit.CellFactory', () => {
     describe('Test Cell Factory with only one texts column type (see ColumnType.TXTS)', () => {
 
         /** @type {TableColumn} */
-        const column: TableColumn = { label: 'Annotations', type: ColumnType.TXTS, data: { values: 'annotations'}};
+        const column: TableColumn = { label: 'Annotations', type: ColumnType.TXTS, data: { values: 'annotations', value: '.'}};
 
         /** @type {Array<any>} */
         const data: Array<any> = [ 
@@ -359,8 +360,8 @@ describe('tests.ui.unit.CellFactory', () => {
         const COLUMN2_VALUEBEFOREMIN = '<2';
         const COLUMN2_VALUEAFTERMAX = '>5';
 
-        /** @type {Array<TableColumnWithModifiers>} */
-        const columns: Array<TableColumnWithModifiers> = [
+        /** @type {Array<TableColumn>} */
+        const columns: Array<TableColumn> = [
             { label: 'Column 1', type: ColumnType.NUM, data: { value: 'propertyA' }, modifier: { minimum: 3, valueBeforeMin: COLUMN0_VALUEBEFOREMIN, valueIfEmpty: COLUMN0_VALUEIFEMPTY }},
             { label: 'Column 2', type: ColumnType.NUM, data: { value: 'propertyB' }, modifier: { maximum: 8, valueAfterMax: COLUMN1_VALUEAFTERMAX }},
             { label: 'Column 3', type: ColumnType.NUM, data: { value: 'propertyC' }, modifier: { minimum: 2, valueBeforeMin: COLUMN2_VALUEBEFOREMIN, maximum: 5, valueAfterMax: COLUMN2_VALUEAFTERMAX }}
@@ -451,8 +452,8 @@ describe('tests.ui.unit.CellFactory', () => {
         const COLUMN0_VALUEIFEMPTY = 'Empty value for A';
         const COLUMN2_VALUEIFEMPTY = 'Empty value for C';
 
-        /** @type {Array<TableColumnWithModifiers>} */
-        const columns: Array<TableColumnWithModifiers> = [
+        /** @type {Array<TableColumn>} */
+        const columns: Array<TableColumn> = [
             { label: 'Column 1', type: ColumnType.TXT, data: { value: 'propertyA' }, modifier: { maximumLength: 10, valueIfEmpty: COLUMN0_VALUEIFEMPTY }},
             { label: 'Column 2', type: ColumnType.TXT, data: { value: 'propertyB' }, modifier: { maximumLength: 8, preformatted: true }},
             { label: 'Column 3', type: ColumnType.TXT, data: { value: 'propertyC' }, modifier: { valueIfEmpty: COLUMN2_VALUEIFEMPTY }}

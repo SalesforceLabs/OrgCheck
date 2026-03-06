@@ -7,15 +7,15 @@
 
     "build": "node ./build/static-resource/build-static-resource.js",
     "test": "sfdx-lwc-jest",
+    "sf:deploy": "sf project deploy start --metadata ApexPage --metadata AuraDefinitionBundle --metadata ContentAsset --metadata CustomApplication --metadata CustomTab --metadata LightningComponentBundle --metadata PermissionSet --metadata Prompt --metadata StaticResource",
+    "sf:deploy:sr": "sf project deploy start --metadata StaticResource",
+    "sf:deploy:lwc": "sf project deploy start --metadata LightningComponentBundle",
+    "sf:deploy:lwc:app": "sf project deploy start --metadata LightningComponentBundle:orgcheckApp",
 
 
 
 
     "lint": "eslint force-app/main/default/lwc",
-    "sf:deploy": "sf project deploy start --metadata ApexPage --metadata AuraDefinitionBundle --metadata ContentAsset --metadata CustomApplication --metadata CustomTab --metadata LightningComponentBundle --metadata PermissionSet --metadata Prompt --metadata StaticResource",
-    "sf:deploy:sr": "sf project deploy start --metadata StaticResource",
-    "sf:deploy:lwc": "sf project deploy start --metadata LightningComponentBundle",
-    "sf:deploy:lwc:app": "sf project deploy start --metadata LightningComponentBundle:orgcheckApp",
     "scan:lwc": "sf code-analyzer run --target './force-app/main/default/lwc/*/*.js' --output-file /tmp/orgcheck-lwc-scan.html; open /tmp/orgcheck-lwc-scan.html",
     "scan:securityreview": "sf code-analyzer run --rule-selector AppExchange --rule-selector Recommended:Security --output-file /tmp/orgcheck-security-scan.html; open /tmp/orgcheck-security-scan.html",
     "sf:open": "sf force org open",

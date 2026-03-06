@@ -3,6 +3,23 @@ import jsforce from 'tests/utils/orgcheck-api-jsforce-mock.utility';
 import fflate from 'tests/utils/orgcheck-api-fflate-mock.utility';
 import { StorageSetupMock_BasedOnMap } from 'tests/utils/orgcheck-api-storage-mock.utility'
 
+const createAPIforTests = () => {
+  return new API({ 
+    logSettings: {
+      isConsoleFallback: () => { return false; },
+      log: () => {},
+      ended: () => {},
+      failed: (... argv) => { console.error('-_-_-_-_-_--_-_-_-_-_--_-_-_-_-_--_-_-_-_-_--_-_-_-_-_-', argv); }
+    },
+    salesforce: { 
+      authenticationOptions: {
+        accessToken: 'UNIT_TESTING'
+      } 
+    },
+    storage: new StorageSetupMock_BasedOnMap()
+  });
+}
+
 describe('tests.api.API', () => {
 
   describe('Test API', () => {
@@ -13,20 +30,7 @@ describe('tests.api.API', () => {
       let hadError = false;
       let err;
       try {
-        const api = new API({ 
-          logSettings: {
-            isConsoleFallback: () => { return false; },
-            log: () => {},
-            ended: () => {},
-            failed: (... argv) => { console.error('-_-_-_-_-_--_-_-_-_-_--_-_-_-_-_--_-_-_-_-_--_-_-_-_-_-', argv); }
-          },
-          salesforce: { 
-            authenticationOptions: {
-              accessToken: 'TESTING-BUNDLE'
-            } 
-          },
-          storage: new StorageSetupMock_BasedOnMap()
-        });
+        const api = createAPIforTests();
         expect(api).not.toBeNull();
         await api.getActiveUsers();
         api.getAllScoreRulesAsDataMatrix();
@@ -80,6 +84,46 @@ describe('tests.api.API', () => {
       }
       expect(hadError).toBe(false);
       expect(err).not.toBeDefined();
+    });
+
+    it('should set the terms to auto-accepted because org is not a production', async () => {
+      const api = createAPIforTests();
+
+      // mocking a connection to a non-production org
+      api.getOrganizationInformation = jest.fn(async function () {
+        return Promise.resolve({ isProduction: false });
+      });
+
+      // For non produciton org terms should be auto-approved
+      expect(await api.checkUsageTerms()).toBeTruthy();
+
+      // We don't really care but this should be logically false
+      expect(api.wereUsageTermsAcceptedManually()).toBeFalsy();
+    });
+
+    it('should set the terms to not accepted because org is a production', async () => {
+      const api = createAPIforTests();
+
+      // mocking a connection to a production org
+      api.getOrganizationInformation = jest.fn(async function () {
+        return Promise.resolve({ isProduction: true });
+      });
+
+      // For produciton org terms should NOT be auto-approved
+      expect(await api.checkUsageTerms()).toBeFalsy();
+
+      // We did not manually approved yet the terms, so should be false
+      expect(api.wereUsageTermsAcceptedManually()).toBeFalsy(); 
+
+      // We then accept the terms explicitely
+      api.acceptUsageTermsManually();
+
+      // This time it should be true
+      expect(api.wereUsageTermsAcceptedManually()).toBeTruthy(); 
+
+      // Finally checking back the terms, should be true
+      expect(await api.checkUsageTerms()).toBeTruthy();
+
     });
   });
 });

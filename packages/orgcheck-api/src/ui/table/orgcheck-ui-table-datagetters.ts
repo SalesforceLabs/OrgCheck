@@ -1,3 +1,6 @@
+/**
+ * @description This interface describe the field/property name in a Row where we find the "value" to show
+ */
 export interface WhereToGetData {
 
     /**
@@ -7,13 +10,22 @@ export interface WhereToGetData {
     value: string;
 }
 
-export interface WhereToGetScoreData {
+/**
+ * @description This interface describe the field/property name in a Row where we find the "values" to iterate over
+ */
+export interface WhereToGetMultipleData {
 
     /**
-     * @description Property containing the score
+     * @description Property containing the values
      * @type {string}
      */
-    value: string;
+    values: string;
+}
+
+/**
+ * @description The score is the value in this case, and we add the fields to find the id and name of the item that has this score
+ */
+export interface WhereToGetScoreData extends WhereToGetData {
 
     /**
      * @description Property containing the Salesforce ID of the entity that has this score
@@ -28,13 +40,16 @@ export interface WhereToGetScoreData {
     name: string;
 }
 
-export interface WhereToGetLinkData {
+/**
+ * @description The text is the value in this case, no additional field needed
+ */ 
+export interface WhereToGetTextData extends WhereToGetData {
+}
 
-    /**
-     * @description Property containing the url to be used in the link
-     * @type {string}
-     */
-    value: string;
+/**
+ * @description The URL is the value in this case, and we add the field to find the label for the hyperlink
+ */
+export interface WhereToGetLinkData extends WhereToGetData {
 
     /**
      * @description Property containing the label to be used in the link
@@ -43,22 +58,10 @@ export interface WhereToGetLinkData {
     label: string;
 }
 
-export interface WhereToGetLinksData extends WhereToGetLinkData {
-
-    /**
-     * @description Property containing the list to iterate over
-     * @type {string}
-     */
-    values: string;
-}
-
-export interface WhereToGetObjectsData {
-
-    /**
-     * @description Property containing the list to iterate over
-     * @type {string}
-     */
-    values: string;
+/**
+ * @description The Object is the value in this case, and we add a method to render this object as a string
+ */
+export interface WhereToGetObjectData extends WhereToGetData {
 
     /**
      * @description Template function to generate a text based on the object
@@ -67,11 +70,21 @@ export interface WhereToGetObjectsData {
     template(arg0: any): string;
 }
 
-export interface WhereToGetTextsData {
 
-    /**
-     * @description Property containing the list to iterate over
-     * @type {string}
-     */
-    values: string;
+/**
+ * @description Values is the list, Value is the field to get the object (for each item)
+ */ 
+export interface WhereToGetObjectsData extends WhereToGetObjectData, WhereToGetMultipleData {
+}
+
+/**
+ * @description Values is the list, Value is the field to get the text (for each item)
+ */ 
+export interface WhereToGetTextsData extends WhereToGetTextData, WhereToGetMultipleData {
+}
+
+/**
+ * @description Values is the list, Value is the field to get the URL (for each item)
+ */ 
+export interface WhereToGetLinksData extends WhereToGetLinkData, WhereToGetMultipleData {
 }

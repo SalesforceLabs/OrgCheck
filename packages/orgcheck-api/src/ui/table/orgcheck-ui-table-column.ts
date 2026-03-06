@@ -1,37 +1,14 @@
 import { 
-    WhereToGetData, 
+    WhereToGetTextData, 
     WhereToGetScoreData, 
     WhereToGetLinkData, 
+    WhereToGetObjectData,
+    WhereToGetTextsData,
     WhereToGetLinksData, 
-    WhereToGetObjectsData, 
-    WhereToGetTextsData } from 'src/ui/table/orgcheck-ui-table-datagetters';
-import { 
-    TextTruncatedModifier, 
-    PreformattedModifier, 
-    EmptyModifier,
-    NumericMinimumModifier, 
-    NumericMaximumModifier, 
-    NumericMinMaxModifier } from 'src/ui/table/orgcheck-ui-table-datamodifiers';
-
-
-export enum Orientation {
-    HORIZONTAL, VERTICAL
-}
-
-export enum ColumnType {
-    IDX  = 'index',
-    SCR  = 'score',
-    TXT  = 'text',
-    TXTS = 'texts',
-    NUM  = 'numeric',
-    PRC  = 'percentage',
-    URL  = 'id',
-    URLS = 'ids',
-    CHK  = 'boolean',
-    DTM  = 'datetime',
-    DEP  = 'dependencies',
-    OBJS = 'objects'
-}
+    WhereToGetObjectsData } from 'src/ui/table/orgcheck-ui-table-datagetters';
+import { Modifier } from 'src/ui/table/orgcheck-ui-table-datamodifiers';
+import { ColumnType } from 'src/ui/table/orgcheck-ui-table-columntype';
+import { Orientation } from 'src/ui/table/orgcheck-ui-table-columnorientation';
 
 export interface TableColumn {
 
@@ -49,25 +26,19 @@ export interface TableColumn {
 
     /**
      * @description Defines how to retrieve the data -- in which property
-     * @type {WhereToGetData | WhereToGetScoreData | WhereToGetLinkData | WhereToGetLinksData | WhereToGetObjectsData | WhereToGetTextsData}
+     * @type { WhereToGetTextData | WhereToGetScoreData | WhereToGetLinkData | WhereToGetObjectData | WhereToGetTextsData | WhereToGetLinksData | WhereToGetObjectsData }
      */
-    data?: WhereToGetData | WhereToGetScoreData | WhereToGetLinkData | WhereToGetLinksData | WhereToGetObjectsData | WhereToGetTextsData;
-}
-
-export interface TableColumnWithModifiers extends TableColumn {
+    data?: WhereToGetTextData | WhereToGetScoreData | WhereToGetLinkData | WhereToGetObjectData | WhereToGetTextsData | WhereToGetLinksData | WhereToGetObjectsData;
 
     /** 
-     * @description 
-     * @type {TextTruncatedModifier | PreformattedModifier | EmptyModifier | NumericMinimumModifier | NumericMaximumModifier | NumericMinMaxModifier}
+     * @description Optional modifier around the data
+     * @type { Modifier }
      */
-    modifier: TextTruncatedModifier | PreformattedModifier | EmptyModifier | NumericMinimumModifier | NumericMaximumModifier | NumericMinMaxModifier;
-}
-
-export interface TableColumnWithOrientation extends TableColumn {
+    modifier?: Modifier;
 
     /** 
-     * @description In which orientation the column should be.
+     * @description In which orientation the column should be. This is optional, by default the column will be horizontal.
      * @type {Orientation}
      */
-    orientation: Orientation;
+    orientation?: Orientation;
 }

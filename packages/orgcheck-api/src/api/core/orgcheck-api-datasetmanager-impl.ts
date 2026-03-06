@@ -61,42 +61,42 @@ export class DatasetManager implements DatasetManagerIntf {
      * @type {Map<string, Dataset>} 
      * @private
      */
-    _datasets: Map<string, Dataset>;
+    private _datasets: Map<string, Dataset>;
 
     /**
      * @description Datasets promise cache
      * @type {Map<string, Promise<Array<any>>>}
      * @private
      */
-    _datasetPromisesCache: Map<string, Promise<Array<any>>>;
+    private _datasetPromisesCache: Map<string, Promise<Array<any>>>;
 
     /**
      * @description Data cache manager
      * @type {DataCacheManagerIntf}
      * @private
      */
-    _dataCache: DataCacheManagerIntf;
+    private _dataCache: DataCacheManagerIntf;
 
     /**
      * @description Salesforce manager
      * @type {SalesforceManagerIntf}
      * @private
      */
-    _sfdcManager: SalesforceManagerIntf;
+    private _sfdcManager: SalesforceManagerIntf;
 
     /**
      * @description Logger
      * @type {LoggerIntf}
      * @private
      */
-    _logger: LoggerIntf;
+    private _logger: LoggerIntf;
 
     /**
      * @description Data factory
      * @type {DataFactoryIntf}}
      * @private
      */
-    _dataFactory: DataFactoryIntf;
+    private _dataFactory: DataFactoryIntf;
 
     /**
      * @description Dataset Manager constructor
@@ -166,7 +166,7 @@ export class DatasetManager implements DatasetManagerIntf {
      * @public
      * @async
      */
-    async run(datasets: Array<string | DatasetRunInformation>): Promise<Map<string, any>> {
+    public async run(datasets: Array<string | DatasetRunInformation>): Promise<Map<string, any>> {
         if (datasets instanceof Array === false) {
             throw new TypeError('The given datasets is not an instance of Array.');
         }
@@ -178,34 +178,40 @@ export class DatasetManager implements DatasetManagerIntf {
             const section = `Run dataset "${alias}"`;
             if (this._datasetPromisesCache.has(cacheKey) === false) {
                 this._datasetPromisesCache.set(cacheKey, new Promise((resolve, reject) => {
-                    this._logger.log(section, `Checking the data cache for key=${cacheKey}...`);
-                    // Get data cache if any
-                    const dataFromCache = this._dataCache.get(cacheKey);
-                    if (dataFromCache) {
-                        // Set the results from data cache
-                        this._logger.ended(section, 'There was data in data cache, we use it!');
-                        // Return the key/alias and value from the data cache
-                        resolve([ alias, dataFromCache ]); // when data comes from cache instanceof won't work! (keep that in mind)
-                    } else {
-                        this._logger.log(section, `There was no data in data cache. Let's retrieve data.`);
-                        // Calling the retriever
-                        this._datasets.get(alias)?.run(
-                            this._sfdcManager, // sfdc manager
-                            this._dataFactory, // data factory
-                            this._logger?.toSimpleLogger(section), // local logger
-                            parameters // Send any parameters if needed
-                        ).then((data) => {
-                            // Cache the data (if possible and not too big)
-                            this._dataCache.set(cacheKey, data); 
-                            // Some logs
-                            this._logger.ended(section, `Data retrieved and saved in cache with key=${cacheKey}`);
-                            // Return the key/alias and value from the cache
-                            resolve([ alias, data ]);
-                        }).catch((/** @type {Error} */ error: Error) => {
-                            // Reject with this error
-                            this._logger.failed(section, error);
-                            reject({ dataset: alias, cause: error });
-                        });
+                    try {
+                        this._logger.log(section, `Checking the data cache for key=${cacheKey}...`);
+                        // Get data cache if any
+                        const dataFromCache = this._dataCache.get(cacheKey);
+                        if (dataFromCache) {
+                            // Set the results from data cache
+                            this._logger.ended(section, 'There was data in data cache, we use it!');
+                            // Return the key/alias and value from the data cache
+                            resolve([ alias, dataFromCache ]); // when data comes from cache instanceof won't work! (keep that in mind)
+                        } else {
+                            this._logger.log(section, `There was no data in data cache. Let's retrieve data.`);
+                            // Calling the retriever
+                            this._datasets.get(alias)?.run(
+                                this._sfdcManager, // sfdc manager
+                                this._dataFactory, // data factory
+                                this._logger?.toSimpleLogger(section), // local logger
+                                parameters // Send any parameters if needed
+                            ).then((data) => {
+                                // Cache the data (if possible and not too big)
+                                this._dataCache.set(cacheKey, data); 
+                                // Some logs
+                                this._logger.ended(section, `Data retrieved and saved in cache with key=${cacheKey}`);
+                                // Return the key/alias and value from the cache
+                                resolve([ alias, data ]);
+                            }).catch((/** @type {Error} */ error: Error) => {
+                                // Reject with this error
+                                this._logger.failed(section, error);
+                                reject({ dataset: alias, cause: error });
+                            });
+                        }
+                    } catch (error) {
+                        // Reject with this error
+                        this._logger.failed(section, error);
+                        reject({ dataset: alias, cause: error });
                     }
                 }));
             }
@@ -219,7 +225,7 @@ export class DatasetManager implements DatasetManagerIntf {
      * @param {Array<string | DatasetRunInformation>} datasets - The list of datasets to clean
      * @public
      */
-    clean(datasets: Array<string | DatasetRunInformation>) {
+    public clean(datasets: Array<string | DatasetRunInformation>) {
         if (datasets instanceof Array === false) {
             throw new TypeError('The given datasets is not an instance of Array.');
         }

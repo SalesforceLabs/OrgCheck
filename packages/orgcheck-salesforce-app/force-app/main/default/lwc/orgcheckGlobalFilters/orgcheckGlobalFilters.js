@@ -249,15 +249,6 @@ export default class OrgcheckGlobalFilters extends LightningElement {
     }
 
     /**
-     * @description Dynamic label of the APPLY button
-     * @returns {string} Label of the APPLY button
-     * @public
-     */ 
-    get applyButtonLabel() {
-        return `Apply ${this.whichFiltersChanged.size} change${this.whichFiltersChanged.size>1?'s':''} in the app...`;
-    }
-
-    /**
      * @description Boolean that indicates if at least one filter has changed originally.
      * @type {boolean}
      * @public

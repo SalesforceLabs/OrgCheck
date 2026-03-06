@@ -1,20 +1,13 @@
-import { 
-    TableColumn, 
-    TableColumnWithModifiers, 
-    TableColumnWithOrientation } from 'src/ui/table/orgcheck-ui-table-column';
-
-export enum SortOrder {
-    DESC = 'desc', 
-    ASC = 'asc'
-}
+import { TableColumn } from 'src/ui/table/orgcheck-ui-table-column';
+import { SortOrder } from 'src/ui/table/orgcheck-ui-table-sortorder';
 
 export interface Table {
 
     /**
      * @description List of columns in a table
-     * @type {Array<TableColumn | TableColumnWithModifiers | TableColumnWithOrientation>}
+     * @type {Array<TableColumn>}
      */
-    columns: Array<TableColumn | TableColumnWithModifiers | TableColumnWithOrientation>;
+    columns: Array<TableColumn>;
 
     /**
      * @description Which index column is used for ordering?

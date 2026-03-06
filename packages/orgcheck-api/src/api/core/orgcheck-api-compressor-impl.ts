@@ -7,7 +7,7 @@ export class Compressor implements CompressorIntf {
      * @type {any}
      * @private
      */
-    _api: any;
+    private _api: any;
 
     /**
      * @description Constructor
@@ -23,8 +23,9 @@ export class Compressor implements CompressorIntf {
      * @param {string} data - Input data
      * @throws {Error} Not implemented yet
      * @returns {string} Output data in hexadecimal format
+     * @public
      */
-    compress(data: string): string { 
+    public compress(data: string): string { 
         const encodedValue = this._api?.strToU8(data);
         const compressedValue = this._api?.zlibSync(encodedValue, { level: 9 })
         return FROM_BUFFER_TO_HEX(compressedValue);
@@ -36,7 +37,7 @@ export class Compressor implements CompressorIntf {
      * @throws {Error} Not implemented yet
      * @returns {string} Output data
      */
-    decompress(data: string): string { 
+    public decompress(data: string): string { 
         const bufferValue = FROM_HEX_TO_BUFFER(data);
         const uncompressedValue = this._api?.unzlibSync(bufferValue);
         const decodedValue = this._api?.strFromU8(uncompressedValue); 

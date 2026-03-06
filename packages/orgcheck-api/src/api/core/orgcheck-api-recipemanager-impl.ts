@@ -66,28 +66,28 @@ export class RecipeManager implements RecipeManagerIntf {
      * @type {LoggerIntf}
      * @private
      */
-    _logger: LoggerIntf;
+    private _logger: LoggerIntf;
 
     /**
      * @description Map of recipes given their alias.
      * @type {Map<string, Recipe>}
      * @private
      */
-    _recipes: Map<string, Recipe>;
+    private _recipes: Map<string, Recipe>;
 
     /**
      * @description Map of recipe collections given their alias.
      * @type {Map<string, RecipeCollection>}
      * @private
      */
-    _recipeCollections: Map<string, RecipeCollection>;
+    private _recipeCollections: Map<string, RecipeCollection>;
 
     /**
      * @description Recipes need a dataset manager to work
      * @type {DatasetManagerIntf}
      * @private
      */
-    _datasetManager: DatasetManagerIntf;
+    private _datasetManager: DatasetManagerIntf;
             
     /**
      * @description Recipe Manager constructor
@@ -162,7 +162,7 @@ export class RecipeManager implements RecipeManagerIntf {
      * @async
      * @public
      */
-    async run(alias: string, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
+    public async run(alias: string, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         if (this._recipes.has(alias)) {
             const result = await this._runRecipe(alias, parameters);
@@ -187,7 +187,7 @@ export class RecipeManager implements RecipeManagerIntf {
      * @param {Map<string, any>} [parameters] - List of values to pass to the recipe
      * @public
      */
-    clean(alias: string, parameters: Map<string, any>) {
+    public clean(alias: string, parameters: Map<string, any>) {
         if (this._recipes.has(alias)) {
             this._cleanRecipe(alias, parameters);
         } else if (this._recipeCollections.has(alias)) {
@@ -207,7 +207,7 @@ export class RecipeManager implements RecipeManagerIntf {
      * @returns {Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any> | undefined>} Returns the value from the recipe or undefined if something bad happens
      * @async
      */
-    async _runRecipe(alias: string, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any> | undefined> {
+    private async _runRecipe(alias: string, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any> | undefined> {
 
         const section = `Run recipe "${alias}"`;
         const recipe = this._recipes.get(alias);
@@ -265,7 +265,7 @@ export class RecipeManager implements RecipeManagerIntf {
      * @returns {Promise<Map<string, DataCollectionStatisticsIntf> | undefined>} Returns the value from the recipe collection or undefined if something bad happens.
      * @async
      */
-    async _runRecipeCollection(alias: string, parameters: Map<string, any>): Promise<Map<string, DataCollectionStatisticsIntf> | undefined> {
+    private async _runRecipeCollection(alias: string, parameters: Map<string, any>): Promise<Map<string, DataCollectionStatisticsIntf> | undefined> {
 
         const section = `Run recipe collection "${alias}"`;
         const recipeCollection = this._recipeCollections.get(alias);
@@ -385,7 +385,7 @@ export class RecipeManager implements RecipeManagerIntf {
      * @param {Map<string, any>} [parameters] List of values to pass to the recipe
      * @public
      */
-    _cleanRecipe(alias: string, parameters: Map<string, any>) {
+    private _cleanRecipe(alias: string, parameters: Map<string, any>) {
 
         const section = `Clean recipe "${alias}"`;
         const recipe = this._recipes.get(alias);
@@ -425,7 +425,7 @@ export class RecipeManager implements RecipeManagerIntf {
      * @param {Map<string, any>} [parameters] List of values to pass to the recipe
      * @public
      */
-    _cleanRecipeCollection(alias: string, parameters: Map<string, any>) {
+    private _cleanRecipeCollection(alias: string, parameters: Map<string, any>) {
 
         const section = `Clean recipe collection "${alias}"`;
         const recipeCollection = this._recipeCollections.get(alias);

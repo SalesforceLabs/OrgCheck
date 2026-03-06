@@ -1,14 +1,32 @@
 import { LightningElement, api, track } from 'lwc';
-import { 
-    SecretSauce,
-    SortOrder, 
-    Table, 
-    ColumnType, 
-    Orientation, 
-    RowsFactory, 
-    ExportedTable } from '@dist/orgcheck';
+import OrgCheckStaticResource from "@salesforce/resourceUrl/OrgCheck_SR";
+import { loadScript } from 'lightning/platformResourceLoader';
+
 
 export default class OrgcheckExtentedDatatable extends LightningElement {
+
+    /**
+     * @description Flag to know if the api was intiated
+     * @type {boolean}
+     * @private
+     */ 
+    _apiInitialized = false;
+
+    /**
+     * @description Called when it's about to render the component
+     */
+    renderedCallback() {
+        // Load only if the api is not already initilized
+        if (this._apiInitialized === false) {
+            loadScript(this, OrgCheckStaticResource + '/js/orgcheck.js')
+                .then(() => {
+                    this._apiInitialized = true;
+                })
+                .catch((e) => {
+                    console.error(e);
+                });
+        }
+    }
 
     // ----------------------------------------------------------------------------------------------------------------
     // ----------------------------------------------------------------------------------------------------------------
@@ -160,7 +178,6 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     /**
      * @description Column headers -- tracked so any change in css can be reflected in table
      * @type {Array<{label: string, cssClass: string, isIterative: boolean}>}
-     * @private
      */
     @track columnHeaders = [];
 
@@ -175,7 +192,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @type {boolean}
      */
     get isSorted() {
-        return this._sortingIndex !== undefined;
+        return this._private_properties.sortingIndex !== undefined;
     }
 
     /**
@@ -183,7 +200,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @type {string}
      */
     get sortingField() {
-        return this._tableDefinition.columns[this._sortingIndex].label;
+        return this._private_properties.tableDefinition.columns[this._private_properties.sortingIndex].label;
     }
 
     /**
@@ -191,7 +208,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @type {string}
      */
     get sortingOrder() {
-        return this._sortingOrder === SortOrder.ASC ? 'ascending' : 'descending';
+        return this._private_properties.sortingOrder === 'asc' ? 'ascending' : 'descending';
     }
 
 
@@ -204,48 +221,24 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     // ----------------------------------------------------------------------------------------------------------------
 
     /**
-     * @description Do we show the score column?
-     * @type {boolean}
-     * @private
+     * @description Internal properties without LWC reactivity
+     * @property allRows {Array} Array of all rows (even the one that are not visible because of the filter or infinite scrolling)
+     * @property tableDefinition {Object} Definition of the table (columns, ordering, etc...)
+     * @property sortingIndex {number} Index of the column used for sorting
+     * @property sortingOrder {string} Order of the sorting (asc or desc)
+     * @property filteringSearchInput {string} Current value of the search input which is used by the filter method
      */
-    _showScoreColumn = false;
-
-    /**
-     * @description Internal array of all rows
-     * @type {Array}
-     * @private
-     */
-    _allRows;
-
-    /**
-     * @description Table definition with ordering ad columns information
-     * @type {Table}
-     * @private
-     */
-    _tableDefinition;
-
-    /**
-     * @description Index of the current column used to sort data
-     * @type {number}
-     */
-    _sortingIndex;
-
-    /**
-     * @description Current order used to sort data
-     * @type {string}
-     */
-    _sortingOrder;
-
-    /**
-     * @description Internal property that indicate the current search input index which is used by the filter method
-     * @type {string}
-     * @private
-     */
-    _filteringSearchInput;
+    _private_properties = {
+        allRows: undefined,
+        tableDefinition: undefined,
+        sortingIndex: undefined,
+        sortingOrder: undefined,
+        filteringSearchInput: undefined
+    }
 
     /**
      * @description Setter for the columns (it will set the internal <code>_columns</code> property)
-     * @param {Table} tableDefinition - Defintion of the table
+     * @param {any} tableDefinition - Defintion of the table
      */
     @api set tableDefinition(tableDefinition) {
 
@@ -253,32 +246,32 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
         if (!tableDefinition) return;
 
         // Set the tableDefinition
-        this._tableDefinition = tableDefinition;
-        this._sortingIndex = tableDefinition.orderIndex;
-        this._sortingOrder = tableDefinition.orderSort;
+        this._private_properties.tableDefinition = tableDefinition;
+        this._private_properties.sortingIndex = tableDefinition.orderIndex;
+        this._private_properties.sortingOrder = tableDefinition.orderSort;
         this.columnHeaders = tableDefinition.columns.map((c, i) => {
-            if (c.type === ColumnType.SCR) {
+            if (c.type === 'score') {
                 // if we show score column, bad cell will be highlighted as well so that we can understand the score (= nb of bad cells)
                 this._showScoreColumn = true; 
             }
-            if (c.type === ColumnType.DEP && this.usesDependencyViewer === false) {
+            if (c.type === 'dependencies' && this.usesDependencyViewer === false) {
                 this.usesDependencyViewer = true;
             };
             return {
                 index: (i + 1),
                 label: c.label,
-                isIterative: c.type === ColumnType.TXTS || c.type === ColumnType.URLS || c.type === ColumnType.OBJS,
-                cssClass: (this._sortingIndex === i ? `sorted ${this._sortingOrder === SortOrder.ASC ? 'sorted-asc' : 'sorted-desc'} ` : '') + 
+                isIterative: c.type === 'texts' || c.type === 'ids' || c.type === 'objects',
+                cssClass: (this._private_properties.sortingIndex === i ? `sorted ${this._private_properties.sortingOrder === 'asc' ? 'sorted-asc' : 'sorted-desc'} ` : '') + 
                           (this.isStickyHeaders ? 'sticky ': '') + 
                           // eslint-disable-next-line dot-notation
-                          (c['orientation'] === Orientation.VERTICAL ? 'vertical ' : ' ')
+                          (c['orientation'] === 'vertical' ? 'vertical ' : ' ')
                           // Note: can't use instanceof on 'c'
             }
         });
     }
 
     get tableDefinition() {
-        return this._tableDefinition;
+        return this._private_properties.tableDefinition;
     }
     
     /**
@@ -288,7 +281,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     @api set rows(rows) {
 
         // Some sanity checks
-        if (!this._tableDefinition) return;
+        if (!this._private_properties.tableDefinition) return;
         if (!this.columnHeaders) return;
         if (!rows) return;
 
@@ -303,7 +296,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
         
         // Parse the rows
         this.nbBadRows = 0;
-        this._allRows = RowsFactory.create(
+        this._allRows = getOrgCheckTable()?.createRows(
             this.tableDefinition, 
             rows, 
             (row, isBad, rowIndex) => { 
@@ -338,11 +331,10 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
 
     /**
      * @description Convert this table into an Excel data
-     * @returns {ExportedTable} The exported table
      */ 
     get exportedRows() {
-        if (this._tableDefinition && this._tableDefinition.columns && this._allRows) {
-            return RowsFactory.export(this._tableDefinition, this._allRows, this.exportBasename, SecretSauce.GetScoreRuleDescription);
+        if (this._private_properties.tableDefinition && this._private_properties.tableDefinition.columns && this._allRows) {
+            return getOrgCheckExport().asRaw(this._private_properties.tableDefinition, this._allRows, this.exportBasename);
         }
         return undefined;
     }
@@ -379,7 +371,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @param {Event | any} event - The event information
      */
     handleSearchInputChanged(event) {
-        this._filteringSearchInput = event.target.value;
+        this._private_properties.filteringSearchInput = event.target.value;
         this._filterAllRows();
         this._setVisibleRows();
     }
@@ -391,23 +383,23 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     handleSortColumnClick(event) {
 
         // Get the old and new columns index
-        const previousSortingColumnIndex = this._sortingIndex;
+        const previousSortingColumnIndex = this._private_properties.sortingIndex;
         const newSortingColumnIndex = parseInt(event.target.getAttribute('aria-colindex'), 10) - 1; // aria-colindex is 1-based index, we need 0-based index
 
         // Set the new sorting column index
-        this._sortingIndex = newSortingColumnIndex;
+        this._private_properties.sortingIndex = newSortingColumnIndex;
 
         // Setting the sorting order accordingly
         if (previousSortingColumnIndex === newSortingColumnIndex) { 
             // If the previous and new are the same, we just switch the order!
-            if (this._sortingOrder === SortOrder.ASC) {
-                this._sortingOrder = SortOrder.DESC;
+            if (this._private_properties.sortingOrder === 'asc') {
+                this._private_properties.sortingOrder = 'desc';
             } else {
-                this._sortingOrder = SortOrder.ASC
+                this._private_properties.sortingOrder = 'asc'
             }
         } else { 
             // if they are different, by default, the ordering is ASC
-            this._sortingOrder = SortOrder.ASC;
+            this._private_properties.sortingOrder = 'asc';
         }
 
         // Remove the style for the old column
@@ -419,7 +411,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
         // Add the sorting style to the new column
         const newColumn = this.columnHeaders[newSortingColumnIndex];
         if (newColumn) {
-            newColumn.cssClass += (this._sortingOrder === SortOrder.ASC ? 'sorted sorted-asc' : 'sorted sorted-desc');
+            newColumn.cssClass += (this._private_properties.sortingOrder === 'asc' ? 'sorted sorted-asc' : 'sorted sorted-desc');
         }
 
         this._sortAllRows();
@@ -463,7 +455,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @private
      */
     _filterAllRows() {
-        RowsFactory.filter(this._allRows, this._filteringSearchInput);
+        getOrgCheckTable()?.filterRows(this._allRows, this._private_properties.filteringSearchInput);
     }
 
     /**
@@ -471,7 +463,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @private
      */
     _sortAllRows() {
-        RowsFactory.sort(this._tableDefinition, this._allRows, this._sortingIndex, this._sortingOrder);
+        getOrgCheckTable()?.sortRows(this._private_properties.tableDefinition, this._allRows, this._private_properties.sortingIndex, this._private_properties.sortingOrder);
     }
 
     /**
@@ -481,7 +473,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     _setVisibleRows() {
         if (this._allRows) {
             const allVisibleRows = this._allRows.filter((row) => row.isVisible === true);
-            this.isFilteredDataEmpty = this._filteringSearchInput && allVisibleRows.length === 0;
+            this.isFilteredDataEmpty = this._private_properties.filteringSearchInput && allVisibleRows.length === 0;
             if (this.isInfiniteScrolling === true && allVisibleRows) {
                 this.isInfiniteScrollingMoreData = this.infiniteScrollingCurrentNbRows < allVisibleRows.length;
             }
@@ -492,4 +484,16 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
             }
         }
     }
+}
+
+const getOrgCheck = () => {
+    return (typeof window !== 'undefined' ? window?.orgcheck : globalThis?.orgcheck ?? null)
+}
+
+const getOrgCheckTable = () => {
+    return getOrgCheck()?.ui?.table;
+}
+
+const getOrgCheckExport = () => {
+    return getOrgCheck()?.export;
 }

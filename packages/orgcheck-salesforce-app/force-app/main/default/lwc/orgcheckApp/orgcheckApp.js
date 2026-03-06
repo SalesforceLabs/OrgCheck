@@ -1,207 +1,8 @@
-import { LightningElement, api } from 'lwc';
+import { LightningElement, api, track } from 'lwc';
 import OrgCheckStaticResource from '@salesforce/resourceUrl/OrgCheck_SR';
 import { loadScript } from 'lightning/platformResourceLoader';
-import { TableDefinitions } from './subs/tableDefinitions.js';
-
-const MAX_ITEMS_IN_HARDCODED_URLS_LIST = 15;
-
-/**
- * @description Application navigation in tabs and subtabs
- * @constant
- */
-const APPLICATION_NAVIGATION = {
-    HOME: { 
-        key:   'home', 
-        title: 'Home',
-        tabs: { 
-            WELCOME:       { key: 'welcome', title : '👋 Welcome!' },
-            CACHE:         { key: 'metadata-cache', title: '🛠️ Metadata Cache' },
-            HELP:          { key: 'help', title: '⁉️ Score explanation' }
-        }
-    },
-    ORG: { 
-        key:   'organization', 
-        title: '🗺️ Salesforce Organization',
-        tabs: { 
-            INDEX0:        { key: 'summary-00', title: 'Summary' },
-            GLOBAL_VIEW:   { key: 'global-view', title: '🏞️ Overview', recipe: ocapi.RecipeAliases.GLOBAL_VIEW },
-            URL_VIEW:      { key: 'hard-coded-urls-view', title: '🏖️ Hard-coded URLs', recipe: ocapi.RecipeAliases.HARDCODED_URLS_VIEW },
-        }
-    },
-    DATAMODEL: { 
-        key:   'datamodel', 
-        title: '⚽ Data model',
-        tabs: { 
-            INDEX1:        { key: 'summary-01', title: 'Summary' },
-            SOBJ_DESC:     { key: 'object', title: '🎳 Object Documentation', recipe: ocapi.RecipeAliases.OBJECT },
-            SOBJECTS:      { key: 'objects', title: '🏉 Objects', recipe: ocapi.RecipeAliases.OBJECTS },
-            CUSTOM_FIELDS: { key: 'custom-fields', title: '🏈 Custom Fields', recipe: ocapi.RecipeAliases.CUSTOM_FIELDS },
-            LAYOUTS:       { key: 'page-layouts', title: '🏓 Page Layouts', recipe: ocapi.RecipeAliases.PAGE_LAYOUTS },
-            VRS:           { key: 'validation-rules', title: '🎾 Validation Rules', recipe: ocapi.RecipeAliases.VALIDATION_RULES },
-            RTS:           { key: 'record-types', title: '🏏 Record Types', recipe: ocapi.RecipeAliases.RECORD_TYPES },
-            WEB_LINKS:     { key: 'web-links', title: '🏑 Web Links', recipe: ocapi.RecipeAliases.WEBLINKS },
-        }
-    },
-    SECURITY: { 
-        key:   'security', 
-        title: '👮 Security and Access',
-        tabs: { 
-            INDEX2:        { key: 'summary-02', title: 'Summary' },
-            USERS:         { key: 'internal-active-users', title: '👥 Active Internal Users', recipe: ocapi.RecipeAliases.INTERNAL_ACTIVE_USERS },
-            PROFILES:      { key: 'profiles', title: '🚓 Profiles', recipe: ocapi.RecipeAliases.PROFILES },
-            PSETS:         { key: 'permission-sets', title: '🚔 Permission Sets', recipe: ocapi.RecipeAliases.PERMISSION_SETS },
-            PSLS:          { key: 'permission-set-licenses', title: '🚔 Permission Set Licenses', recipe: ocapi.RecipeAliases.PERMISSION_SET_LICENSES },
-            PROFILE_RSTRS: { key: 'profile-restrictions', title: '🚸 Profile Restrictions', recipe: ocapi.RecipeAliases.PROFILE_RESTRICTIONS },
-            PROFILE_PWDS:  { key: 'profile-password-policies', title: '⛖ Profile Password Policies', recipe: ocapi.RecipeAliases.PROFILE_PWD_POLICIES },
-            CRUDS:         { key: 'object-permissions', title: '🚦 Object Permissions', recipe: ocapi.RecipeAliases.OBJECT_PERMISSIONS },
-            FLSS:          { key: 'field-permissions', title: '🚧 Field Level Securities', recipe: ocapi.RecipeAliases.FIELD_PERMISSIONS },
-            APP_PERMS:     { key: 'app-permissions', title: '⛕ Application Permissions', recipe: ocapi.RecipeAliases.APP_PERMISSIONS },
-            BROWSERS:      { key: 'browsers', title: '🌐 Browsers', recipe: ocapi.RecipeAliases.BROWSERS },
-        }
-    },
-    BOXES: { 
-        key:   'boxes', 
-        title: '🐇 Boxes',
-        tabs: { 
-            INDEX3:        { key: 'summary-03', title: 'Summary' },
-            ROLES_GRAPH:   { key: 'user-roles-hierarchy', title: '🐙 Internal Role Explorer' },
-            ROLES:         { key: 'user-roles', title: '🦓 Internal Role Listing', recipe: ocapi.RecipeAliases.USER_ROLES },
-            PGS:           { key: 'public-groups', title: '🐘 Public Groups', recipe: ocapi.RecipeAliases.PUBLIC_GROUPS },
-            QUEUES:        { key: 'queues', title: '🦒 Queues', recipe: ocapi.RecipeAliases.QUEUES },
-            CHT_GROUPS:    { key: 'collaboration-groups', title: '🦙 Chatter Groups', recipe: ocapi.RecipeAliases.COLLABORATION_GROUPS },
-        }
-    },
-    AUTOMATION: { 
-        key:   'automation', 
-        title: '🤖 Automations',
-        tabs: { 
-            INDEX4:        { key: 'summary-04', title: 'Summary' },
-            FLOWS:         { key: 'flows', title: '🏎️ Flows', recipe: ocapi.RecipeAliases.FLOWS },
-            PBS:           { key: 'process-builders',  title: '🛺 Process Builders', recipe: ocapi.RecipeAliases.PROCESS_BUILDERS },
-            WORKFLOWS:     { key: 'workflows', title: '🚗 Workflows', recipe: ocapi.RecipeAliases.WORKFLOWS },
-        }
-    },
-    SETTING: { 
-        key:   'setting', 
-        title: '🎁 Setting',
-        tabs: {
-            INDEX5:        { key: 'summary-05', title: 'Summary' },
-            LABELS:        { key: 'custom-labels', title: '🏷️ Custom Labels', recipe: ocapi.RecipeAliases.CUSTOM_LABELS },
-            DOCUMENTS:     { key: 'documents', title: '🍱 Documents', recipe: ocapi.RecipeAliases.DOCUMENTS },
-            EMAIL_TPLS:    { key: 'email-templates', title: '🌇 Email Templates', recipe: ocapi.RecipeAliases.EMAIL_TEMPLATES },
-            ARTICLES:      { key: 'knowledge-articles', title: '📚 Knowledge Articles', recipe: ocapi.RecipeAliases.KNOWLEDGE_ARTICLES },
-            SRS:           { key: 'static-resources', title: '🗿 Static Resources', recipe: ocapi.RecipeAliases.STATIC_RESOURCES },
-        }
-    },
-    VISUAL: { 
-        key:   'visual', 
-        title: '🥐 User Interface',
-        tabs: { 
-            INDEX6:        { key: 'summary-06', title: 'Summary' },
-            VFPS:          { key: 'visualforce-pages', title: '🥖 Visualforce Pages', recipe: ocapi.RecipeAliases.VISUALFORCE_PAGES },
-            VFCS:          { key: 'visualforce-components', title: '🍞 Visualforce Components', recipe: ocapi.RecipeAliases.VISUALFORCE_COMPONENTS },
-            LG_PAGES:      { key: 'lightning-pages', title: '🎂 Lightning Pages', recipe: ocapi.RecipeAliases.LIGHTNING_PAGES },
-            AURAS:         { key: 'lightning-aura-components', title: '🧁 Lightning Aura Components', recipe: ocapi.RecipeAliases.LIGHTNING_AURA_COMPONENTS },
-            LWCS:          { key: 'lightning-web-components', title: '🍰 Lightning Web Components', recipe: ocapi.RecipeAliases.LIGHTNING_WEB_COMPONENTS },
-            HOME_PAGES:    { key: 'home-page-components', title: '🍩 Home Page Components', recipe: ocapi.RecipeAliases.HOME_PAGE_COMPONENTS },
-            TABS:          { key: 'custom-tabs', title: '🥠 Custom Tabs', recipe: ocapi.RecipeAliases.CUSTOM_TABS },
-        }
-    },
-    CODE: { 
-        key:   'code', 
-        title: '🔥 Programmatic',
-        tabs: {
-            INDEX7:        { key: 'summary-07', title: 'Summary' },
-            CLASSES:       { key: 'apex-classes', title: '❤️‍🔥 Apex Classes', recipe: ocapi.RecipeAliases.APEX_CLASSES },
-            UNCOMPILEDS:   { key: 'apex-uncompiled', title: '🌋 Apex Classes That Need Recompilation', recipe: ocapi.RecipeAliases.APEX_UNCOMPILED },
-            TRIGGERS:      { key: 'apex-triggers', title: '🧨 Apex Triggers', recipe: ocapi.RecipeAliases.APEX_TRIGGERS },
-            TESTS:         { key: 'apex-tests', title: '🚒 Apex Unit Tests', recipe: ocapi.RecipeAliases.APEX_TESTS },
-        }
-    },
-    ANALYTICS: { 
-        key:   'analytics', 
-        title: '⛰️ Analytics',
-        tabs: {
-            INDEX8:        { key: 'summary-08', title: 'Summary' },
-            REPORTS:       { key: 'reports', title: '🌳 Reports', recipe: ocapi.RecipeAliases.REPORTS }, 
-            DASHBOARDS:    { key: 'dashboards', title: '🌲 Dashboards', recipe: ocapi.RecipeAliases.DASHBOARDS },
-        }
-    },
-};
-Object.freeze(APPLICATION_NAVIGATION);
-
-/**
- * @description Keys of the main tabs in the application
- * @type {Array<string>}
- * @constant
- */
-const MAIN_TABS_VALUES = Object.values(APPLICATION_NAVIGATION).map(tab => tab.key);
-Object.freeze(MAIN_TABS_VALUES);
-
-/**
- * @description Sub tabs by key
- * @type {Map<string, {tab: {key: string, title: string}, mainTabKey: string}>}
- * @constant
- */
-const SUB_TABS = new Map();
-
-/**
- * @description Sub tab keys by main tab key
- * @type {Map<string, Array<string>>}
- * @constant
- */
-const SUB_TABS_BY_MAIN_TAB_KEY = new Map();
-
-/**
- * @description Sub tab keys by their corresponding recipe
- * @type {Map<string, string>}
- * @constant
- */
-const RECIPE_TO_SUB_TAB = new Map();
-
-Object.values(APPLICATION_NAVIGATION).forEach(mTab => Object.values(mTab.tabs).forEach(sTab => {
-    SUB_TABS.set(sTab.key, { tab: { key: sTab.key, title: sTab.title }, mainTabKey: mTab.key });
-    if (SUB_TABS_BY_MAIN_TAB_KEY.has(mTab.key) === false) SUB_TABS_BY_MAIN_TAB_KEY.set(mTab.key, []);
-    SUB_TABS_BY_MAIN_TAB_KEY.get(mTab.key).push(sTab.key);
-    if (sTab.recipe) {
-        RECIPE_TO_SUB_TAB.set(sTab.recipe, sTab.key);
-    }
-}));
-Object.freeze(SUB_TABS);
-Object.freeze(SUB_TABS_BY_MAIN_TAB_KEY);
-Object.freeze(RECIPE_TO_SUB_TAB);
-
-/**
- * @description Sanitize and validate main tab input
- * @param {string} input - The input main tab value
- * @returns {string} The sanitized main tab value
- * @throws {Error} If the input is not a valid main tab value
- */
-const SANITIZE_MAIN_TAB_INPUT = (input) => { 
-    if (input === undefined || input === null) throw new Error('Input is undefined or null');
-    if (typeof input !== 'string') throw new Error('Input is not a string'); 
-    const sanitizedInput = input.trim().toLowerCase();
-    if (MAIN_TABS_VALUES.includes(sanitizedInput) === false) { 
-        throw new Error(`Input <${input}> is not a valid main tab value`);
-    } 
-    return sanitizedInput;
-};
 
 export default class OrgcheckApp extends LightningElement {
-
-    /**
-     * @description Text encoder
-     * @type {TextEncoder}
-     * @public
-     */ 
-    @api textEncoder;
-
-    /**
-     * @description Text decoder
-     * @type {TextDecoder}
-     * @public
-     */ 
-    @api textDecoder;
 
     /**
      * @description Local storage
@@ -209,6 +10,14 @@ export default class OrgcheckApp extends LightningElement {
      * @public
      */ 
     @api localStorage;
+
+    /** 
+     * @description Access Token of the current user
+     *                 This value is decorated by "api" so it can be passed by the parent.
+     *                 Indeed the value will be set by the parent (a Visual Force page) and will be used by the Org Check API
+     * @type {string}
+     */
+    @api accessToken;
 
     /**
      * @description URL for the logo in the header
@@ -219,91 +28,77 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Current user has accepted the usage terms
-     * @type {boolean} 
+     * @type {{ accepted: boolean, needConfirmation: boolean, manuallyAccepted: boolean }}
      * @public
      */
-    useOrgCheckInThisOrgConfirmed = false;
+    @track useOrgCheck = {
+        // Current user has accepted the usage terms
+        accepted: false,
+        // We need the current user to accept explicitely the usage terms
+        needConfirmation: false,
+        // If we need a confirmation, we store here the explicit validation of the user
+        manuallyAccepted: false
+    };
 
     /**
-     * @description We need the current user to accept the usage terms
-     * @type {boolean} 
-     * @public
-     */
-    useOrgCheckInThisOrgNeedConfirmation = false;
-
-    /**
-     * @description True if the current accepted manually the terms (mostly for Production orgs)
-     * @type {boolean} 
-     * @public
-     */
-    useOrgCheckManuallyAccepted = false;
-
-    /**
-     * @description True if the content of the next tab is being loaded
-     * @type {boolean}
-     * @public
-     */
-    tabLoading = false;
-
-    /**
-     * @description Org Check version
+     * @description Org Check version -- will be updated when the Org Check API is loaded
      * @type {string} 
      * @public
      */
-    get orgCheckVersion() {
-        return this._api?.version ?? '';
-    }
+    orgCheckVersion;
 
     /**
-     * @description Numerical representation of the Salesforce API Version we use in Org Check
+     * @description Numerical representation of the Salesforce API Version we use in Org 
+     *              Check -- will be updated when the Org Check API is loaded
      * @type {number}
      * @public
      */
-    get salesforceApiVersion() {
-        return this._api?.salesforceApiVersion ?? NaN;
+    salesforceApiVersion;
+
+    /**
+     * @description Information about the salesforce organization we are connected to -- will 
+     *              be updated when the Org Check API is loaded and terms are accepted
+     * @type {{ name: string, type: string, theme: string }}
+     * @public
+     */
+    @track orgInformation = {
+        // Org name
+        name: '',
+        // Org type. Can be 'Production', 'Sandbox', 'Trial' or 'Developer Edition' 
+        type: '',
+        // Depending on the type of the org, we can have different themes in the UI
+        theme: ''
     }
 
     /**
-     * @description Org name
-     * @type {string} 
+     * @description Information about the current limit we have for the salesforce -- will 
+     *              be updated when the Org Check API is loaded, terms are accepted and
+     *              everytime org check api is reaching Salesforce servers
+     * @type {{ hasInformation: boolean, usage: string, theme: string }}
      * @public
      */
-    orgName;
+    @track orgLimit = {
+        // Do we have yet any information about the org limits (will be false until we 
+        // get the first information from the API)
+        hasInformation: false,
+        // Org usage limit information
+        usage: '',
+        // Depending on the limits, we can have different themes in the UI
+        theme: ''
+    }
 
     /**
-     * @description Org type. Can be 'Production', 'Sandbox', 'Trial' or 'Developer Edition'
-     * @type {string} 
-     * @public
+     * @description Data received from the Org Check API and used in the different 
+     *              tables and components of the UI.
+     * @type {Object<string, any>}
      */
-    orgType;
+    @track data = { };
 
     /**
-     * @description Is the type of the org a production one?
-     * @type {boolean} 
-     * @public
+     * @description Table definitions received from the Org Check API
+     * @type {Object<string, any>}
      */
-    isOrgProduction;
-
-    /**
-     * @description Depending on the type of the org, we can have different themes in the UI
-     * @type {string} 
-     * @public
-     */
-    themeForOrgType;
-
-    /**
-     * @description Org usage limit information
-     * @type {string} 
-     * @public
-     */
-    orgLimit;
-
-    /**
-     * @description Depending on the usage limit, we can have different themes in the UI
-     * @type {string} 
-     * @public
-     */
-    themeForOrgLimit;
+    @track tableDefinitions = { };
 
     /**
      * @description list of items stored in org check cache
@@ -327,92 +122,38 @@ export default class OrgcheckApp extends LightningElement {
     showhardCodedURLsViewExportButton = false;
 
     /**
-     * @description Current activated tab in the main tab set
-     * @type {string}
-     * @public
-     */
-    selectedMainTab;
-
-    /**
-     * @description Current activated tab in one of the sub tab sets
-     * @type {string}
-     * @public
-     */
-    selectedSubTab;
-
-    /**
-     * @description Salesforce Id of the current user passed by Visual Force page
-     *                 This value is decorated by "api" so it can be passed by the parent.
-     *                 Indeed the value will be set by the parent (a Visual Force page) and will be used by the Org Check API
-     * @type {string}
-     */
-    @api userId;
-
-    /** 
-     * @description Access Token of the current user
-     *                 This value is decorated by "api" so it can be passed by the parent.
-     *                 Indeed the value will be set by the parent (a Visual Force page) and will be used by the Org Check API
-     * @type {string}
-     */
-    @api accessToken;
-
-    /**
-     * @description The OrgCheck api
-     * @type {ocapi.API}
-     * @private
-     */
-    _api;
-
-    /**
-     * @description This flag prevents double initialization of the API + UI flow
+     * @description Is something is loading?
      * @type {boolean}
-     * @private
-     */
-    _hasInitialized = false;
-
-    /**
-     * @description This flag checks that the children components are ready
-     * @type {boolean}
-     * @private
-     */
-    _childrenReady = false;
-
-    /**
-     * @description Spinner component
-     * @type {any}
-     * @private
-     */
-    _spinner;
-
-    /**
-     * @description Modal component
-     * @type {any}
-     * @private
-     */
-    _modal;
-
-    /**
-     * @description Global filter component
-     * @type {any}
-     * @private
-     */
-    _filters;
-
-
-    
-    /**
-     * @description Connected callback - initial setup
      * @public
      */
-    connectedCallback() { 
-        // Set initial state and safe defaults 
-        this.tabLoading = false; 
-        this.useOrgCheckInThisOrgConfirmed = false; 
-        this.useOrgCheckInThisOrgNeedConfirmation = false; 
-        this.useOrgCheckManuallyAccepted = false;
-        // If you need to precreate the API object shell without DOM, you can, but do not call spinner/modal here. 
-        // Leave real API instantiation to a dedicated method invoked once both preconditions are true. 
-    }
+    isLoading = false
+
+    /**
+     * @description List of items for the navigation menu on the left of the app, built from the APPLICATION_NAVIGATION constant
+     * @type {Array<{ label: string, name: string, expanded: boolean, items: Array<{ label: string, name: string, metatext: string }> }>}
+     * @public
+     */
+    navigationMenuItems = INITIAL_NAVIGATION_ITEMS;
+
+    /**
+     * @description Internal properties without LWC reactivity
+     * @property {string} currentMenuItem - The currently selected menu item
+     * @property {OrgCheckAPI} api - The Org Check API instance
+     * @property {boolean} hasInitialized - This flag prevents double initialization of the API + UI flow
+     * @property {boolean} childrenReady - This flag checks that the children components are ready
+     * @property {any} spinner - Spinner component
+     * @property {any} modal - Modal component
+     * @property {any} filters - Global filter component
+     */
+    _private_properties = {
+        currentMenuItem: '',
+        api: undefined,
+        hasInitialized: false,
+        childrenReady: false,
+        spinner: undefined,
+        modal: undefined,
+        filters: undefined
+    };
 
     /**
      * @description After the component is fully load let's init some elements and the api
@@ -420,14 +161,14 @@ export default class OrgcheckApp extends LightningElement {
      */
     renderedCallback() { 
         // Wire child refs if not wired 
-        if (!this._spinner) this._spinner = this.template.querySelector('c-orgcheck-spinner'); 
-        if (!this._modal) this._modal = this.template.querySelector('c-orgcheck-modal'); 
-        if (!this._filters) this._filters = this.template.querySelector('c-orgcheck-global-filters');
+        if (!this._private_properties.spinner) this._private_properties.spinner = this.template.querySelector('c-orgcheck-spinner'); 
+        if (!this._private_properties.modal) this._private_properties.modal = this.template.querySelector('c-orgcheck-modal'); 
+        if (!this._private_properties.filters) this._private_properties.filters = this.template.querySelector('c-orgcheck-global-filters');
         // Set children ready flag
-        if (this._spinner && this._modal && this._filters && !this._childrenReady) this._childrenReady = true;
-        // Kick off initial flow once when both accessToken is present and children are ready. 
-        if (!this._hasInitialized && this._childrenReady && this.accessToken) {
-            this._hasInitialized = true; 
+        if (this._private_properties.spinner && this._private_properties.modal && this._private_properties.filters && !this._private_properties.childrenReady) this._private_properties.childrenReady = true;
+        // Kick off initial flow once when both accessToken & localStorage is present and children are ready. 
+        if (!this._private_properties.hasInitialized && this._private_properties.childrenReady && this.accessToken && this.localStorage) {
+            this._private_properties.hasInitialized = true; 
             // Defer heavy work to a microtask to avoid re-entrancy in rendering
             Promise.resolve().then(() => this._initApi()); 
         }
@@ -439,124 +180,89 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */
     async _initApi() {
-        const SECTION_01 = 'Initialize the Org Check API';
-        const SECTION_02 = 'Third party librairies';
-        const SECTION_03 = 'Load Org Check API'; 
+        
+        const SECTION_01 = 'Initialize the Org Check API and its dependencies';
+        const SECTION_02 = 'Load libraries from static resource';
+        const SECTION_03 = 'Initiate the Org Check API'; 
         const SECTION_04 = 'Additional steps';
         try {
             // Show spinner
-            this._spinner?.open();
-            this._spinner?.sectionLog(SECTION_01, `C'est parti...`);
+            this.isLoading = true;
+            this._private_properties.spinner?.open();
+            this._private_properties.spinner?.sectionLog(SECTION_01, `C'est parti...`);
 
-            // Load the third party scripts
-            this._spinner?.sectionLog(SECTION_02, `Start loading...`);
+            // Load the javascript scripts (including orgcheck) from the static resource
+            this._private_properties.spinner?.sectionLog(SECTION_02, `Start loading...`);
             try {
                 await Promise.all([
                     loadScript(this, OrgCheckStaticResource + '/js/jsforce.js'),
                     loadScript(this, OrgCheckStaticResource + '/js/fflate.js'),
                     loadScript(this, OrgCheckStaticResource + '/js/lfs.js'),
-                    loadScript(this, OrgCheckStaticResource + '/js/orgcheck-api.js'),
-                    loadScript(this, OrgCheckStaticResource + '/js/orgcheck-ui.js')
+                    loadScript(this, OrgCheckStaticResource + '/js/orgcheck.js'),
                 ]);
-                this._spinner?.sectionEnded(SECTION_02, `Done.`);
+                this._private_properties.spinner?.sectionEnded(SECTION_02, `Done.`);
             } catch (error) {
-                this._spinner?.sectionFailed(SECTION_02, error);
-                throw new Error(`Error while loading third party libraries`);
+                this._private_properties.spinner?.sectionFailed(SECTION_02, error);
+                throw new Error(`Error while loading libraries from static resource`);
             }
 
-            // Load the Org Check API
-            this._spinner?.sectionLog(SECTION_03, `Start loading...`);
+            // Create an Org Check API
+            this._private_properties.spinner?.sectionLog(SECTION_03, `Start initiating...`);
             try {
-                this._api = new API({
+                this._private_properties.api = instantiateOrgCheckAPI({
                     salesforce: {
-                        authentication: {
-                            // -- Using given session information to authenticate ----
+                        authenticationOptions: {
                             accessToken: this.accessToken
-                            // -- Using connected app information to authenticate ----
-                            // clientId: null,
-                            // clientSecret: null,
-                            // redirectUri: null
-                        },
-                        connection: {
-                            // -- Using jsforce instance ----
-                            useJsForce: true,
-                            // -- Using mock implementation ----
-                            // useJsForce: false,
-                            // mockImpl: { ... }
                         }
                     },
-                    storage: { 
-                        // -- Provide a Storage instance to use to store data ----
-                        localImpl: this.localStorage,
-                        compression: {
-                            // -- Using fflate instance ----
-                            useFflate: true,
-                            // -- Using mock implementation ----
-                            // useFflate: false,
-                            // mockImpl: { ... }
-                        },
-                        encoding: {
-                            // -- Using fflate instance ----
-                            useFflate: true,
-                            // -- Using mock implementation ----
-                            // useFflate: false,
-                            // mockImpl: { ... }
-                        }
+                    // Storage methods -- delegation to the local storage (which is the one of the browser)
+                    storage: {
+                        setItem: (key, value) => this.localStorage.setItem(key, value),
+                        getItem: (key) => this.localStorage.getItem(key),
+                        removeItem: (key) => this.localStorage.removeItem(key),
+                        key: (n) => this.localStorage.key(n),
+                        length: () => this.localStorage.length
                     },
                     // Log methods -- delegation to the UI spinner
                     logSettings: {
-                        /**
-                         * @returns {boolean} true if this logger is a console fallback logger, false otherwise
-                         */
-                        isConsoleFallback: () => { return true; },
-                        /**
-                         * @description Standard log method
-                         * @param {string} section - The section name
-                         * @param {string} message - The message to log
-                         */ 
-                        log: (section, message) => { this._spinner?.sectionLog(section, message); },
-                        /**
-                         * @description Log method when task is ended
-                         * @param {string} section - The section name
-                         * @param {string} message - The message to log
-                         */ 
-                        ended: (section, message) => { this._spinner?.sectionEnded(section, message); },
-                        /**
-                         * @description Log method when task has just failed
-                         * @param {string} section - The section name
-                         * @param {string | Error} error - The error to log
-                         */ 
-                        failed: (section, error) => { this._spinner?.sectionFailed(section, error); }
+                        isConsoleFallback: () => { return true; }, // log in console please!
+                        log: (section, message) => { this._private_properties.spinner?.sectionLog(section, message); },
+                        ended: (section, message) => { this._private_properties.spinner?.sectionEnded(section, message); },
+                        failed: (section, error) => { this._private_properties.spinner?.sectionFailed(section, error); }
                     }
                 });
-                this._spinner?.sectionEnded(SECTION_03, `Done.`);
+                this._private_properties.spinner?.sectionEnded(SECTION_03, `Done.`);
             } catch (error) {
-                this._spinner?.sectionFailed(SECTION_03, error);
-                throw new Error(`Error while loading Org Check api`);
+                this._private_properties.spinner?.sectionFailed(SECTION_03, error);
+                throw new Error(`Error while initiating Org Check API`);
             }
 
             // Some other stuff to do
-            this._spinner?.sectionLog(SECTION_04, `Starting...`);
+            this._private_properties.spinner?.sectionLog(SECTION_04, `Starting...`);
             try {
-                // Get the score rules matrix once here
-                this._spinner?.sectionLog(SECTION_04, `Get the score rules matrix...`);
-                this._internalAllScoreRulesDataMatrix = this._api?.getAllScoreRulesAsDataMatrix();
+                // Get the version of Org Check because we want to display it in the headers
+                this._private_properties.spinner?.sectionLog(SECTION_04, `Get the version of Org Check...`);
+                this.orgCheckVersion = this._private_properties.api?.version;
+                // Get the Salesforce API version we are using because we want to display it in the headers
+                this._private_properties.spinner?.sectionLog(SECTION_04, `Get the Salesforce API version used that Org Check is using...`);
+                this.salesforceApiVersion = this._private_properties.api?.salesforceApiVersion;
                 // Update the cache information when we are finish loading everything
-                this._spinner?.sectionLog(SECTION_04, `Update the cache information when we are finish loading everything...`);
+                this._private_properties.spinner?.sectionLog(SECTION_04, `Update the cache information when we are finish loading everything...`);
                 this._updateCacheInformation();
                 // Load basic information if the user has already accepted the terms
                 this._spinner?.sectionLog(SECTION_04, `Load basic information if the user has already accepted the terms...`);
                 await this._loadBasicInformationIfAccepted();
-                this._spinner?.sectionEnded(SECTION_04, `Done.`);
+                this._private_properties.spinner?.sectionEnded(SECTION_04, `Done.`);
             } catch (error) {
-                this._spinner?.sectionFailed(SECTION_04, error);
+                this._private_properties.spinner?.sectionFailed(SECTION_04, error);
                 throw new Error(`Error while processing additional steps`);
             }
 
-            this._spinner?.sectionEnded(SECTION_01, 'Done');
-
+            this._private_properties.spinner?.sectionEnded(SECTION_01, 'Done');
         } catch (error) {
-            this._spinner?.sectionFailed(SECTION_01, error);
+            this._private_properties.spinner?.sectionFailed(SECTION_01, error);
+        } finally {
+            this.isLoading = false;
         }
     }
 
@@ -569,44 +275,44 @@ export default class OrgcheckApp extends LightningElement {
     /**
      * @description Getter for the selected namespace from the global filter
      * @returns {string} Empty string ('') if 'no namespace' selected, Wildcard ('*') if 'any namespace' selected, otherwise the name of the seleted namespace.
-     * @private
      */ 
     get namespace() {
-        if (this._filters?.isSelectedPackageAny === true) {
-            return '*';
+        if (this._private_properties.filters?.isSelectedPackageAny === true) {
+            return ANY;
         }
-        if (this._filters?.isSelectedPackageNo === true) {
-            return '';
+        if (this._private_properties.filters?.isSelectedPackageNo === true) {
+            return EMPTY;
         }
-        return this._filters?.selectedPackage;
+        return this._private_properties.filters?.selectedPackage;
     }
 
     /**
      * @description Getter for the selected sobject type from the global filter
      * @returns {string} Wildcard ('*') if 'any type' selected, otherwise the name of the seleted type.
-     * @private
      */ 
     get objectType() {
-        if (this._filters?.isSelectedSObjectTypeAny === true) {
-            return '*';
+        if (this._private_properties.filters?.isSelectedSObjectTypeAny === true) {
+            return ANY;
         }
-        return this._filters?.selectedSObjectType;
+        return this._private_properties.filters?.selectedSObjectType;
     }
 
     /**
      * @description Getter for the selected sobject name from the global filter
      * @returns {string} Wildcard ('*') if 'any sobject' selected, otherwise the name of the seleted sobject.
-     * @private
      */ 
     get object() {
-        if (this._filters?.isSelectedSObjectApiNameAny === true) {
-            this.isObjectSpecified = false;
-            return '*';
+        if (this._private_properties.filters?.isSelectedSObjectApiNameAny === true) {
+            return ANY;
         }
-        this.isObjectSpecified = true;
-        return this._filters?.selectedSObjectApiName;
+        return this._private_properties.filters?.selectedSObjectApiName;
     }
 
+    /**
+     * @description Some tabs require object to be specified in the filter (like Object Description and Field Permissions)
+     * @type {boolean}
+     */ 
+    isObjectSpecified;
 
 
 
@@ -623,14 +329,9 @@ export default class OrgcheckApp extends LightningElement {
      * @public
      */ 
     get isThereAnyApexUncompiled() {
-        return this.selectedSubTab === APPLICATION_NAVIGATION.CODE.tabs.UNCOMPILEDS.key && this.apexUncompiledTableData?.length > 0 || false;
+        return this.tabs.selectedSubTab === APPLICATION_NAVIGATION.CODE.items.UNCOMPILEDS.key && this.apexUncompiledTableData?.length > 0 || false;
     }
 
-    /**
-     * @description Some tabs require object to be specified in the filter (like Object Description and Field Permissions)
-     * @type {boolean}
-     */ 
-    isObjectSpecified;
 
 
 
@@ -643,109 +344,97 @@ export default class OrgcheckApp extends LightningElement {
     // ----------------------------------------------------------------------------------------------------------------
     // ----------------------------------------------------------------------------------------------------------------
 
-    _aliasNone = () => '';
-    _aliasNamespace = () => `${this.namespace}`;
-    _aliasAll = () => `${this.namespace}-${this.objectType}-${this.object}`;
-    _aliasObjNamespace = () => `${this.object}-${this.namespace}`;
-    _aliasObject = () => `${this.object}`;
-    _aliasTypeNamespace = () => `${this.namespace}-${this.objectType}`;
-
-    /**
-     * @description List of internal transformers to get data from the API
-     * @type {Map<string, {data: string, remove: Function, getAlias: Function, get: Function, lastAlias?: string}>}
-     * @private
-     */
-    _internalTransformers = new Map([
-        [ APPLICATION_NAVIGATION.ANALYTICS.tabs.DASHBOARDS.key,      { data: 'dashboardsTableData',                   remove: () => { this._api?.removeAllDashboardsFromCache(); },               getAlias: this._aliasNone,          get: async () => { return this._api?.getDashboards(); }} ],
-        [ APPLICATION_NAVIGATION.ANALYTICS.tabs.REPORTS.key,         { data: 'reportsTableData',                      remove: () => { this._api?.removeAllReportsFromCache(); },                  getAlias: this._aliasNone,          get: async () => { return this._api?.getReports(); }} ],
-        [ APPLICATION_NAVIGATION.AUTOMATION.tabs.FLOWS.key,          { data: 'flowsTableData',                        remove: () => { this._api?.removeAllFlowsFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getFlows(); }} ],
-        [ APPLICATION_NAVIGATION.AUTOMATION.tabs.PBS.key,            { data: 'processBuildersTableData',              remove: () => { this._api?.removeAllProcessBuildersFromCache(); },          getAlias: this._aliasNone,          get: async () => { return this._api?.getProcessBuilders(); }} ],
-        [ APPLICATION_NAVIGATION.AUTOMATION.tabs.WORKFLOWS.key,      { data: 'workflowsTableData',                    remove: () => { this._api?.removeAllWorkflowsFromCache(); },                getAlias: this._aliasNone,          get: async () => { return this._api?.getWorkflows(); }} ],
-        [ APPLICATION_NAVIGATION.BOXES.tabs.CHT_GROUPS.key,          { data: 'chatterGroupsTableData',                remove: () => { this._api?.removeAllChatterGroupsFromCache(); },            getAlias: this._aliasNone,          get: async () => { return this._api?.getChatterGroups(); }} ],
-        [ APPLICATION_NAVIGATION.BOXES.tabs.PGS.key,                 { data: 'publicGroupsTableData',                 remove: () => { this._api?.removeAllPublicGroupsFromCache(); },             getAlias: this._aliasNone,          get: async () => { return this._api?.getPublicGroups(); }} ],
-        [ APPLICATION_NAVIGATION.BOXES.tabs.QUEUES.key,              { data: 'queuesTableData',                       remove: () => { this._api?.removeAllQueuesFromCache(); },                   getAlias: this._aliasNone,          get: async () => { return this._api?.getQueues(); }} ],
-        [ APPLICATION_NAVIGATION.BOXES.tabs.ROLES.key,               { data: 'rolesTableData',                        remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getRoles(); }} ],
-        [ APPLICATION_NAVIGATION.BOXES.tabs.ROLES_GRAPH.key,         { data: 'rolesTree',                             remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getRolesTree(); }} ],
-        [ APPLICATION_NAVIGATION.CODE.tabs.CLASSES.key,              { data: 'apexClassesTableData',                  remove: () => { this._api?.removeAllApexClassesFromCache(); },              getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexClasses(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.CODE.tabs.TESTS.key,                { data: 'apexTestsTableData',                    remove: () => { this._api?.removeAllApexTestsFromCache(); },                getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexTests(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.CODE.tabs.TRIGGERS.key,             { data: 'apexTriggersTableData',                 remove: () => { this._api?.removeAllApexTriggersFromCache(); },             getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexTriggers(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.CODE.tabs.UNCOMPILEDS.key,          { data: 'apexUncompiledTableData',               remove: () => { this._api?.removeAllApexUncompiledFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexUncompiled(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.DATAMODEL.tabs.CUSTOM_FIELDS.key,   { data: 'customFieldsTableData',                 remove: () => { this._api?.removeAllCustomFieldsFromCache(); },             getAlias: this._aliasAll,           get: async () => { return this._api?.getCustomFields(this.namespace, this.objectType, this.object); }} ],
-        [ APPLICATION_NAVIGATION.DATAMODEL.tabs.LAYOUTS.key,         { data: 'pageLayoutsTableData',                  remove: () => { this._api?.removeAllPageLayoutsFromCache(); },              getAlias: this._aliasAll,           get: async () => { return this._api?.getPageLayouts(this.namespace, this.objectType, this.object); }} ],
-        [ APPLICATION_NAVIGATION.DATAMODEL.tabs.RTS.key,             { data: 'recordTypesTableData',                  remove: () => { this._api?.removeAllRecordTypesFromCache(); },              getAlias: this._aliasAll,           get: async () => { return this._api?.getRecordTypes(this.namespace, this.objectType, this.object); }} ],
-        [ APPLICATION_NAVIGATION.DATAMODEL.tabs.SOBJ_DESC.key,       { data: 'objectData',                            remove: () => { this._api?.removeObjectFromCache(this.object); },           getAlias: this._aliasObject,        get: async () => { return this.object !== '*' ? this._api?.getObject(this.object) : undefined; }} ],
-        [ APPLICATION_NAVIGATION.DATAMODEL.tabs.SOBJECTS.key,        { data: 'objectsTableData',                      remove: () => { this._api?.removeAllObjectsFromCache(); },                  getAlias: this._aliasTypeNamespace, get: async () => { return this._api?.getObjects(this.namespace, this.objectType); }} ],
-        [ APPLICATION_NAVIGATION.DATAMODEL.tabs.VRS.key,             { data: 'validationRulesTableData',              remove: () => { this._api?.removeAllValidationRulesFromCache(); },          getAlias: this._aliasAll,           get: async () => { return this._api?.getValidationRules(this.namespace, this.objectType, this.object); }} ],
-        [ APPLICATION_NAVIGATION.DATAMODEL.tabs.WEB_LINKS.key,       { data: 'webLinksTableData',                     remove: () => { this._api?.removeAllWeblinksFromCache(); },                 getAlias: this._aliasAll,           get: async () => { return this._api?.getWeblinks(this.namespace, this.objectType, this.object); }} ],
-        [ APPLICATION_NAVIGATION.ORG.tabs.GLOBAL_VIEW.key,           { data: '_internalGlobalViewDataFromAPI',        remove: () => { this._api?.removeGlobalViewFromCache(); },                  getAlias: this._aliasNone,          get: async () => { return this._api?.getGlobalView(); }} ],
-        [ APPLICATION_NAVIGATION.ORG.tabs.URL_VIEW.key,              { data: '_internalHardCodedURLsViewDataFromAPI', remove: () => { this._api?.removeHardcodedURLsFromCache(); },               getAlias: this._aliasNone,          get: async () => { return this._api?.getHardcodedURLsView(); }} ],
-        [ APPLICATION_NAVIGATION.SECURITY.tabs.APP_PERMS.key,        { data: '_internalAppPermissionsDataMatrix',     remove: () => { this._api?.removeAllAppPermissionsFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApplicationPermissionsPerParent(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.SECURITY.tabs.BROWSERS.key,         { data: 'browsersTableData',                     remove: () => { this._api?.removeAllBrowsersFromCache(); },                 getAlias: this._aliasNone,          get: async () => { return this._api?.getBrowsers(); }} ],
-        [ APPLICATION_NAVIGATION.SECURITY.tabs.CRUDS.key,            { data: '_internalObjectPermissionsDataMatrix',  remove: () => { this._api?.removeAllObjectPermissionsFromCache(); },        getAlias: this._aliasNamespace,     get: async () => { return this._api?.getObjectPermissionsPerParent(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.SECURITY.tabs.FLSS.key,             { data: '_internalFieldPermissionsDataMatrix',   remove: () => { this._api?.removeAllFieldPermissionsFromCache(); },         getAlias: this._aliasObjNamespace,  get: async () => { return this._api?.getFieldPermissionsPerParent(this.object, this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.SECURITY.tabs.PROFILE_PWDS.key,     { data: 'profilePasswordPoliciesTableData',      remove: () => { this._api?.removeAllProfilePasswordPoliciesFromCache(); },  getAlias: this._aliasNone,          get: async () => { return this._api?.getProfilePasswordPolicies(); }} ],
-        [ APPLICATION_NAVIGATION.SECURITY.tabs.PROFILE_RSTRS.key,    { data: 'profileRestrictionsTableData',          remove: () => { this._api?.removeAllProfileRestrictionsFromCache(); },      getAlias: this._aliasNamespace,     get: async () => { return this._api?.getProfileRestrictions(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.SECURITY.tabs.PROFILES.key,         { data: 'profilesTableData',                     remove: () => { this._api?.removeAllProfilesFromCache(); },                 getAlias: this._aliasNamespace,     get: async () => { return this._api?.getProfiles(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.SECURITY.tabs.PSETS.key,            { data: 'permissionSetsTableData',               remove: () => { this._api?.removeAllPermSetsFromCache(); },                 getAlias: this._aliasNamespace,     get: async () => { return this._api?.getPermissionSets(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.SECURITY.tabs.PSLS.key,             { data: 'permissionSetLicensesTableData',        remove: () => { this._api?.removeAllPermSetLicensesFromCache(); },          getAlias: this._aliasNone,          get: async () => { return this._api?.getPermissionSetLicenses(); }} ],
-        [ APPLICATION_NAVIGATION.SECURITY.tabs.USERS.key,            { data: 'usersTableData',                        remove: () => { this._api?.removeAllActiveUsersFromCache(); },              getAlias: this._aliasNone,          get: async () => { return this._api?.getActiveUsers(); }} ],
-        [ APPLICATION_NAVIGATION.SETTING.tabs.ARTICLES.key,          { data: 'knowledgeArticlesTableData',            remove: () => { this._api?.removeAllKnowledgeArticlesFromCache(); },        getAlias: this._aliasNone,          get: async () => { return this._api?.getKnowledgeArticles(); }} ],
-        [ APPLICATION_NAVIGATION.SETTING.tabs.DOCUMENTS.key,         { data: 'documentsTableData',                    remove: () => { this._api?.removeAllDocumentsFromCache(); },                getAlias: this._aliasNamespace,     get: async () => { return this._api?.getDocuments(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.SETTING.tabs.EMAIL_TPLS.key,        { data: 'emailTemplatesTableData',               remove: () => { this._api?.removeAllEmailTemplatesFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getEmailTemplates(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.SETTING.tabs.LABELS.key,            { data: 'customLabelsTableData',                 remove: () => { this._api?.removeAllCustomLabelsFromCache(); },             getAlias: this._aliasNamespace,     get: async () => { return this._api?.getCustomLabels(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.SETTING.tabs.SRS.key,               { data: 'staticResourcesTableData',              remove: () => { this._api?.removeAllStaticResourcesFromCache(); },          getAlias: this._aliasNamespace,     get: async () => { return this._api?.getStaticResources(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.VISUAL.tabs.AURAS.key,              { data: 'auraComponentsTableData',               remove: () => { this._api?.removeAllLightningAuraComponentsFromCache(); },  getAlias: this._aliasNamespace,     get: async () => { return this._api?.getLightningAuraComponents(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.VISUAL.tabs.HOME_PAGES.key,         { data: 'homePageComponentsTableData',           remove: () => { this._api?.removeAllHomePageComponentsFromCache(); },       getAlias: this._aliasNone,          get: async () => { return this._api?.getHomePageComponents(); }} ],
-        [ APPLICATION_NAVIGATION.VISUAL.tabs.LG_PAGES.key,           { data: 'flexiPagesTableData',                   remove: () => { this._api?.removeAllLightningPagesFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getLightningPages(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.VISUAL.tabs.LWCS.key,               { data: 'lightningWebComponentsTableData',       remove: () => { this._api?.removeAllLightningWebComponentsFromCache(); },   getAlias: this._aliasNamespace,     get: async () => { return this._api?.getLightningWebComponents(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.VISUAL.tabs.TABS.key,               { data: 'customTabsTableData',                   remove: () => { this._api?.removeAllCustomTabsFromCache(); },               getAlias: this._aliasNamespace,     get: async () => { return this._api?.getCustomTabs(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.VISUAL.tabs.VFCS.key,               { data: 'visualForceComponentsTableData',        remove: () => { this._api?.removeAllVisualForceComponentsFromCache(); },    getAlias: this._aliasNamespace,     get: async () => { return this._api?.getVisualForceComponents(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.VISUAL.tabs.VFPS.key,               { data: 'visualForcePagesTableData',             remove: () => { this._api?.removeAllVisualForcePagesFromCache(); },         getAlias: this._aliasNamespace,     get: async () => { return this._api?.getVisualForcePages(this.namespace); }} ],
-    ]);
-
+    _showCurrentContentPanel() {
+        const mainContentZone = this.template.querySelector('[data-key="orgcheck-content"]');       
+        for (let i = 0; i < mainContentZone.children.length; i++) {
+            const contentPanel = mainContentZone.children[i];
+            if (contentPanel.getAttribute('data-key') === this._private_properties.currentMenuItem) {
+                contentPanel.classList.remove('slds-hide');
+            } else {
+                contentPanel.classList.add('slds-hide');
+            }
+        }
+    }
 
     /**
      * @description Call a specific method of the API given a tab name
-     * @param {string} tabValue - The value of the tab to use
+     * @param {string} key - The name of the panel to update
      * @param {boolean} [forceRefresh] - Do we force the refresh or not (false by default)
-     * @param {boolean} [lazyRefresh] - Is it a lazy refresh or not (true by default)
      * @private
      * @async
      */ 
-    async _updateData(tabValue, forceRefresh=false, lazyRefresh=true) {
-        const transformer = this._internalTransformers.get(tabValue); 
-        if (transformer) {
-            if (forceRefresh === true) {
-                // Call the remove cache from the API for this tabValue
-                transformer.remove();
-            }
-            // IF we set the lazy refresh to TRUE THEN
-            //     Only update the data if the current tab ("this.selectedSubTab") is the one we are looking for ("tabValue")
-            // ELSE
-            //     Update the data whatever the current tab is.
-            // The IF statement could be like: 
-            //     (lazyRefresh === true && tabValue === this.selectedSubTab) || lazyRefresh === false
-            // Let's do some Bool logic!!
-            // The previous IF statement is equivalent to:
-            //     NOT(  NOT( (lazyRefresh === true && tabValue === this.selectedSubTab)     ||  lazyRefresh === false )  )
-            //     NOT(  NOT(lazyRefresh === true && tabValue === this.selectedSubTab)       &&  NOT(lazyRefresh === false)  )
-            //     NOT(  NOT(lazyRefresh === true && tabValue === this.selectedSubTab)       &&  lazyRefresh === true  )
-            //     NOT( (NOT(lazyRefresh === true) || NOT(tabValue === this.selectedSubTab)) &&  lazyRefresh === true  )
-            //     NOT( (    lazyRefresh === false ||     tabValue !== this.selectedSubTab ) &&  lazyRefresh === true  )
-            //     NOT( (lazyRefresh === false &&  lazyRefresh === true ) || (tabValue !== this.selectedSubTab &&  lazyRefresh === true ) )
-            //     NOT( (                    false                      ) || (tabValue !== this.selectedSubTab &&  lazyRefresh === true ) )
-            //     NOT( (tabValue !== this.selectedSubTab && lazyRefresh === true )
-            // This is magic! ;)
-            if (!(tabValue !== this.selectedSubTab && lazyRefresh === true)) {
-                // "Alias" means the filter combinaison used to gather the data (obviously if the alias changed, the data will change as well)
-                const alias = transformer.getAlias();
-                // If you forced the refresh the data should be retrieved even if the alias is the same
-                // OR
-                // If the alias has changed (like the combinaison of filters value which will pontentially change the returned value from the API
-                if (forceRefresh === true || transformer.lastAlias !== alias) {
-                    transformer.lastAlias = alias;
-                    this[transformer.data] = await transformer.get();
+    async _updateCurrentData(forceRefresh) {
+        const subItem = ALL_NAVIGATION_SUBITEMS_BY_KEY[this._private_properties.currentMenuItem]; 
+        if (subItem && this._private_properties.api) {
+            // --------------------------------------------------------------------------------
+            // Potentially we need to refresh the data 
+            // --------------------------------------------------------------------------------
+            // if forceRefresh = true and the subItem has a 'clear' property, we want to refresh the data from the API 
+            if (forceRefresh === true && subItem.clear) {
+                // get the reference of the corresponding 'clear' method in the API
+                const clearMethod = this._private_properties.api[subItem.clear];
+                // check if the method exists in the API
+                if (clearMethod) {
+                    // call the method from the API that will clear the cache for this data
+                    this._private_properties.api[subItem.clear]();
+                } else {
+                    // Just in case...
+                    console.warn(`Trying to clear cache for key ${key} but method ${subItem.clear} does not exist in the API`);
                 }
+            }
+            // --------------------------------------------------------------------------------
+            // Alias is useful to check if the data has potentially changed
+            // Each data may have a dependency with global filters, so if one of the filter 
+            // changed and the value has dependecy with it, ot's more likely that the data 
+            // needs top be updated
+            // --------------------------------------------------------------------------------
+            // get the current alias depending on the dependency with global filter values
+            let alias;
+            switch (subItem.alias) {
+                case ALIASES.PACKAGE:       alias = `${this.namespace}`; break;
+                case ALIASES.ALL:             alias = `${this.namespace}-${this.objectType}-${this.object}`; break;
+                case ALIASES.OBJECTNAMESPACE: alias = `${this.object}-${this.namespace}`; break;
+                case ALIASES.OBJECT:          alias = `${this.object}`; break;
+                case ALIASES.NONE: default:   alias = '-'; break; // don't put empty string -- it's confusing
+            }
+            if (subItem.get && (forceRefresh === true || subItem.lastAlias !== alias)) {
+                // update the last alias value with this alias
+                subItem.lastAlias = alias;
+                // shall we proceed getting the data for this item? It depends if there is a getOnlyIf condition or not, and if yes if it is validated or not
+                if (subItem.getOnlyIf ? subItem.getOnlyIf(this) === true : true) {
+                    // get the reference of the corresponding 'get' method in the API
+                    const getMethod = this._private_properties.api[subItem.get];
+                    // check if the method exists in the API
+                    if (getMethod) {
+                        // Wee need potentially to pass some parameters to the get method, depending on the definition of the item
+                        // Important: keep the order of the parameters as defined
+                        const parameters = subItem.getParameters ? subItem.getParameters.map((p) => {
+                            switch (p) {
+                                case PARAMETERS.NAMESPACE: return this.namespace;
+                                case PARAMETERS.OBJECT: return this.object;
+                                case PARAMETERS.TYPE: return this.objectType;
+                            }
+                        }) : [];
+                        // call the method from the API that will get the data
+                        let data = await this._private_properties.api[subItem.get](...parameters);
+                        // If the data is a DataMatrix, the data needs to be extract in a special property
+                        // Else just a data then save it
+                        this.data[lowercaseFirstLetter(subItem.data)] = subItem.isDataMatrix ? (data?.rows ?? []) : data;
+                        // Optional parameters for the tableDefinition(s) (if any)
+                        if (subItem.tableDefinitions || subItem.tableDefinition) {
+                            // if dataMatrix we pass the entire data
+                            // if object we pass false because we don't want to have object-related columns
+                            // else we pass undefined because there is no specific parameter to pass
+                            const param = subItem.isDataMatrix ? data : undefined;
+                            (subItem.tableDefinitions ?? [ subItem.tableDefinition ]).forEach((tableDef) => {
+                                this.tableDefinitions[lowercaseFirstLetter(tableDef)] = instantiateOrgCheckTableDefinition(tableDef, param);
+                            });
+                        }
+                    } else {
+                        // Just in case...
+                        console.warn(`Trying to get data for key ${key} but method ${subItem.get} does not exist in the API`);
+                    }
+                }                
             }
         }
     }
@@ -755,14 +444,13 @@ export default class OrgcheckApp extends LightningElement {
      * @private
      */ 
     _updateLimits() {
-        const dailyApiInformation = this._api?.dailyApiRequestLimitInformation;
-        if (dailyApiInformation && dailyApiInformation.currentUsagePercentage) {
-            if (dailyApiInformation.isGreenZone === true) this.themeForOrgLimit = 'slds-theme_success';
-            else if (dailyApiInformation.isYellowZone === true) this.themeForOrgLimit = 'slds-theme_warning';
-            else /* if (dailyApiInformation.isRedZone === true) */ this.themeForOrgLimit = 'slds-theme_error';
-            this.orgLimit = `Daily API Request Limit: ${dailyApiInformation.currentUsagePercentage}%`;    
+        const darli = this._private_properties.api?.dailyApiRequestLimitInformation;
+        if (darli && darli.currentUsagePercentage) {
+            this.orgLimit.hasInformation = true;
+            this.orgLimit.theme = darli.isGreenZone === true ? 'slds-theme_success' : (darli.isYellowZone === true ? 'slds-theme_warning' : 'slds-theme_error');
+            this.orgLimit.usage = `Daily API Request Limit: ${darli.currentUsagePercentage}%`;    
         } else {
-            this.orgLimit = undefined;
+            this.orgLimit.hasInformation = false;
         }
     }
 
@@ -771,7 +459,7 @@ export default class OrgcheckApp extends LightningElement {
      * @private
      */ 
     _updateCacheInformation() {
-        this.cacheManagerData = this._api?.getCacheInformation();
+        this.cacheManagerData = this._private_properties.api?.getCacheInformation();
     }
 
     /**
@@ -780,14 +468,14 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */ 
     async _checkTermsAcceptance() {
-        if (await this._api?.checkUsageTerms()) {
-            this.useOrgCheckInThisOrgNeedConfirmation = false;
-            this.useOrgCheckInThisOrgConfirmed = true;
+        if (await this._private_properties.api?.checkUsageTerms()) {
+            this.useOrgCheck.needConfirmation = false;
+            this.useOrgCheck.accepted = true;
         } else {
-            this.useOrgCheckInThisOrgNeedConfirmation = true;
-            this.useOrgCheckInThisOrgConfirmed = false;
+            this.useOrgCheck.needConfirmation = true;
+            this.useOrgCheck.accepted = false;
         }
-        this.useOrgCheckManuallyAccepted = this._api?.wereUsageTermsAcceptedManually();
+        this.useOrgCheck.manuallyAccepted = this._private_properties.api?.wereUsageTermsAcceptedManually();
     }
 
     /**
@@ -800,7 +488,7 @@ export default class OrgcheckApp extends LightningElement {
         // Check for acceptance
         console?.log('Checking if the terms are accepted...')
         await this._checkTermsAcceptance();
-        if (this.useOrgCheckInThisOrgConfirmed === false) {
+        if (this.useOrgCheck.accepted === false) {
             console?.log('The use of Org Check in this org was not confirmed. Stopping...');
             return;
         }
@@ -808,17 +496,14 @@ export default class OrgcheckApp extends LightningElement {
 
         // Check basic permission for the current user
         console?.log('Checking if current user has enough permission...')
-        await this._api?.checkCurrentUserPermissions(); // if no perm this throws an error
+        await this._private_properties.api?.checkCurrentUserPermissions(); // if no perm this throws an error
 
         // Information about the org
         console?.log('Information about the org...');
-        const orgInfo = await this._api?.getOrganizationInformation();
-        this.orgName = orgInfo.name + ' (' + orgInfo.id + ')';
-        this.orgType = orgInfo.type;
-        this.isOrgProduction = orgInfo.isProduction;
-        if (orgInfo.isProduction === true) this.themeForOrgType = 'slds-theme_error';
-        else if (orgInfo.isSandbox === true) this.themeForOrgType = 'slds-theme_warning';
-        else this.themeForOrgType = 'slds-theme_success';
+        const orgInfo = await this._private_properties.api?.getOrganizationInformation();
+        this.orgInformation.name = orgInfo.name + ' (' + orgInfo.id + ')';
+        this.orgInformation.type = orgInfo.type;
+        this.orgInformation.theme = orgInfo.isProduction === true ? 'slds-theme_error' : (orgInfo.isSandbox === true ? 'slds-theme_warning' : 'slds-theme_success');
         
         // Data for the filters
         console?.log('Load filters...');
@@ -837,56 +522,32 @@ export default class OrgcheckApp extends LightningElement {
      */ 
     async _loadFilters(forceRefresh=false) {
         console?.log('Hide the filter panel...');
-        this._filters?.hide();
+        this._private_properties.filters?.hide();
 
         if (forceRefresh === true) {
             console?.log('Clean data from cache (if any)...');
-            this._api?.removeAllObjectsFromCache();
-            this._api?.removeAllPackagesFromCache();
+            this._private_properties.api?.removeAllObjectsFromCache();
+            this._private_properties.api?.removeAllPackagesFromCache();
         }
 
         console?.log('Get packages, types and objects from the org...');
         const filtersData = await Promise.all([
-            this._api?.getPackages(),
-            this._api?.getObjectTypes(),
-            this._api?.getObjects(this.namespace, this.objectType)
+            this._private_properties.api?.getPackages(),
+            this._private_properties.api?.getObjectTypes(),
+            this._private_properties.api?.getObjects(this.namespace, this.objectType)
         ])
 
         console?.log('Loading data in the drop boxes...');
-        this._filters?.updatePackageOptions(filtersData[0]);
-        this._filters?.updateSObjectTypeOptions(filtersData[1]);
-        this._filters?.updateSObjectApiNameOptions(filtersData[2]);
+        this._private_properties.filters?.updatePackageOptions(filtersData[0]);
+        this._private_properties.filters?.updateSObjectTypeOptions(filtersData[1]);
+        this._private_properties.filters?.updateSObjectApiNameOptions(filtersData[2]);
+        this.isObjectSpecified = false;
 
         console?.log('Showing the filter panel...');
-        this._filters?.show();
+        this._private_properties.filters?.show();
 
         console?.log('Update the daily API limit informations...');
         this._updateLimits();
-    }
-
-    /**
-     * @description Unique method to propagate a change to be done in the current tab. DOES NOT THROW any error
-     * @private
-     * @async
-     */
-    async _updateCurrentTab() {
-        const TAB_SECTION = `Tab "${this.selectedSubTab}"`;
-        this.tabLoading = true;
-        try {
-            this._spinner?.open();
-            this._spinner?.sectionLog(TAB_SECTION, `C'est parti!`);
-            switch (this.selectedSubTab) {
-                case 'welcome': this._updateCacheInformation(); break;
-                default:        await this._updateData(this.selectedSubTab);
-            }
-            this._spinner?.sectionEnded(TAB_SECTION, `Done.`);
-            this._spinner?.close(0);
-        } catch (error) {
-            this._spinner?.sectionFailed(TAB_SECTION, error);
-        } finally {
-            this._updateLimits();
-            this.tabLoading = false;
-        }
     }
 
 
@@ -900,12 +561,51 @@ export default class OrgcheckApp extends LightningElement {
     // ----------------------------------------------------------------------------------------------------------------
 
     /**
-     * @description New filters were "applied" in the global filters, therefore the current screen needs to be updated
+     * @description Event called when the user search something in the navigation menu on the left. We filter the 
+     *              menu with the search term entered.
+     * @param {Event | any} event - The event information
+     */
+    handleNavigationMenuSearch(event) {
+        const searchTerm = event?.target?.value?.toLowerCase() || '';
+        if (searchTerm) {
+            this.navigationMenuItems = INITIAL_NAVIGATION_ITEMS.map((mainItem) => {
+                const itemsMatching = mainItem.items.filter((subItem) => subItem.label.toLowerCase().includes(searchTerm));
+                const isItemsMatching = itemsMatching.length > 0;
+                const isItemMatching = mainItem.label.toLowerCase().includes(searchTerm);
+                return {
+                    label: mainItem.label,
+                    name: mainItem.name,
+                    expanded: isItemsMatching || isItemMatching,
+                    items: isItemMatching ? mainItem.items : (isItemsMatching ? itemsMatching : [] )
+                }
+            }).filter((mainItem) => mainItem.items.length > 0);
+        } else {
+            this.navigationMenuItems = INITIAL_NAVIGATION_ITEMS;
+        }
+    }
+
+    /**
+     * @description Event called when the user select an item in the navigation menu on the left. We just log it for now 
+     *              but we could do some specific action depending on the item selected in the future.
+     * @param {Event | any} event - The event information
+     */
+    async handleNavigationMenuSelect(event) {
+        const item = event?.detail?.name;
+        if (item && item.length === 2) {
+            this._private_properties.currentMenuItem = item;
+            await this._updateCurrentData();
+            this._showCurrentContentPanel();
+        }
+    }
+
+    /**
+     * @description New filters were applied (or reset) in the global filters, therefore the current screen needs to be updated
      * @public
      * @async
      */
     async handleFiltersValidated() {
-        await this._updateCurrentTab(); // this method does not throw any error so it is safe to just call it
+        this.isObjectSpecified = this._private_properties.filters?.isSelectedSObjectApiNameAny === false;
+        await this._updateCurrentData();
     }
 
     /**
@@ -914,11 +614,7 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */
     async handleFiltersRefreshed() {
-        try {
-            await this._loadFilters(true);
-        } catch(e) {
-            this._showError('Error while handleFiltersRefreshed', e);
-        }
+        await this._loadFilters(true);
     }
 
     /**
@@ -938,71 +634,12 @@ export default class OrgcheckApp extends LightningElement {
             // @ts-ignore
             if (checkbox.checked === true) {
                 // yes it is!
-                this._api?.acceptUsageTermsManually();
+                this._private_properties.api?.acceptUsageTermsManually();
                 await this._loadBasicInformationIfAccepted();
             }
             // do nothing if it is not checked.
         } catch(e) {
             this._showError('Error while handleClickUsageAcceptance', e);
-        }
-    }
-
-    /**
-     * @description Event called when user selects a main tab
-     * @param {Event | any} event - The event information
-     * @public
-     * @async
-     */
-    async handleMainTabActivation(event) {
-        try {
-            // The source of the event is the main tab
-            const mainTab = event.target;
-            // @ts-ignore
-            this.selectedMainTab = SANITIZE_MAIN_TAB_INPUT(mainTab?.value);
-            // In each main tab there is an inner tabset with tabs (called SubTabs here)
-            // Get a reference of the sub tabset (undefined if not found)
-            // @ts-ignore
-            const subTabSet = mainTab.querySelector('lightning-tabset');
-            // Get the active tab value of this sub tab set (it should be the last activated sub tab)
-            // NOTE: the previous value could be the one from the previous tab opened ONLY IF the next tab was not yet rendered
-            const subTabActivated = subTabSet?.activeTabValue;
-            // Get the list of subtabs' name for the main tab selected
-            const subTabsAvailable = SUB_TABS_BY_MAIN_TAB_KEY.get(this.selectedMainTab); 
-
-            if (subTabSet && subTabsAvailable.includes(this.selectedSubTab)) {
-                // If the sub tab was specifically set align it with the sub tab
-                subTabSet.activeTabValue = this.selectedSubTab;
-            } else if (subTabsAvailable.includes(subTabActivated)) {
-                // Now if the subTabActivated is part of the list subTabsAvailable we select it
-                this.selectedSubTab = subTabActivated;
-            } else {
-                // if not the tab was not yet rendered, so we are going to select the first tab in the list
-                this.selectedSubTab = subTabsAvailable[0];
-            }
-        } catch (e) {
-            this._showError('Error while handleMainTabActivation', e);
-        }
-    }
-
-    /**
-     * @description Event called when user selects a sub tab (within a main tab)
-     * @param {Event | any} event - The event information
-     * @public
-     * @async
-     */
-    async handleSubTabActivation(event) {
-        try {
-            // The source of the event is a sub tab
-            const subTab = event?.target; // not throwing any error
-            // That subTab's name will be the next currentTab
-            // @ts-ignore
-            const nextCurrentSubTab = subTab.value; // not throwing any error
-            // Store the curret sub tab
-            this.selectedSubTab = nextCurrentSubTab;
-            // Ask to update the current data
-            await this._updateCurrentTab(); // not throwing any error here!
-        } catch (e) {
-            this._showError('Error while handleSubTabActivation', e);
         }
     }
 
@@ -1014,7 +651,7 @@ export default class OrgcheckApp extends LightningElement {
     async handleRemoveAllCache() {
         try {
             // try to call the corresponding API method
-            this._api?.removeAllFromCache(); // may throw an error
+            this._private_properties.api?.removeAllFromCache(); // may throw an error
             // and reload
             window.location.reload();
         } catch (e) {
@@ -1031,7 +668,7 @@ export default class OrgcheckApp extends LightningElement {
         // Get attribute data-item-name
         const itemName = event?.target?.getAttribute('data-item-name');
         // Get the data from cache
-        const cacheData = this._api?.getCacheData(itemName);
+        const cacheData = this._private_properties.api?.getCacheData(itemName);
         // Dump the cache in the dialogBox
         let htmlContent = '';
         if (cacheData === null || cacheData === undefined) {
@@ -1094,12 +731,12 @@ export default class OrgcheckApp extends LightningElement {
     async handleClickRunAllTests() {
         try {
             const LOG_SECTION = 'RUN ALL TESTS';
-            this._spinner?.open();
-            this._spinner?.sectionLog(LOG_SECTION, 'Launching...');
+            this._private_properties.spinner?.open();
+            this._private_properties.spinner?.sectionLog(LOG_SECTION, 'Launching...');
             try {
-                const asyncApexJobId = await this._api?.runAllTestsAsync();
-                this._spinner?.sectionEnded(LOG_SECTION, 'Done!');
-                this._spinner?.close(0);
+                const asyncApexJobId = await this._private_properties.api?.runAllTestsAsync();
+                this._private_properties.spinner?.sectionEnded(LOG_SECTION, 'Done!');
+                this._private_properties.spinner?.close(0);
 
                 let htmlContent = 'We asked Salesforce to run all the test classes in your org.<br /><br />';
                 htmlContent += 'For more information about the success of these tests, you can:<br /><ul>';
@@ -1108,7 +745,7 @@ export default class OrgcheckApp extends LightningElement {
                 this._openModal('Asynchronous Run All Test Asked', htmlContent);
 
             } catch (error) {
-                this._spinner?.sectionFailed(LOG_SECTION, error);
+                this._private_properties.spinner?.sectionFailed(LOG_SECTION, error);
             }
         } catch (e) {
             this._showError('Error while handleClickRunAllTests', e);
@@ -1125,7 +762,7 @@ export default class OrgcheckApp extends LightningElement {
         try {
             // @ts-ignore
             const recipes = event.target.getAttribute('data-recipes')?.split(',');
-            await Promise.all(recipes?.map(async (/** @type {string} */ recipe) => { await this._updateData(recipe, true); } ));
+            await Promise.all(recipes?.map(async (/** @type {string} */ recipe) => { await this._updateCurrentData(recipe, true); } ));
         } catch (e) {
             this._showError('Error while handleClickRefreshCurrentTab', e);
         }
@@ -1138,32 +775,32 @@ export default class OrgcheckApp extends LightningElement {
      */ 
     async handleClickRecompile() {
         try {
-            this._spinner?.open();
+            this._private_properties.spinner?.open();
             const LOG_SECTION = 'RECOMPILE'
             /** @type {Map<string, string>} */;
             const apexClassNamesById = new Map();
-            this._spinner?.sectionLog(LOG_SECTION, 'Processing...');
+            this._private_properties.spinner?.sectionLog(LOG_SECTION, 'Processing...');
             this.apexUncompiledTableData.slice(0, 25).forEach(c => {
                 const classId = c.id.substring(0, 15);
                 const className = c.name;
-                this._spinner?.sectionLog(`${LOG_SECTION}-${classId}`, `Asking to recompile class: ${className}`);
+                this._private_properties.spinner?.sectionLog(`${LOG_SECTION}-${classId}`, `Asking to recompile class: ${className}`);
                 apexClassNamesById.set(classId, className);
             });
             /** @type {Map<string, {isSuccess: boolean, reasons?: Array<string>}>} */
-            const responses = await this._api?.compileClasses(Array.from(apexClassNamesById.keys()), );
-            this._spinner?.sectionLog(LOG_SECTION, 'We got the response from the server...');
+            const responses = await this._private_properties.api?.compileClasses(Array.from(apexClassNamesById.keys()), );
+            this._private_properties.spinner?.sectionLog(LOG_SECTION, 'We got the response from the server...');
             let noError = true;
             responses.forEach((result, id) => {
                 const name = apexClassNamesById.get(id.substring(0, 15));
                 if (result.isSuccess === true) {
-                    this._spinner?.sectionEnded(`${LOG_SECTION}-${id}`, `Recompilation requested for class: ${name} (${id})`);
+                    this._private_properties.spinner?.sectionEnded(`${LOG_SECTION}-${id}`, `Recompilation requested for class: ${name} (${id})`);
                 } else {
-                    this._spinner?.sectionFailed(`${LOG_SECTION}-${id}`, `Errors for class ${name} (${id}): ${result.reasons.join(', ')}`);
+                    this._private_properties.spinner?.sectionFailed(`${LOG_SECTION}-${id}`, `Errors for class ${name} (${id}): ${result.reasons.join(', ')}`);
                     noError = false;
                 }
             });
             if (noError === true) {
-                this._spinner?.sectionEnded(LOG_SECTION, 'Done!');
+                this._private_properties.spinner?.sectionEnded(LOG_SECTION, 'Done!');
                 this._openModal('Recompilation Requested Successfully',
                     'Please hit the Refresh button (in Org Check) to get the latest data '+
                     'from your Org.  By the way, in the future, if you need to '+
@@ -1171,7 +808,7 @@ export default class OrgcheckApp extends LightningElement {
                     'Code > Apex Classes" and click on the link "Compile all classes".'
                 );
             } else {
-                this._spinner?.sectionFailed(LOG_SECTION, 'Done but with errors');
+                this._private_properties.spinner?.sectionFailed(LOG_SECTION, 'Done but with errors');
             }
         } catch (e) {
             this._showError('Error while handleClickRecompile', e);
@@ -1215,8 +852,8 @@ export default class OrgcheckApp extends LightningElement {
      * @private
      */
     _navigateToTab(mainTab, subTab) {
-        this.selectedMainTab = mainTab;
-        this.selectedSubTab = subTab;
+        this.tabs.selectedMainTab = mainTab;
+        this.tabs.selectedSubTab = subTab;
     }
 
     /**
@@ -1247,340 +884,30 @@ export default class OrgcheckApp extends LightningElement {
 
 
 
-    // ----------------------------------------------------------------------------------------------------------------
-    // ----------------------------------------------------------------------------------------------------------------
-    // Column header definition for all data tables in the app
-    // ----------------------------------------------------------------------------------------------------------------
-    // ----------------------------------------------------------------------------------------------------------------
-
-    /**
-     * @description Table definition for field sets (specific to the current selected object)
-     * @type {ocui.Table}
-     */ 
-    fieldSetsTableDefinition = TableDefinitions.FieldSets;
-
-    /**
-     * @description Table definition for page layouts (specific to the current selected object)
-     * @type {ocui.Table}
-     */
-    layoutsTableDefinition = TableDefinitions.Layouts;
-
-    /**
-     * @description Table definition for object limits (specific to the current selected object)
-     * @type {ocui.Table}
-     */
-    limitsTableDefinition = TableDefinitions.Limits;
-
-    /**
-     * @description Table definition for validation rules
-     * @type {ocui.Table}
-     */
-    validationRulesTableDefinition = TableDefinitions.ValidationRules;
-
-    /**
-     * @description Table definition for validation rules (specific to the current selected object)
-     * @type {ocui.Table}
-     */
-    validationRulesInObjectTableDefinition = TableDefinitions.ValidationRulesInObject;
-
-    /**
-     * @description Table definition for web links (specific to the current selected object)
-     * @type {ocui.Table}
-     */
-    webLinksInObjectTableDefinition = TableDefinitions.WebLinksInObject;
-    
-    /**
-     * @description Table definition for web links (for all objects)
-     * @type {ocui.Table}
-     */
-    webLinksTableDefinition = TableDefinitions.WebLinks;
-
-    /**
-     * @description Table definition for static resources
-     * @type {ocui.Table}
-     */
-    staticResourcesTableDefinition = TableDefinitions.StaticResources;
-
-    /**
-     * @description Table definition for record types (specific to the current selected object)
-     * @type {ocui.Table}
-     */
-    recordTypesInObjectTableDefinition = TableDefinitions.RecordTypesInObject;
-
-    /**
-     * @description Table definition for record types for all objects
-     * @type {ocui.Table}
-     */
-    recordTypesTableDefinition = TableDefinitions.RecordTypes;
-
-    /**
-     * @description Table definition for sobject relationships (specific to the current selected object)
-     * @type {ocui.Table}
-     */
-    relationshipsTableDefinition = TableDefinitions.Relationships
-
-    /**
-     * @description Table definition for chatter groups
-     * @type {ocui.Table}
-     */
-    chatterGroupsTableDefinition = TableDefinitions.ChatterGroups;
-
-    /**
-     * @description Data definition for browsers
-     * @type {ocui.Table}
-     */
-    browsersTableDefinition = TableDefinitions.Browsers;
-
-    /**
-     * @description Table definition for custom fields
-     * @type {ocui.Table}
-     */
-    customFieldsTableDefinition = TableDefinitions.CustomFields;
-
-    /**
-     * @description Table definition for custom fields (specific to the current selected object)
-     * @type {ocui.Table}
-     */
-    customFieldsInObjectTableDefinition = TableDefinitions.CustomFieldsInObject;
-
-    /**
-     * @description Table definition for standard fields (specific to the current selected object)
-     * @type {ocui.Table}
-     */
-    standardFieldsInObjectTableDefinition = TableDefinitions.StandardFieldsInObject;
-    /**
-     * @description Table definition for custom labels
-     * @type {ocui.Table}
-     */
-    customLabelsTableDefinition = TableDefinitions.CustomLabels;
-
-    /**
-     * @description Table definition for custom tabs
-     * @type {ocui.Table}
-     */
-    customTabsTableDefinition = TableDefinitions.CustomTabs;
-
-    /**
-     * @description Table definition for documents
-     * @type {ocui.Table}
-     */
-    documentsTableDefinition = TableDefinitions.Documents;
-
-    /**
-     * @description Table definition for dashboards
-     * @type {ocui.Table}
-     */
-    dashboardsTableDefinition = TableDefinitions.Dashboards;
-
-    /**
-     * @description Table definition for reports
-     * @type {ocui.Table}
-     */
-    reportsTableDefinition = TableDefinitions.Reports;
-
-    /**
-     * @description Table definition for lightning aura components
-     * @type {ocui.Table}
-     */
-    auraComponentsTableDefinition = TableDefinitions.AuraComponents;
-
-    /**
-     * @description Table definition for lightning pages
-     * @type {ocui.Table}
-     */
-    flexiPagesTableDefinition = TableDefinitions.FlexiPages;
-
-    /**
-     * @description Table definition for lightning pages within an SObject
-     * @type {ocui.Table}
-     */
-    flexiPagesInObjectTableDefinition = TableDefinitions.FlexiPagesInObject;
-    
-    /**
-     * @description Table definition for knowledge articles
-     * @type {ocui.Table}
-     */ 
-    knowledgeArticlesTableDefinition = TableDefinitions.KnowledgeArticles;
-
-    /**
-     * @description Table definition for lightning web components
-     * @type {ocui.Table}
-     */
-    lightningWebComponentsTableDefinition = TableDefinitions.LightningWebComponents;
-
-
-    /**
-     * @description Table definition for page layouts
-     * @type {ocui.Table}
-     */
-    pageLayoutsTableDefinition = TableDefinitions.PageLayouts;
-
-    /**
-     * @description Table definition for permission sets
-     * @type {ocui.Table}
-     */
-    permissionSetsTableDefinition = TableDefinitions.PermissionSets;
-
-    /**
-     * @description Table definition for permission set licenses
-     * @type {ocui.Table}
-     */
-    permissionSetLicensesTableDefinition = TableDefinitions.PermissionSetLicenses;
-
-    /**
-     * @description Table definition for profiles
-     * @type {ocui.Table}
-     */
-    profilesTableDefinition = TableDefinitions.Profiles;
-
-    /**
-     * @description Table definition for profile restrictions
-     * @type {ocui.Table}
-     */
-    profileRestrictionsTableDefinition = TableDefinitions.ProfileRestrictions;
-
-    /**
-     * @description Table definition for profiles password policies
-     * @type {ocui.Table}
-     */
-    profilePasswordPoliciesTableDefinition = TableDefinitions.ProfilePasswordPolicies;
-
-    /**
-     * @description Table definition for public groups
-     * @type {ocui.Table}
-     */
-    publicGroupsTableDefinition = TableDefinitions.PublicGroups;
-
-    /**
-     * @description Table definition for queues
-     * @type {ocui.Table}
-     */
-    queuesTableDefinition = TableDefinitions.Queues;
-
-    /**
-     * @description Table definition for active internal users
-     * @type {ocui.Table}
-     */
-    usersTableDefinition = TableDefinitions.Users;
-
-    /**
-     * @description Table definition for visualforce components
-     * @type {ocui.Table}
-     */
-    visualForceComponentsTableDefinition = TableDefinitions.VisualForceComponents;
-
-    /**
-     * @description Table definition for visualforce pages
-     * @type {ocui.Table}
-     */
-    visualForcePagesTableDefinition = TableDefinitions.VisualForcePages;
-
-    /**
-     * @description Table definition for apex classes (compiled and not tests)
-     * @type {ocui.Table}
-     */
-    apexClassesTableDefinition = TableDefinitions.ApexClasses;
-
-    /**
-     * @description Table definition for uncompiled apex classes
-     * @type {ocui.Table}
-     */    
-    apexUncompiledTableDefinition = TableDefinitions.ApexUncompiledClasses;
-
-    /**
-     * @description Table definition for apex triggers
-     * @type {ocui.Table}
-     */
-    apexTriggersTableDefinition = TableDefinitions.ApexTriggers;
-
-    /**
-     * @description Table definition for apex triggers within SObject
-     * @type {ocui.Table}
-     */
-    apexTriggersInObjectTableDefinition = TableDefinitions.ApexTriggersInObject;
-
-    /**
-     * @description Table definition for apex classes that are tests
-     * @type {ocui.Table}
-     */
-    apexTestsTableDefinition = TableDefinitions.ApexTests;
-
-    /**
-     * @description Table definition for SObjects
-     * @type {ocui.Table}
-     */
-    objectsTableDefinition = TableDefinitions.Objects;
-
-    /**
-     * @description Table definition for flows
-     * @type {ocui.Table}
-     */
-    flowsTableDefinition = TableDefinitions.Flows;
-
-    /**
-     * @description Table definition for email templates
-     * @type {ocui.Table}
-     */ 
-    emailTemplatesTableDefinition = TableDefinitions.EmailTemplates;
-
-    /**
-     * @description Table definition for home page components
-     * @type {ocui.Table}
-     */ 
-    homePageComponentsTableDefinition = TableDefinitions.HomePageComponents;
-
-    /**
-     * @description Table definition for process builders
-     * @type {ocui.Table}
-     */
-    processBuildersTableDefinition = TableDefinitions.ProcessBuilders;
-    
-    /**
-     * @description Table definition for workflows
-     * @type {ocui.Table}
-     */
-    workflowsTableDefinition = TableDefinitions.Workflows;
-
-    /**
-     * @description Table definition for workflows in an object
-     * @type {ocui.Table}
-     */
-    workflowsInObjectTableDefinition = TableDefinitions.WorkflowsInObject;
-
-    /**
-     * @description Table definition for roles
-     * @type {ocui.Table}
-     */
-    rolesTableDefinition = TableDefinitions.Roles;
-
     /**
      * @description Table definition for object permissions
-     * @type {ocui.Table}
      */
-    get objectPermissionsTableDefinition() { return TableDefinitions.ObjectPermissions(this._internalObjectPermissionsDataMatrix); }
+    //get objectPermissionsTableDefinition() { return getTableDefinitions()?.ObjectPermissions(this._internalObjectPermissionsDataMatrix); }
  
     /**
      * @description Table definition for application permissions
-     * @type {ocui.Table}
      */
-    get appPermissionsTableDefinition() { return TableDefinitions.AppPermissions(this._internalAppPermissionsDataMatrix); }
+    //get appPermissionsTableDefinition() { return getTableDefinitions()?.AppPermissions(this._internalAppPermissionsDataMatrix); }
     
     /**
      * @description Table definition for field permissions
-     * @type {ocui.Table}
      */
-    get fieldPermissionsTableDefinition() { return TableDefinitions.FieldPermissions(this._internalFieldPermissionsDataMatrix); }
+    //get fieldPermissionsTableDefinition() { return getTableDefinitions()?.FieldPermissions(this._internalFieldPermissionsDataMatrix); }
 
     /**
      * @description Table definition for score rules
-     * @type {ocui.Table}
      */
-    get scoreRulesTableDefinition() { return TableDefinitions.ScoreRules(this._internalAllScoreRulesDataMatrix); }
+    //get scoreRulesTableDefinition() { return getTableDefinitions()?.ScoreRules(this.data._internalAllScoreRulesDataMatrix); }
     
     /**
      * @description Table definition for hard coded urls view
      */
-    hardCodedURLsViewTableDefinition = TableDefinitions.HardCodedURLsView(MAX_ITEMS_IN_HARDCODED_URLS_LIST);
+    //get hardCodedURLsViewTableDefinition() { return getTableDefinitions()?.HardCodedURLsView(MAX_ITEMS_IN_HARDCODED_URLS_LIST); }
 
 
     // ----------------------------------------------------------------------------------------------------------------
@@ -1662,10 +989,8 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Representation of an export for SObject Description data
-     * @type {Array<ocui.ExportedTable>}
      */
     get objectInformationExportSource() { 
-        /** @type {Array<ocui.ExportedTable>} */
         const sheets = [];
         sheets.push({ 
             header: 'General information',
@@ -1686,173 +1011,29 @@ export default class OrgcheckApp extends LightningElement {
                 [ 'External Sharing', `${this.objectData.externalSharingModel ?? ''}` ]
             ]
         });
-        sheets.push(ocui.RowsFactory.createAndExport(TableDefinitions.StandardFieldsInObject, this.objectData.standardFields, 'Standard Fields', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(TableDefinitions.CustomFieldsInObject, this.objectData.customFieldRefs, 'Custom Fields', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(TableDefinitions.ApexTriggersInObject, this.objectData.apexTriggerRefs, 'Apex Triggers', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(TableDefinitions.FieldSets, this.objectData.fieldSets, 'Field Sets', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(TableDefinitions.Layouts, this.objectData.layouts, 'Page Layouts', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(TableDefinitions.FlexiPagesInObject, this.objectData.flexiPages, 'Lightning Pages', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(TableDefinitions.Limits, this.objectData.limits, 'Limits', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(TableDefinitions.ValidationRulesInObject, this.objectData.validationRules, 'Validation Rules', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(TableDefinitions.WebLinksInObject, this.objectData.webLinks, 'Web Links', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(TableDefinitions.RecordTypesInObject, this.objectData.recordTypes, 'Record Types', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(TableDefinitions.Relationships, this.objectData.relationships, 'Relationships', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(this.standardFieldsInObjectTableDefinition, this.objectData.standardFields, 'Standard Fields', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(this.customFieldsInObjectTableDefinition, this.objectData.customFieldRefs, 'Custom Fields', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(this.apexTriggersInObjectTableDefinition, this.objectData.apexTriggerRefs, 'Apex Triggers', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(this.fieldSetsTableDefinition, this.objectData.fieldSets, 'Field Sets', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(this.layoutsTableDefinition, this.objectData.layouts, 'Page Layouts', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(this.flexiPagesInObjectTableDefinition, this.objectData.flexiPages, 'Lightning Pages', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(this.limitsTableDefinition, this.objectData.limits, 'Limits', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(this.validationRulesInObjectTableDefinition, this.objectData.validationRules, 'Validation Rules', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(this.webLinksInObjectTableDefinition, this.objectData.webLinks, 'Web Links', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(this.recordTypesInObjectTableDefinition, this.objectData.recordTypes, 'Record Types', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(this.relationshipsTableDefinition, this.objectData.relationships, 'Relationships', ocapi.SecretSauce.GetScoreRuleDescription));
         return sheets;
     }
 
     /**
      * @description Representation of an export for the global view data
-     * @type {Array<ocui.ExportedTable>}
      */
     globalViewItemsExport;
 
     /**
      * @description Representation of an export for hardcoded URLs view data
-     * @type {Array<ocui.ExportedTable>}
      */ 
     hardCodedURLsViewItemsExport;
-
-
-
-    // ----------------------------------------------------------------------------------------------------------------
-    // ----------------------------------------------------------------------------------------------------------------
-    // All tables in the app
-    // ----------------------------------------------------------------------------------------------------------------
-    // ----------------------------------------------------------------------------------------------------------------
-
-    /** 
-     * @description Data table for all objects in the org 
-     * @type {Array<ocapi.SFDC_Object>}
-     */
-    objectsTableData;
-
-    /** 
-     * @description Data table for one object in the org 
-     * @type {ocapi.SFDC_Object}
-     */
-    objectData;
-
-    /**
-     * @description Data table for chatter groups in the org
-     * @type {Array<ocapi.SFDC_CollaborationGroup>}
-     * @public
-     */ 
-    chatterGroupsTableData;
-
-    /**
-     * @description Data table for browsers in the org
-     * @type {Array<ocapi.SFDC_Browser>}
-     * @public
-     */
-    browsersTableData;
-
-    /** 
-     * @description Data table for custom fields 
-     * @type {Array<ocapi.SFDC_Field>}
-     */
-    customFieldsTableData;
-
-    /** 
-     * @description Data table for custom labels 
-     * @type {Array<ocapi.SFDC_CustomLabel>}
-     */
-    customLabelsTableData;
-
-    /**
-     * @description Data table for custom tabs 
-     * @type {Array<ocapi.SFDC_CustomTab>}
-     */
-    customTabsTableData;
-
-    /**
-     * @description Data table for documents
-     * @type {Array<ocapi.SFDC_Document>}
-     */
-    documentsTableData;
-
-    /**
-     * @description Data table for dashboards
-     * @type {Array<ocapi.SFDC_Dashboard>}
-     */
-    dashboardsTableData;
-
-    /**
-     * @description Data table for reports
-     * @type {Array<ocapi.SFDC_Report>}
-     */
-    reportsTableData;
-
-    /** 
-     * @description Data table for lightning aura components 
-     * @type {Array<ocapi.SFDC_LightningAuraComponent>}
-     */
-    auraComponentsTableData;
-
-    /** 
-     * @description Data table for lightning pages 
-     * @type {Array<ocapi.SFDC_LightningPage>}
-     */
-    flexiPagesTableData;
-
-    /**
-     * @description Data table for knowledge articles
-     * @type {Array<ocapi.SFDC_KnowledgeArticle>}
-     */ 
-    knowledgeArticlesTableData;
-
-    /** 
-     * @description Data table for lightning web components 
-     * @type {Array<ocapi.SFDC_LightningWebComponent>}
-     */
-    lightningWebComponentsTableData;
-
-    /** 
-     * @description Data table for page layouts
-     * @type {Array<ocapi.SFDC_PageLayout>}
-     */
-    pageLayoutsTableData;
-
-    /** 
-     * @description Data table for permission sets
-     * @type {Array<ocapi.SFDC_PermissionSet>}
-     */
-    permissionSetsTableData;
-
-    /** 
-     * @description Data table for permission set licenses
-     * @type {Array<ocapi.SFDC_PermissionSetLicense>}
-     */
-    permissionSetLicensesTableData;
-
-    /** 
-     * @description Data table for profiles
-     * @type {Array<ocapi.SFDC_Profile>}
-     */
-    profilesTableData;
-
-    /** 
-     * @description Data table for profile restrictions 
-     * @type {Array<ocapi.SFDC_ProfileRestrictions>}
-     */
-    profileRestrictionsTableData;
-
-    /** 
-     * @description Data table for profile password policies 
-     * @type {Array<ocapi.SFDC_ProfilePasswordPolicy>}
-     */
-    profilePasswordPoliciesTableData;
-
-    /** 
-     * @description Data table for public groups and queues 
-     * @type {Array<ocapi.SFDC_Group>}
-     */
-    publicGroupsAndQueuesTableData;
-
-    /** 
-     * @description Data table for active users 
-     * @type {Array<ocapi.SFDC_User>}
-     */
-    usersTableData;
 
     /**
      * @description Global View data from API
@@ -1873,7 +1054,7 @@ export default class OrgcheckApp extends LightningElement {
             }
             const detailsSheets = [];
             data?.forEach((item, recipe) => {
-                const tabValue = RECIPE_TO_SUB_TAB.get(recipe);
+                const tabValue = RECIPEALIAS_TO_SUB_TAB.get(recipe);
                 const transfomer = this._internalTransformers.get(tabValue);
                 const itemName = SUB_TABS.get(tabValue)?.tab?.title ?? tabValue;
                 const definitionName = transfomer.data.replace(/Data$/, 'Definition');
@@ -1965,126 +1146,6 @@ export default class OrgcheckApp extends LightningElement {
         }
     }
 
-    /** 
-     * @description Data for the global view
-     * @type {Array}
-     */
-    globalViewData;
-
-    /** 
-     * @description Data for the hard coded urls view
-     * @type {Array}
-     */
-    hardCodedURLsViewData;
-
-    /**
-     * @description Data table for validation rules
-     * @type {Array<ocapi.SFDC_ValidationRule>}
-     */ 
-    validationRulesTableData;
-
-    /** 
-     * @description Data table for visualforce components 
-     * @type {Array<ocapi.SFDC_VisualForceComponent>}
-     */
-    visualForceComponentsTableData;
-
-    /** 
-     * @description Data table for visualforce pages
-     * @type {Array<ocapi.SFDC_VisualForcePage>}
-     */
-    visualForcePagesTableData;
-
-    /** 
-     * @description Data table for apex classes (compiled and not unit test)
-     * @type {Array<ocapi.SFDC_ApexClass>}
-     */
-    apexClassesTableData;
-
-    /** 
-     * @description Data table for uncompiled apex classes
-     * @type {Array<ocapi.SFDC_ApexClass>}
-     */
-    apexUncompiledTableData;
-
-    /** 
-     * @description Data table for apex triggers
-     * @type {Array<ocapi.SFDC_ApexTrigger>}
-     */
-    apexTriggersTableData;
-
-    /** 
-     * @description Data table for apex classes that are unit tests 
-     * @type {Array<ocapi.SFDC_ApexClass>}
-     */
-    apexTestsTableData;
-
-    /** 
-     * @description Data table for internal user roles 
-     * @type {Array<ocapi.SFDC_UserRole>}
-     */
-    rolesTableData;
-
-    /** 
-     * @description Top level user role tree, where each record may have children.
-     * @type {ocapi.SFDC_UserRole}
-     */
-    rolesTree;
-
-    /** 
-     * @description Data table for flows 
-     * @type {Array<ocapi.SFDC_Flow>}
-     */
-    flowsTableData;
-
-    /**
-     * @description Data table for email templates
-     * @type {Array<ocapi.SFDC_EmailTemplate>}
-     */
-    emailTemplatesTableData;
-
-    /**
-     * @description Data table for home page components
-     * @type {Array<ocapi.SFDC_HomePageComponent>}
-     */
-    homePageComponentsTableData;
-
-    /** 
-     * @description Data table for process builders 
-     * @type {Array<ocapi.SFDC_Flow>}
-     */
-    processBuildersTableData;
-
-    /** 
-     * @description Data table for weblinks
-     * @type {Array<ocapi.SFDC_WebLink>}
-     */
-    webLinksTableData;
-
-    /**
-     * @description Data table for static resources
-     * @type {Array<ocapi.SFDC_StaticResource>}
-     */ 
-    staticResourcesTableData;
-
-    /** 
-     * @description Data table for workflows 
-     * @type {Array<ocapi.SFDC_Workflow>}
-     */
-    workflowsTableData;
-
-    /** 
-     * @description Table data for record types 
-     * @type {Array<ocapi.SFDC_RecordType>}
-     */
-    recordTypesTableData;
-
-    /**
-     * @description Data matrix for object permissions
-     * @type {ocapi.DataMatrix}
-     */ 
-    _internalObjectPermissionsDataMatrix;
-
     /**
      * @description Data table for object permissions
      * @type {Array}
@@ -2092,12 +1153,6 @@ export default class OrgcheckApp extends LightningElement {
     get objectPermissionsTableData() {
         return this._internalObjectPermissionsDataMatrix?.rows || [];
     }
-
-    /**
-     * @description Data matrix for application permissions
-     * @type {ocapi.DataMatrix}
-     */ 
-    _internalAppPermissionsDataMatrix;
 
     /**
      * @description Data table for application permissions
@@ -2108,12 +1163,6 @@ export default class OrgcheckApp extends LightningElement {
     }
 
     /**
-     * @description Data matrix for field permissions
-     * @type {ocapi.DataMatrix}
-     */ 
-    _internalFieldPermissionsDataMatrix;
-
-    /**
      * @description Data table for field permissions
      * @type {Array}
      */ 
@@ -2121,18 +1170,238 @@ export default class OrgcheckApp extends LightningElement {
         return this._internalFieldPermissionsDataMatrix?.rows || [];
     }
 
-    /**
-     * @description Data matrix for all score rules
-     * @type {ocapi.DataMatrix}
-     */ 
-    _internalAllScoreRulesDataMatrix;
-
     /** 
      * @description Data table for all score rules
      * @type {Array}
      */
     get allScoreRulesTableData() {
-        return this._internalAllScoreRulesDataMatrix?.rows || [];
+        return this.data.allScoreRulesDataMatrix?.rows || [];
     }
-
 }
+
+
+
+const MAX_ITEMS_IN_HARDCODED_URLS_LIST = 15;
+
+const getOrgCheck = () => {
+    return (typeof window !== 'undefined' ? window?.orgcheck : globalThis?.orgcheck ?? null)
+}
+
+const instantiateOrgCheckAPI = (setup) => {
+    const apiConstructor = getOrgCheck()?.API;
+    if (apiConstructor) return new apiConstructor(setup);
+    return undefined;
+}
+
+const instantiateOrgCheckTableDefinition = (name, data) => {
+    const tableDefConstructor = getOrgCheck()?.ui.table.definitions[name];
+    if (tableDefConstructor) return new tableDefConstructor(data);
+    return undefined;
+}
+
+const ALIASES = {
+    NONE: 'none',
+    ALL: 'all',
+    PACKAGE: 'namespace',
+    OBJECT: 'object',
+    OBJ_PCK: 'object-namespace',
+    PCK_TYP: 'namespace-type'
+}
+
+const PARAMETERS = {
+    OBJECT: 'object',
+    NAMESPACE: 'namespace',
+    TYPE: 'objectType'
+}
+
+const ANY = '*';
+const EMPTY = '';
+
+const lowercaseFirstLetter = (string) => {
+  return string.charAt(0).toLowerCase() + string.slice(1)
+}
+
+/**
+ * @description Application navigation in two levels
+ * @constant
+ */
+const APPLICATION_NAVIGATION = {
+    HOME: { 
+        key:   'A', 
+        title: 'Home',
+        items: { 
+            WELCOME:       { key: '01', title: '👋 Welcome!' },
+            CACHE:         { key: '02', title: '🛠️ Metadata Cache' },
+            HELP:          { key: '03', title: '⁉️ Score explanation', data: 'scoreRules', alias: ALIASES.NONE, get: 'getAllScoreRulesAsDataMatrix', tableDefinition: 'ScoreRules', isDataMatrix: true }
+        }
+    },
+    ORG: { 
+        key:   'B', 
+        title: '🗺️ Salesforce Organization',
+        items: { 
+            GLOBAL_VIEW:   { key: '04', title: '🏞️ Overview',        recipe: 'global-view',    data: '_internalGlobalViewDataFromAPI',        clear: 'removeGlobalViewFromCache',    alias: ALIASES.NONE, get: 'getGlobalView',        tableDefinition: 'GlobalViewItems' },
+            URL_VIEW:      { key: '05', title: '🏖️ Hard-coded URLs', recipe: 'hardcoded-urls', data: '_internalHardCodedURLsViewDataFromAPI', clear: 'removeHardcodedURLsFromCache', alias: ALIASES.NONE, get: 'getHardcodedURLsView', tableDefinition: 'HardCodedURLs' },
+        }
+    },
+    DATAMODEL: { 
+        key:   'C', 
+        title: '⚽ Data model',
+        items: { 
+            SOBJ_DESC:     { key: '06', title: '🎳 Object Documentation', recipe: 'object',           data: 'objectData',      clear: 'removeObjectFromCache',             alias: ALIASES.OBJECT,    get: 'getObject',          getOnlyIf: (that) => (that.isObjectSpecified), tableDefinitions: [ 'ApexTriggersInObject', 'CustomFieldsInObject', 'FieldSets', 'FlexiPagesInObject', 
+                                                                                                                                                                                                                                                                                     'PageLayouts', 'Limits', 'RecordTypesInObject', 'Relationships', 'StandardFields', 
+                                                                                                                                                                                                                                                                                     'ValidationRulesInObject', 'WebLinksInObject', 'Workflows' ], getParameters: [ PARAMETERS.OBJECT ] },
+            SOBJECTS:      { key: '07', title: '🏉 Objects',              recipe: 'objects',          data: 'objects',         clear: 'removeAllObjectsFromCache',         alias: ALIASES.PCK_TYP,   get: 'getObjects',         tableDefinition: 'Objects',                    getParameters: [ PARAMETERS.NAMESPACE, PARAMETERS.TYPE ] },
+            CUSTOM_FIELDS: { key: '08', title: '🏈 Custom Fields',        recipe: 'custom-fields',    data: 'customFields',    clear: 'removeAllCustomFieldsFromCache',    alias: ALIASES.ALL,       get: 'getCustomFields',    tableDefinition: 'CustomFields',               getParameters: [ PARAMETERS.NAMESPACE, PARAMETERS.TYPE, PARAMETERS.OBJECT ] },
+            LAYOUTS:       { key: '09', title: '🏓 Page Layouts',         recipe: 'page-layouts',     data: 'pageLayouts',     clear: 'removeAllPageLayoutsFromCache',     alias: ALIASES.ALL,       get: 'getPageLayouts',     tableDefinition: 'PageLayouts',                getParameters: [ PARAMETERS.NAMESPACE, PARAMETERS.TYPE, PARAMETERS.OBJECT ] },
+            VRS:           { key: '0A', title: '🎾 Validation Rules',     recipe: 'validation-rules', data: 'validationRules', clear: 'removeAllValidationRulesFromCache', alias: ALIASES.ALL,       get: 'getValidationRules', tableDefinition: 'ValidationRules',            getParameters: [ PARAMETERS.NAMESPACE, PARAMETERS.TYPE, PARAMETERS.OBJECT ] },
+            RTS:           { key: '0B', title: '🏏 Record Types',         recipe: 'record-types',     data: 'recordTypes',     clear: 'removeAllRecordTypesFromCache',     alias: ALIASES.ALL,       get: 'getRecordTypes',     tableDefinition: 'RecordTypes',                getParameters: [ PARAMETERS.NAMESPACE, PARAMETERS.TYPE, PARAMETERS.OBJECT ] },
+            WEB_LINKS:     { key: '0C', title: '🏑 Web Links',            recipe: 'web-links',        data: 'webLinks',        clear: 'removeAllWeblinksFromCache',        alias: ALIASES.ALL,       get: 'getWeblinks',        tableDefinition: 'WebLinks',                   getParameters: [ PARAMETERS.NAMESPACE, PARAMETERS.TYPE, PARAMETERS.OBJECT ] },
+        }
+    },
+    SECURITY: { 
+        key:   'D', 
+        title: '👮 Security and Access',
+        items: { 
+            USERS:         { key: '0D', title: '👥 Active Internal Users',     recipe: 'internal-active-users',    data: 'users',                    clear: 'removeAllActiveUsersFromCache',            alias: ALIASES.NONE,     get: 'getActiveUsers',                     tableDefinition: 'Users' },
+            PROFILES:      { key: '0E', title: '🚓 Profiles',                  recipe: 'profiles',                 data: 'profiles',                 clear: 'removeAllProfilesFromCache',               alias: ALIASES.PACKAGE,  get: 'getProfiles',                        tableDefinition: 'Profiles',                getParameters: [ PARAMETERS.NAMESPACE ] },
+            PSETS:         { key: '0F', title: '🚔 Permission Sets',           recipe: 'permission-sets',          data: 'permissionSets',           clear: 'removeAllPermSetsFromCache',               alias: ALIASES.PACKAGE,  get: 'getPermissionSets',                  tableDefinition: 'PermissionSets',          getParameters: [ PARAMETERS.NAMESPACE ] },
+            PSLS:          { key: '10', title: '🚔 Permission Set Licenses',   recipe: 'permission-set-licenses',  data: 'permissionSetLicenses',    clear: 'removeAllPermSetLicensesFromCache',        alias: ALIASES.PACKAGE,  get: 'getPermissionSetLicenses',           tableDefinition: 'PermissionSetLicenses',   getParameters: [ PARAMETERS.NAMESPACE ] },
+            PROFILE_RSTRS: { key: '11', title: '🚸 Profile Restrictions',      recipe: 'profile-restrictions',     data: 'profileRestrictions',      clear: 'removeAllProfileRestrictionsFromCache',    alias: ALIASES.PACKAGE,  get: 'getProfileRestrictions',             tableDefinition: 'ProfileRestrictions',     getParameters: [ PARAMETERS.NAMESPACE ] },
+            PROFILE_PWDS:  { key: '12', title: '⛖ Profile Password Policies', recipe: 'profile-password-policies', data: 'profilePasswordPolicies', clear: 'removeAllProfilePasswordPoliciesFromCache', alias: ALIASES.NONE,     get: 'getProfilePasswordPolicies',         tableDefinition: 'ProfilePasswordPolicies' },
+            CRUDS:         { key: '13', title: '🚦 Object Permissions',        recipe: 'object-permissions',       data: 'objectPermissions',       clear: 'removeAllObjectPermissionsFromCache',       alias: ALIASES.PACKAGE,  get: 'getObjectPermissionsPerParent',      tableDefinition: 'ObjectPermissions',       getParameters: [ PARAMETERS.NAMESPACE ],                    isDataMatrix: true },
+            FLSS:          { key: '14', title: '🚧 Field Level Securities',    recipe: 'field-permissions',        data: 'fieldPermissions',        clear: 'removeAllFieldPermissionsFromCache',        alias: ALIASES.OBJ_PCK,  get: 'getFieldPermissionsPerParent',       tableDefinition: 'FieldPermissions',        getParameters: [ PARAMETERS.OBJECT, PARAMETERS.NAMESPACE ], isDataMatrix: true },
+            APP_PERMS:     { key: '15', title: '⛕ Application Permissions',   recipe: 'app-permissions',          data: 'appPermissions',           clear: 'removeAllAppPermissionsFromCache',          alias: ALIASES.PACKAGE,  get: 'getApplicationPermissionsPerParent', tableDefinition: 'AppPermissions',          getParameters: [ PARAMETERS.NAMESPACE ],                    isDataMatrix: true },
+            BROWSERS:      { key: '16', title: '🌐 Browsers',                  recipe: 'browsers',                 data: 'browsers',                 clear: 'removeAllBrowsersFromCache',               alias: ALIASES.NONE,     get: 'getBrowsers',                         tableDefinition: 'Browsers' },
+        }
+    },
+    BOXES: { 
+        key:   'E', 
+        title: '🐇 Boxes',
+        items: { 
+            ROLES_GRAPH:   { key: '17', title: '🐙 Internal Role Explorer', recipe: 'user-roles',           data: 'rolesTree',     clear: 'removeAllRolesFromCache',         alias: ALIASES.NONE, get: 'getRolesTree' },
+            ROLES:         { key: '18', title: '🦓 Internal Role Listing',  recipe: 'user-roles',           data: 'roles',         clear: 'removeAllRolesFromCache',         alias: ALIASES.NONE, get: 'getRoles',         tableDefinition: 'Roles' },
+            PGS:           { key: '19', title: '🐘 Public Groups',          recipe: 'public-groups',        data: 'publicGroups',  clear: 'removeAllPublicGroupsFromCache',  alias: ALIASES.NONE, get: 'getPublicGroups',  tableDefinition: 'PublicGroups' },
+            QUEUES:        { key: '1A', title: '🦒 Queues',                 recipe: 'queues',               data: 'queues',        clear: 'removeAllQueuesFromCache',        alias: ALIASES.NONE, get: 'getQueues',        tableDefinition: 'Queues' },
+            CHT_GROUPS:    { key: '1B', title: '🦙 Chatter Groups',         recipe: 'collaboration-groups', data: 'chatterGroups', clear: 'removeAllChatterGroupsFromCache', alias: ALIASES.NONE, get: 'getChatterGroups', tableDefinition: 'ChatterGroups' },
+        }
+    },
+    AUTOMATION: { 
+        key:   'F', 
+        title: '🤖 Automations',
+        items: { 
+            FLOWS:         { key: '1C', title: '🏎️ Flows',            recipe: 'flows',            data: 'flows',           clear: 'removeAllFlowsFromCache',           alias: ALIASES.NONE, get: 'getFlows',           tableDefinition: 'Flows' },
+            PBS:           { key: '1D', title: '🛺 Process Builders', recipe: 'process-builders', data: 'processBuilders', clear: 'removeAllProcessBuildersFromCache', alias: ALIASES.NONE, get: 'getProcessBuilders', tableDefinition: 'ProcessBuilders' },
+            WORKFLOWS:     { key: '1E', title: '🚗 Workflows',        recipe: 'workflows',        data: 'workflows',       clear: 'removeAllWorkflowsFromCache',       alias: ALIASES.NONE, get: 'getWorkflows',       tableDefinition: 'Workflows' },
+        }
+    },
+    SETTING: { 
+        key:   'G', 
+        title: '🎁 Setting',
+        items: {
+            LABELS:        { key: '1F', title: '🏷️ Custom Labels',      recipe: 'custom-labels',      data: 'customLabels',      clear: 'removeAllCustomLabelsFromCache',      alias: ALIASES.PACKAGE, get: 'getCustomLabels',      tableDefinition: 'CustomLabels',     getParameters: [ PARAMETERS.NAMESPACE ] },
+            DOCUMENTS:     { key: '20', title: '🍱 Documents',          recipe: 'documents',          data: 'documents',         clear: 'removeAllDocumentsFromCache',         alias: ALIASES.PACKAGE, get: 'getDocuments',         tableDefinition: 'Documents',        getParameters: [ PARAMETERS.NAMESPACE ] },
+            EMAIL_TPLS:    { key: '21', title: '🌇 Email Templates',    recipe: 'email-templates',    data: 'emailTemplates',    clear: 'removeAllEmailTemplatesFromCache',    alias: ALIASES.PACKAGE, get: 'getEmailTemplates',    tableDefinition: 'EmailTemplates',   getParameters: [ PARAMETERS.NAMESPACE ] },
+            ARTICLES:      { key: '22', title: '📚 Knowledge Articles', recipe: 'knowledge-articles', data: 'knowledgeArticles', clear: 'removeAllKnowledgeArticlesFromCache', alias: ALIASES.NONE,    get: 'getKnowledgeArticles', tableDefinition: 'KnowledgeArticles' },
+            SRS:           { key: '23', title: '🗿 Static Resources',   recipe: 'static-resources',   data: 'staticResources',   clear: 'removeAllStaticResourcesFromCache',   alias: ALIASES.PACKAGE, get: 'getStaticResources',   tableDefinition: 'StaticResources',  getParameters: [ PARAMETERS.NAMESPACE ] },
+        }
+    },
+    VISUAL: { 
+        key:   'H', 
+        title: '🥐 User Interface',
+        items: {
+            VFPS:          { key: '24', title: '🥖 Visualforce Pages',         recipe: 'visualforce-pages',         data: 'visualForcePages',       clear: 'removeAllVisualForcePagesFromCache',        alias: ALIASES.PACKAGE, get: 'getVisualForcePages',        tableDefinition: 'VisualForcePages',       getParameters: [ PARAMETERS.NAMESPACE ]},
+            VFCS:          { key: '25', title: '🍞 Visualforce Components',    recipe: 'visualforce-components',    data: 'visualForceComponents',  clear: 'removeAllVisualForceComponentsFromCache',   alias: ALIASES.PACKAGE, get: 'getVisualForceComponents',   tableDefinition: 'VisualForceComponents',  getParameters: [ PARAMETERS.NAMESPACE ] },
+            LG_PAGES:      { key: '26', title: '🎂 Lightning Pages',           recipe: 'lightning-pages',           data: 'flexiPages',             clear: 'removeAllLightningPagesFromCache',          alias: ALIASES.PACKAGE, get: 'getLightningPages',          tableDefinition: 'FlexiPages',             getParameters: [ PARAMETERS.NAMESPACE ] },
+            AURAS:         { key: '27', title: '🧁 Lightning Aura Components', recipe: 'lightning-aura-components', data: 'auraComponents',         clear: 'removeAllLightningAuraComponentsFromCache', alias: ALIASES.PACKAGE, get: 'getLightningAuraComponents', tableDefinition: 'AuraComponents',         getParameters: [ PARAMETERS.NAMESPACE ] },
+            LWCS:          { key: '28', title: '🍰 Lightning Web Components',  recipe: 'lightning-web-components',  data: 'lightningWebComponents', clear: 'removeAllLightningWebComponentsFromCache',  alias: ALIASES.PACKAGE, get: 'getLightningWebComponents',  tableDefinition: 'LightningWebComponents', getParameters: [ PARAMETERS.NAMESPACE ] },
+            HOME_PAGES:    { key: '29', title: '🍩 Home Page Components',      recipe: 'home-page-components',      data: 'homePageComponents',     clear: 'removeAllHomePageComponentsFromCache',      alias: ALIASES.NONE,    get: 'getHomePageComponents',      tableDefinition: 'HomePageComponents' },
+            TABS:          { key: '2A', title: '🥠 Custom Tabs',               recipe: 'custom-tabs',               data: 'customTabs',             clear: 'removeAllCustomTabsFromCache',              alias: ALIASES.PACKAGE, get: 'getCustomTabs',              tableDefinition: 'CustomTabs',             getParameters: [ PARAMETERS.NAMESPACE ] },
+        }
+    },
+    CODE: { 
+        key:   'I', 
+        title: '🔥 Programmatic',
+        items: {
+            CLASSES:       { key: '2B', title: '❤️‍🔥 Apex Classes',                         recipe: 'apex-classes',    data: 'apexClasses',    clear: 'removeAllApexClassesFromCache',    alias: ALIASES.PACKAGE, get: 'getApexClasses',    tableDefinition: 'ApexClasses',    getParameters: [ PARAMETERS.NAMESPACE ] },
+            UNCOMPILEDS:   { key: '2C', title: '🌋 Apex Classes That Need Recompilation', recipe: 'apex-uncompiled', data: 'apexUncompiled', clear: 'removeAllApexUncompiledFromCache', alias: ALIASES.PACKAGE, get: 'getApexUncompiled', tableDefinition: 'ApexUncompiled', getParameters: [ PARAMETERS.NAMESPACE ] },
+            TRIGGERS:      { key: '2D', title: '🧨 Apex Triggers',                        recipe: 'apex-triggers',   data: 'apexTriggers',   clear: 'removeAllApexTriggersFromCache',   alias: ALIASES.PACKAGE, get: 'getApexTriggers',   tableDefinition: 'ApexTriggers',   getParameters: [ PARAMETERS.NAMESPACE ] },
+            TESTS:         { key: '2E', title: '🚒 Apex Unit Tests',                      recipe: 'apex-tests',      data: 'apexTests',      clear: 'removeAllApexTestsFromCache',      alias: ALIASES.PACKAGE, get: 'getApexTests',      tableDefinition: 'ApexTests',      getParameters: [ PARAMETERS.NAMESPACE ] },
+        }
+    },
+    ANALYTICS: { 
+        key:   'J', 
+        title: '⛰️ Analytics',
+        items: {
+            REPORTS:       { key: '2F', title: '🌳 Reports',    recipe: 'reports',    data: 'reports',    clear: 'removeAllReportsFromCache',    alias: ALIASES.NONE, get: 'getReports',    tableDefinition: 'Reports' },
+            DASHBOARDS:    { key: '30', title: '🌲 Dashboards', recipe: 'dashboards', data: 'dashboards', clear: 'removeAllDashboardsFromCache', alias: ALIASES.NONE, get: 'getDashboards', tableDefinition: 'Dashboards' },
+        }
+    },
+};
+
+const ALL_NAVIGATION_SUBITEMS_BY_KEY = {};
+const INITIAL_NAVIGATION_ITEMS = Object.keys(APPLICATION_NAVIGATION).map((key) => { 
+    const item = APPLICATION_NAVIGATION[key];
+    return {
+        label: item.title,
+        name: item.key,
+        expanded: item.key === APPLICATION_NAVIGATION.HOME.key, // let's expand the "Home" section by default
+        items: Object.keys(item.items).map((k) => {
+            const subItem = item.items[k];
+            ALL_NAVIGATION_SUBITEMS_BY_KEY[subItem.key] = subItem;
+            return { label: subItem.title, name: subItem.key }
+        })
+    }
+});
+
+/**
+ * @description Keys of the main tabs in the application
+ * @type {Array<string>}
+ * @constant
+ */
+const MAIN_TABS_VALUES = Object.values(APPLICATION_NAVIGATION).map(tab => tab.key);
+
+/**
+ * @description Sub tabs by key
+ * @type {Map<string, {tab: {key: string, title: string}, mainTabKey: string}>}
+ * @constant
+ */
+const SUB_TABS = new Map();
+
+/**
+ * @description Sub tab keys by main tab key
+ * @type {Map<string, Array<string>>}
+ * @constant
+ */
+const SUB_TABS_BY_MAIN_TAB_KEY = new Map();
+
+/**
+ * @description Sub tab keys by their corresponding recipe alias
+ * @type {Map<string, string>}
+ * @constant
+ */
+const RECIPE_TO_SUB_TAB = new Map();
+
+Object.values(APPLICATION_NAVIGATION).forEach(mTab => Object.values(mTab.items).forEach(sTab => {
+    SUB_TABS.set(sTab.key, { tab: { key: sTab.key, title: sTab.title }, mainTabKey: mTab.key });
+    if (SUB_TABS_BY_MAIN_TAB_KEY.has(mTab.key) === false) SUB_TABS_BY_MAIN_TAB_KEY.set(mTab.key, []);
+    SUB_TABS_BY_MAIN_TAB_KEY.get(mTab.key).push(sTab.key);
+    if (sTab.recipe) {
+        RECIPE_TO_SUB_TAB.set(sTab.recipe, sTab.key);
+    }
+}));
+
+/**
+ * @description Sanitize and validate main tab input
+ * @param {string} input - The input main tab value
+ * @returns {string} The sanitized main tab value
+ * @throws {Error} If the input is not a valid main tab value
+ */
+const SANITIZE_MAIN_TAB_INPUT = (input) => { 
+    if (input === undefined || input === null) throw new Error('Input is undefined or null');
+    if (typeof input !== 'string') throw new Error('Input is not a string'); 
+    const sanitizedInput = input.trim().toLowerCase();
+    if (MAIN_TABS_VALUES.includes(sanitizedInput) === false) { 
+        throw new Error(`Input <${input}> is not a valid main tab value`);
+    } 
+    return sanitizedInput;
+};

@@ -1,6 +1,5 @@
-// @ts-check
 import { LightningElement, api, track } from 'lwc';
-import OrgCheckStaticResource from '@salesforce/resourceUrl/OrgCheck_SR';
+import OrgCheckStaticResource from "@salesforce/resourceUrl/OrgCheck_SR";
 
 /**
  * @description Represents the different statuses of a section

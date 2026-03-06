@@ -1,15 +1,16 @@
-import { ColumnType, TableColumn, TableColumnWithModifiers } from 'src/ui/table/orgcheck-ui-table-column';
+import { TableColumn } from 'src/ui/table/orgcheck-ui-table-column';
+import { ColumnType } from 'src/ui/table/orgcheck-ui-table-columntype';
 
 export class CellFactory {
 
     /**
      * @description Create an instance of WhereToGetData like objects from a type and a set of properties
-     * @param {TableColumn | TableColumnWithModifiers} column - Column header information
+     * @param {TableColumn } column - Column header information
      * @param {any} row - Input data
      * @returns {any} Output data
      * @static
      */
-    static create(column: TableColumn | TableColumnWithModifiers, row: any): any {
+    static create(column: TableColumn, row: any): any {
         const cell: { data: any } = { data: {}};
         const modifier = column['modifier'] ?? undefined;
         const columnData = column['data'] ?? {};

@@ -12,13 +12,13 @@ export class DataCacheManager implements DataCacheManagerIntf {
      * @description Compression to use before storing the data
      * @type {CompressorIntf}
      */
-    _compressor: CompressorIntf;
+    private _compressor: CompressorIntf;
 
     /**
      * @description Storage to save/retrieve the data
      * @type {StorageIntf}
      */
-    _storage: StorageIntf;
+    private _storage: StorageIntf;
 
     /**
      * @description Cache Manager constructor
@@ -37,7 +37,7 @@ export class DataCacheManager implements DataCacheManagerIntf {
      * @returns {any} the entry from the cache, or null if not found or any error occured
      * @public
      */
-    get(key: string): any {
+    public get(key: string): any {
         const metadataPhysicalKey = GENERATE_PHYSICAL_KEY_METADATA(key);
         const dataPhysicalKey = GENERATE_PHYSICAL_KEY_DATA(key);
         // Get information about this key in the metadata first
@@ -59,8 +59,8 @@ export class DataCacheManager implements DataCacheManagerIntf {
         }
         // Make sure the metadata is up to date with the data
         metadataEntry.length = dataEntry.content?.length ?? 0;
-        // ... and is saved!
-        this._storage.setItem(metadataPhysicalKey, JSON.stringify(metadataEntry));
+        // ... and is saved encrypted!
+        this._setItemToCache(metadataPhysicalKey, JSON.stringify(metadataEntry));
         // if the data is a map
         if (metadataEntry.type === 'map') {
             try {
@@ -85,7 +85,7 @@ export class DataCacheManager implements DataCacheManagerIntf {
      * @param {any} value - the value to set in the cache, can be a Map or an Array, or null to remove the entry
      * @public
      */
-    set(key: any, value: any): void {
+    public set(key: any, value: any): void {
         const metadataPhysicalKey = GENERATE_PHYSICAL_KEY_METADATA(key);
         const dataPhysicalKey = GENERATE_PHYSICAL_KEY_DATA(key);
         if (value === null || value === undefined) {
@@ -119,7 +119,7 @@ export class DataCacheManager implements DataCacheManagerIntf {
      * @description Get details of the cache.
      * @returns {Array<DataCacheItemIntf>} an array of objects that contains the name, the type, the size and the creation date of each entry.
      */
-    details(): DataCacheItemIntf[] {
+    public details(): DataCacheItemIntf[] {
         return this._storage.keys()
             .filter((key: string) => key.startsWith(METADATA_CACHE_PREFIX))
             .map((key: string) => {
@@ -138,7 +138,7 @@ export class DataCacheManager implements DataCacheManagerIntf {
      * @param {string} key - the key to remove the entry from the cache
      * @public
      */
-    remove(key: any): void {
+    public remove(key: any): void {
         this._storage.removeItem(GENERATE_PHYSICAL_KEY_DATA(key));
         this._storage.removeItem(GENERATE_PHYSICAL_KEY_METADATA(key));
     }
@@ -148,7 +148,7 @@ export class DataCacheManager implements DataCacheManagerIntf {
      * @returns {void}
      * @public
      */
-    clear(): void {
+    public clear(): void {
         return this._storage.keys()
             .filter((/** @type {string} */ key: string) => key.startsWith(CACHE_PREFIX))
             .forEach((/** @type {string} */ key: any) => this._storage.removeItem(key));
@@ -164,7 +164,7 @@ export class DataCacheManager implements DataCacheManagerIntf {
      * @throws {Error} Most likely when trying to save the value in the local storage (storageSetItem)
      * @private
      */
-    _setItemToCache = (key: any, stringValue: string): void => {
+    private _setItemToCache = (key: any, stringValue: string): void => {
         let hexValue: string = 'N/A';
         try {
             hexValue = this._compressor.compress(stringValue);
@@ -184,7 +184,7 @@ export class DataCacheManager implements DataCacheManagerIntf {
      * @returns {any} the entry from the cache
      * @private
      */
-    _getEntryFromCache = (key: string): any => {
+    private _getEntryFromCache = (key: string): any => {
         let entryFromStorage: string | undefined;
         try {
             const hexValue = this._storage.getItem(key);
@@ -192,7 +192,11 @@ export class DataCacheManager implements DataCacheManagerIntf {
                 entryFromStorage = this._compressor.decompress(hexValue);
             }
         } catch (error) {
-            console.error(`Error occured when trying to get the value for key ${key}`, error, error?.message);
+            console.warn(`For some reason, we couldn't decompress the value stored for key ${key}. 
+                One reason would be that it is not compressed the way we wanted.
+                So we consider that the value is invalid. 
+                Oh and by the way, the error message was: ${error?.message}.`);
+            return null;
         }
         if (!entryFromStorage) return null;
         try {

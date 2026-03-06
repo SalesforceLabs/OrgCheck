@@ -16,13 +16,12 @@ const PUBLICGROUP_TYPE = 'publicgroup';
 
 class AbstractRecipeGroups implements Recipe {
 
-
     /**
      * @description Function to filter the apex classes
      * @type {Function}
      * @private
      */ 
-    _filterFunction: Function;
+    private _filterFunction: Function;
 
     /**
      * @description Constructor letting us choose the type of apex classes to check
@@ -48,7 +47,7 @@ class AbstractRecipeGroups implements Recipe {
      * @returns {Array<string | DatasetRunInformation>} The datasets aliases that this recipe is using
      * @public
      */
-    extract(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public extract(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
         return [DatasetAliases.INTERNALACTIVEUSERS, DatasetAliases.PUBLICGROUPSANDQUEUES];
     }
 
@@ -60,7 +59,7 @@ class AbstractRecipeGroups implements Recipe {
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
+    public async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data and parameters
         const /** @type {Map<string, SFDC_Group>} */ groups: Map<string, SFDC_Group> = data.get(DatasetAliases.PUBLICGROUPSANDQUEUES);

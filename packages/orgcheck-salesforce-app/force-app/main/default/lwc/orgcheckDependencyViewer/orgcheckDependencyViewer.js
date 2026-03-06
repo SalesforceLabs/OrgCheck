@@ -1,10 +1,4 @@
 import { LightningElement, api } from 'lwc';
-import { 
-    DataDependencyItem, 
-    DataDependenciesForOneItem, 
-    Table, 
-    SortOrder, 
-    ColumnType } from '@dist/orgcheck';
 
 const ESCAPE_DATA = (unsafe) => {
     if (unsafe === undefined || Number.isNaN(unsafe) || unsafe === null) return '';
@@ -55,14 +49,12 @@ export default class OrgcheckDependencyViewer extends LightningElement {
 
     /**
      * @description List of items that are using the item
-     * @type {Array<DataDependencyItem>}
      * @public
      */ 
     dependencyUsingData;
 
     /**
      * @description List of items that are used the item
-     * @type {Array<DataDependencyItem>}
      * @public
      */ 
     dependencyUsedData;
@@ -124,25 +116,23 @@ export default class OrgcheckDependencyViewer extends LightningElement {
 
     /**
      * @description Table definition for the tabular view of dependencies
-     * @type {Table}
      * @public
      */ 
     dependencyTableDefinition = {
         columns: [
-            { label: '#',     type: ColumnType.IDX },
-            { label: 'Name',  type: ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'Type',  type: ColumnType.TXT, data: { value: 'type' }}
-
+            { label: '#',     type: 'index' },
+            { label: 'Name',  type: 'id', data: { value: 'url', label: 'name' }},
+            { label: 'Type',  type: 'text', data: { value: 'type' }}
         ],
         orderIndex: 1,
-        orderSort: SortOrder.ASC
+        orderSort: 'asc'
     };
 
     /**
      * @description Set information about the item and its dependencies and then open the modal
      * @param {string} whatId - Salesforce ID of the item
      * @param {string} whatName - Name of the item
-     * @param {DataDependenciesForOneItem} dependencies - Data dependencies of the item
+     * @param {any} dependencies - Data dependencies of the item
      * @public
      */ 
     @api open(whatId, whatName, dependencies) {

@@ -12,7 +12,7 @@
     "include": [
         "src/**/*.js",
         "tests/**/*.js"
-    ],
+, "src/ui/tabledefinitions/tableDefinitions.ts"    ],
     "exclude": [
         "node_modules"
     ]

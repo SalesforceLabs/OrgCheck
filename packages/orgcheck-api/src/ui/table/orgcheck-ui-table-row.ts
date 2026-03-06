@@ -1,23 +1,51 @@
 export interface Row {
 
-    /** @type {number} */
+    /** 
+     * @description Pre-calcultaed index of the row (needs to be recalculated when sroting for example!)
+     * @type {number} 
+     * @public
+     */
     index: number;
 
-    /** @type {string} */
+    /** 
+     * @description Name of the row
+     * @type {string} 
+     * @public
+     */
     name: string;
 
-    /** @type {number} */
+    /** 
+     * @description Score of the row if it has one
+     * @type {number} 
+     * @public
+     */
     score: number;
 
-    /** @type {Array<string>} */
+    /** 
+     * @description List of bad fields (must match column's value)
+    /* @type {Array<string>} 
+     * @public
+     */
     badFields: Array<string>;
 
-    /** @type {Array<string>} */
+    /** 
+     * @description List of reason id when this row is bad (can be empty, should not have duplicates)
+    /* @type {Array<string>} 
+     * @public
+     */
     badReasonIds: Array<string>;
 
-    /** @type {Array<any>} */
+    /** 
+     * @description List of cells in this row
+    /* @type {Array<any>}
+     * @public
+     */
     cells: Array<any>;
 
-    /** @type {boolean} */
+    /** 
+     * @description Flag used when filtering the table. Meaning is obvious.
+    /* @type {boolean} 
+     * @public
+     */
     isVisible: boolean;
 }

@@ -74,12 +74,7 @@ export class API implements ApiIntf {
      * @type {number}
      * @public
      */
-    get salesforceApiVersion(): number {
-        if (this._sfdcManager === undefined) {
-            throw new Error(`The salesforce manager was not defined in method salesforceApiVersion`);
-        }
-        return this._sfdcManager.apiVersion;
-    }
+    public readonly salesforceApiVersion: number;
     
     /**
      * @description Private Recipe Manager property used to run a recipe given its alias
@@ -144,7 +139,8 @@ export class API implements ApiIntf {
             throw new Error(`Setup is missing a salesforce property`); 
         }
         this._sfdcManager = new SalesforceManager(setup?.salesforce);
-        
+        this.salesforceApiVersion = this._sfdcManager.apiVersion;
+
         // --------------------
         // Cache Manager
         // --------------------
@@ -165,7 +161,7 @@ export class API implements ApiIntf {
      * @description Remove all cache from dataset manager
      * @public
      */
-    removeAllFromCache() {
+    public removeAllFromCache() {
         this._cacheManager.clear();
     }
 
@@ -174,7 +170,7 @@ export class API implements ApiIntf {
      * @returns {Array<DataCacheItemIntf>} list of cache information 
      * @public
      */
-    getCacheInformation(): Array<DataCacheItemIntf> {
+    public getCacheInformation(): Array<DataCacheItemIntf> {
         return this._cacheManager.details();
     }
 
@@ -184,7 +180,7 @@ export class API implements ApiIntf {
      * @returns {any} cached data 
      * @public
      */
-    getCacheData(itemName: string): any {
+    public getCacheData(itemName: string): any {
         return this._cacheManager.get(itemName);
     }
 
@@ -193,7 +189,7 @@ export class API implements ApiIntf {
      * @returns {DataMatrixIntf} Information about score rules as a matrix
      * @public
      */
-    getAllScoreRulesAsDataMatrix(): DataMatrixIntf {
+    public getAllScoreRulesAsDataMatrix(): DataMatrixIntf {
         const workingMatrix = DataMatrixFactory.create();
         SecretSauce.AllScoreRules.forEach((rule) => {
             workingMatrix.setRowHeader(`${rule.id}`, rule);
@@ -213,7 +209,7 @@ export class API implements ApiIntf {
      * @returns {SalesforceUsageInformationIntf} Percentage of the daily api usage and a confidence precentage.
      * @public
      */
-    get dailyApiRequestLimitInformation(): SalesforceUsageInformationIntf {
+    public get dailyApiRequestLimitInformation(): SalesforceUsageInformationIntf {
         return this._sfdcManager.dailyApiRequestLimitInformation;
     }
 
@@ -242,7 +238,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async compileClasses(apexClassIds: Array<string>): Promise<Map<string, { isSuccess: boolean; reasons?: Array<string>; }>> {
+    public async compileClasses(apexClassIds: Array<string>): Promise<Map<string, { isSuccess: boolean; reasons?: Array<string>; }>> {
         if (this._logger === undefined) {
             throw new Error(`The logger was not defined in method compileClasses`);
         }
@@ -260,7 +256,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getOrganizationInformation(): Promise<SFDC_Organization> {
+    public async getOrganizationInformation(): Promise<SFDC_Organization> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.ORGANIZATION));
     }
@@ -272,7 +268,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async checkUsageTerms(): Promise<boolean> {
+    public async checkUsageTerms(): Promise<boolean> {
         const orgInfo = (await this.getOrganizationInformation());
         if (orgInfo.isProduction === true && this._usageTermsAcceptedManually === false) {
             return false;
@@ -285,7 +281,7 @@ export class API implements ApiIntf {
      * @returns {boolean} true if the usage terms were accepted manually, false otherwise
      * @public
      */
-    wereUsageTermsAcceptedManually(): boolean {
+    public wereUsageTermsAcceptedManually(): boolean {
         return this._usageTermsAcceptedManually;
     }
 
@@ -293,7 +289,7 @@ export class API implements ApiIntf {
      * @description Accept manually the usage terms
      * @public
      */
-    acceptUsageTermsManually() {
+    public acceptUsageTermsManually() {
         this._usageTermsAcceptedManually = true;
     }
 
@@ -304,7 +300,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async checkCurrentUserPermissions(): Promise<boolean> {
+    public async checkCurrentUserPermissions(): Promise<boolean> {
         // @ts-ignore
         const /** @type {Map} */ perms: Map = (await this._recipeManager.run(RecipeAliases.CURRENT_USER_PERMISSIONS, new Map([
             [OrgCheckGlobalParameter.SYSTEM_PERMISSIONS_LIST, [ 'ModifyAllData', 'AuthorApex', 'ApiEnabled', 'InstallPackaging' ]]
@@ -328,7 +324,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getPackages(): Promise<Array<SFDC_Package>> {
+    public async getPackages(): Promise<Array<SFDC_Package>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PACKAGES));
     }
@@ -337,7 +333,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about packages
      * @public
      */
-    removeAllPackagesFromCache() {
+    public removeAllPackagesFromCache() {
         this._recipeManager.clean(RecipeAliases.PACKAGES);
     }
 
@@ -351,7 +347,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getPageLayouts(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_PageLayout>> {
+    public async getPageLayouts(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_PageLayout>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PAGE_LAYOUTS, new Map([
             [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
@@ -364,7 +360,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about page layouts
      * @public
      */
-    removeAllPageLayoutsFromCache() {
+    public removeAllPageLayoutsFromCache() {
         this._recipeManager.clean(RecipeAliases.PAGE_LAYOUTS);
     }
 
@@ -375,7 +371,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getObjectTypes(): Promise<Array<SFDC_ObjectType>> {
+    public async getObjectTypes(): Promise<Array<SFDC_ObjectType>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.OBJECT_TYPES));
     }
@@ -389,7 +385,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getObjects(namespace: string, sobjectType: string): Promise<Array<SFDC_Object>> {
+    public async getObjects(namespace: string, sobjectType: string): Promise<Array<SFDC_Object>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.OBJECTS, new Map([
             [OrgCheckGlobalParameter.PACKAGE_NAME, namespace],
@@ -401,7 +397,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about objects
      * @public
      */
-    removeAllObjectsFromCache() {
+    public removeAllObjectsFromCache() {
         this._recipeManager.clean(RecipeAliases.OBJECTS);
     }
 
@@ -413,7 +409,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getObject(sobject: string): Promise<SFDC_Object> {
+    public async getObject(sobject: string): Promise<SFDC_Object> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.OBJECT, new Map([
             [OrgCheckGlobalParameter.SOBJECT_NAME, sobject]
@@ -425,7 +421,7 @@ export class API implements ApiIntf {
      * @param {string} sobject - the name of the sobject to remove from cache
      * @public
      */
-    removeObjectFromCache(sobject: string) {
+    public removeObjectFromCache(sobject: string) {
         this._recipeManager.clean(RecipeAliases.OBJECT, new Map([[OrgCheckGlobalParameter.SOBJECT_NAME, sobject]]));
     }
 
@@ -437,7 +433,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getObjectPermissionsPerParent(namespace: string): Promise<DataMatrixIntf> {
+    public async getObjectPermissionsPerParent(namespace: string): Promise<DataMatrixIntf> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.OBJECT_PERMISSIONS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -448,7 +444,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about object permissions
      * @public
      */
-    removeAllObjectPermissionsFromCache() {
+    public removeAllObjectPermissionsFromCache() {
         this._recipeManager.clean(RecipeAliases.OBJECT_PERMISSIONS);
     }
 
@@ -460,7 +456,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getApplicationPermissionsPerParent(namespace: string): Promise<DataMatrixIntf> {
+    public async getApplicationPermissionsPerParent(namespace: string): Promise<DataMatrixIntf> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.APP_PERMISSIONS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -471,7 +467,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about application permissions
      * @public
      */
-    removeAllAppPermissionsFromCache() {
+    public removeAllAppPermissionsFromCache() {
         this._recipeManager.clean(RecipeAliases.APP_PERMISSIONS);
     }
 
@@ -482,7 +478,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getKnowledgeArticles(): Promise<Array<SFDC_KnowledgeArticle>> {
+    public async getKnowledgeArticles(): Promise<Array<SFDC_KnowledgeArticle>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.KNOWLEDGE_ARTICLES));
     }
@@ -491,7 +487,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about knowledge articles
      * @public
      */
-    removeAllKnowledgeArticlesFromCache() {
+    public removeAllKnowledgeArticlesFromCache() {
         this._recipeManager.clean(RecipeAliases.KNOWLEDGE_ARTICLES);
     }    
 
@@ -502,7 +498,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getChatterGroups(): Promise<Array<SFDC_CollaborationGroup>> {
+    public async getChatterGroups(): Promise<Array<SFDC_CollaborationGroup>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.COLLABORATION_GROUPS));
     }
@@ -511,7 +507,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about Chatter groups
      * @public
      */
-    removeAllChatterGroupsFromCache() {
+    public removeAllChatterGroupsFromCache() {
         this._recipeManager.clean(RecipeAliases.COLLABORATION_GROUPS);
     }    
 
@@ -525,7 +521,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getCustomFields(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_Field>> {
+    public async getCustomFields(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_Field>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.CUSTOM_FIELDS, new Map([
             [OrgCheckGlobalParameter.PACKAGE_NAME, namespace], 
@@ -538,7 +534,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about custom fields
      * @public
      */
-    removeAllCustomFieldsFromCache() {
+    public removeAllCustomFieldsFromCache() {
         this._recipeManager.clean(RecipeAliases.CUSTOM_FIELDS);
     }
 
@@ -550,7 +546,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getPermissionSets(namespace: string): Promise<Array<SFDC_PermissionSet>> {
+    public async getPermissionSets(namespace: string): Promise<Array<SFDC_PermissionSet>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PERMISSION_SETS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -561,7 +557,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about permission sets
      * @public
      */
-    removeAllPermSetsFromCache() {
+    public removeAllPermSetsFromCache() {
         this._recipeManager.clean(RecipeAliases.PERMISSION_SETS);
     }
 
@@ -572,7 +568,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getPermissionSetLicenses(): Promise<Array<SFDC_PermissionSetLicense>> {
+    public async getPermissionSetLicenses(): Promise<Array<SFDC_PermissionSetLicense>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PERMISSION_SET_LICENSES));
     }
@@ -581,7 +577,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about permission set licenses
      * @public
      */
-    removeAllPermSetLicensesFromCache() {
+    public removeAllPermSetLicensesFromCache() {
         this._recipeManager.clean(RecipeAliases.PERMISSION_SET_LICENSES);
     }
 
@@ -593,7 +589,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getProfiles(namespace: string): Promise<Array<SFDC_Profile>> {
+    public async getProfiles(namespace: string): Promise<Array<SFDC_Profile>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PROFILES, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -604,7 +600,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about profiles
      * @public
      */
-    removeAllProfilesFromCache() {
+    public removeAllProfilesFromCache() {
         this._recipeManager.clean(RecipeAliases.PROFILES);
     }
 
@@ -616,7 +612,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getProfileRestrictions(namespace: string): Promise<Array<SFDC_ProfileRestrictions>> {
+    public async getProfileRestrictions(namespace: string): Promise<Array<SFDC_ProfileRestrictions>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PROFILE_RESTRICTIONS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -627,7 +623,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about profile restrictions
      * @public
      */
-    removeAllProfileRestrictionsFromCache() {
+    public removeAllProfileRestrictionsFromCache() {
         this._recipeManager.clean(RecipeAliases.PROFILE_RESTRICTIONS);
     }
 
@@ -638,7 +634,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getProfilePasswordPolicies(): Promise<Array<SFDC_ProfilePasswordPolicy>> {
+    public async getProfilePasswordPolicies(): Promise<Array<SFDC_ProfilePasswordPolicy>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PROFILE_PWD_POLICIES));
     }
@@ -647,7 +643,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about profile password policies
      * @public
      */
-    removeAllProfilePasswordPoliciesFromCache() {
+    public removeAllProfilePasswordPoliciesFromCache() {
         this._recipeManager.clean(RecipeAliases.PROFILE_PWD_POLICIES);
     }
 
@@ -658,7 +654,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getActiveUsers(): Promise<Array<SFDC_User>> {
+    public async getActiveUsers(): Promise<Array<SFDC_User>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.INTERNAL_ACTIVE_USERS));
     }
@@ -667,7 +663,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about active users
      * @public
      */
-    removeAllActiveUsersFromCache() {
+    public removeAllActiveUsersFromCache() {
         this._recipeManager.clean(RecipeAliases.INTERNAL_ACTIVE_USERS);
     }
 
@@ -678,7 +674,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getBrowsers(): Promise<Array<SFDC_Browser>> {
+    public async getBrowsers(): Promise<Array<SFDC_Browser>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.BROWSERS));
     }
@@ -687,7 +683,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about browsers
      * @public
      */
-    removeAllBrowsersFromCache() {
+    public removeAllBrowsersFromCache() {
         this._recipeManager.clean(RecipeAliases.BROWSERS);
     }
 
@@ -699,7 +695,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getCustomLabels(namespace: string): Promise<Array<SFDC_CustomLabel>> {
+    public async getCustomLabels(namespace: string): Promise<Array<SFDC_CustomLabel>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.CUSTOM_LABELS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -710,7 +706,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about custom labels
      * @public
      */
-    removeAllCustomLabelsFromCache() {
+    public removeAllCustomLabelsFromCache() {
         this._recipeManager.clean(RecipeAliases.CUSTOM_LABELS);
     }
 
@@ -722,7 +718,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getCustomTabs(namespace: string): Promise<Array<SFDC_CustomTab>> {
+    public async getCustomTabs(namespace: string): Promise<Array<SFDC_CustomTab>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.CUSTOM_TABS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -733,7 +729,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about custom tabs
      * @public
      */
-    removeAllCustomTabsFromCache() {
+    public removeAllCustomTabsFromCache() {
         this._recipeManager.clean(RecipeAliases.CUSTOM_TABS);
     }
 
@@ -745,7 +741,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getDocuments(namespace: string): Promise<Array<SFDC_Document>> {
+    public async getDocuments(namespace: string): Promise<Array<SFDC_Document>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.DOCUMENTS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -756,7 +752,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about documents
      * @public
      */
-    removeAllDocumentsFromCache() {
+    public removeAllDocumentsFromCache() {
         this._recipeManager.clean(RecipeAliases.DOCUMENTS);
     }
 
@@ -768,7 +764,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getLightningWebComponents(namespace: string): Promise<Array<SFDC_LightningWebComponent>> {
+    public async getLightningWebComponents(namespace: string): Promise<Array<SFDC_LightningWebComponent>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.LIGHTNING_WEB_COMPONENTS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -779,7 +775,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about lightning web components
      * @public
      */
-    removeAllLightningWebComponentsFromCache() {
+    public removeAllLightningWebComponentsFromCache() {
         this._recipeManager.clean(RecipeAliases.LIGHTNING_WEB_COMPONENTS);
     }
 
@@ -791,7 +787,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getLightningAuraComponents(namespace: string): Promise<Array<SFDC_LightningAuraComponent>> {
+    public async getLightningAuraComponents(namespace: string): Promise<Array<SFDC_LightningAuraComponent>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.LIGHTNING_AURA_COMPONENTS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -802,7 +798,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about lightning aura components
      * @public
      */
-    removeAllLightningAuraComponentsFromCache() {
+    public removeAllLightningAuraComponentsFromCache() {
         this._recipeManager.clean(RecipeAliases.LIGHTNING_AURA_COMPONENTS);
     }
 
@@ -814,7 +810,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getLightningPages(namespace: string): Promise<Array<SFDC_LightningPage>> {
+    public async getLightningPages(namespace: string): Promise<Array<SFDC_LightningPage>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.LIGHTNING_PAGES, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -825,7 +821,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about lightning pages
      * @public
      */
-    removeAllLightningPagesFromCache() {
+    public removeAllLightningPagesFromCache() {
         this._recipeManager.clean(RecipeAliases.LIGHTNING_PAGES);
     }
     
@@ -837,7 +833,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getVisualForceComponents(namespace: string): Promise<Array<SFDC_VisualForceComponent>> {
+    public async getVisualForceComponents(namespace: string): Promise<Array<SFDC_VisualForceComponent>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.VISUALFORCE_COMPONENTS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -848,7 +844,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about Visualforce Components
      * @public
      */
-    removeAllVisualForceComponentsFromCache() {
+    public removeAllVisualForceComponentsFromCache() {
         this._recipeManager.clean(RecipeAliases.VISUALFORCE_COMPONENTS);
     }
 
@@ -860,7 +856,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getVisualForcePages(namespace: string): Promise<Array<SFDC_VisualForcePage>> {
+    public async getVisualForcePages(namespace: string): Promise<Array<SFDC_VisualForcePage>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.VISUALFORCE_PAGES, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -871,7 +867,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about Visualforce Pages
      * @public
      */
-    removeAllVisualForcePagesFromCache() {
+    public removeAllVisualForcePagesFromCache() {
         this._recipeManager.clean(RecipeAliases.VISUALFORCE_PAGES);
     }
     
@@ -882,7 +878,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getPublicGroups(): Promise<Array<SFDC_Group>> {
+    public async getPublicGroups(): Promise<Array<SFDC_Group>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PUBLIC_GROUPS));
     }
@@ -891,7 +887,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about public groups
      * @public
      */
-    removeAllPublicGroupsFromCache() {
+    public removeAllPublicGroupsFromCache() {
         this._recipeManager.clean(RecipeAliases.PUBLIC_GROUPS);
     }
 
@@ -902,7 +898,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getQueues(): Promise<Array<SFDC_Group>> {
+    public async getQueues(): Promise<Array<SFDC_Group>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.QUEUES));
     }
@@ -911,7 +907,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about queues
      * @public
      */
-    removeAllQueuesFromCache() {
+    public removeAllQueuesFromCache() {
         this._recipeManager.clean(RecipeAliases.QUEUES);
     }
 
@@ -923,7 +919,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getApexClasses(namespace: string): Promise<Array<SFDC_ApexClass>> {
+    public async getApexClasses(namespace: string): Promise<Array<SFDC_ApexClass>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.APEX_CLASSES, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -934,7 +930,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about apex classes
      * @public
      */
-    removeAllApexClassesFromCache() {
+    public removeAllApexClassesFromCache() {
         this._recipeManager.clean(RecipeAliases.APEX_CLASSES);
     }
 
@@ -946,7 +942,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getApexTests(namespace: string): Promise<Array<SFDC_ApexClass>> {
+    public async getApexTests(namespace: string): Promise<Array<SFDC_ApexClass>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.APEX_TESTS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -957,7 +953,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about apex tests
      * @public
      */
-    removeAllApexTestsFromCache() {
+    public removeAllApexTestsFromCache() {
         this._recipeManager.clean(RecipeAliases.APEX_TESTS);
     }
 
@@ -969,7 +965,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getApexUncompiled(namespace: string): Promise<Array<SFDC_ApexClass>> {
+    public async getApexUncompiled(namespace: string): Promise<Array<SFDC_ApexClass>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.APEX_UNCOMPILED, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -980,7 +976,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about apex uncompiled classes
      * @public
      */
-    removeAllApexUncompiledFromCache() {
+    public removeAllApexUncompiledFromCache() {
         this._recipeManager.clean(RecipeAliases.APEX_UNCOMPILED);
     }
 
@@ -992,7 +988,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getApexTriggers(namespace: string): Promise<Array<SFDC_ApexTrigger>> {
+    public async getApexTriggers(namespace: string): Promise<Array<SFDC_ApexTrigger>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.APEX_TRIGGERS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -1003,7 +999,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about apex triggers
      * @public
      */
-    removeAllApexTriggersFromCache() {
+    public removeAllApexTriggersFromCache() {
         this._recipeManager.clean(RecipeAliases.APEX_TRIGGERS);
     }
 
@@ -1014,7 +1010,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getRoles(): Promise<Array<SFDC_UserRole>> {
+    public async getRoles(): Promise<Array<SFDC_UserRole>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.USER_ROLES));
     }
@@ -1023,7 +1019,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about roles
      * @public
      */
-    removeAllRolesFromCache() {
+    public removeAllRolesFromCache() {
         this._recipeManager.clean(RecipeAliases.USER_ROLES);
     }
 
@@ -1034,7 +1030,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getRolesTree(): Promise<SFDC_UserRole> {
+    public async getRolesTree(): Promise<SFDC_UserRole> {
         // Get data
         const allRoles = (await this.getRoles());
         // @ts-ignore
@@ -1079,7 +1075,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getStaticResources(namespace: string): Promise<Array<SFDC_StaticResource>> {
+    public async getStaticResources(namespace: string): Promise<Array<SFDC_StaticResource>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.STATIC_RESOURCES, new Map([
             [OrgCheckGlobalParameter.PACKAGE_NAME, namespace]
@@ -1090,7 +1086,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about Static Resources
      * @public
      */
-    removeAllStaticResourcesFromCache() {
+    public removeAllStaticResourcesFromCache() {
         this._recipeManager.clean(RecipeAliases.STATIC_RESOURCES);
     }
 
@@ -1104,7 +1100,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getWeblinks(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_WebLink>> {
+    public async getWeblinks(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_WebLink>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.WEBLINKS, new Map([
             [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
@@ -1117,7 +1113,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about WebLinks
      * @public
      */
-    removeAllWeblinksFromCache() {
+    public removeAllWeblinksFromCache() {
         this._recipeManager.clean(RecipeAliases.WEBLINKS);
     }    
 
@@ -1128,7 +1124,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getWorkflows(): Promise<Array<SFDC_Workflow>> {
+    public async getWorkflows(): Promise<Array<SFDC_Workflow>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.WORKFLOWS));
     }
@@ -1137,7 +1133,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about workflows
      * @public
      */
-    removeAllWorkflowsFromCache() {
+    public removeAllWorkflowsFromCache() {
         this._recipeManager.clean(RecipeAliases.WORKFLOWS);
     }
 
@@ -1151,7 +1147,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getRecordTypes(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_RecordType>> {
+    public async getRecordTypes(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_RecordType>> {
         // @ts-ignore    
         return (await this._recipeManager.run(RecipeAliases.RECORD_TYPES, new Map([
             [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
@@ -1164,7 +1160,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about record types
      * @public
      */
-    removeAllRecordTypesFromCache() {
+    public removeAllRecordTypesFromCache() {
         this._recipeManager.clean(RecipeAliases.RECORD_TYPES);
     }
 
@@ -1177,7 +1173,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getFieldPermissionsPerParent(sobject: string, namespace: string): Promise<DataMatrixIntf> {
+    public async getFieldPermissionsPerParent(sobject: string, namespace: string): Promise<DataMatrixIntf> {
         // @ts-ignore    
         return (await this._recipeManager.run(RecipeAliases.FIELD_PERMISSIONS, new Map([
             [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
@@ -1189,7 +1185,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about field permissions
      * @public
      */
-    removeAllFieldPermissionsFromCache() {
+    public removeAllFieldPermissionsFromCache() {
         this._recipeManager.clean(RecipeAliases.FIELD_PERMISSIONS);
     }
 
@@ -1200,7 +1196,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getFlows(): Promise<Array<SFDC_Flow>> {
+    public async getFlows(): Promise<Array<SFDC_Flow>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.FLOWS));
     }
@@ -1209,7 +1205,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about flows
      * @public
      */
-    removeAllFlowsFromCache() {
+    public removeAllFlowsFromCache() {
         this._recipeManager.clean(RecipeAliases.FLOWS);
     }
     
@@ -1221,7 +1217,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getEmailTemplates(namespace: string): Promise<Array<SFDC_EmailTemplate>> {
+    public async getEmailTemplates(namespace: string): Promise<Array<SFDC_EmailTemplate>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.EMAIL_TEMPLATES, new Map([
             [OrgCheckGlobalParameter.PACKAGE_NAME, namespace]
@@ -1232,7 +1228,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about email template
      * @public
      */
-    removeAllEmailTemplatesFromCache() {
+    public removeAllEmailTemplatesFromCache() {
         this._recipeManager.clean(RecipeAliases.EMAIL_TEMPLATES);
     }
 
@@ -1243,7 +1239,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getHomePageComponents(): Promise<Array<SFDC_HomePageComponent>> {
+    public async getHomePageComponents(): Promise<Array<SFDC_HomePageComponent>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.HOME_PAGE_COMPONENTS));
     }
@@ -1252,7 +1248,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about home page components
      * @public
      */
-    removeAllHomePageComponentsFromCache() {
+    public removeAllHomePageComponentsFromCache() {
         this._recipeManager.clean(RecipeAliases.HOME_PAGE_COMPONENTS);
     }
 
@@ -1263,7 +1259,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getProcessBuilders(): Promise<Array<SFDC_Flow>> {
+    public async getProcessBuilders(): Promise<Array<SFDC_Flow>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PROCESS_BUILDERS));
     }
@@ -1272,7 +1268,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about process builders
      * @public
      */
-    removeAllProcessBuildersFromCache() {
+    public removeAllProcessBuildersFromCache() {
         this._recipeManager.clean(RecipeAliases.PROCESS_BUILDERS);
     }
     
@@ -1286,7 +1282,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getValidationRules(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_ValidationRule>> {
+    public async getValidationRules(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_ValidationRule>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.VALIDATION_RULES, new Map([
             [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
@@ -1299,7 +1295,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about validation rules
      * @public
      */
-    removeAllValidationRulesFromCache() {
+    public removeAllValidationRulesFromCache() {
         this._recipeManager.clean(RecipeAliases.VALIDATION_RULES);
     }
 
@@ -1310,7 +1306,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getDashboards(): Promise<Array<SFDC_Dashboard>> {
+    public async getDashboards(): Promise<Array<SFDC_Dashboard>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.DASHBOARDS));
     }
@@ -1319,7 +1315,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about dashboards
      * @public
      */
-    removeAllDashboardsFromCache() {
+    public removeAllDashboardsFromCache() {
         this._recipeManager.clean(RecipeAliases.DASHBOARDS);
     }
 
@@ -1330,7 +1326,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getReports(): Promise<Array<SFDC_Report>> {
+    public async getReports(): Promise<Array<SFDC_Report>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.REPORTS));
     }
@@ -1339,7 +1335,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about reports
      * @public
      */
-    removeAllReportsFromCache() {
+    public removeAllReportsFromCache() {
         this._recipeManager.clean(RecipeAliases.REPORTS);
     }
 
@@ -1350,7 +1346,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getGlobalView(): Promise<Map<string, DataCollectionStatisticsIntf>> {
+    public async getGlobalView(): Promise<Map<string, DataCollectionStatisticsIntf>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.GLOBAL_VIEW));
     }
@@ -1359,7 +1355,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about global view
      * @public
      */
-    removeGlobalViewFromCache() {
+    public removeGlobalViewFromCache() {
         this._recipeManager.clean(RecipeAliases.GLOBAL_VIEW);
     }
 
@@ -1370,7 +1366,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    async getHardcodedURLsView(): Promise<Map<string, DataCollectionStatisticsIntf>> {
+    public async getHardcodedURLsView(): Promise<Map<string, DataCollectionStatisticsIntf>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.HARDCODED_URLS_VIEW));
     }
@@ -1379,7 +1375,7 @@ export class API implements ApiIntf {
      * @description Remove all the cached information about hardcoded URLs view
      * @public
      */
-    removeHardcodedURLsFromCache() {
+    public removeHardcodedURLsFromCache() {
         this._recipeManager.clean(RecipeAliases.HARDCODED_URLS_VIEW);
     }
 }

@@ -1,7 +1,9 @@
-import { Table, SortOrder, ExportedTable } from 'src/ui/table/orgcheck-ui-table';
-import { CellFactory } from 'src/ui/table/orgcheck-ui-table-cell';
-import { ColumnType } from 'src/ui/table/orgcheck-ui-table-column';
+import { Table, ExportedTable } from 'src/ui/table/orgcheck-ui-table';
+import { CellFactory } from 'src/ui/table/orgcheck-ui-table-cellfactory';
 import { Row } from 'src/ui/table/orgcheck-ui-table-row';
+import { ColumnType } from 'src/ui/table/orgcheck-ui-table-columntype';
+import { SortOrder } from 'src/ui/table/orgcheck-ui-table-sortorder';
+import { SecretSauce } from 'src/api/core/orgcheck-api-secretsauce';
 
 export class RowsFactory {
 
@@ -107,10 +109,9 @@ export class RowsFactory {
      * @param {Table} tableDefintion - Definition of the table
      * @param {Array<Row>} rows - List of rows
      * @param {string} title - Title of the exported table
-     * @param {Function} badScoreLabelById - Function to get the label of a bad score
      * @returns {ExportedTable} Exported table
      */ 
-    static export(tableDefintion: Table, rows: Array<Row>, title: string, badScoreLabelById: Function): ExportedTable {
+    static export(tableDefintion: Table, rows: Array<Row>, title: string): ExportedTable {
 
         /** @type {ExportedTable} */
         const exportedRows: ExportedTable = { header: title, columns: [], rows: [] };
@@ -159,7 +160,7 @@ export class RowsFactory {
                 if (cell?.typeofindex === true) { // for INDEX typed cell, we set the row's index
                     exportRow.push(`${row?.index}`);
                 } else if (cell?.typeofscore === true) { // for SCORE typed cell, we set the row's score and we add a JSON representation of the list of bad reason Ids
-                    exportRow.push(`${row?.score}`, ARRAY_TO_STRING(row?.badReasonIds?.map((id) => badScoreLabelById(id))));
+                    exportRow.push(`${row?.score}`, ARRAY_TO_STRING(row?.badReasonIds?.map((id) => SecretSauce.GetScoreRuleDescription(Number.parseInt(id)))));
                 } else if (cell?.typeofid === true) { // for URL typed cell, we set the label and then the URL
                     exportRow.push(`${cell?.data?.label}`, `${cell.data?.value}`);
                 } else if (cell?.typeofids === true) { // for multiple URLs typed cell, we set a JSON representation of the labels and then a JSON representation of the URLs
@@ -191,13 +192,12 @@ export class RowsFactory {
      * @param {Table} tableDefintion - Definition of the table
      * @param {Array<any>} records - List of records
      * @param {string} title - Title of the exported table
-     * @param {Function} badScoreLabelById - Function to get the label of a bad score
      * @returns {ExportedTable} Exported table
      */ 
-    static createAndExport(tableDefintion: Table, records: Array<any>, title: string, badScoreLabelById: Function): ExportedTable {
+    static createAndExport(tableDefintion: Table, records: Array<any>, title: string): ExportedTable {
         const donothing = () => {};
         const rows = RowsFactory.create(tableDefintion, records, donothing, donothing);
-        return RowsFactory.export(tableDefintion, rows, title, badScoreLabelById);
+        return RowsFactory.export(tableDefintion, rows, title);
     }
 }
 

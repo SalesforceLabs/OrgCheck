@@ -7,19 +7,19 @@ export class DatasetRunInformation {
      * @type {string}
      * @public
      */
-    alias: string;
+    public readonly alias: string;
 
     /**
      * @type {string}
      * @public
      */
-    cacheKey: string;
+    public readonly cacheKey: string;
 
     /**
      * @type {Map<string, any>}
      * @public
      */
-    parameters: Map<string, any>;
+    public readonly parameters: Map<string, any>;
     
     /**
      * @description Constructor

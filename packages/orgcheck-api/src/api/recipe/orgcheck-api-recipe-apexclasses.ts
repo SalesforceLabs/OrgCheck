@@ -23,7 +23,7 @@ class AbstractRecipeApexClasses implements Recipe {
      * @type {Function}
      * @private
      */ 
-    _filterFunction: Function;
+    private _filterFunction: Function;
 
     /**
      * @description Constructor letting us choose the type of apex classes to check
@@ -53,7 +53,7 @@ class AbstractRecipeApexClasses implements Recipe {
      * @returns {Array<string | DatasetRunInformation>} The datasets aliases that this recipe is using
      * @public
      */
-    extract(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public extract(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
         return [
             DatasetAliases.APEXCLASSES
         ];
@@ -68,7 +68,7 @@ class AbstractRecipeApexClasses implements Recipe {
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
+    public async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data and parameters
         const /** @type {Map<string, SFDC_ApexClass>} */ apexClasses: Map<string, SFDC_ApexClass> = data.get(DatasetAliases.APEXCLASSES);

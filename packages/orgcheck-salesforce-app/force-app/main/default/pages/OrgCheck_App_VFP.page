@@ -134,22 +134,16 @@
             const divJokes = document.getElementById('orgcheck-jokes');
             let iCar = 0;
             const iId = setInterval(() => {
-                const c = jokeContent.charAt(iCar++);
-                divJokes.innerHTML += c === '\n' ? '<br />' : c;
-                if (iCar >= jokeContent.length - 2) {
+                if (iCar < jokeContent.length) {
+                    // there are still some characters to display, let's keep going
+                    const c = jokeContent.charAt(iCar++);
+                    divJokes.innerHTML += c === '\n' ? '<br />' : c;
+                } else {
+                    // stop the interval -- we are done with the jokes content
                     clearInterval(iId);
                 }
-            }, 55);
+            }, 55); // display the jokes one character at a time for a typewriter effect -- 55 milliseconds is the sweet spot
         }, true);
-        
-        /* Reset the cache of previous versions of Org Check that used VFP localStorage (before LWC impl.) */
-        try {
-            Object.keys(localStorage)
-                .filter(e => e.startsWith('OrgCheck.'))
-                .forEach(e => localStorage.removeItem(e));
-        } catch (e) {
-            console.error('For your information, I had an error while resetting the cache of previous Org Check versions (prior to Lithium).')
-        }
 
         /* Determine the namespace where the app is running (if local/standalone the package is 'c') */ 
         const firstSubDomain = document.location.host.split('.')[0];
@@ -162,22 +156,33 @@
         
         /* Load the app */
         function loadOrgCheckApp() {
-            $Lightning.use(app, () => {
-                $Lightning.createComponent(
-                    component, 
-                    { 
-                        accessToken: '{! JSENCODE($Api.Session_Id) }', 
-                        userId: '{! JSENCODE($User.Id) }',
-                        textEncoder: new TextEncoder(),
-                        textDecoder: new TextDecoder(),
-                        localStorage: window.localStorage
-                    },
-                    'orgcheck-app',
-                    () => {
-                        document.getElementById('orgcheck-loading-box').remove();
+            try {
+                $Lightning.use(app, () => {
+                    try {
+                        $Lightning.createComponent(
+                            // type --------------------------------
+                            component,
+                            // attributes --------------------------
+                            { 
+                                accessToken: '{! JSENCODE($Api.Session_Id) }', 
+                                localStorage: window.localStorage
+                            },
+                            // domLocator --------------------------
+                            'orgcheck-app',
+                            // callback ----------------------------
+                            (cmp, status, errorMessage) => {
+                                console.info('Log when callback is called:', cmp, status, errorMessage);
+                                if (errorMessage) console.error(errorMessage);
+                                document.getElementById('orgcheck-loading-box').remove();
+                            }
+                        );
+                    } catch (error) {
+                        console.error('Error while calling Lightning.createComponent()', error);
                     }
-                );
-            });
+                });
+            } catch (error) {
+                console.error('Error while calling Lightning.use()', error);
+            }
         }
 
         /* Launch the app for real */

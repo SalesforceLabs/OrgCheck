@@ -14,14 +14,14 @@ export class Logger implements LoggerIntf {
      * @type {BasicLoggerIntf}
      * @private
      */
-    _logger: BasicLoggerIntf;
+    private _logger: BasicLoggerIntf;
 
     /**
      * @description Is the failed logging enabled?
      * @type {boolean}
      * @private
      */
-    _enabledFailed: boolean = true;
+    private _enabledFailed: boolean = true;
 
     /**
      * @description Constructor
@@ -35,7 +35,7 @@ export class Logger implements LoggerIntf {
      * @description Returns true if the logger is a console fallback logger
      * @returns {boolean} True if the logger is a console fallback logger
      */
-    isConsoleFallback(): boolean {
+    public isConsoleFallback(): boolean {
         return this._logger?.isConsoleFallback();
     }
 
@@ -44,7 +44,7 @@ export class Logger implements LoggerIntf {
      * @param {string} operationName - The name of the operation
      * @param {string} [message] - The message to log
      */
-    log(operationName: string, message: string) { 
+    public log(operationName: string, message: string) { 
         if (this._logger?.isConsoleFallback()) {
             CONSOLE_LOG(operationName, 'LOG', message);
         }
@@ -56,7 +56,7 @@ export class Logger implements LoggerIntf {
      * @param {string} operationName - The name of the operation
      * @param {string} [message] - The message to log
      */
-    ended(operationName: string, message: string) { 
+    public ended(operationName: string, message: string) { 
         if (this._logger?.isConsoleFallback()) {
             CONSOLE_LOG(operationName, 'ENDED', message);
         }
@@ -69,7 +69,7 @@ export class Logger implements LoggerIntf {
      * @param {Error | string} [error] - The error to log
      * @public
      */
-    failed(operationName: string, error: Error | string) { 
+    public failed(operationName: string, error: Error | string) { 
         if (this._enabledFailed === true) {
             if (this._logger?.isConsoleFallback()) {
                 CONSOLE_LOG(operationName, 'FAILED', error);
@@ -83,7 +83,7 @@ export class Logger implements LoggerIntf {
      * @param {boolean} [flag] - Enable or disable the failed logging
      * @public
      */
-    enableFailed(flag: boolean=true) { 
+    public enableFailed(flag: boolean=true) { 
         this._enabledFailed = (flag === true);
     }
 
@@ -92,7 +92,7 @@ export class Logger implements LoggerIntf {
      * @param {string} operationName - The name of the operation
      * @returns {SimpleLoggerIntf} The simple logger created from the logger for that specific section
      */ 
-    toSimpleLogger(operationName: string): SimpleLoggerIntf {
+    public toSimpleLogger(operationName: string): SimpleLoggerIntf {
         return { 
             log: (message) => { 
                 if (this._logger?.isConsoleFallback() ?? true) {

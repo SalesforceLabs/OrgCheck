@@ -158,25 +158,25 @@ export class DataFactoryInstance implements DataFactoryInstanceIntf {
      * @type {DataAliases} 
      * @private
      */
-    _dataAlias: DataAliases;
+    private _dataAlias: DataAliases;
 
     /**
      * @type {Array<ScoreRule>} 
      * @private
      */
-    _scoreRules: Array<ScoreRule>;
+    private _scoreRules: Array<ScoreRule>;
 
     /**
      * @type {boolean} 
      * @private
      */
-    _isDependenciesNeeded: boolean;
+    private _isDependenciesNeeded: boolean;
 
     /**
      * @type {Function}
      * @private
      */
-    _caster: Function;
+    private _caster: Function;
 
     /**
      * @description Constructor
@@ -199,7 +199,7 @@ export class DataFactoryInstance implements DataFactoryInstanceIntf {
      * @throws if configuration is null or configuration.properties is null
      * @public
      */
-    create(setup: DataFactoryInstanceCreateSetup | DataFactoryInstanceCreateSetup_WithDependencies): any {
+    public create(setup: DataFactoryInstanceCreateSetup | DataFactoryInstanceCreateSetup_WithDependencies): any {
         // Checks
         if (!setup) throw new TypeError("Setup can't be null.");
         if (!setup.properties) throw new TypeError("Setup.properties can't be null.");
@@ -236,7 +236,7 @@ export class DataFactoryInstance implements DataFactoryInstanceIntf {
      * @returns {any} Returns the row with computed score
      * @public
      */
-    computeScore(row: any): any { 
+    public computeScore(row: any): any { 
         this._scoreRules.filter(v => { 
             try { 
                 if (v.formula(row) === true) return true;
@@ -259,7 +259,7 @@ export class DataFactoryInstance implements DataFactoryInstanceIntf {
      * @throws if setup is null or configuration.properties is null
      * @public
      */
-    createWithScore(setup: DataFactoryInstanceCreateSetup | DataFactoryInstanceCreateSetup_WithDependencies): any {
+    public createWithScore(setup: DataFactoryInstanceCreateSetup | DataFactoryInstanceCreateSetup_WithDependencies): any {
         return this.computeScore(this.create(setup));
     }
 }

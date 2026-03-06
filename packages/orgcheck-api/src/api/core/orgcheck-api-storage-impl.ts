@@ -10,8 +10,9 @@ export class Storage implements StorageIntf {
     /**
      * @description The local storage instance
      * @type {StorageSetup}
+     * @private
      */
-    _storage: StorageSetup;
+    private _storage: StorageSetup;
     
     /**
      * @description Constructor
@@ -25,8 +26,9 @@ export class Storage implements StorageIntf {
      * @description Set an item in the local storage
      * @param {string} key - The key to set
      * @param {string} value - The value to set
+     * @public
      */
-    setItem(key: string, value: string) { 
+    public setItem(key: string, value: string) { 
         this._storage.setItem(key, value); 
     }
 
@@ -35,7 +37,7 @@ export class Storage implements StorageIntf {
      * @param {string} key - The key to set
      * @returns {string} The stored value for the given key
      */
-    getItem(key: string): string { 
+    public getItem(key: string): string { 
         return this._storage.getItem(key); 
     }
 
@@ -43,7 +45,7 @@ export class Storage implements StorageIntf {
      * @description Removes an item from the local storage
      * @param {string} key - The key to remove
      */
-    removeItem(key: string) { 
+    public removeItem(key: string) { 
         this._storage.removeItem(key);
     }
     
@@ -51,7 +53,7 @@ export class Storage implements StorageIntf {
      * @description Get all the keys in the storage
      * @returns {Array<string>} List of keys
      */
-    keys(): Array<string> {  
+    public keys(): Array<string> {  
         const keys: string[] = []; 
         for (let i = 0; i < this._storage?.length; i++) {
             const key = this._storage.key(i);

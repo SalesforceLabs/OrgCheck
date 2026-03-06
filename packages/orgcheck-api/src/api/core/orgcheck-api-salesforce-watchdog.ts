@@ -109,7 +109,7 @@ export class SalesforceWatchDog {
      * @type {() => { used: number, max: number }}
      * @private
      */
-    _apiLimitExtractor: () => { used: number; max: number; };
+    private _apiLimitExtractor: () => { used: number; max: number; };
 
     /**
      * @description Timestamp of the last request we have made to Salesforce.
@@ -118,14 +118,14 @@ export class SalesforceWatchDog {
      * @type {number | undefined}
      * @private
      */
-    _lastRequestToSalesforce: number | undefined;
+    private _lastRequestToSalesforce: number | undefined;
 
     /**
      * @description Last ratio the Salesforce API gave us about the Daily API Request. 
      * @type {SalesforceUsageInformationIntf}
      * @private
      */
-    _lastApiUsage: SalesforceUsageInformationIntf;
+    private _lastApiUsage: SalesforceUsageInformationIntf;
 
     /**
      * @description Before calling the Salesforce API, this is a watch dog to make sure we don't exceed the daily API request limit
@@ -133,7 +133,7 @@ export class SalesforceWatchDog {
      * @throws {SalesforceError} If we reach the limit
      * @public
      */
-    beforeRequest(callback?: Function) {
+    public beforeRequest(callback?: Function) {
         if (this._lastRequestToSalesforce && 
             Date.now() - this._lastRequestToSalesforce <= IF_LIMIT_INFO_ARE_OLDER_THAN_THIS_FORCE_REFRESH && 
             this._lastApiUsage.isRedZone
@@ -158,7 +158,7 @@ export class SalesforceWatchDog {
      * @throws {SalesforceError} If we reach the limit
      * @public
      */
-    afterRequest(callback?: Function) {
+    public afterRequest(callback?: Function) {
         const apiUsage = this._apiLimitExtractor();
         if (apiUsage) {
             this._lastApiUsage.currentUsageRatio = apiUsage.used / apiUsage.max;
@@ -173,7 +173,7 @@ export class SalesforceWatchDog {
      * @returns {SalesforceUsageInformation} Information of the current usage of the Daily Request API
      * @public
      */
-    get dailyApiRequestLimitInformation(): SalesforceUsageInformation {
+    public get dailyApiRequestLimitInformation(): SalesforceUsageInformation {
         return this._lastApiUsage;
     }
 }
