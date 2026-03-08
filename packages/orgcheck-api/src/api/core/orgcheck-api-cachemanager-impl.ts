@@ -126,7 +126,7 @@ export class DataCacheManager implements DataCacheManagerIntf {
                 const entry: MetadataItemInCache = this._getEntryFromCache(key);
                 const name = GENERATE_LOGICAL_KEY(key);
                 if (entry) {
-                    return { name: name, isEmpty: entry?.length === 0, isMap: entry.type === 'map', length: entry?.length, created: entry.created };    
+                    return { name: name, isEmpty: entry.length === 0, isMap: entry.type === 'map', length: entry.length, created: entry.created };    
                 }
                 return { name: name, isEmpty: true, isMap: false, length: 0, created: 0 };
             }

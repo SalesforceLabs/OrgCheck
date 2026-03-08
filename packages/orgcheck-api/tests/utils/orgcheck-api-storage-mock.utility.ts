@@ -15,5 +15,5 @@ export class StorageSetupMock_BasedOnMap implements StorageSetup {
   getItem(key: string) { return this._cache.get(key); }
   removeItem(key: string) { this._cache.delete(key); }
   key(index: number): string { return Array.from(this._cache.keys())[index]; }
-  get length(): number { return this._cache.size; }
+  length(): number { return this._cache.size; }
 }

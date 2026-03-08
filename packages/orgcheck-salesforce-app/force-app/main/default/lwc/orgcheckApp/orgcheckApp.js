@@ -101,13 +101,6 @@ export default class OrgcheckApp extends LightningElement {
     @track tableDefinitions = { };
 
     /**
-     * @description list of items stored in org check cache
-     * @type {Array<DataCacheItemIntf>}
-     * @public 
-     */ 
-    cacheManagerData = [];
-
-    /**
      * @description Is the export button for Global View is shown or not
      * @type {boolean}
      * @public
@@ -246,9 +239,6 @@ export default class OrgcheckApp extends LightningElement {
                 // Get the Salesforce API version we are using because we want to display it in the headers
                 this._private_properties.spinner?.sectionLog(SECTION_04, `Get the Salesforce API version used that Org Check is using...`);
                 this.salesforceApiVersion = this._private_properties.api?.salesforceApiVersion;
-                // Update the cache information when we are finish loading everything
-                this._private_properties.spinner?.sectionLog(SECTION_04, `Update the cache information when we are finish loading everything...`);
-                this._updateCacheInformation();
                 // Load basic information if the user has already accepted the terms
                 this._spinner?.sectionLog(SECTION_04, `Load basic information if the user has already accepted the terms...`);
                 await this._loadBasicInformationIfAccepted();
@@ -391,11 +381,12 @@ export default class OrgcheckApp extends LightningElement {
             // get the current alias depending on the dependency with global filter values
             let alias;
             switch (subItem.alias) {
-                case ALIASES.PACKAGE:       alias = `${this.namespace}`; break;
+                case ALIASES.PACKAGE:         alias = `${this.namespace}`; break;
                 case ALIASES.ALL:             alias = `${this.namespace}-${this.objectType}-${this.object}`; break;
-                case ALIASES.OBJECTNAMESPACE: alias = `${this.object}-${this.namespace}`; break;
+                case ALIASES.OBJ_PCK:         alias = `${this.object}-${this.namespace}`; break;
+                case ALIASES.PCK_TYP:         alias = `${this.namespace}-${this.objectType}`; break;
                 case ALIASES.OBJECT:          alias = `${this.object}`; break;
-                case ALIASES.NONE: default:   alias = '-'; break; // don't put empty string -- it's confusing
+                case ALIASES.NONE: default:   alias = '-'; forceRefresh = true; break;
             }
             if (subItem.get && (forceRefresh === true || subItem.lastAlias !== alias)) {
                 // update the last alias value with this alias
@@ -454,13 +445,6 @@ export default class OrgcheckApp extends LightningElement {
         }
     }
 
-    /**
-     * @description Update the api cache information in the UI from the API
-     * @private
-     */ 
-    _updateCacheInformation() {
-        this.cacheManagerData = this._private_properties.api?.getCacheInformation();
-    }
 
     /**
      * @description Check if the terms are accepted and thus we can continue to use this org
@@ -690,7 +674,7 @@ export default class OrgcheckApp extends LightningElement {
             htmlContent += JSON.stringify(cacheData);
         }
         // show the modal
-        this._openModal(`Dump of the browser cache for item: ${itemName}`, htmlContent);
+        this._private_properties.modal?.open(`Dump of the browser cache for item: ${itemName}`, htmlContent);
     }
 
     /**
@@ -715,7 +699,7 @@ export default class OrgcheckApp extends LightningElement {
                 });
                 htmlContent += '</ul>';
                 // show the modal
-                this._openModal(`Understand the Score of "${detail.whatName}" (${detail.whatId})`, htmlContent);
+                this._private_properties.modal?.open(`Understand the Score of "${detail.whatName}" (${detail.whatId})`, htmlContent);
             } catch (e) {
                 // in case ocapi.SecretSauce.GetScoreRule threw an error!
                 this._showError('Error while handleViewScore', e);
@@ -742,7 +726,7 @@ export default class OrgcheckApp extends LightningElement {
                 htmlContent += 'For more information about the success of these tests, you can:<br /><ul>';
                 htmlContent += '<li>Go <a href="/lightning/setup/ApexTestQueue/home" target="_blank" rel="external noopener noreferrer">here</a> to see the results of these tests.</li>';
                 htmlContent += `<li>Check with Tooling API the status of the following record: /tooling/sobjects/AsyncApexJob/${asyncApexJobId}</li><ul>`;
-                this._openModal('Asynchronous Run All Test Asked', htmlContent);
+                this._private_properties.modal?.open('Asynchronous Run All Test Asked', htmlContent);
 
             } catch (error) {
                 this._private_properties.spinner?.sectionFailed(LOG_SECTION, error);
@@ -801,7 +785,7 @@ export default class OrgcheckApp extends LightningElement {
             });
             if (noError === true) {
                 this._private_properties.spinner?.sectionEnded(LOG_SECTION, 'Done!');
-                this._openModal('Recompilation Requested Successfully',
+                this._private_properties.modal?.open('Recompilation Requested Successfully',
                     'Please hit the Refresh button (in Org Check) to get the latest data '+
                     'from your Org.  By the way, in the future, if you need to '+
                     'recompile ALL the classes, go to "Setup > Custom '+
@@ -857,15 +841,6 @@ export default class OrgcheckApp extends LightningElement {
     }
 
     /**
-     * @description Open a modal with specific title and HTML content
-     * @param {string} title Title of the modal
-     * @param {string} htmlContent HTML content of the modal
-     */
-    _openModal(title, htmlContent) {
-        this._modal?.open(title, htmlContent);
-    }
-
-    /**
      * @description Show the error in a modal (that can be closed)
      * @param {string} title - The title of the modal
      * @param {Error} error - The error to show in the error modal
@@ -877,7 +852,7 @@ export default class OrgcheckApp extends LightningElement {
                             `If the FAQ is not helping, consider creating an issue on <a href="http://sfdc.co/OrgCheck-Backlog" target="_blank" rel="external noopener noreferrer">Org Check Issues tracker</a> `+
                             `along with the context, a screenshot and the following error. <br /><br /> `+
                             `<ul><li>Message: <code>${error?.message}</code></li><li>Stack: <code>${error?.stack}</code></li><li>Error as JSON: <code>${JSON.stringify(error)}</code></li></ul></font>`                                
-        this._openModal(title, htmlContent);
+        this._private_properties.modal?.open(title, htmlContent);
         console.error(title, error);
     }
 
@@ -976,7 +951,7 @@ export default class OrgcheckApp extends LightningElement {
         } else {
             htmlContent += 'No parent';
         }
-        this._openModal(`Details for role ${data.record.name}`, htmlContent);
+        this._private_properties.modal?.open(`Details for role ${data.record.name}`, htmlContent);
     }
 
 
@@ -1231,7 +1206,7 @@ const APPLICATION_NAVIGATION = {
         title: 'Home',
         items: { 
             WELCOME:       { key: '01', title: '👋 Welcome!' },
-            CACHE:         { key: '02', title: '🛠️ Metadata Cache' },
+            CACHE:         { key: '02', title: '🛠️ Metadata Cache',    data: 'cacheItems', alias: ALIASES.NONE, get: 'getCacheInformation' },
             HELP:          { key: '03', title: '⁉️ Score explanation', data: 'scoreRules', alias: ALIASES.NONE, get: 'getAllScoreRulesAsDataMatrix', tableDefinition: 'ScoreRules', isDataMatrix: true }
         }
     },

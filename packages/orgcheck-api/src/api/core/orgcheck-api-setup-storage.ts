@@ -30,5 +30,5 @@ export interface StorageSetup {
      * @description The size of a storage
      * @property
      */
-    length: number;
+    length(): number;
 }

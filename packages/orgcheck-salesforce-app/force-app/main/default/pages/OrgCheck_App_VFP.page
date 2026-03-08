@@ -18,7 +18,7 @@
         }
         .orgcheck-loading-text {
             opacity: 0;
-            animation: orgcheck-intro 3s ease-out 0.5s forwards;
+            animation: orgcheck-intro 2s ease-out 1s forwards;
             color: rgb(75, 213, 238);
             font-weight: 400;
             font-size: 300%;
@@ -29,7 +29,7 @@
         }        
         .orgcheck-jokes-board {
             opacity: 0;
-            animation: orgcheck-jokes-board 1s ease-out 3.5s forwards;
+            animation: orgcheck-jokes-board 1s ease-out 3s forwards;
             border-radius: 15px;
             box-shadow: 10px 10px 10px #9daf8b;
             background-color: black;

@@ -55,7 +55,7 @@ export class Storage implements StorageIntf {
      */
     public keys(): Array<string> {  
         const keys: string[] = []; 
-        for (let i = 0; i < this._storage?.length; i++) {
+        for (let i = 0; i < this._storage?.length(); i++) {
             const key = this._storage.key(i);
             if (key) {
                 keys.push(key); 
