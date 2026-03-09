@@ -3,6 +3,12 @@ import { DataCacheManagerIntf, MetadataItemInCache, DataItemInCache } from 'src/
 import { CompressorIntf } from 'src/api/core/orgcheck-api-compressor';
 import { StorageIntf } from 'src/api/core/orgcheck-api-storage';
 
+enum TYPE {
+    MAP = 'map',
+    ARRAY = 'array',
+    OBJECT = 'object'
+}
+
 /** 
  * @description Cache Manager class implementation
  */
@@ -62,7 +68,7 @@ export class DataCacheManager implements DataCacheManagerIntf {
         // ... and is saved encrypted!
         this._setItemToCache(metadataPhysicalKey, JSON.stringify(metadataEntry));
         // if the data is a map
-        if (metadataEntry.type === 'map') {
+        if (metadataEntry.type === TYPE.MAP) {
             try {
                 // create the map from the data (double array structure)
                 return new Map(dataEntry.content);
@@ -94,10 +100,12 @@ export class DataCacheManager implements DataCacheManagerIntf {
         } else {
             const now = Date.now();
             const metadataEntry: MetadataItemInCache = value instanceof Map ? {
-                type: 'map', length: value.size, created: now
+                type: TYPE.MAP, length: value.size, created: now
+            } : ( Array.isArray(value) ? {
+                type: TYPE.ARRAY, length: value?.length, created: now
             } : {
-                type: 'array', length: value?.length, created: now
-            };
+                type: TYPE.OBJECT, length: 1, created: now
+            });
             const dataEntry: DataItemInCache = value instanceof Map ? {
                 content: Array.from(value.entries()).filter(t => t[0]?.endsWith('Ref') === false), created: now
             } : {
@@ -116,21 +124,38 @@ export class DataCacheManager implements DataCacheManagerIntf {
     }
 
     /**
-     * @description Get details of the cache.
+     * @description Get details of the cache as an array ordered by their keys alphabetically.
      * @returns {Array<DataCacheItemIntf>} an array of objects that contains the name, the type, the size and the creation date of each entry.
      */
     public details(): DataCacheItemIntf[] {
         return this._storage.keys()
             .filter((key: string) => key.startsWith(METADATA_CACHE_PREFIX))
+            .sort()
             .map((key: string) => {
                 const entry: MetadataItemInCache = this._getEntryFromCache(key);
                 const name = GENERATE_LOGICAL_KEY(key);
                 if (entry) {
-                    return { name: name, isEmpty: entry.length === 0, isMap: entry.type === 'map', length: entry.length, created: entry.created };    
+                    return { 
+                        name: name, 
+                        isEmpty: entry.length === 0, 
+                        isMap: entry.type === TYPE.MAP, 
+                        isArray: entry.type === TYPE.ARRAY, 
+                        isObject: entry.type === TYPE.OBJECT, 
+                        length: entry.length, 
+                        created: entry.created ? new Date(entry.created).toLocaleString() : '' 
+                    };    
                 }
-                return { name: name, isEmpty: true, isMap: false, length: 0, created: 0 };
-            }
-        );
+                // if null or undefined
+                return { 
+                    name: name, 
+                    isEmpty: true, 
+                    isMap: false, 
+                    isArray: false,
+                    isObject: true, // we consider empty as an object
+                    length: 0, 
+                    created: '' 
+                };
+            });
     }
 
     /**

@@ -117,24 +117,31 @@
                                 List of cached metadata from the Salesforce org you want to check into your Browser persistant cache.<br />
                                 <lightning-layout multiple-rows>
                                     <template lwc:if={data.cacheItems} for:each={data.cacheItems} for:item="item">
-                                        <lightning-layout-item padding="around-small" key={item.name}>
+                                        <lightning-layout-item size="2" key={item.name} padding="around-small">
                                             <div class="viewCacheItem">
                                                 <lightning-card>
-                                                    <lightning-button label="Log" slot="actions" onclick={handleLogCacheItem} data-item-name={item.name}></lightning-button>
+                                                    <lightning-button-icon icon-name="utility:zoomin" alternative-text="Show details" slot="actions" onclick={handleLogCacheItem} data-item-name={item.name}></lightning-button-icon>
                                                     <h3 slot="title">
-                                                        <lightning-icon icon-name="utility:database" size="small"></lightning-icon>
-                                                        &nbsp; 
-                                                        {item.name}
-                                                        &nbsp;&nbsp;&nbsp; 
+                                                        <lightning-layout vertical-align="center">
+                                                            <lightning-layout-item>
+                                                                <lightning-icon icon-name="utility:database" size="small"></lightning-icon>
+                                                                &nbsp;
+                                                            </lightning-layout-item>
+                                                            <lightning-layout-item>
+                                                                <div class="slds-line-clamp">{item.name}</div>
+                                                            </lightning-layout-item>
+                                                        </lightning-layout>
                                                     </h3>
                                                     <div slot="footer">
-                                                        <lightning-badge lwc:if={item.isMap} label="Map"></lightning-badge>
-                                                        <lightning-badge lwc:else label="Object"></lightning-badge>
+                                                        <lightning-badge class="slds-badge_lightest" lwc:if={item.created} icon-name="utility:date_time" label={item.created}></lightning-badge>
+                                                        <lightning-badge class="slds-badge_lightest" lwc:if={item.isMap} icon-name="action:map" label="Map"></lightning-badge>
+                                                        <lightning-badge class="slds-badge_lightest" lwc:else label="Object" icon-name="utility:sparkles" ></lightning-badge>
                                                     </div>
-                                                    <p class="slds-var-p-horizontal_small">
-                                                        <span lwc:if={item.length}>Size: <lightning-formatted-number value={item.length}></lightning-formatted-number><br /></span>
-                                                        Created: <lightning-formatted-date-time value={item.created}></lightning-formatted-date-time><br />
-                                                    </p>
+                                                    <div class="slds-var-p-horizontal_small">
+                                                        <h1 class="slds-text-heading_large slds-align_absolute-center">
+                                                            <lightning-formatted-number value={item.length}></lightning-formatted-number>
+                                                        </h1>
+                                                    </div>
                                                 </lightning-card>
                                             </div>
                                         </lightning-layout-item>  

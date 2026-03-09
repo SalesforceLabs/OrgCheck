@@ -19,12 +19,22 @@ export interface DataCacheItemIntf {
     isMap: boolean;
 
     /** 
+     * @type {boolean}
+     */
+    isArray: boolean;
+
+    /** 
+     * @type {boolean}
+     */
+    isObject: boolean;
+
+    /** 
      * @type {number}
      */
     length: number;
 
     /** 
-     * @type {number}
+     * @type {string}
      */
-    created: number;
+    created: string;
 }
