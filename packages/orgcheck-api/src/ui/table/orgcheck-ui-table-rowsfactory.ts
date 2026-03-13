@@ -16,7 +16,7 @@ export class RowsFactory {
      * @returns {Array<Row>} List of rows
      */
     static create(tableDefinition: Table, records: Array<any>, onEachRowCallback: Function, onEachCellCallback: Function): Array<Row> {
-        return records.map((record, rIndex) => {
+        return records?.map((record, rIndex) => {
             const row = {
                 index: rIndex+1, // 1-based index of the current row (should be recalculated after sorting)
                 score: record.score, // score is a global KPI at the row level (not at a cell i mean)
@@ -41,7 +41,7 @@ export class RowsFactory {
             if (onEachRowCallback) onEachRowCallback(row, record.score > 0, rIndex);
             // Finally return the row
             return row;
-        });
+        }) ?? [];
     }
 
     /**

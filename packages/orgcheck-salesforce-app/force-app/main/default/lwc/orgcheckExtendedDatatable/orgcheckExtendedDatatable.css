@@ -51,8 +51,11 @@ tr.bad > button {
     line-height: normal;
 }
 
-table.dontuseallspace {
+div.unsettablewidth > table {
     width: unset;
+}
+div.autowidth {
+    width: auto;
 }
 
 th.sticky {

@@ -27,31 +27,31 @@ describe('tests.api.unit.DataCacheManager', () => {
         case 'string':
           expect(item.isEmpty).toBe(false);
           expect(item.isMap).toBe(false);
-          expect(item?.length).toBe(8);
+          expect(item?.length).toBe(1); // string is a unique object so it should be 1, right!
           expect(item.created).toBeDefined();
           break;
         case 'map':
           expect(item.isEmpty).toBe(false);
           expect(item.isMap).toBe(true);
-          expect(item?.length).toBe(2);
+          expect(item?.length).toBe(2); // this should be the size of the map. So two :D
           expect(item.created).toBeDefined();
           break;
         case 'array':
           expect(item.isEmpty).toBe(false);
           expect(item.isMap).toBe(false);
-          expect(item?.length).toBe(3);
+          expect(item?.length).toBe(3); // this should be the length of the array. So three :D
           expect(item.created).toBeDefined();
           break;
         case 'null':
           expect(item.isEmpty).toBe(false);
           expect(item.isMap).toBe(false);
-          expect(item?.length).toBe(0);
+          expect(item?.length).toBe(0); // null means nothing right so length should be zero?! right?? 
           expect(item.created).toBe(0);
           break;
         case 'undefined':
           expect(item.isEmpty).toBe(false);
           expect(item.isMap).toBe(false);
-          expect(item?.length).toBe(0);
+          expect(item?.length).toBe(0); // undefined means nothing right so length should be zero?! right?? 
           expect(item.created).toBe(0);
           break;
         default:

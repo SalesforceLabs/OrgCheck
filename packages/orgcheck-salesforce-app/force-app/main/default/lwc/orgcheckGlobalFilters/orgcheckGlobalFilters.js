@@ -95,6 +95,13 @@ export default class OrgcheckGlobalFilters extends LightningElement {
     }
 
     /**
+     * @description Dropdown alignment (defaut: left)
+     * @type {string}
+     * @public
+     */
+    @api dropdownAlignment = "left";
+
+    /**
      * @description Update the list of package options. This method adds systematically the 'All packages' 
      *                 and the 'No package' options on top.  It also sets the current filter value back to 
      *                 the 'All packages' option.

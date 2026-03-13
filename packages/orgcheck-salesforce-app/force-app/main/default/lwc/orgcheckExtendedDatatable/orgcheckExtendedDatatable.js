@@ -89,7 +89,13 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @type {boolean}
      */
     @api dontUseAllSpace = false;
-    
+
+    /**
+     * @description Let the table be scrollable (or not) if its width to too big for the container.
+     * @type {boolean}
+     */
+    @api dontBeScrollable = false;
+
     /**
      * @description Do you need the headers to stick on top of the screen even if you scroll down?
      * @type {boolean}
@@ -112,11 +118,11 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     // ----------------------------------------------------------------------------------------------------------------
 
     /**
-     * @description CSS classes for the table
+     * @description CSS classes for the table container
      * @type {string}
      */
-    get tableClasses() {
-        return `slds-table slds-table_bordered ${this.dontUseAllSpace === true?'dontuseallspace':''}`;
+    get tableContainerClasses() {
+        return `${this.dontUseAllSpace === true ? 'unsettablewidth' : ''} ${this.dontBeScrollable === false ? 'slds-scrollable autowidth' : ''}`;
     }
 
     /**

@@ -534,12 +534,14 @@ export class SalesforceManager implements SalesforceManagerIntf {
         logger?.log(`Done running ${queries?.length} SOQL ${queries?.length>1?'queries':'query'}.`);
         // if errors has at least one item, it means one of the Promises failed
         if (errors?.length > 0) {
-            return Promise.reject(errors[0]);
+            logger?.log(`We had ${errors.length} errors during soqlQuery: ${errors.map((e,i) => (`${i}: ${e?.message}`)).join(', ')}`);
+            throw errors[0];
         }
         // at this point all promises have been settled (or 'successful' if you)
-        const results = allSettledPromisesResult.filter((result) => result.status === 'fulfilled').map((result) => result.value); // filter just to make sure we have only the fulfilled ones!
+        const results = allSettledPromisesResult.filter((result) => result.status === 'fulfilled')
+                                                .map((result) => result.value); // filter just to make sure we have only the fulfilled ones!
         // return the results
-        return Promise.resolve(results);
+        return results;
     }
 
     /**

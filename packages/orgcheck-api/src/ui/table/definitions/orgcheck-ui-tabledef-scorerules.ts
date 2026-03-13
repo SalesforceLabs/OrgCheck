@@ -28,7 +28,7 @@ export class ScoreRulesTableDefinitions implements Table {
         if (this._matrix) {
             this._matrix.columnHeaders // returns an array of string representing the static 'label' of the org check class
                 .sort()
-                .forEach((/** @type {string} */ classLabel) => {
+                .forEach((classLabel: string) => {
                     columns.push({ 
                         label: classLabel, 
                         type: ColumnType.CHK, 
@@ -45,7 +45,7 @@ export class ScoreRulesTableDefinitions implements Table {
      * @description Which index column is used for ordering?
      * @type {number}
      */
-    orderIndex: number = 1;
+    orderIndex: number = 0;
     
     /**
      * @description What is the sort order: ASC or DESC?

@@ -101,20 +101,6 @@ export default class OrgcheckApp extends LightningElement {
     @track tableDefinitions = { };
 
     /**
-     * @description Is the export button for Global View is shown or not
-     * @type {boolean}
-     * @public
-     */
-    showGlobalViewExportButton = false;
-
-    /**
-     * @description Is the export button for Hard-coded URLs View is shown or not
-     * @type {boolean}
-     * @public
-     */
-    showhardCodedURLsViewExportButton = false;
-
-    /**
      * @description Is something is loading?
      * @type {boolean}
      * @public
@@ -122,15 +108,28 @@ export default class OrgcheckApp extends LightningElement {
     isLoading = false
 
     /**
-     * @description List of items for the navigation menu on the left of the app, built from the APPLICATION_NAVIGATION constant
+     * @description List of items for the navigation menu on the left of the app
      * @type {Array<{ label: string, name: string, expanded: boolean, items: Array<{ label: string, name: string, metatext: string }> }>}
      * @public
      */
-    navigationMenuItems = INITIAL_NAVIGATION_ITEMS;
+    navigationMenuItems = APPLICATION_NAVIGATION_MENU_ITEMS_FOR_TREE;
+
+    /**
+     * @description Selected item in the navigation tree
+     * @type {string}
+     * @public
+     */
+    navigationMenuSelected;
+
+    /**
+     * @description Current content pane title
+     * @type {string}
+     * @public
+     */
+    currentContentTitle;
 
     /**
      * @description Internal properties without LWC reactivity
-     * @property {string} currentMenuItem - The currently selected menu item
      * @property {OrgCheckAPI} api - The Org Check API instance
      * @property {boolean} hasInitialized - This flag prevents double initialization of the API + UI flow
      * @property {boolean} childrenReady - This flag checks that the children components are ready
@@ -139,7 +138,6 @@ export default class OrgcheckApp extends LightningElement {
      * @property {any} filters - Global filter component
      */
     _private_properties = {
-        currentMenuItem: '',
         api: undefined,
         hasInitialized: false,
         childrenReady: false,
@@ -163,16 +161,15 @@ export default class OrgcheckApp extends LightningElement {
         if (!this._private_properties.hasInitialized && this._private_properties.childrenReady && this.accessToken && this.localStorage) {
             this._private_properties.hasInitialized = true; 
             // Defer heavy work to a microtask to avoid re-entrancy in rendering
-            Promise.resolve().then(() => this._initApi()); 
+            Promise.resolve().then(() => this.initApi()); 
         }
     }
 
     /**
      * @description Initialize the Org Check API mostly
-     * @private
      * @async
      */
-    async _initApi() {
+    async initApi() {
         
         const SECTION_01 = 'Initialize the Org Check API and its dependencies';
         const SECTION_02 = 'Load libraries from static resource';
@@ -241,7 +238,7 @@ export default class OrgcheckApp extends LightningElement {
                 this.salesforceApiVersion = this._private_properties.api?.salesforceApiVersion;
                 // Load basic information if the user has already accepted the terms
                 this._spinner?.sectionLog(SECTION_04, `Load basic information if the user has already accepted the terms...`);
-                await this._loadBasicInformationIfAccepted();
+                await this._async_loadBasicInformationIfAccepted();
                 this._private_properties.spinner?.sectionEnded(SECTION_04, `Done.`);
             } catch (error) {
                 this._private_properties.spinner?.sectionFailed(SECTION_04, error);
@@ -304,9 +301,6 @@ export default class OrgcheckApp extends LightningElement {
      */ 
     isObjectSpecified;
 
-
-
-
     // ----------------------------------------------------------------------------------------------------------------
     // ----------------------------------------------------------------------------------------------------------------
     // Some other getter for the UI
@@ -322,54 +316,82 @@ export default class OrgcheckApp extends LightningElement {
         return this.tabs.selectedSubTab === APPLICATION_NAVIGATION.CODE.items.UNCOMPILEDS.key && this.apexUncompiledTableData?.length > 0 || false;
     }
 
-
-
-
-
-
-
     // ----------------------------------------------------------------------------------------------------------------
     // ----------------------------------------------------------------------------------------------------------------
-    // Wrapper part between the Org Check API and the UI
+    // Internal methods that will be used by the handlers later
     // ----------------------------------------------------------------------------------------------------------------
     // ----------------------------------------------------------------------------------------------------------------
 
-    _showCurrentContentPanel() {
-        const mainContentZone = this.template.querySelector('[data-key="orgcheck-content"]');       
-        for (let i = 0; i < mainContentZone.children.length; i++) {
-            const contentPanel = mainContentZone.children[i];
-            if (contentPanel.getAttribute('data-key') === this._private_properties.currentMenuItem) {
-                contentPanel.classList.remove('slds-hide');
-            } else {
-                contentPanel.classList.add('slds-hide');
+    /**
+     * @description Please go to a page/content given its key in the navigation tree
+     * @param {string} keyPage - The key of the page to go to
+     * @private
+     * @async
+     */
+    async _async_goToPage(keyPage) {
+        if (NAVIGATION_ITEMS_BY_KEY.has(keyPage)) {
+            try {
+                this.isLoading = true;
+                this.navigationMenuSelected = keyPage;
+                await this._async_updateCurrentData();
+                this._showCurrentContentPanel();
+            } finally {
+                this.isLoading = false;
             }
         }
     }
 
     /**
+     * @description Show the current panel (and hide the others)
+     * @private
+     */
+    _showCurrentContentPanel() {
+        const mainContentZone = this.template.querySelector('[data-key="orgcheck-content"]');    
+        if (mainContentZone) {
+            let panelFound = false;
+            for (let i = 0; i < mainContentZone.children.length; i++) {
+                const contentPanel = mainContentZone.children[i];
+                const key = contentPanel.getAttribute('data-key');
+                if (key === this.navigationMenuSelected) {
+                    panelFound = true;
+                    const subItem = NAVIGATION_ITEMS_BY_KEY.get(this.navigationMenuSelected); 
+                    this.currentContentTitle = subItem?.title;
+                    contentPanel.classList.remove('slds-hide');
+                } else {
+                    contentPanel.classList.add('slds-hide');
+                }
+            }
+            if (panelFound === false) {
+                console.warn(`Can't find the content panel with property "data-key" = '${this.navigationMenuSelected}'`);
+            }
+        } else {
+            console.warn(`Can't find the component with property "data-key" = 'orgcheck-content'`);
+        }
+    }
+
+    /**
      * @description Call a specific method of the API given a tab name
-     * @param {string} key - The name of the panel to update
      * @param {boolean} [forceRefresh] - Do we force the refresh or not (false by default)
      * @private
      * @async
      */ 
-    async _updateCurrentData(forceRefresh) {
-        const subItem = ALL_NAVIGATION_SUBITEMS_BY_KEY[this._private_properties.currentMenuItem]; 
-        if (subItem && this._private_properties.api) {
+    async _async_updateCurrentData(forceRefresh) {
+        const navigationItem = NAVIGATION_ITEMS_BY_KEY.get(this.navigationMenuSelected); 
+        if (navigationItem && this._private_properties.api) {
             // --------------------------------------------------------------------------------
             // Potentially we need to refresh the data 
             // --------------------------------------------------------------------------------
-            // if forceRefresh = true and the subItem has a 'clear' property, we want to refresh the data from the API 
-            if (forceRefresh === true && subItem.clear) {
+            // if forceRefresh = true and the navigationItem has a 'clear' property, we want to refresh the data from the API 
+            if (forceRefresh === true && navigationItem.clear) {
                 // get the reference of the corresponding 'clear' method in the API
-                const clearMethod = this._private_properties.api[subItem.clear];
+                const clearMethod = this._private_properties.api[navigationItem.clear];
                 // check if the method exists in the API
                 if (clearMethod) {
                     // call the method from the API that will clear the cache for this data
-                    this._private_properties.api[subItem.clear]();
+                    this._private_properties.api[navigationItem.clear]();
                 } else {
                     // Just in case...
-                    console.warn(`Trying to clear cache for key ${key} but method ${subItem.clear} does not exist in the API`);
+                    console.warn(`Trying to clear cache for key ${key} but method ${navigationItem.clear} does not exist in the API`);
                 }
             }
             // --------------------------------------------------------------------------------
@@ -380,7 +402,7 @@ export default class OrgcheckApp extends LightningElement {
             // --------------------------------------------------------------------------------
             // get the current alias depending on the dependency with global filter values
             let alias;
-            switch (subItem.alias) {
+            switch (navigationItem.alias) {
                 case ALIASES.PACKAGE:         alias = `${this.namespace}`; break;
                 case ALIASES.ALL:             alias = `${this.namespace}-${this.objectType}-${this.object}`; break;
                 case ALIASES.OBJ_PCK:         alias = `${this.object}-${this.namespace}`; break;
@@ -388,18 +410,18 @@ export default class OrgcheckApp extends LightningElement {
                 case ALIASES.OBJECT:          alias = `${this.object}`; break;
                 case ALIASES.NONE: default:   alias = '-'; forceRefresh = true; break;
             }
-            if (subItem.get && (forceRefresh === true || subItem.lastAlias !== alias)) {
+            if (navigationItem.get && (forceRefresh === true || navigationItem.lastAlias !== alias)) {
                 // update the last alias value with this alias
-                subItem.lastAlias = alias;
+                navigationItem.lastAlias = alias;
                 // shall we proceed getting the data for this item? It depends if there is a getOnlyIf condition or not, and if yes if it is validated or not
-                if (subItem.getOnlyIf ? subItem.getOnlyIf(this) === true : true) {
+                if (navigationItem.getOnlyIf ? navigationItem.getOnlyIf(this) === true : true) {
                     // get the reference of the corresponding 'get' method in the API
-                    const getMethod = this._private_properties.api[subItem.get];
+                    const getMethod = this._private_properties.api[navigationItem.get];
                     // check if the method exists in the API
                     if (getMethod) {
                         // Wee need potentially to pass some parameters to the get method, depending on the definition of the item
                         // Important: keep the order of the parameters as defined
-                        const parameters = subItem.getParameters ? subItem.getParameters.map((p) => {
+                        const parameters = navigationItem.getParameters ? navigationItem.getParameters.map((p) => {
                             switch (p) {
                                 case PARAMETERS.NAMESPACE: return this.namespace;
                                 case PARAMETERS.OBJECT: return this.object;
@@ -407,27 +429,68 @@ export default class OrgcheckApp extends LightningElement {
                             }
                         }) : [];
                         // call the method from the API that will get the data
-                        let data = await this._private_properties.api[subItem.get](...parameters);
+                        let data = await this._private_properties.api[navigationItem.get](...parameters);
+                        // if you need to post process
+                        if (navigationItem.postProcess) {
+                            data = navigationItem.postProcess(this, data);
+                        }
                         // If the data is a DataMatrix, the data needs to be extract in a special property
                         // Else just a data then save it
-                        this.data[lowercaseFirstLetter(subItem.data)] = subItem.isDataMatrix ? (data?.rows ?? []) : data;
+                        this._setData(navigationItem.data, navigationItem.isDataMatrix ? (data?.rows ?? []) : data);
                         // Optional parameters for the tableDefinition(s) (if any)
-                        if (subItem.tableDefinitions || subItem.tableDefinition) {
+                        if (navigationItem.tableDefinitions || navigationItem.tableDefinition) {
                             // if dataMatrix we pass the entire data
                             // if object we pass false because we don't want to have object-related columns
                             // else we pass undefined because there is no specific parameter to pass
-                            const param = subItem.isDataMatrix ? data : undefined;
-                            (subItem.tableDefinitions ?? [ subItem.tableDefinition ]).forEach((tableDef) => {
-                                this.tableDefinitions[lowercaseFirstLetter(tableDef)] = instantiateOrgCheckTableDefinition(tableDef, param);
+                            const param = navigationItem.isDataMatrix ? data : undefined;
+                            (navigationItem.tableDefinitions ?? [ navigationItem.tableDefinition ]).forEach((tableDef) => {
+                                this._setTableDefinition(tableDef, param);
                             });
                         }
                     } else {
                         // Just in case...
-                        console.warn(`Trying to get data for key ${key} but method ${subItem.get} does not exist in the API`);
+                        console.warn(`Trying to get data for key ${key} but method ${navigationItem.get} does not exist in the API`);
                     }
                 }                
             }
         }
+    }
+
+    /**
+     * @description Set a specific data in the global object called 'data'
+     * @param {string} name
+     * @param {any} data 
+     */
+    _setData(name, data) {
+        const dataName = lowercaseFirstLetter(name);
+        this.data[dataName] = data;
+    }
+
+    /**
+     * @description Set a specific table definition in the global object called 'tableDefinitions'
+     * @param {string} name
+     * @param {any} data 
+     */
+    _setTableDefinition(name, data) {
+        const tableDefName = lowercaseFirstLetter(name);
+        this.tableDefinitions[tableDefName] = instantiateOrgCheckTableDefinition(name, data);;
+    }
+
+    /**
+     * @description Get a specific table definition from the global object called 'tableDefinitions'
+     * @param {string} name
+     */
+    _getTableDefinition(name, data) {
+        const tableDefName = lowercaseFirstLetter(name);
+        const tableDefinition = this.tableDefinitions[tableDefName];
+        // if it exists
+        if (tableDefinition) {
+            return tableDefinition;
+        }
+        // if not yet, let's set it...
+        this._setTableDefinition(name, data);
+        // and we return it!
+        return this.tableDefinitions[tableDefName];
     }
 
     /**
@@ -445,13 +508,12 @@ export default class OrgcheckApp extends LightningElement {
         }
     }
 
-
     /**
      * @description Check if the terms are accepted and thus we can continue to use this org
      * @private
      * @async
      */ 
-    async _checkTermsAcceptance() {
+    async _async_checkTermsAcceptance() {
         if (await this._private_properties.api?.checkUsageTerms()) {
             this.useOrgCheck.needConfirmation = false;
             this.useOrgCheck.accepted = true;
@@ -468,10 +530,10 @@ export default class OrgcheckApp extends LightningElement {
      * @private
      * @async
      */ 
-    async _loadBasicInformationIfAccepted() {
+    async _async_loadBasicInformationIfAccepted() {
         // Check for acceptance
         console?.log('Checking if the terms are accepted...')
-        await this._checkTermsAcceptance();
+        await this._async_checkTermsAcceptance();
         if (this.useOrgCheck.accepted === false) {
             console?.log('The use of Org Check in this org was not confirmed. Stopping...');
             return;
@@ -491,11 +553,14 @@ export default class OrgcheckApp extends LightningElement {
         
         // Data for the filters
         console?.log('Load filters...');
-        await this._loadFilters();
+        await this._async_loadFilters();
 
         // Update daily API limit information
         console?.log('Update the daily API limit informations...');
         this._updateLimits();
+
+        // Open the HOME/WELCOME page by default
+        await this._async_goToPage(APPLICATION_NAVIGATION.HOME.items.WELCOME.key);
     }
 
     /**
@@ -504,7 +569,7 @@ export default class OrgcheckApp extends LightningElement {
      * @private
      * @async
      */ 
-    async _loadFilters(forceRefresh=false) {
+    async _async_loadFilters(forceRefresh=false) {
         console?.log('Hide the filter panel...');
         this._private_properties.filters?.hide();
 
@@ -534,9 +599,143 @@ export default class OrgcheckApp extends LightningElement {
         this._updateLimits();
     }
 
+    /**
+     * @description Show the error in a modal (that can be closed)
+     * @param {string} title - The title of the modal
+     * @param {Error} error - The error to show in the error modal
+     * @private
+     */ 
+    _showError(title, error) {
+        const htmlContent = `<font color="red">Sorry! An error occurred while processing... <br /><br />`+
+                            `Please review our <a href="http://sfdc.co/OrgCheck-FAQ" target="_blank" rel="external noopener noreferrer">Org Check FAQ</a> and try to resolve this issue in your Org based on our community's feedback. <br /><br /> `+
+                            `If the FAQ is not helping, consider creating an issue on <a href="http://sfdc.co/OrgCheck-Backlog" target="_blank" rel="external noopener noreferrer">Org Check Issues tracker</a> `+
+                            `along with the context, a screenshot and the following error. <br /><br /> `+
+                            `<ul><li>Message: <code>${error?.message}</code></li><li>Stack: <code>${error?.stack}</code></li><li>Error as JSON: <code>${JSON.stringify(error)}</code></li></ul></font>`                                
+        this._private_properties.modal?.open(title, htmlContent);
+        console.error(title, error);
+    }
 
+    /**
+     * @description Generate the array for exporting the data of the current object
+     * @returns {Array}
+     * @private
+     */
+    _generateDataForCurrentObjectExport() {
+        const sheets = [];
+        if (this.data.objectData) {
+            sheets.push({ 
+                header: 'General information',
+                columns: [ 'Label', 'Value' ],
+                rows: [
+                    [ 'API Name', `${this.data.objectData.apiname ?? ''}` ],
+                    [ 'Package', `${this.data.objectData.package ?? ''}` ],
+                    [ 'Singular Label', `${this.data.objectData.label ?? ''}` ],
+                    [ 'Plural Label', `${this.data.objectData.labelPlural ?? ''}` ],
+                    [ 'Description', `${this.data.objectData.description ?? ''}` ],
+                    [ 'Key Prefix', `${this.data.objectData.keyPrefix ?? ''}` ],
+                    [ 'Record Count (including deleted ones)', `${this.data.objectData.recordCount}` ],
+                    [ 'Is Custom?', `${this.data.objectData.isCustom?'true':'false'}` ],
+                    [ 'Feed Enable?', `${this.data.objectData.isFeedEnabled?'true':'false'}` ],
+                    [ 'Most Recent Enabled?', `${this.data.objectData.isMostRecentEnabled?'true':'false'}` ],
+                    [ 'Global Search Enabled?', `${this.data.objectData.isSearchable?'true':'false'}` ],
+                    [ 'Internal Sharing', `${this.data.objectData.internalSharingModel ?? ''}` ],
+                    [ 'External Sharing', `${this.data.objectData.externalSharingModel ?? ''}` ]
+                ]
+            });
+            sheets.push(createAndExport(this.tableDefinitions.standardFields, this.data.objectData.standardFields, 'Standard Fields'));
+            sheets.push(createAndExport(this.tableDefinitions.customFieldsInObject, this.data.objectData.customFieldRefs, 'Custom Fields'));
+            sheets.push(createAndExport(this.tableDefinitions.apexTriggersInObject, this.data.objectData.apexTriggerRefs, 'Apex Triggers'));
+            sheets.push(createAndExport(this.tableDefinitions.fieldSets, this.data.objectData.fieldSets, 'Field Sets'));
+            sheets.push(createAndExport(this.tableDefinitions.pageLayouts, this.data.objectData.layouts, 'Page Layouts'));
+            sheets.push(createAndExport(this.tableDefinitions.flexiPagesInObject, this.data.objectData.flexiPages, 'Lightning Pages'));
+            sheets.push(createAndExport(this.tableDefinitions.limits, this.data.objectData.limits, 'Limits'));
+            sheets.push(createAndExport(this.tableDefinitions.validationRulesInObject, this.data.objectData.validationRules, 'Validation Rules'));
+            sheets.push(createAndExport(this.tableDefinitions.webLinksInObject, this.data.objectData.webLinks, 'Web Links'));
+            sheets.push(createAndExport(this.tableDefinitions.recordTypesInObject, this.data.objectData.recordTypes, 'Record Types'));
+            sheets.push(createAndExport(this.tableDefinitions.relationships, this.data.objectData.relationships, 'Relationships'));
+            sheets.push(createAndExport(this.tableDefinitions.workflows, this.data.objectData.workflows, 'Relationships'));            
+        }
+        return sheets;
+    }
 
+    /**
+     * @description Hard coded URLS data post-processing
+     * @param {any} dataFromApi
+     * @returns {any}
+     */ 
+    _hardCodedURLsPostProcess(dataFromApi) {
+        const data = [];
+        dataFromApi?.forEach((item, recipe) => {
+            const navigationItem = NAVIGATION_ITEMS_BY_RECIPE.get(recipe);
+            const tableDefinition = this._getTableDefinition(navigationItem?.tableDefinition, item.data);
+            const firstUrlColumn = tableDefinition.columns.filter(c => c.type === 'id')[0];
+            data.push({
+                type: navigationItem.title,
+                hadError: item?.hadError,
+                countAll: item?.countAll,
+                countBad: item?.countBad,
+                items: item?.data?.filter((d, i) => i < MAX_ITEMS_IN_HARDCODED_URLS_LIST).map(d => {
+                    return {
+                        url: d?.[firstUrlColumn.data.value],
+                        name: d?.[firstUrlColumn.data.label]
+                    };
+                })
+            });
+        });
+        return data;
+    }
 
+    /**
+     * @description Global View data post-processing
+     * @param {any} dataFromApi
+     * @returns {any}
+     */ 
+    _globalViewPostProcess(dataFromApi) {
+        const data = [];
+        const goodAndBadRows = [];
+        const rulesRows = [];
+        const detailsSheets = [];
+        dataFromApi?.forEach((item, recipe) => {
+            const navigationItem = NAVIGATION_ITEMS_BY_RECIPE.get(recipe);
+            const tableDefinition = this._getTableDefinition(navigationItem?.tableDefinition, item.data);
+            data.push({
+                countBad: item?.countBad,
+                label: navigationItem.title,
+                hadError: item?.hadError,
+                class: `slds-box viewCard ${item?.hadError === true ? 'viewCard-error' : (item?.countBad === 0 ? 'viewCard-no-bad-data' : 'viewCard-some-bad-data')}`,
+                keyPage: navigationItem.key,
+                tableDefinition: this._getTableDefinition(APPLICATION_NAVIGATION.ORG.items.GLOBAL_VIEW.tableDefinition),
+                data: item?.countBadByRule?.map((c) => { return { name: `${c.ruleName}`,  value: c.count }}) ?? []
+            });
+            goodAndBadRows.push([ navigationItem.title, item.countGood, item.countBad ]); 
+            item?.countBadByRule?.forEach((c) => {
+                rulesRows.push([ navigationItem.title, c.ruleName, c.count ]);
+            });
+            detailsSheets.push({
+                countBad: item?.countBad,
+                exportedTable: createAndExport(tableDefinition, item?.data, navigationItem.title)
+            });
+        });
+        const sheets = [];
+        sheets.push({ 
+            header: 'Statistics (Good and Bad)', 
+            columns: [ 'Type of items', 'Count of good items', 'Count of bad items' ], 
+            rows: goodAndBadRows.sort((a, b) => (a[2] < b[2] ? 1 : -1)) // Index=2 sorted by Bad count
+                                .map(r => ([r[0], `${r[1]}`, `${r[2]}`]) ) // converting numbers to strings
+        });
+        sheets.push({ 
+            header: 'Statistics (Reasons)', 
+            columns: [ 'Type of items', 'Why are they considered bad?', 'Count of bad items' ], 
+            rows: rulesRows.sort((a, b) => (a[2] < b[2] ? 1 : -1)) // Index=2 sorted by Bad count
+                            .map(r => ([r[0], `${r[1]}`, `${r[2]}`]) ) // converting numbers to strings
+        });
+        // Sorting the details sheets by count of bad items descending (bad items on top)
+        detailsSheets.sort((a, b) => (a.countBad < b.countBad ? 1 : -1)).forEach(s => sheets.push(s.exportedTable));
+        // Set the export structure to 'globalViewItemsExport'
+        this.globalViewItemsExport = sheets;
+        // Sorting the global view data by count of bad items descending (bad items on top)
+        return data.sort((a, b) => (a.countBad < b.countBad ? 1 : -1));
+    }
 
     // ----------------------------------------------------------------------------------------------------------------
     // ----------------------------------------------------------------------------------------------------------------
@@ -550,21 +749,25 @@ export default class OrgcheckApp extends LightningElement {
      * @param {Event | any} event - The event information
      */
     handleNavigationMenuSearch(event) {
-        const searchTerm = event?.target?.value?.toLowerCase() || '';
-        if (searchTerm) {
-            this.navigationMenuItems = INITIAL_NAVIGATION_ITEMS.map((mainItem) => {
-                const itemsMatching = mainItem.items.filter((subItem) => subItem.label.toLowerCase().includes(searchTerm));
-                const isItemsMatching = itemsMatching.length > 0;
-                const isItemMatching = mainItem.label.toLowerCase().includes(searchTerm);
-                return {
-                    label: mainItem.label,
-                    name: mainItem.name,
-                    expanded: isItemsMatching || isItemMatching,
-                    items: isItemMatching ? mainItem.items : (isItemsMatching ? itemsMatching : [] )
-                }
-            }).filter((mainItem) => mainItem.items.length > 0);
-        } else {
-            this.navigationMenuItems = INITIAL_NAVIGATION_ITEMS;
+        try {
+            const searchTerm = event?.target?.value?.toLowerCase() || '';
+            if (searchTerm) {
+                this.navigationMenuItems = APPLICATION_NAVIGATION_MENU_ITEMS_FOR_TREE.map((section) => {
+                    const itemsMatching = section.items.filter((item) => item.label.toLowerCase().includes(searchTerm));
+                    const isItemsMatching = itemsMatching.length > 0;
+                    const isItemMatching = section.label.toLowerCase().includes(searchTerm);
+                    return {
+                        label: section.label,
+                        name: section.name,
+                        expanded: isItemsMatching || isItemMatching,
+                        items: isItemMatching ? section.items : (isItemsMatching ? itemsMatching : [] )
+                    }
+                }).filter((section) => section.items.length > 0);
+            } else {
+                this.navigationMenuItems = APPLICATION_NAVIGATION_MENU_ITEMS_FOR_TREE;
+            }
+        } catch (error) {
+            this._showError('handleNavigationMenuSearch', error);
         }
     }
 
@@ -574,11 +777,13 @@ export default class OrgcheckApp extends LightningElement {
      * @param {Event | any} event - The event information
      */
     async handleNavigationMenuSelect(event) {
-        const item = event?.detail?.name;
-        if (item && item.length === 2) {
-            this._private_properties.currentMenuItem = item;
-            await this._updateCurrentData();
-            this._showCurrentContentPanel();
+        try {
+            const item = event?.detail?.name;
+            if (item && item.length === 2) {
+                await this._async_goToPage(item);
+            }
+        } catch (error) {
+            this._showError('handleNavigationMenuSelect', error);
         }
     }
 
@@ -588,8 +793,12 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */
     async handleFiltersValidated() {
-        this.isObjectSpecified = this._private_properties.filters?.isSelectedSObjectApiNameAny === false;
-        await this._updateCurrentData();
+        try {
+            this.isObjectSpecified = this._private_properties.filters?.isSelectedSObjectApiNameAny === false;
+            await this._async_updateCurrentData();
+        } catch (error) {
+            this._showError('handleFiltersValidated', error);
+        }
     }
 
     /**
@@ -598,7 +807,11 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */
     async handleFiltersRefreshed() {
-        await this._loadFilters(true);
+        try {
+            await this._async_loadFilters(true);
+        } catch (error) {
+            this._showError('handleFiltersRefreshed', error);
+        }
     }
 
     /**
@@ -615,15 +828,14 @@ export default class OrgcheckApp extends LightningElement {
         if (!checkbox) return;
         try {
             // is it checked?
-            // @ts-ignore
             if (checkbox.checked === true) {
                 // yes it is!
                 this._private_properties.api?.acceptUsageTermsManually();
-                await this._loadBasicInformationIfAccepted();
+                await this._async_loadBasicInformationIfAccepted();
             }
             // do nothing if it is not checked.
-        } catch(e) {
-            this._showError('Error while handleClickUsageAcceptance', e);
+        } catch(error) {
+            this._showError('handleClickUsageAcceptance', error);
         }
     }
 
@@ -638,8 +850,8 @@ export default class OrgcheckApp extends LightningElement {
             this._private_properties.api?.removeAllFromCache(); // may throw an error
             // and reload
             window.location.reload();
-        } catch (e) {
-            this._showError('Error while handleRemoveAllCache', e);
+        } catch (error) {
+            this._showError('handleRemoveAllCache', error);
         }
     }
 
@@ -649,32 +861,36 @@ export default class OrgcheckApp extends LightningElement {
      * @public
      */ 
     handleLogCacheItem(event) {
-        // Get attribute data-item-name
-        const itemName = event?.target?.getAttribute('data-item-name');
-        // Get the data from cache
-        const cacheData = this._private_properties.api?.getCacheData(itemName);
-        // Dump the cache in the dialogBox
-        let htmlContent = '';
-        if (cacheData === null || cacheData === undefined) {
-            htmlContent += 'There is no data in the cache for this item.';
-        } else if (cacheData instanceof Map) {
-            htmlContent += `<b>Type:</b> Map<br /><br /><b>Size:</b> ${cacheData.size}<br /><br /><b>Content:</b><ul>`;
-            Array.from(cacheData.entries()).forEach((entry, index) => {
-                htmlContent += `<li><b>INDEX:</b> ${index}, <b>KEY:</b> ${entry[0]}, <b>VALUE:</b> ${JSON.stringify(entry[1])}</li>`;
-            });
-            htmlContent += '</ul>';
-        } else if (Array.isArray(cacheData)) {
-            htmlContent += `<b>Type:</b> Array<br /><br /><b>Size:</b> ${cacheData.length}<br /><br /><b>Content:</b><ul>`;
-            cacheData.forEach((value, index) => {
-                htmlContent += `<li><b>INDEX:</b> ${index}, <b>VALUE:</b> ${JSON.stringify(value)}</li>`;
-            });
-            htmlContent += '</ul>';
-        } else {
-            htmlContent += `<b>Type:</b> ${typeof cacheData}<br /><br /><b>Content:</b><br />`;
-            htmlContent += JSON.stringify(cacheData);
+        try {
+            // Get attribute data-item-name
+            const itemName = event?.target?.getAttribute('data-item-name');
+            // Get the data from cache
+            const cacheData = this._private_properties.api?.getCacheData(itemName);
+            // Dump the cache in the dialogBox
+            let htmlContent = '';
+            if (cacheData === null || cacheData === undefined) {
+                htmlContent += 'There is no data in the cache for this item.';
+            } else if (cacheData instanceof Map) {
+                htmlContent += `<b>Type:</b> Map<br /><br /><b>Size:</b> ${cacheData.size}<br /><br /><b>Content:</b><ul>`;
+                Array.from(cacheData.entries()).forEach((entry, index) => {
+                    htmlContent += `<li><b>INDEX:</b> ${index}, <b>KEY:</b> ${entry[0]}, <b>VALUE:</b> ${JSON.stringify(entry[1])}</li>`;
+                });
+                htmlContent += '</ul>';
+            } else if (Array.isArray(cacheData)) {
+                htmlContent += `<b>Type:</b> Array<br /><br /><b>Size:</b> ${cacheData.length}<br /><br /><b>Content:</b><ul>`;
+                cacheData.forEach((value, index) => {
+                    htmlContent += `<li><b>INDEX:</b> ${index}, <b>VALUE:</b> ${JSON.stringify(value)}</li>`;
+                });
+                htmlContent += '</ul>';
+            } else {
+                htmlContent += `<b>Type:</b> ${typeof cacheData}<br /><br /><b>Content:</b><br />`;
+                htmlContent += JSON.stringify(cacheData);
+            }
+            // show the modal
+            this._private_properties.modal?.open(`Dump of the browser cache for item: ${itemName}`, htmlContent);
+        } catch (error) {
+            this._showError('handleLogCacheItem', error);
         }
-        // show the modal
-        this._private_properties.modal?.open(`Dump of the browser cache for item: ${itemName}`, htmlContent);
     }
 
     /**
@@ -683,27 +899,29 @@ export default class OrgcheckApp extends LightningElement {
      * @public
      */ 
     handleViewScore(event) {
-        // The event should contain a detail property
-        // @ts-ignore
-        const detail = event?.detail;
-        if (detail) {
-            try {
-                // prepare the modal content
-                let htmlContent = `The component <code><b>${detail.whatName}</b></code> (<code>${detail.whatId}</code>) has a `+
-                                `score of <b><code>${detail.score}</code></b> because of the following reasons:<br /><ul>`;
-                detail.reasonIds?.forEach((/** @type {number} */ id) => {
-                    const reason = ocapi.SecretSauce.GetScoreRule(id); // may throw an error
-                    if (reason) {
-                        htmlContent += `<li><b>${reason.description}</b>: <i>${reason.errorMessage}</i></li>`;
-                    }
-                });
-                htmlContent += '</ul>';
-                // show the modal
-                this._private_properties.modal?.open(`Understand the Score of "${detail.whatName}" (${detail.whatId})`, htmlContent);
-            } catch (e) {
-                // in case ocapi.SecretSauce.GetScoreRule threw an error!
-                this._showError('Error while handleViewScore', e);
-           }
+        try {
+            // The event should contain a detail property
+            const detail = event?.detail;
+            if (detail) {
+                try {
+                    // prepare the modal content
+                    let htmlContent = `The component <code><b>${detail.whatName}</b></code> (<code>${detail.whatId}</code>) has a `+
+                                      `score of <b><code>${detail.score}</code></b> because of the following reasons:<br /><ul>`;
+                    detail.reasonIds?.forEach((/** @type {number} */ id) => {
+                        const reason = getRuleById(id);
+                        if (reason) {
+                            htmlContent += `<li><b>${reason.description}</b>: <i>${reason.errorMessage}</i></li>`;
+                        }
+                    });
+                    htmlContent += '</ul>';
+                    // show the modal
+                    this._private_properties.modal?.open(`Understand the Score of "${detail.whatName}" (${detail.whatId})`, htmlContent);
+                } catch (e) {
+                    this._showError('Error while handleViewScore', e);
+                }
+            }
+        } catch (error) {
+            this._showError('handleViewScore', error);
         }
     }
 
@@ -731,24 +949,8 @@ export default class OrgcheckApp extends LightningElement {
             } catch (error) {
                 this._private_properties.spinner?.sectionFailed(LOG_SECTION, error);
             }
-        } catch (e) {
-            this._showError('Error while handleClickRunAllTests', e);
-        }
-    }
-
-    /**
-     * @description Event called when the user clicks on the "Refresh" button from the current tab
-     * @param {Event | any} event - The event information
-     * @async
-     * @public
-     */ 
-    async handleClickRefreshCurrentTab(event) {
-        try {
-            // @ts-ignore
-            const recipes = event.target.getAttribute('data-recipes')?.split(',');
-            await Promise.all(recipes?.map(async (/** @type {string} */ recipe) => { await this._updateCurrentData(recipe, true); } ));
-        } catch (e) {
-            this._showError('Error while handleClickRefreshCurrentTab', e);
+        } catch (error) {
+            this._showError('handleClickRunAllTests', error);
         }
     }
 
@@ -794,96 +996,28 @@ export default class OrgcheckApp extends LightningElement {
             } else {
                 this._private_properties.spinner?.sectionFailed(LOG_SECTION, 'Done but with errors');
             }
-        } catch (e) {
-            this._showError('Error while handleClickRecompile', e);
+        } catch (error) {
+            this._showError('handleClickRecompile', error);
         }
     }
 
+    
+
     /**
-     * @description Event called when the user clicks on a button to open a sub tab
+     * @description Method called when the user click on one of the cards in the global view
      * @param {Event | any} event - The event information
      * @public
-     */
-    handleOpenSubTab(event) {
+     */ 
+    async handleOpenPage(event) {
         try {
-            // The source of the event is a button with a specific attribute
-            const button = event?.target; // not throwing any error
-            // The button should have an attribute called data-tab 
-            // @ts-ignore
-            const tab = button.getAttribute('data-tab');
-            // Split the tab value into two elements one for the main tab and the other for the sub tab
-            const elements = tab.split(':');
-            // call the navigation method
-            this._navigateToTab( elements[0], elements[1] );
-        } catch (e) {
-            this._showError('Error while handleOpenSubTab', e);
+            // Get attribute data-key-page
+            const keyPage = event?.target?.getAttribute('data-key-page');
+            // And open the page
+            await this._async_goToPage(keyPage);
+        } catch (error) {
+            this._showError('handleOpenPage', error);
         }
     }
-
-
-
-
-    // ----------------------------------------------------------------------------------------------------------------
-    // ----------------------------------------------------------------------------------------------------------------
-    // Navigation and Showing modals methods
-    // ----------------------------------------------------------------------------------------------------------------
-    // ----------------------------------------------------------------------------------------------------------------
-    
-    /**
-     * @description Navigate to a specific tab and sub tab
-     * @param {string} mainTab - The main tab to navigate to
-     * @param {string} subTab - The sub tab to navigate to
-     * @private
-     */
-    _navigateToTab(mainTab, subTab) {
-        this.tabs.selectedMainTab = mainTab;
-        this.tabs.selectedSubTab = subTab;
-    }
-
-    /**
-     * @description Show the error in a modal (that can be closed)
-     * @param {string} title - The title of the modal
-     * @param {Error} error - The error to show in the error modal
-     * @private
-     */ 
-    _showError(title, error) {
-        const htmlContent = `<font color="red">Sorry! An error occurred while processing... <br /><br />`+
-                            `Please review our <a href="http://sfdc.co/OrgCheck-FAQ" target="_blank" rel="external noopener noreferrer">Org Check FAQ</a> and try to resolve this issue in your Org based on our community's feedback. <br /><br /> `+
-                            `If the FAQ is not helping, consider creating an issue on <a href="http://sfdc.co/OrgCheck-Backlog" target="_blank" rel="external noopener noreferrer">Org Check Issues tracker</a> `+
-                            `along with the context, a screenshot and the following error. <br /><br /> `+
-                            `<ul><li>Message: <code>${error?.message}</code></li><li>Stack: <code>${error?.stack}</code></li><li>Error as JSON: <code>${JSON.stringify(error)}</code></li></ul></font>`                                
-        this._private_properties.modal?.open(title, htmlContent);
-        console.error(title, error);
-    }
-
-
-
-
-    /**
-     * @description Table definition for object permissions
-     */
-    //get objectPermissionsTableDefinition() { return getTableDefinitions()?.ObjectPermissions(this._internalObjectPermissionsDataMatrix); }
- 
-    /**
-     * @description Table definition for application permissions
-     */
-    //get appPermissionsTableDefinition() { return getTableDefinitions()?.AppPermissions(this._internalAppPermissionsDataMatrix); }
-    
-    /**
-     * @description Table definition for field permissions
-     */
-    //get fieldPermissionsTableDefinition() { return getTableDefinitions()?.FieldPermissions(this._internalFieldPermissionsDataMatrix); }
-
-    /**
-     * @description Table definition for score rules
-     */
-    //get scoreRulesTableDefinition() { return getTableDefinitions()?.ScoreRules(this.data._internalAllScoreRulesDataMatrix); }
-    
-    /**
-     * @description Table definition for hard coded urls view
-     */
-    //get hardCodedURLsViewTableDefinition() { return getTableDefinitions()?.HardCodedURLsView(MAX_ITEMS_IN_HARDCODED_URLS_LIST); }
-
 
     // ----------------------------------------------------------------------------------------------------------------
     // ----------------------------------------------------------------------------------------------------------------
@@ -954,8 +1088,6 @@ export default class OrgcheckApp extends LightningElement {
         this._private_properties.modal?.open(`Details for role ${data.record.name}`, htmlContent);
     }
 
-
-
     // ----------------------------------------------------------------------------------------------------------------
     // ----------------------------------------------------------------------------------------------------------------
     // Export structure for objects (which is needed because multiple tables) and global view
@@ -965,193 +1097,18 @@ export default class OrgcheckApp extends LightningElement {
     /**
      * @description Representation of an export for SObject Description data
      */
-    get objectInformationExportSource() { 
-        const sheets = [];
-        sheets.push({ 
-            header: 'General information',
-            columns: [ 'Label', 'Value' ],
-            rows: [
-                [ 'API Name', `${this.objectData.apinam ?? ''}` ],
-                [ 'Package', `${this.objectData.package ?? ''}` ],
-                [ 'Singular Label', `${this.objectData.label ?? ''}` ],
-                [ 'Plural Label', `${this.objectData.labelPlural ?? ''}` ],
-                [ 'Description', `${this.objectData.description ?? ''}` ],
-                [ 'Key Prefix', `${this.objectData.keyPrefix ?? ''}` ],
-                [ 'Record Count (including deleted ones)', `${this.objectData.recordCount}` ],
-                [ 'Is Custom?', `${this.objectData.isCustom?'true':'false'}` ],
-                [ 'Feed Enable?', `${this.objectData.isFeedEnabled?'true':'false'}` ],
-                [ 'Most Recent Enabled?', `${this.objectData.isMostRecentEnabled?'true':'false'}` ],
-                [ 'Global Search Enabled?', `${this.objectData.isSearchable?'true':'false'}` ],
-                [ 'Internal Sharing', `${this.objectData.internalSharingModel ?? ''}` ],
-                [ 'External Sharing', `${this.objectData.externalSharingModel ?? ''}` ]
-            ]
-        });
-        sheets.push(ocui.RowsFactory.createAndExport(this.standardFieldsInObjectTableDefinition, this.objectData.standardFields, 'Standard Fields', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(this.customFieldsInObjectTableDefinition, this.objectData.customFieldRefs, 'Custom Fields', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(this.apexTriggersInObjectTableDefinition, this.objectData.apexTriggerRefs, 'Apex Triggers', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(this.fieldSetsTableDefinition, this.objectData.fieldSets, 'Field Sets', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(this.layoutsTableDefinition, this.objectData.layouts, 'Page Layouts', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(this.flexiPagesInObjectTableDefinition, this.objectData.flexiPages, 'Lightning Pages', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(this.limitsTableDefinition, this.objectData.limits, 'Limits', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(this.validationRulesInObjectTableDefinition, this.objectData.validationRules, 'Validation Rules', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(this.webLinksInObjectTableDefinition, this.objectData.webLinks, 'Web Links', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(this.recordTypesInObjectTableDefinition, this.objectData.recordTypes, 'Record Types', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(this.relationshipsTableDefinition, this.objectData.relationships, 'Relationships', ocapi.SecretSauce.GetScoreRuleDescription));
-        return sheets;
+    get objectInformationExportSource() {
+        try {
+            return this._generateDataForCurrentObjectExport();
+        } catch (error) {
+            this._showError('objectInformationExportSource', error);
+        }
     }
 
     /**
      * @description Representation of an export for the global view data
      */
     globalViewItemsExport;
-
-    /**
-     * @description Representation of an export for hardcoded URLs view data
-     */ 
-    hardCodedURLsViewItemsExport;
-
-    /**
-     * @description Global View data from API
-     * @param {Map} data - The data from the API
-     */ 
-    set _internalGlobalViewDataFromAPI(data) {
-        if (data) {
-            const globalViewData = [];
-            const goodAndBadRows = [];
-            const rulesRows = [];
-            const ruleTableDefinition = {
-                columns: [
-                    { label: 'Items', type: ocui.ColumnType.NUM, data: { value: 'value' }},
-                    { label: 'What is the issue?', type: ocui.ColumnType.TXT, data: { value: 'name' }}
-                ],
-                orderIndex: 0,
-                orderSort: ocui.SortOrder.DESC
-            }
-            const detailsSheets = [];
-            data?.forEach((item, recipe) => {
-                const tabValue = RECIPEALIAS_TO_SUB_TAB.get(recipe);
-                const transfomer = this._internalTransformers.get(tabValue);
-                const itemName = SUB_TABS.get(tabValue)?.tab?.title ?? tabValue;
-                const definitionName = transfomer.data.replace(/Data$/, 'Definition');
-                const definitionTable = this[definitionName];
-                globalViewData.push({
-                    countBad: item?.countBad,
-                    label: itemName,
-                    hadError: item?.hadError,
-                    class: `slds-box viewCard ${item?.hadError === true ? 'viewCard-error' : (item?.countBad === 0 ? 'viewCard-no-bad-data' : 'viewCard-some-bad-data')}`,
-                    tab: SUB_TABS.get(tabValue).mainTabKey,
-                    tableDefinition: ruleTableDefinition,
-                    tableData: item?.countBadByRule?.map((c) => { return { name: `${c.ruleName}`,  value: c.count }}) ?? []
-                });
-                goodAndBadRows.push([ itemName, item.countGood, item.countBad ]); 
-                item?.countBadByRule?.forEach((c) => {
-                    rulesRows.push([ itemName, c.ruleName, c.count ]);
-                });
-                detailsSheets.push({
-                    countBad: item?.countBad,
-                    exportedTable: ocui.RowsFactory.createAndExport(definitionTable, item?.data, itemName, ocapi.SecretSauce.GetScoreRuleDescription)
-                });
-            });
-            const sheets = [];
-            sheets.push({ 
-                header: 'Statistics (Good and Bad)', 
-                columns: [ 'Type of items', 'Count of good items', 'Count of bad items' ], 
-                rows: goodAndBadRows.sort((a, b) => (a[2] < b[2] ? 1 : -1)) // Index=2 sorted by Bad count
-                                    .map(r => ([r[0], `${r[1]}`, `${r[2]}`]) ) // converting numbers to strings
-            });
-            sheets.push({ 
-                header: 'Statistics (Reasons)', 
-                columns: [ 'Type of items', 'Why are they considered bad?', 'Count of bad items' ], 
-                rows: rulesRows.sort((a, b) => (a[2] < b[2] ? 1 : -1)) // Index=2 sorted by Bad count
-                               .map(r => ([r[0], `${r[1]}`, `${r[2]}`]) ) // converting numbers to strings
-            });
-            // Sorting the details sheets by count of bad items descending (bad items on top)
-            detailsSheets.sort((a, b) => (a.countBad < b.countBad ? 1 : -1)).forEach(s => sheets.push(s.exportedTable));
-            // Sorting the global view data by count of bad items descending (bad items on top)
-            this.globalViewData = globalViewData.sort((a, b) => (a.countBad < b.countBad ? 1 : -1));
-            this.globalViewItemsExport = sheets;
-            this.showGlobalViewExportButton = true;
-        } else {
-            this.globalViewData = [];
-            this.globalViewItemsExport = [];
-            this.showGlobalViewExportButton = false;
-        }
-    }
-
-    /**
-     * @description Hard-coded URLS View data from API
-     * @param {Map} data - The data from the API
-     */ 
-    set _internalHardCodedURLsViewDataFromAPI(data) {
-        if (data) {
-            const hardCodedURLsViewData = [];
-            const sheets = [];
-            data?.forEach((item, recipe) => {
-                const tabValue = RECIPE_TO_SUB_TAB.get(recipe);
-                const transfomer = this._internalTransformers.get(tabValue);
-                const itemName = SUB_TABS.get(tabValue)?.tab?.title ?? tabValue;
-                const definitionName = transfomer.data.replace(/Data$/, 'Definition');
-                /** @type {ocui.Table} */
-                const definitionTable = this[definitionName];
-                /** @type {ocui.TableColumn} */
-                const firstUrlColumn = definitionTable.columns.filter(c => c.type === ocui.ColumnType.URL)[0];
-                hardCodedURLsViewData.push({
-                    type: itemName,
-                    hadError: item?.hadError,
-                    countAll: item?.countAll,
-                    countBad: item?.countBad,
-                    items: item?.data?.filter((d, i) => i < MAX_ITEMS_IN_HARDCODED_URLS_LIST).map(d => {
-                        return {
-                            url: d?.[firstUrlColumn.data.value],
-                            name: d?.[firstUrlColumn.data.label]
-                        };
-                    })
-                });
-                if (item?.data?.length > 0) {
-                    sheets.push(ocui.RowsFactory.createAndExport(definitionTable, item?.data, itemName, ocapi.SecretSauce.GetScoreRuleDescription));
-                }
-            });
-            this.hardCodedURLsViewData = hardCodedURLsViewData; // no need to sort
-            this.hardCodedURLsViewItemsExport = sheets.sort((a, b) => { return (a?.rows?.length ?? 0) < (b?.rows?.length ?? 0) ? 1 : -1; }); // sorted by Nb Rows
-            this.showhardCodedURLsViewExportButton = true;
-        } else {
-            this.hardCodedURLsViewData = [];
-            this.hardCodedURLsViewItemsExport = [];
-            this.showhardCodedURLsViewExportButton = false;
-        }
-    }
-
-    /**
-     * @description Data table for object permissions
-     * @type {Array}
-     */ 
-    get objectPermissionsTableData() {
-        return this._internalObjectPermissionsDataMatrix?.rows || [];
-    }
-
-    /**
-     * @description Data table for application permissions
-     * @type {Array}
-     */ 
-    get appPermissionsTableData() {
-        return this._internalAppPermissionsDataMatrix?.rows || [];
-    }
-
-    /**
-     * @description Data table for field permissions
-     * @type {Array}
-     */ 
-    get fieldPermissionsTableData() {
-        return this._internalFieldPermissionsDataMatrix?.rows || [];
-    }
-
-    /** 
-     * @description Data table for all score rules
-     * @type {Array}
-     */
-    get allScoreRulesTableData() {
-        return this.data.allScoreRulesDataMatrix?.rows || [];
-    }
 }
 
 
@@ -1172,6 +1129,14 @@ const instantiateOrgCheckTableDefinition = (name, data) => {
     const tableDefConstructor = getOrgCheck()?.ui.table.definitions[name];
     if (tableDefConstructor) return new tableDefConstructor(data);
     return undefined;
+}
+
+const createAndExport = (... argv) => {
+    return getOrgCheck()?.ui.table.createAndExport(... argv);
+}
+
+const getRuleById = (id) => {
+    return getOrgCheck()?.rules.get(id);
 }
 
 const ALIASES = {
@@ -1214,8 +1179,8 @@ const APPLICATION_NAVIGATION = {
         key:   'B', 
         title: '🗺️ Salesforce Organization',
         items: { 
-            GLOBAL_VIEW:   { key: '04', title: '🏞️ Overview',        recipe: 'global-view',    data: '_internalGlobalViewDataFromAPI',        clear: 'removeGlobalViewFromCache',    alias: ALIASES.NONE, get: 'getGlobalView',        tableDefinition: 'GlobalViewItems' },
-            URL_VIEW:      { key: '05', title: '🏖️ Hard-coded URLs', recipe: 'hardcoded-urls', data: '_internalHardCodedURLsViewDataFromAPI', clear: 'removeHardcodedURLsFromCache', alias: ALIASES.NONE, get: 'getHardcodedURLsView', tableDefinition: 'HardCodedURLs' },
+            GLOBAL_VIEW:   { key: '04', title: '🏞️ Overview',        recipe: 'global-view',    data: 'globalView',    clear: 'removeGlobalViewFromCache',    alias: ALIASES.NONE, get: 'getGlobalView',        postProcess: (that, data) => { return that._globalViewPostProcess(data); },    tableDefinition: 'GlobalView' },
+            URL_VIEW:      { key: '05', title: '🏖️ Hard coded URLs', recipe: 'hardcoded-urls', data: 'hardCodedURLs', clear: 'removeHardcodedURLsFromCache', alias: ALIASES.NONE, get: 'getHardcodedURLsView', postProcess: (that, data) => { return that._hardCodedURLsPostProcess(data); }, tableDefinition: 'HardCodedURLs' },
         }
     },
     DATAMODEL: { 
@@ -1313,70 +1278,23 @@ const APPLICATION_NAVIGATION = {
     },
 };
 
-const ALL_NAVIGATION_SUBITEMS_BY_KEY = {};
-const INITIAL_NAVIGATION_ITEMS = Object.keys(APPLICATION_NAVIGATION).map((key) => { 
-    const item = APPLICATION_NAVIGATION[key];
+const NAVIGATION_ITEMS_BY_KEY = new Map();
+const NAVIGATION_ITEMS_BY_RECIPE = new Map();
+const NAVIGATION_SECTIONKEYS_BY_ITEMKEY = new Map();
+const APPLICATION_NAVIGATION_MENU_ITEMS_FOR_TREE = Object.keys(APPLICATION_NAVIGATION).map((sectionKey) => { 
+    const section = APPLICATION_NAVIGATION[sectionKey];
     return {
-        label: item.title,
-        name: item.key,
-        expanded: item.key === APPLICATION_NAVIGATION.HOME.key, // let's expand the "Home" section by default
-        items: Object.keys(item.items).map((k) => {
-            const subItem = item.items[k];
-            ALL_NAVIGATION_SUBITEMS_BY_KEY[subItem.key] = subItem;
-            return { label: subItem.title, name: subItem.key }
+        label: section.title,
+        name: section.key,
+        expanded: false,
+        items: Object.keys(section.items).map((itemKey) => {
+            const item = section.items[itemKey];
+            NAVIGATION_ITEMS_BY_KEY.set(item.key, item);
+            NAVIGATION_SECTIONKEYS_BY_ITEMKEY.set(item.key, section.key);
+            if (item.recipe) {
+                NAVIGATION_ITEMS_BY_RECIPE.set(item.recipe,  item);
+            }
+            return { label: item.title, name: item.key }
         })
     }
 });
-
-/**
- * @description Keys of the main tabs in the application
- * @type {Array<string>}
- * @constant
- */
-const MAIN_TABS_VALUES = Object.values(APPLICATION_NAVIGATION).map(tab => tab.key);
-
-/**
- * @description Sub tabs by key
- * @type {Map<string, {tab: {key: string, title: string}, mainTabKey: string}>}
- * @constant
- */
-const SUB_TABS = new Map();
-
-/**
- * @description Sub tab keys by main tab key
- * @type {Map<string, Array<string>>}
- * @constant
- */
-const SUB_TABS_BY_MAIN_TAB_KEY = new Map();
-
-/**
- * @description Sub tab keys by their corresponding recipe alias
- * @type {Map<string, string>}
- * @constant
- */
-const RECIPE_TO_SUB_TAB = new Map();
-
-Object.values(APPLICATION_NAVIGATION).forEach(mTab => Object.values(mTab.items).forEach(sTab => {
-    SUB_TABS.set(sTab.key, { tab: { key: sTab.key, title: sTab.title }, mainTabKey: mTab.key });
-    if (SUB_TABS_BY_MAIN_TAB_KEY.has(mTab.key) === false) SUB_TABS_BY_MAIN_TAB_KEY.set(mTab.key, []);
-    SUB_TABS_BY_MAIN_TAB_KEY.get(mTab.key).push(sTab.key);
-    if (sTab.recipe) {
-        RECIPE_TO_SUB_TAB.set(sTab.recipe, sTab.key);
-    }
-}));
-
-/**
- * @description Sanitize and validate main tab input
- * @param {string} input - The input main tab value
- * @returns {string} The sanitized main tab value
- * @throws {Error} If the input is not a valid main tab value
- */
-const SANITIZE_MAIN_TAB_INPUT = (input) => { 
-    if (input === undefined || input === null) throw new Error('Input is undefined or null');
-    if (typeof input !== 'string') throw new Error('Input is not a string'); 
-    const sanitizedInput = input.trim().toLowerCase();
-    if (MAIN_TABS_VALUES.includes(sanitizedInput) === false) { 
-        throw new Error(`Input <${input}> is not a valid main tab value`);
-    } 
-    return sanitizedInput;
-};

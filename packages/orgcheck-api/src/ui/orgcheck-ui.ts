@@ -70,7 +70,7 @@ export class TableDefinitions {
     static FlexiPages: typeof FlexiPagesTableDefinitions = FlexiPagesTableDefinitions;
     static FlexiPagesInObject: typeof FlexiPagesInObjectTableDefinitions = FlexiPagesInObjectTableDefinitions;
     static Flows: typeof FlowsTableDefinitions = FlowsTableDefinitions;
-    static GlobalViewItems: typeof GlobalViewItemsTableDefinitions = GlobalViewItemsTableDefinitions;
+    static GlobalView: typeof GlobalViewItemsTableDefinitions = GlobalViewItemsTableDefinitions;
     static HardCodedURLs: typeof HardCodedURLsTableDefinitions = HardCodedURLsTableDefinitions;
     static HomePageComponents: typeof HomePageComponentsTableDefinitions = HomePageComponentsTableDefinitions;
     static KnowledgeArticles: typeof KnowledgeArticlesTableDefinitions = KnowledgeArticlesTableDefinitions;

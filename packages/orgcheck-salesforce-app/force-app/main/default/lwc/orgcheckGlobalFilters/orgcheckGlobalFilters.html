@@ -6,6 +6,7 @@
                 variant="label-hidden" 
                 value={package}
                 options={packageOptions}
+                dropdown-alignment={dropdownAlignment}
                 disabled={unavailable}
                 onchange={handleChangeValue} ></lightning-combobox>
         </li>
@@ -14,6 +15,7 @@
                 data-id="sobjectType"
                 variant="label-hidden" 
                 value={sobjectType}
+                dropdown-alignment={dropdownAlignment}
                 disabled={unavailable}
                 options={sobjectTypeOptions}
                 onchange={handleChangeValue} ></lightning-combobox>
@@ -23,6 +25,7 @@
                 data-id="sobjectApiName"
                 variant="label-hidden" 
                 value={sobjectApiName}
+                dropdown-alignment={dropdownAlignment}
                 disabled={unavailable}
                 options={sobjectApiNameOptions}
                 onchange={handleChangeValue}></lightning-combobox>
@@ -39,7 +42,7 @@
             </template>
             <template lwc:if={filtersOriginallyChanged}>
                 <lightning-button-icon 
-                    variant="border" 
+                    variant="border-filled" 
                     icon-name="utility:clear" 
                     disabled={unavailable}
                     title="Remove all filters..." 
@@ -47,11 +50,12 @@
                 &nbsp;
             </template>
             <lightning-button-icon 
-                variant="border" 
+                variant="border-filled" 
                 icon-name="utility:sync"
                 disabled={unavailable}
                 title="Refresh the list of objects and packages..."
                 onclick={handleClickRefresh}></lightning-button-icon>
+                &nbsp;
         </li>
         <li>
             <template if:true={unavailable}>

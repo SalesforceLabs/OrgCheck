@@ -96,7 +96,7 @@ export class DatasetPageLayouts implements Dataset {
 
         // Get information about the previous identified page layouts using metadata api
         logger?.log(`Calling Tooling API Composite to get more information about these ${pageLayoutIds?.length} page layouts...`);
-        const pageLayoutMetadataRecords = await sfdcManager.readMetadataAtScale('Layout', pageLayoutIds, [ 'FIELD_INTEGRITY_EXCEPTION', 'UNKNOWN_EXCEPTION' ], logger);
+        const pageLayoutMetadataRecords = await sfdcManager.readMetadataAtScale('Layout', pageLayoutIds, [ 'FIELD_INTEGRITY_EXCEPTION', 'UNKNOWN_EXCEPTION', 'INSUFFICIENT_ACCESS' ], logger);
 
         logger?.log(`Parsing ${pageLayoutMetadataRecords?.length} page layout metadata information...`);
         await Processor.forEach(pageLayoutMetadataRecords, async (/** @type {any} */ metadataRecord: any) => {

@@ -5,29 +5,17 @@ import { TableColumn } from "src/ui/table/orgcheck-ui-table-column";
 
 export class HardCodedURLsTableDefinitions implements Table {
     
-    private _nbMaxItems: number;
-
-    /**
-     * @description Constructor to specify the maximum number items to show
-     * @param {number} nbMaxItems - Maximum number of items to show
-     */
-    constructor(nbMaxItems: number) {
-        this._nbMaxItems = nbMaxItems;
-    }
-
     /**
      * @description List of columns in a table
      * @type {Array<TableColumn>}
      */
-    get columns(): Array<TableColumn> { 
-        return [
-            { label: 'Type',      type: ColumnType.TXT, data: { value: 'type' }},
-            { label: 'Had Issue', type: ColumnType.CHK, data: { value: 'hadError' }},
-            { label: 'Bad',       type: ColumnType.NUM, data: { value: 'countBad' }},
-            { label: 'Total',     type: ColumnType.NUM, data: { value: 'countAll' }},
-            { label: `First ${this._nbMaxItems} items...`, type: ColumnType.URLS, data: { values: 'items', value: 'url', label: 'name' }}
-        ];
-    };
+    columns: Array<TableColumn> = [
+        { label: 'Type',           type: ColumnType.TXT, data: { value: 'type' }},
+        { label: 'Had Issue',      type: ColumnType.CHK, data: { value: 'hadError' }},
+        { label: 'Bad',            type: ColumnType.NUM, data: { value: 'countBad' }},
+        { label: 'Total',          type: ColumnType.NUM, data: { value: 'countAll' }},
+        { label: 'First items...', type: ColumnType.URLS, data: { values: 'items', value: 'url', label: 'name' }}
+    ];
 
     /**
      * @description Which index column is used for ordering?
