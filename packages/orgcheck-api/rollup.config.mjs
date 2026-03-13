@@ -16,7 +16,7 @@ export default [
             file: './dist/orgcheck.js',
             format: 'umd',           // 'iife' has an issue with the export of the module
             name: 'orgcheck',        // the global variable
-            context: 'window',
+            //context: 'window',
             extend: true,            // optional – merge with an existing window.orgcheck
             plugins: [ terser() ]
         }
