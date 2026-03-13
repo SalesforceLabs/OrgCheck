@@ -18,4 +18,4 @@ package-lock.json
 yarn.lock
 
 #org check generated files
-dist/
+dist/orgcheck.js
