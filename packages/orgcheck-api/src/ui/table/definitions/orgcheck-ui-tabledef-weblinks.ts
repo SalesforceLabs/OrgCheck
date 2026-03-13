@@ -52,17 +52,17 @@ class AbstractWebLinksTableDefinitions implements Table {
      * @description What is the sort order: ASC or DESC?
      * @type {SortOrder}
      */
-    orderSort: SortOrder = SortOrder.ASC;
+    orderSort: SortOrder = SortOrder.DESC;
 }
 
 export class WebLinksTableDefinitions extends AbstractWebLinksTableDefinitions {
     constructor() {
-        super(false);
+        super(true);
     }
 }
 
 export class WebLinksInObjectTableDefinitions extends AbstractWebLinksTableDefinitions {
     constructor() {
-        super(true);
+        super(false);
     }
 }

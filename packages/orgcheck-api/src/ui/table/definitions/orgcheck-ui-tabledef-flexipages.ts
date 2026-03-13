@@ -51,17 +51,17 @@ class AbstractFlexiPagesTableDefinitions implements Table {
      * @description What is the sort order: ASC or DESC?
      * @type {SortOrder}
      */
-    orderSort: SortOrder = SortOrder.ASC;
+    orderSort: SortOrder = SortOrder.DESC;
 }
 
 export class FlexiPagesTableDefinitions extends AbstractFlexiPagesTableDefinitions {
     constructor() {
-        super(false);
+        super(true);
     }
 }
 
 export class FlexiPagesInObjectTableDefinitions extends AbstractFlexiPagesTableDefinitions {
     constructor() {
-        super(true);
+        super(false);
     }
 }

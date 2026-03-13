@@ -58,17 +58,17 @@ class AbstractApexTriggersTableDefinitions implements Table {
      * @description What is the sort order: ASC or DESC?
      * @type {SortOrder}
      */
-    orderSort: SortOrder = SortOrder.ASC;
+    orderSort: SortOrder = SortOrder.DESC;
 }
 
 export class ApexTriggersTableDefinitions extends AbstractApexTriggersTableDefinitions {
     constructor() {
-        super(false);
+        super(true);
     }
 }
 
 export class ApexTriggersInObjectTableDefinitions extends AbstractApexTriggersTableDefinitions {
     constructor() {
-        super(true);
+        super(false);
     }
 }

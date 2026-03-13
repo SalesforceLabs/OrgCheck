@@ -47,17 +47,17 @@ class AbstractValidationRulesTableDefinitions implements Table {
      * @description What is the sort order: ASC or DESC?
      * @type {SortOrder}
      */
-    orderSort: SortOrder = SortOrder.ASC;
+    orderSort: SortOrder = SortOrder.DESC;
 }
 
 export class ValidationRulesTableDefinitions extends AbstractValidationRulesTableDefinitions {
     constructor() {
-        super(false);
+        super(true);
     }
 }
 
 export class ValidationRulesInObjectTableDefinitions extends AbstractValidationRulesTableDefinitions {
     constructor() {
-        super(true);
+        super(false);
     }
 }

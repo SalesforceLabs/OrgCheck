@@ -45,17 +45,17 @@ class AbstractRecordTypesTableDefinitions implements Table {
      * @description What is the sort order: ASC or DESC?
      * @type {SortOrder}
      */
-    orderSort: SortOrder = SortOrder.ASC;
+    orderSort: SortOrder = SortOrder.DESC;
 }
 
 export class RecordTypesTableDefinitions extends AbstractRecordTypesTableDefinitions {
     constructor() {
-        super(false);
+        super(true);
     }
 }
 
 export class RecordTypesInObjectTableDefinitions extends AbstractRecordTypesTableDefinitions {
     constructor() {
-        super(true);
+        super(false);
     }
 }
