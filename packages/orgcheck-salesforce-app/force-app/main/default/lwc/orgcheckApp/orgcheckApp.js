@@ -334,6 +334,7 @@ export default class OrgcheckApp extends LightningElement {
                 this.isLoading = true;
                 this.navigationMenuSelected = keyPage;
                 await this._async_updateCurrentData();
+                this._updateLimits();
                 this._showCurrentContentPanel();
             } finally {
                 this.isLoading = false;
@@ -554,10 +555,6 @@ export default class OrgcheckApp extends LightningElement {
         // Data for the filters
         console?.log('Load filters...');
         await this._async_loadFilters();
-
-        // Update daily API limit information
-        console?.log('Update the daily API limit informations...');
-        this._updateLimits();
 
         // Open the HOME/WELCOME page by default
         await this._async_goToPage(APPLICATION_NAVIGATION.HOME.items.WELCOME.key);
