@@ -332,9 +332,15 @@ export default class OrgcheckApp extends LightningElement {
         if (NAVIGATION_ITEMS_BY_KEY.has(keyPage)) {
             try {
                 this.isLoading = true;
-                this.navigationMenuSelected = keyPage;
-                await this._async_updateCurrentData();
-                this._updateLimits();
+                if (this.useOrgCheck.accepted === false) {
+                    // force to go to main page if terms not accepted
+                    this.navigationMenuSelected = APPLICATION_NAVIGATION.HOME.items.WELCOME.key;
+                } else {
+                    // else you go where you want!
+                    this.navigationMenuSelected = keyPage;
+                    await this._async_updateCurrentData();
+                    this._updateLimits();
+                }
                 this._showCurrentContentPanel();
             } finally {
                 this.isLoading = false;
@@ -377,6 +383,7 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */ 
     async _async_updateCurrentData(forceRefresh) {
+
         const navigationItem = NAVIGATION_ITEMS_BY_KEY.get(this.navigationMenuSelected); 
         if (navigationItem && this._private_properties.api) {
             // --------------------------------------------------------------------------------
@@ -535,29 +542,37 @@ export default class OrgcheckApp extends LightningElement {
         // Check for acceptance
         console?.log('Checking if the terms are accepted...')
         await this._async_checkTermsAcceptance();
-        if (this.useOrgCheck.accepted === false) {
-            console?.log('The use of Org Check in this org was not confirmed. Stopping...');
-            return;
+        if (this.useOrgCheck.accepted === true) {
+            console?.log('The use of Org Check in this org was confirmed.');
+
+            // Show the main panel to start using the app!
+            console?.log('Show the main panel');
+            const mainPanel = this.template.querySelector('[data-key="orgcheck-main"]');    
+            if (mainPanel) {
+                mainPanel.classList.remove('slds-hide');
+            }
+            
+            // Check basic permission for the current user
+            console?.log('Checking if current user has enough permission...')
+            await this._private_properties.api?.checkCurrentUserPermissions(); // if no perm this throws an error
+
+            // Information about the org
+            console?.log('Information about the org...');
+            const orgInfo = await this._private_properties.api?.getOrganizationInformation();
+            this.orgInformation.name = orgInfo.name + ' (' + orgInfo.id + ')';
+            this.orgInformation.type = orgInfo.type;
+            this.orgInformation.theme = orgInfo.isProduction === true ? 'slds-theme_error' : (orgInfo.isSandbox === true ? 'slds-theme_warning' : 'slds-theme_success');
+            
+            // Data for the filters
+            console?.log('Load filters...');
+            await this._async_loadFilters();
+
+            // We want to go to the HOME/WELCOME page
+            await this._async_goToPage(APPLICATION_NAVIGATION.HOME.items.WELCOME.key);
+
+        } else {
+            console?.log('The use of Org Check in this org was not confirmed. The user has to accept them.');
         }
-        console?.log('The use of Org Check in this org was confirmed. Continuing...');
-
-        // Check basic permission for the current user
-        console?.log('Checking if current user has enough permission...')
-        await this._private_properties.api?.checkCurrentUserPermissions(); // if no perm this throws an error
-
-        // Information about the org
-        console?.log('Information about the org...');
-        const orgInfo = await this._private_properties.api?.getOrganizationInformation();
-        this.orgInformation.name = orgInfo.name + ' (' + orgInfo.id + ')';
-        this.orgInformation.type = orgInfo.type;
-        this.orgInformation.theme = orgInfo.isProduction === true ? 'slds-theme_error' : (orgInfo.isSandbox === true ? 'slds-theme_warning' : 'slds-theme_success');
-        
-        // Data for the filters
-        console?.log('Load filters...');
-        await this._async_loadFilters();
-
-        // Open the HOME/WELCOME page by default
-        await this._async_goToPage(APPLICATION_NAVIGATION.HOME.items.WELCOME.key);
     }
 
     /**
@@ -567,6 +582,7 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */ 
     async _async_loadFilters(forceRefresh=false) {
+
         console?.log('Hide the filter panel...');
         this._private_properties.filters?.hide();
 
@@ -812,25 +828,14 @@ export default class OrgcheckApp extends LightningElement {
     }
 
     /**
-     * @description When the org is a production, we show a message and a checkbox. This event is triggered when the user clicks on this checkbox.
-     *              This should activate the usage of the Salesforce API from Org Check API.
-     * @param {Event | any} event - The event information
+     * @description When the org is a production, we show a message. This event is when the user accept the terms by click on "yes" button
      * @public
      * @async
      */
-    async handleClickUsageAcceptance(event) {
-        // The source of the event is the acceptance checkbox
-        const checkbox = event?.target;
-        // do nothing if we did not find the checkbox (weird!!)
-        if (!checkbox) return;
+    async handleClickUsageAcceptance() {
         try {
-            // is it checked?
-            if (checkbox.checked === true) {
-                // yes it is!
-                this._private_properties.api?.acceptUsageTermsManually();
-                await this._async_loadBasicInformationIfAccepted();
-            }
-            // do nothing if it is not checked.
+            this._private_properties.api?.acceptUsageTermsManually();
+            await this._async_loadBasicInformationIfAccepted();
         } catch(error) {
             this._showError('handleClickUsageAcceptance', error);
         }
@@ -1166,6 +1171,7 @@ const APPLICATION_NAVIGATION = {
     HOME: { 
         key:   'A', 
         title: 'Home',
+        disabledIfTermsNotYetAccepted: false,
         items: { 
             WELCOME:       { key: '01', title: '👋 Welcome!' },
             CACHE:         { key: '02', title: '🛠️ Metadata Cache',    data: 'cacheItems', alias: ALIASES.NONE, get: 'getCacheInformation' },
@@ -1175,6 +1181,7 @@ const APPLICATION_NAVIGATION = {
     ORG: { 
         key:   'B', 
         title: '🗺️ Salesforce Organization',
+        disabledIfTermsNotYetAccepted: true,
         items: { 
             GLOBAL_VIEW:   { key: '04', title: '🏞️ Overview',        recipe: 'global-view',    data: 'globalView',    clear: 'removeGlobalViewFromCache',    alias: ALIASES.NONE, get: 'getGlobalView',        postProcess: (that, data) => { return that._globalViewPostProcess(data); },    tableDefinition: 'GlobalView' },
             URL_VIEW:      { key: '05', title: '🏖️ Hard coded URLs', recipe: 'hardcoded-urls', data: 'hardCodedURLs', clear: 'removeHardcodedURLsFromCache', alias: ALIASES.NONE, get: 'getHardcodedURLsView', postProcess: (that, data) => { return that._hardCodedURLsPostProcess(data); }, tableDefinition: 'HardCodedURLs' },
@@ -1183,6 +1190,7 @@ const APPLICATION_NAVIGATION = {
     DATAMODEL: { 
         key:   'C', 
         title: '⚽ Data model',
+        disabledIfTermsNotYetAccepted: true,
         items: { 
             SOBJ_DESC:     { key: '06', title: '🎳 Object Documentation', recipe: 'object',           data: 'objectData',      clear: 'removeObjectFromCache',             alias: ALIASES.OBJECT,    get: 'getObject',          getOnlyIf: (that) => (that.isObjectSpecified), tableDefinitions: [ 'ApexTriggersInObject', 'CustomFieldsInObject', 'FieldSets', 'FlexiPagesInObject', 
                                                                                                                                                                                                                                                                                      'PageLayouts', 'Limits', 'RecordTypesInObject', 'Relationships', 'StandardFields', 
@@ -1198,6 +1206,7 @@ const APPLICATION_NAVIGATION = {
     SECURITY: { 
         key:   'D', 
         title: '👮 Security and Access',
+        disabledIfTermsNotYetAccepted: true,
         items: { 
             USERS:         { key: '0D', title: '👥 Active Internal Users',     recipe: 'internal-active-users',    data: 'users',                    clear: 'removeAllActiveUsersFromCache',            alias: ALIASES.NONE,     get: 'getActiveUsers',                     tableDefinition: 'Users' },
             PROFILES:      { key: '0E', title: '🚓 Profiles',                  recipe: 'profiles',                 data: 'profiles',                 clear: 'removeAllProfilesFromCache',               alias: ALIASES.PACKAGE,  get: 'getProfiles',                        tableDefinition: 'Profiles',                getParameters: [ PARAMETERS.NAMESPACE ] },
@@ -1214,6 +1223,7 @@ const APPLICATION_NAVIGATION = {
     BOXES: { 
         key:   'E', 
         title: '🐇 Boxes',
+        disabledIfTermsNotYetAccepted: true,
         items: { 
             ROLES_GRAPH:   { key: '17', title: '🐙 Internal Role Explorer', recipe: 'user-roles',           data: 'rolesTree',     clear: 'removeAllRolesFromCache',         alias: ALIASES.NONE, get: 'getRolesTree' },
             ROLES:         { key: '18', title: '🦓 Internal Role Listing',  recipe: 'user-roles',           data: 'roles',         clear: 'removeAllRolesFromCache',         alias: ALIASES.NONE, get: 'getRoles',         tableDefinition: 'Roles' },
@@ -1225,6 +1235,7 @@ const APPLICATION_NAVIGATION = {
     AUTOMATION: { 
         key:   'F', 
         title: '🤖 Automations',
+        disabledIfTermsNotYetAccepted: true,
         items: { 
             FLOWS:         { key: '1C', title: '🏎️ Flows',            recipe: 'flows',            data: 'flows',           clear: 'removeAllFlowsFromCache',           alias: ALIASES.NONE, get: 'getFlows',           tableDefinition: 'Flows' },
             PBS:           { key: '1D', title: '🛺 Process Builders', recipe: 'process-builders', data: 'processBuilders', clear: 'removeAllProcessBuildersFromCache', alias: ALIASES.NONE, get: 'getProcessBuilders', tableDefinition: 'ProcessBuilders' },
@@ -1234,6 +1245,7 @@ const APPLICATION_NAVIGATION = {
     SETTING: { 
         key:   'G', 
         title: '🎁 Setting',
+        disabledIfTermsNotYetAccepted: true,
         items: {
             LABELS:        { key: '1F', title: '🏷️ Custom Labels',      recipe: 'custom-labels',      data: 'customLabels',      clear: 'removeAllCustomLabelsFromCache',      alias: ALIASES.PACKAGE, get: 'getCustomLabels',      tableDefinition: 'CustomLabels',     getParameters: [ PARAMETERS.NAMESPACE ] },
             DOCUMENTS:     { key: '20', title: '🍱 Documents',          recipe: 'documents',          data: 'documents',         clear: 'removeAllDocumentsFromCache',         alias: ALIASES.PACKAGE, get: 'getDocuments',         tableDefinition: 'Documents',        getParameters: [ PARAMETERS.NAMESPACE ] },
@@ -1245,6 +1257,7 @@ const APPLICATION_NAVIGATION = {
     VISUAL: { 
         key:   'H', 
         title: '🥐 User Interface',
+        disabledIfTermsNotYetAccepted: true,
         items: {
             VFPS:          { key: '24', title: '🥖 Visualforce Pages',         recipe: 'visualforce-pages',         data: 'visualForcePages',       clear: 'removeAllVisualForcePagesFromCache',        alias: ALIASES.PACKAGE, get: 'getVisualForcePages',        tableDefinition: 'VisualForcePages',       getParameters: [ PARAMETERS.NAMESPACE ]},
             VFCS:          { key: '25', title: '🍞 Visualforce Components',    recipe: 'visualforce-components',    data: 'visualForceComponents',  clear: 'removeAllVisualForceComponentsFromCache',   alias: ALIASES.PACKAGE, get: 'getVisualForceComponents',   tableDefinition: 'VisualForceComponents',  getParameters: [ PARAMETERS.NAMESPACE ] },
@@ -1258,6 +1271,7 @@ const APPLICATION_NAVIGATION = {
     CODE: { 
         key:   'I', 
         title: '🔥 Programmatic',
+        disabledIfTermsNotYetAccepted: true,
         items: {
             CLASSES:       { key: '2B', title: '❤️‍🔥 Apex Classes',                         recipe: 'apex-classes',    data: 'apexClasses',    clear: 'removeAllApexClassesFromCache',    alias: ALIASES.PACKAGE, get: 'getApexClasses',    tableDefinition: 'ApexClasses',    getParameters: [ PARAMETERS.NAMESPACE ] },
             UNCOMPILEDS:   { key: '2C', title: '🌋 Apex Classes That Need Recompilation', recipe: 'apex-uncompiled', data: 'apexUncompiled', clear: 'removeAllApexUncompiledFromCache', alias: ALIASES.PACKAGE, get: 'getApexUncompiled', tableDefinition: 'ApexUncompiled', getParameters: [ PARAMETERS.NAMESPACE ] },
@@ -1268,6 +1282,7 @@ const APPLICATION_NAVIGATION = {
     ANALYTICS: { 
         key:   'J', 
         title: '⛰️ Analytics',
+        disabledIfTermsNotYetAccepted: true,
         items: {
             REPORTS:       { key: '2F', title: '🌳 Reports',    recipe: 'reports',    data: 'reports',    clear: 'removeAllReportsFromCache',    alias: ALIASES.NONE, get: 'getReports',    tableDefinition: 'Reports' },
             DASHBOARDS:    { key: '30', title: '🌲 Dashboards', recipe: 'dashboards', data: 'dashboards', clear: 'removeAllDashboardsFromCache', alias: ALIASES.NONE, get: 'getDashboards', tableDefinition: 'Dashboards' },

@@ -25,3 +25,11 @@
 .contentTitle {
     background-color: #4395a590;
 }
+
+div.pleaseAcceptTheTerms {
+    width: 80%;
+    justify-self: center;
+    background-color: #ffb900;
+    padding: 2em;
+    border-radius: 2em;
+}
