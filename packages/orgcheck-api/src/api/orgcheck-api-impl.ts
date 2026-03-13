@@ -67,7 +67,7 @@ export class API implements ApiIntf {
      * @type {string}
      * @public
      */
-    public readonly version: string = 'Nitrogen [N,7]';
+    public readonly version: string = 'Oxygen [O,8]';
 
     /**
      * @description Numerical representation of the Salesforce API Version we use
