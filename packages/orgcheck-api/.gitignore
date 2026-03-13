@@ -18,6 +18,4 @@ package-lock.json
 yarn.lock
 
 #org check generated files
-dist/orgcheck-api.js
-dist/orgcheck-ui.js
-
+dist/

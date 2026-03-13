@@ -34,7 +34,6 @@ package-lock.json
 yarn.lock
 
 #org check generated files
-force-app/main/default/lwc/**/libs/orgcheck-*.js
 force-app/main/default/staticresources/OrgCheck_SR.resource
 
 # Local environment variables
