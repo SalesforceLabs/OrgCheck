@@ -1,0 +1,16 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directories:
+      - "/"
+    schedule:
+      interval: "daily"
+    target-branch: "main"
+  - package-ecosystem: "npm"
+    directories:
+      - "/packages/orgcheck-api"
+      - "/packages/orgcheck-salesforce-app"
+      - "/packages/orgcheck-sfdx-plugin"
+    schedule:
+      interval: "daily"
+    target-branch: "release-oxygen"
