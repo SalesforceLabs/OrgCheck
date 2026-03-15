@@ -2,7 +2,7 @@ import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import typescript from 'rollup-plugin-typescript2';
 import terser from '@rollup/plugin-terser';
-//import dts from "rollup-plugin-dts";
+import { dts } from 'rollup-plugin-dts';
 
 export default [
     {
@@ -14,11 +14,26 @@ export default [
         ],
         output: {
             file: './dist/orgcheck.js',
-            format: 'umd',           // 'iife' has an issue with the export of the module
-            name: 'orgcheck',        // the global variable
-            //context: 'window',
-            extend: true,            // optional – merge with an existing window.orgcheck
+            format: 'umd',
+            name: 'orgcheck',
+            extend: true,
             plugins: [ terser() ]
         }
+    },
+    {
+        input: './src/orgcheck.ts',
+        output: { file: './dist/orgcheck.d.ts', format: 'es' },
+        plugins: [
+            dts({
+                tsconfig: './tsconfig.json',
+                compilerOptions: { 
+                    baseUrl: '.', 
+                    paths: { 
+                        'src/*': ['./src/*'], 
+                        'tslib': ['./node_modules/tslib/tslib.d.ts'] 
+                    } 
+                }
+            })
+        ]
     }
 ];

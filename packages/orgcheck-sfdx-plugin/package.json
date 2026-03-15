@@ -7,7 +7,9 @@
     "@orgcheck/api": "8.0.0",
     "@oclif/core": "^4",
     "@salesforce/core": "^8",
-    "@salesforce/sf-plugins-core": "^12"
+    "@salesforce/sf-plugins-core": "^12",
+    "fflate": "^0.8.2",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
     "@oclif/plugin-command-snapshot": "^5.1.9",

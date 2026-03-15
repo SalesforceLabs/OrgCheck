@@ -29,6 +29,8 @@
         "test": "jest \".*unit.*\" ",
         "build": "rollup -c rollup.config.mjs && jest \".*bundled.*\" "
     },
+    "main": "./dist/orgcheck.js",
+    "types": "./dist/orgcheck.d.ts",
     "dependencies": {
         "fflate": "^0.8.2",
         "jsforce": "^3.10.14",
