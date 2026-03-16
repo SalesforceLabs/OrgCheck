@@ -1,5 +1,6 @@
 import { Data } from 'src/api/core/orgcheck-api-data';
 import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
+import { DataCollectionStatisticsIntf } from './orgcheck-api-data-datacollectionstats';
 
 /**
  * @description Recipe Manager interface
@@ -13,11 +14,11 @@ export interface RecipeManagerIntf {
      *   - Step 3. Transform the retrieved data and return the final result as a Map
      * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map<string, any>} [parameters] - List of values to pass to the recipe
-     * @returns {Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<Array<Data | DataCollectionStatisticsIntf> | DataMatrixIntf | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    run(alias: string, parameters?: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>>;
+    run(alias: string, parameters: Map<string, any>): Promise<Array<Data | DataCollectionStatisticsIntf> | DataMatrixIntf | Data | Map<string, any>>;
 
     /**
      * @description Cleans a designated recipe (by its alias) and the corresponding datasets.

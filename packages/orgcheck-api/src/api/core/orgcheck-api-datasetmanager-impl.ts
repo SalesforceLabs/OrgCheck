@@ -184,7 +184,7 @@ export class DatasetManager implements DatasetManagerIntf {
                         const dataFromCache = this._dataCache.get(cacheKey);
                         if (dataFromCache) {
                             // Set the results from data cache
-                            this._logger.ended(section, 'There was data in data cache, we use it!');
+                            this._logger.finalLog(section, 'There was data in data cache, we use it!');
                             // Return the key/alias and value from the data cache
                             resolve([ alias, dataFromCache ]); // when data comes from cache instanceof won't work! (keep that in mind)
                         } else {
@@ -199,18 +199,18 @@ export class DatasetManager implements DatasetManagerIntf {
                                 // Cache the data (if possible and not too big)
                                 this._dataCache.set(cacheKey, data); 
                                 // Some logs
-                                this._logger.ended(section, `Data retrieved and saved in cache with key=${cacheKey}`);
+                                this._logger.finalLog(section, `Data retrieved and saved in cache with key=${cacheKey}`);
                                 // Return the key/alias and value from the cache
                                 resolve([ alias, data ]);
                             }).catch((/** @type {Error} */ error: Error) => {
                                 // Reject with this error
-                                this._logger.failed(section, error);
+                                this._logger.fatal(section, error);
                                 reject({ dataset: alias, cause: error });
                             });
                         }
                     } catch (error) {
                         // Reject with this error
-                        this._logger.failed(section, error);
+                        this._logger.fatal(section, error);
                         reject({ dataset: alias, cause: error });
                     }
                 }));

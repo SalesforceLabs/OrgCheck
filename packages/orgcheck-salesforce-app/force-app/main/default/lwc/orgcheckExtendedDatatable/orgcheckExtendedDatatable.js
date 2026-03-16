@@ -302,7 +302,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
         
         // Parse the rows
         this.nbBadRows = 0;
-        this._allRows = getOrgCheckTable()?.createRows(
+        this._allRows = getOrgCheckTableFactory()?.createRows(
             this.tableDefinition, 
             rows, 
             (row, isBad, rowIndex) => { 
@@ -340,7 +340,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      */ 
     get exportedRows() {
         if (this._private_properties.tableDefinition && this._private_properties.tableDefinition.columns && this._allRows) {
-            return getOrgCheckExport().asRaw(this._private_properties.tableDefinition, this._allRows, this.exportBasename);
+            return getOrgCheckTableFactory().asRaw(this._private_properties.tableDefinition, this._allRows, this.exportBasename);
         }
         return undefined;
     }
@@ -461,7 +461,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @private
      */
     _filterAllRows() {
-        getOrgCheckTable()?.filterRows(this._allRows, this._private_properties.filteringSearchInput);
+        getOrgCheckTableFactory()?.filterRows(this._allRows, this._private_properties.filteringSearchInput);
     }
 
     /**
@@ -469,7 +469,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @private
      */
     _sortAllRows() {
-        getOrgCheckTable()?.sortRows(this._private_properties.tableDefinition, this._allRows, this._private_properties.sortingIndex, this._private_properties.sortingOrder);
+        getOrgCheckTableFactory()?.sortRows(this._private_properties.tableDefinition, this._allRows, this._private_properties.sortingIndex, this._private_properties.sortingOrder);
     }
 
     /**
@@ -496,10 +496,6 @@ const getOrgCheck = () => {
     return (typeof window !== 'undefined' ? window?.orgcheck : globalThis?.orgcheck ?? null)
 }
 
-const getOrgCheckTable = () => {
-    return getOrgCheck()?.ui?.table;
-}
-
-const getOrgCheckExport = () => {
-    return getOrgCheck()?.export;
+const getOrgCheckTableFactory = () => {
+    return getOrgCheck()?.TableFactory ?? undefined;
 }

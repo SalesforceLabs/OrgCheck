@@ -1,8 +1,5 @@
-import { BasicLoggerIntf, LoggerIntf, SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
-
-export const LOG_OPERATION_IN_PROGRESS = 0;
-export const LOG_OPERATION_DONE = 1;
-export const LOG_OPERATION_FAILED = 2;
+import { LoggerIntf, SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
+import { LoggerSetup } from './orgcheck-api-setup-logger';
 
 /**
  * @description Logger for  
@@ -10,111 +7,91 @@ export const LOG_OPERATION_FAILED = 2;
 export class Logger implements LoggerIntf {
 
     /**
-     * @description Logger gets an injected logger :)
-     * @type {BasicLoggerIntf}
-     * @private
-     */
-    private _logger: BasicLoggerIntf;
-
-    /**
-     * @description Is the failed logging enabled?
+     * @description Flag that turns fatal() to simple warning() if set to true
      * @type {boolean}
-     * @private
+     * @public
      */
-    private _enabledFailed: boolean = true;
+    optimisticByPass: boolean;
 
     /**
      * @description Constructor
-     * @param {BasicLoggerIntf} logger - The injected logger
+     * @param {LoggerSetup} setup
      */
-    constructor(logger: BasicLoggerIntf) {
-        this._logger = logger;
-    }
+    constructor(private readonly setup: LoggerSetup) {
+        this.optimisticByPass = false;
+    }    
 
     /**
-     * @description Returns true if the logger is a console fallback logger
-     * @returns {boolean} True if the logger is a console fallback logger
-     */
-    public isConsoleFallback(): boolean {
-        return this._logger?.isConsoleFallback();
-    }
-
-    /**
-     * @see LoggerIntf.log
-     * @param {string} operationName - The name of the operation
-     * @param {string} [message] - The message to log
-     */
-    public log(operationName: string, message: string) { 
-        if (this._logger?.isConsoleFallback()) {
-            CONSOLE_LOG(operationName, 'LOG', message);
-        }
-        this._logger?.log(operationName, message);
-    }
-
-    /**
-     * @see LoggerIntf.ended
-     * @param {string} operationName - The name of the operation
-     * @param {string} [message] - The message to log
-     */
-    public ended(operationName: string, message: string) { 
-        if (this._logger?.isConsoleFallback()) {
-            CONSOLE_LOG(operationName, 'ENDED', message);
-        }
-        this._logger?.ended(operationName, message);
-    }
-
-    /**
-     * @see LoggerIntf.failed
-     * @param {string} operationName - The name of the operation
-     * @param {Error | string} [error] - The error to log
+     * @description This method just logs a message for a given operation
+     *              If the operation was not started yet, it will after this call
+     *              The given operation is expeted to just continue
+     * @param {string} operationName - the name of the operation
+     * @param {string} [message] - the message to log
      * @public
      */
-    public failed(operationName: string, error: Error | string) { 
-        if (this._enabledFailed === true) {
-            if (this._logger?.isConsoleFallback()) {
-                CONSOLE_LOG(operationName, 'FAILED', error);
+    public log(operationName: string, message?: string): void {
+        this.setup?.messageLogged(operationName, message);
+    }
+
+    /**
+     * @description This method logs a message for a given operation and then stops the operation
+     * @param {string} operationName - the name of the operation
+     * @param {string} [message] - the message to log
+     * @public
+     */
+    public finalLog(operationName: string, message?: string): void {
+        this.setup.endedSuccessfully(operationName, message);
+    }
+
+    /**
+     * @description This method logs a simple warning (message or error)for a given operation
+     *              The operation is can continue
+     * @param {string} operationName - the name of the operation
+     * @param {Error | string} [error] - the error to log
+     * @public
+     */
+    public warn(operationName: string, error?: Error | string): void {
+        if (error instanceof Error) {
+            this.setup?.messageLogged(operationName, `Warning: error.message`);
+        } else {
+            this.setup?.messageLogged(operationName, `Warning: error}`);
+        }
+    }
+
+    /**
+     * @description This method logs a fatal error for a given operation
+     *              The operation is supposed to be stopped after this call
+     * @param {string} operationName - the name of the operation
+     * @param {Error | string} [error] - the error to log
+     * @public
+     */
+    public fatal(operationName: string, error?: Error | string): void {
+        if (this.optimisticByPass === true) {
+            if (error instanceof Error) {
+                this.setup?.messageLogged(operationName, `Warning: error.message`);
+            } else {
+                this.setup?.messageLogged(operationName, `Warning: error}`);
             }
-            this._logger?.failed(operationName, error);
+        } else {
+            this.setup?.endedWithError(operationName, error);
         }
     }
 
     /**
-     * @description Enable or disable the failed logging
-     * @param {boolean} [flag] - Enable or disable the failed logging
-     * @public
-     */
-    public enableFailed(flag: boolean=true) { 
-        this._enabledFailed = (flag === true);
-    }
-
-    /**
-     * @description Turn this logger into a simple logger for a specific section
-     * @param {string} operationName - The name of the operation
-     * @returns {SimpleLoggerIntf} The simple logger created from the logger for that specific section
+     * @description Turn this logger into a simple logger for a specific operation
+     * @param {string} operationName - the name of the operation
+     * @returns {SimpleLoggerIntf} - a simple logger
      */ 
     public toSimpleLogger(operationName: string): SimpleLoggerIntf {
         return { 
             log: (message) => { 
-                if (this._logger?.isConsoleFallback() ?? true) {
-                    CONSOLE_LOG(operationName, 'LOG', message);
-                }
-                this._logger?.log(operationName, message);
+                this.setup?.messageLogged(operationName, message);
             },
             debug: (message) => { 
-                if (this._logger?.isConsoleFallback() ?? true) {
-                    CONSOLE_LOG(operationName, 'DEBUG', message);
+                if (console && console.debug) {
+                    console.debug(`${new Date().toISOString()} - ${operationName} - ${message}`);
                 }
             }
         };
     }
-}
-
-/**
- * @description Logs the end of this section
- * @param {string} operationName - The name of the operation
- * @param {string} event - The event to log
- * @param {string | Error} [message] - The message to log
- */
-const CONSOLE_LOG = (operationName: string, event: string, message: string | Error='...') => { 
-    console.log(`${new Date().toISOString()} - ${operationName} - ${event} - ${message}`); 
 }

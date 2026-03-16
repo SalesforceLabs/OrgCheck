@@ -215,10 +215,11 @@ export default class OrgcheckApp extends LightningElement {
                     },
                     // Log methods -- delegation to the UI spinner
                     logSettings: {
-                        isConsoleFallback: () => { return true; }, // log in console please!
-                        log: (section, message) => { this._private_properties.spinner?.sectionLog(section, message); },
-                        ended: (section, message) => { this._private_properties.spinner?.sectionEnded(section, message); },
-                        failed: (section, error) => { this._private_properties.spinner?.sectionFailed(section, error); }
+                        started: () => { },
+                        messageLogged: (section, message) => { this._private_properties.spinner?.sectionLog(section, message); },
+                        endedWithError: (section, error) => { this._private_properties.spinner?.sectionFailed(section, error); },
+                        endedSuccessfully: (section, message) => { this._private_properties.spinner?.sectionEnded(section, message); },
+                        stopped: () => {}
                     }
                 });
                 this._private_properties.spinner?.sectionEnded(SECTION_03, `Done.`);
@@ -678,8 +679,8 @@ export default class OrgcheckApp extends LightningElement {
      */ 
     _hardCodedURLsPostProcess(dataFromApi) {
         const data = [];
-        dataFromApi?.forEach((item, recipe) => {
-            const navigationItem = NAVIGATION_ITEMS_BY_RECIPE.get(recipe);
+        dataFromApi?.forEach((item) => {
+            const navigationItem = NAVIGATION_ITEMS_BY_RECIPE.get(item.recipeName);
             const tableDefinition = this._getTableDefinition(navigationItem?.tableDefinition, item.data);
             const firstUrlColumn = tableDefinition.columns.filter(c => c.type === 'id')[0];
             data.push({
@@ -707,9 +708,9 @@ export default class OrgcheckApp extends LightningElement {
         const data = [];
         const goodAndBadRows = [];
         const rulesRows = [];
-        const detailsSheets = [];
-        dataFromApi?.forEach((item, recipe) => {
-            const navigationItem = NAVIGATION_ITEMS_BY_RECIPE.get(recipe);
+        const sheets = [];
+        dataFromApi?.forEach((item) => {
+            const navigationItem = NAVIGATION_ITEMS_BY_RECIPE.get(item.recipeName);
             const tableDefinition = this._getTableDefinition(navigationItem?.tableDefinition, item.data);
             data.push({
                 countBad: item?.countBad,
@@ -724,30 +725,23 @@ export default class OrgcheckApp extends LightningElement {
             item?.countBadByRule?.forEach((c) => {
                 rulesRows.push([ navigationItem.title, c.ruleName, c.count ]);
             });
-            detailsSheets.push({
-                countBad: item?.countBad,
-                exportedTable: createAndExport(tableDefinition, item?.data, navigationItem.title)
-            });
+            sheets.push(createAndExport(tableDefinition, item?.data, navigationItem.title));
         });
-        const sheets = [];
-        sheets.push({ 
-            header: 'Statistics (Good and Bad)', 
-            columns: [ 'Type of items', 'Count of good items', 'Count of bad items' ], 
-            rows: goodAndBadRows.sort((a, b) => (a[2] < b[2] ? 1 : -1)) // Index=2 sorted by Bad count
-                                .map(r => ([r[0], `${r[1]}`, `${r[2]}`]) ) // converting numbers to strings
-        });
-        sheets.push({ 
+        sheets.unshift({ 
             header: 'Statistics (Reasons)', 
             columns: [ 'Type of items', 'Why are they considered bad?', 'Count of bad items' ], 
             rows: rulesRows.sort((a, b) => (a[2] < b[2] ? 1 : -1)) // Index=2 sorted by Bad count
                             .map(r => ([r[0], `${r[1]}`, `${r[2]}`]) ) // converting numbers to strings
         });
-        // Sorting the details sheets by count of bad items descending (bad items on top)
-        detailsSheets.sort((a, b) => (a.countBad < b.countBad ? 1 : -1)).forEach(s => sheets.push(s.exportedTable));
+        sheets.unshift({ 
+            header: 'Statistics (Good and Bad)', 
+            columns: [ 'Type of items', 'Count of good items', 'Count of bad items' ], 
+            rows: goodAndBadRows.sort((a, b) => (a[2] < b[2] ? 1 : -1)) // Index=2 sorted by Bad count
+                                .map(r => ([r[0], `${r[1]}`, `${r[2]}`]) ) // converting numbers to strings
+        });
         // Set the export structure to 'globalViewItemsExport'
         this.globalViewItemsExport = sheets;
-        // Sorting the global view data by count of bad items descending (bad items on top)
-        return data.sort((a, b) => (a.countBad < b.countBad ? 1 : -1));
+        return data;
     }
 
     // ----------------------------------------------------------------------------------------------------------------
@@ -1122,23 +1116,30 @@ const getOrgCheck = () => {
 }
 
 const instantiateOrgCheckAPI = (setup) => {
-    const apiConstructor = getOrgCheck()?.API;
-    if (apiConstructor) return new apiConstructor(setup);
+    const creatorMethod = getOrgCheck()?.ApiFactory?.create;
+    if (creatorMethod) return creatorMethod(setup);
     return undefined;
 }
 
 const instantiateOrgCheckTableDefinition = (name, data) => {
-    const tableDefConstructor = getOrgCheck()?.ui.table.definitions[name];
-    if (tableDefConstructor) return new tableDefConstructor(data);
+    const tableDefinitions = getOrgCheck()?.TableDefinitions;
+    if (tableDefinitions) {
+        const tableDefConstructor = tableDefinitions[name];
+        if (tableDefConstructor) return new tableDefConstructor(data);
+    }
     return undefined;
 }
 
 const createAndExport = (... argv) => {
-    return getOrgCheck()?.ui.table.createAndExport(... argv);
+    const method = getOrgCheck()?.TableFactory?.createAndExport;
+    if (method) return method(... argv);
+    return undefined;
 }
 
 const getRuleById = (id) => {
-    return getOrgCheck()?.rules.get(id);
+    const method = getOrgCheck()?.Rules?.get;
+    if (method) return method(id);
+    return undefined;
 }
 
 const ALIASES = {

@@ -1,24 +1,6 @@
-import { API } from 'src/api/orgcheck-api-impl';
 import jsforce from 'tests/utils/orgcheck-api-jsforce-mock.utility';
 import fflate from 'tests/utils/orgcheck-api-fflate-mock.utility';
-import { StorageSetupMock_BasedOnMap } from 'tests/utils/orgcheck-api-storage-mock.utility'
-
-const createAPIforTests = () => {
-  return new API({ 
-    logSettings: {
-      isConsoleFallback: () => { return false; },
-      log: () => {},
-      ended: () => {},
-      failed: (... argv) => { console.error('-_-_-_-_-_--_-_-_-_-_--_-_-_-_-_--_-_-_-_-_--_-_-_-_-_-', argv); }
-    },
-    salesforce: { 
-      authenticationOptions: {
-        accessToken: 'UNIT_TESTING'
-      } 
-    },
-    storage: new StorageSetupMock_BasedOnMap()
-  });
-}
+import { createAPIforUnitTests } from 'tests/utils/orgcheck-api-for-unit-tests-utility';
 
 describe('tests.api.API', () => {
 
@@ -30,7 +12,7 @@ describe('tests.api.API', () => {
       let hadError = false;
       let err;
       try {
-        const api = createAPIforTests();
+        const api = createAPIforUnitTests();
         expect(api).not.toBeNull();
         await api.getActiveUsers();
         api.getAllScoreRulesAsDataMatrix();
@@ -87,7 +69,7 @@ describe('tests.api.API', () => {
     });
 
     it('should set the terms to auto-accepted because org is not a production', async () => {
-      const api = createAPIforTests();
+      const api = createAPIforUnitTests();
 
       // mocking a connection to a non-production org
       api.getOrganizationInformation = jest.fn(async function () {
@@ -102,7 +84,7 @@ describe('tests.api.API', () => {
     });
 
     it('should set the terms to not accepted because org is a production', async () => {
-      const api = createAPIforTests();
+      const api = createAPIforUnitTests();
 
       // mocking a connection to a production org
       api.getOrganizationInformation = jest.fn(async function () {

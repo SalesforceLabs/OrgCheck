@@ -1,110 +1,150 @@
-import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
+import { Flags, Progress, SfCommand, Spinner } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
 import * as fflate from 'fflate';
 import orgcheck from '@orgcheck/api';
 
 // Make fflate available to orgcheck (used for cache compression)
-(globalThis as any).fflate = fflate;
+// @ts-expect-error Fflate loaded from globalThis
+globalThis.fflate = fflate;
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('orgcheck-sfdx-plugin', 'check.global-view');
 
-export type GlobalViewResult = {
-  version: string,
-  action: string,
-  size: number,
-  data: any
+export type CheckResult = {
+  length: number;
+  statistics: orgcheck.DataCollectionStatisticsIntf[];
+}
+
+export type CheckOutput = {
+  orgCheckVersion: string;
+  dateCheck: string;
+  action: string;
+  result: CheckResult;
 };
 
-export default class CheckGlobalView extends SfCommand<GlobalViewResult> {
+export default class CheckGlobalView extends SfCommand<CheckOutput> {
   
   public static readonly summary = messages.getMessage('summary');
-  
   public static readonly description = messages.getMessage('description');
+  public static readonly examples = messages.getMessages('examples');
   
   public static readonly flags = {
     'target-org': Flags.requiredOrg()
   }
   
-  public async run(): Promise<GlobalViewResult> {
+  public async run(): Promise<CheckOutput> {
   
     const { flags } = await this.parse(CheckGlobalView);
   
-    const orgcheckApi = orgcheck.ApiFactory.create({
-      salesforce: {
-        connection: flags['target-org'].getConnection()
-      },
-      storage: new InMemoryStorage(),
-      logSettings: new SfCommandLogger(this)
-    });
+    const actionName = 'global-view';
+    const orgcheckApi =
+      process.env.ORGCHECK_TEST_MOCK === '1'
+        ? createMockApi()
+        : orgcheck.ApiFactory.create({
+            salesforce: {
+              connection: flags['target-org'].getConnection(undefined)
+            },
+            storage: new StorageSetup(),
+            logSettings: new LoggerSetup(actionName, this.spinner, this.progress)
+          });
 
-    const action = 'global-view';
-    const results = await orgcheckApi.getGlobalView();
-    const size = results.size ?? 0;
-    const data: any = {};
-    results.forEach((value: orgcheck.DataCollectionStatisticsIntf, key: string) => {
-      data[key] = value;
-    });
+    const results = (await orgcheckApi.getGlobalView()) ?? [];
 
     return {
-      version: orgcheckApi.version,
-      action: action,
-      size: size,
-      data: data
+      orgCheckVersion: orgcheckApi.version,
+      dateCheck: new Date().toISOString(),
+      action: actionName,
+      result: {
+        length: results.length,
+        statistics: results
+      }
     };
   }
 }
 
-class SfCommandLogger implements orgcheck.LoggerSetup {
+class LoggerSetup implements orgcheck.LoggerSetup {
 
-  private sfCommand: SfCommand<any>;
+  private sections: Set<string>;
+  private nbSuccesses: number;
+  private nbFailures: number;
+  private nbStopped: number;
+  
+  public constructor(actionName: string, private spinner: Spinner, private progress: Progress) {
 
-  constructor(sfCommand: SfCommand<any>) {
-    this.sfCommand = sfCommand;
+    this.spinner.start(`Performing action: ${actionName}...`);
+    this.progress.start(0, {}, { title: 'Progress'  });
+    this.sections = new Set();
+    this.nbSuccesses = 0;
+    this.nbFailures = 0;
+    this.nbStopped = 0;
   }
 
-  isConsoleFallback(): boolean {
-    return true;
+  public started(section: string): void {
+    this.sections.add(section);
+    this.progress.setTotal(this.sections.size);
   }
-
-  log(section: string, message: string): void {
-    this.sfCommand.log(section, message);
+  
+  public messageLogged(section: string, message?: string): void {
+    this.spinner.status = `[${section}] ${message ?? ''}`;
   }
-
-  ended(section: string, message: string): void {
-    this.sfCommand.log(section, message);
+  
+  public endedWithError(section: string, error?: Error | string): void {
+    this.nbFailures++;
+    const errorMessage = error instanceof Error ? error?.message : error;
+    this.spinner.status = `[${section}] ${errorMessage ?? 'Unknown error'}`;
   }
-
-  failed(section: string, error: Error): void {
-    this.sfCommand.error(section, error);
+  
+  public endedSuccessfully(section: string, message?: string): void {
+    this.nbSuccesses++;
+    this.spinner.status = `[${section}] ${message ?? 'Success'}`;
+  }
+  
+  public stopped(): void {
+    this.nbStopped = this.nbSuccesses + this.nbFailures;
+    this.progress.update(this.nbStopped);
+    if (this.nbStopped >= this.sections.size) {
+      this.progress.finish();
+      this.spinner.stop();
+    }
   }
 }
 
-class InMemoryStorage implements orgcheck.StorageSetup {
+class StorageSetup implements orgcheck.StorageSetup {
   
   private map: Map<string, string>;
   
-  constructor() {
+  public constructor() {
     this.map = new Map<string, string>();
   }
   
-  setItem(key: string, value: string): void {
+  public setItem(key: string, value: string): void {
     this.map.set(key, value);
   }
   
-  getItem(key: string): string {
+  public getItem(key: string): string {
     return this.map.get(key) ?? '';
   }
   
-  removeItem(key: string): void {
+  public removeItem(key: string): void {
     this.map.delete(key);
   }
   
-  key(n: number): string {
+  public key(n: number): string {
     return Array.from(this.map.keys())[n] ?? '';
   }
   
-  length(): number {
+  public length(): number {
     return this.map.size;
   }
+}
+
+function createMockApi(): orgcheck.ApiIntf {
+  const mockStats: orgcheck.DataCollectionStatisticsIntf[] = [
+    { recipeName: 'apex-classes', hadError: false, lastErrorMessage: '', countAll: 10, countBad: 2, countGood: 8, countBadByRule: [], data: [] },
+    { recipeName: 'custom-fields', hadError: false, lastErrorMessage: '', countAll: 5, countBad: 0, countGood: 5, countBadByRule: [], data: [] },
+  ];
+  return {
+    version: '8.0.0',
+    getGlobalView: () => Promise.resolve(mockStats),
+  } as orgcheck.ApiIntf;
 }

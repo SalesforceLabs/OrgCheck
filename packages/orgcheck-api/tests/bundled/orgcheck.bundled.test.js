@@ -1,7 +1,6 @@
-import orgcheck from 'dist/orgcheck';
 import jsforce from 'tests/utils/orgcheck-api-jsforce-mock.utility';
 import fflate from 'tests/utils/orgcheck-api-fflate-mock.utility';
-import { StorageSetupMock_BasedOnMap } from 'tests/utils/orgcheck-api-storage-mock.utility'
+import { createAPIforBundeledTests } from 'tests/utils/orgcheck-api-for-bundled-tests-utility';
 
 describe('tests.orgcheck.bundled', () => {
 
@@ -13,20 +12,7 @@ describe('tests.orgcheck.bundled', () => {
       let hadError = false;
       let err;
       try {
-        const api = new orgcheck.API({ 
-          logSettings: {
-            isConsoleFallback: () => { return false; },
-            log: () => {},
-            ended: () => {},
-            failed: (... argv) => { console.error('-_-_-_-_-_--_-_-_-_-_--_-_-_-_-_--_-_-_-_-_--_-_-_-_-_-', argv); }
-          },
-          salesforce: { 
-            authenticationOptions: {
-              accessToken: 'TESTING-BUNDLE'
-            } 
-          },
-          storage: new StorageSetupMock_BasedOnMap()
-        });
+        const api = createAPIforBundeledTests();
         expect(api).not.toBeNull();
         await api.getActiveUsers();
         api.getAllScoreRulesAsDataMatrix();

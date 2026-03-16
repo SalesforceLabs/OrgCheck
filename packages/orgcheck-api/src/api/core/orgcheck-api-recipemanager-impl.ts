@@ -11,7 +11,7 @@ import { RecipeApexTriggers } from 'src/api/recipe/orgcheck-api-recipe-apextrigg
 import { RecipeAppPermissions } from 'src/api/recipe/orgcheck-api-recipe-apppermissions';
 import { RecipeBrowsers } from 'src/api/recipe/orgcheck-api-recipe-browsers';
 import { RecipeCollaborationGroups } from 'src/api/recipe/orgcheck-api-recipe-collaborationgroups';
-import { DataCollectionStatistics, RecipeCollection } from 'src/api/core/orgcheck-api-recipecollection';
+import { DataCollectionStatisticsOK, DataCollectionStatisticsWithError, RecipeCollection } from 'src/api/core/orgcheck-api-recipecollection';
 import { RecipeCurrentUserPermissions } from 'src/api/recipe/orgcheck-api-recipe-currentuserpermissions';
 import { RecipeCustomFields } from 'src/api/recipe/orgcheck-api-recipe-customfields';
 import { RecipeCustomLabels } from 'src/api/recipe/orgcheck-api-recipe-customlabels';
@@ -158,11 +158,11 @@ export class RecipeManager implements RecipeManagerIntf {
      * @description Runs a designated recipe (by its alias)
      * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map<string, any>} [parameters] List of values to pass to the recipe
-     * @returns {Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<Array<Data | DataCollectionStatisticsIntf> | DataMatrixIntf | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    public async run(alias: string, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
+    public async run(alias: string, parameters: Map<string, any>): Promise<Array<Data | DataCollectionStatisticsIntf> | DataMatrixIntf | Data | Map<string, any>> {
 
         if (this._recipes.has(alias)) {
             const result = await this._runRecipe(alias, parameters);
@@ -207,7 +207,7 @@ export class RecipeManager implements RecipeManagerIntf {
      * @returns {Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any> | undefined>} Returns the value from the recipe or undefined if something bad happens
      * @async
      */
-    private async _runRecipe(alias: string, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any> | undefined> {
+    private async _runRecipe(alias: string, parameters: Map<string, any>): Promise<Array<Data > | DataMatrixIntf | Data | Map<string, any> | undefined> {
 
         const section = `Run recipe "${alias}"`;
         const recipe = this._recipes.get(alias);
@@ -224,7 +224,7 @@ export class RecipeManager implements RecipeManagerIntf {
         try {
             datasets = recipe.extract(this._logger.toSimpleLogger(section), parameters);
         } catch(error) {
-            this._logger.failed(section, `An error occurred while extracting the datasets (message: ${error.message}).`);
+            this._logger.fatal(section, `An error occurred while extracting the datasets (message: ${error.message}).`);
             return;
         }
         this._logger.log(section, `This recipe has ${datasets?.length} ${datasets?.length>1?'datasets':'dataset'}: ${datasets.map((d) => d instanceof DatasetRunInformation ? d.alias : d ).join(', ')}...`);
@@ -236,7 +236,7 @@ export class RecipeManager implements RecipeManagerIntf {
         try {
             data = await this._datasetManager.run(datasets);
         } catch(error) {
-            this._logger.failed(section, `An error occurred while running the dataset ${error.dataset}.`);
+            this._logger.fatal(section, `An error occurred while running the dataset ${error.dataset}.`);
             return;
         }
         this._logger.log(section, 'Datasets information successfuly retrieved!');
@@ -250,10 +250,10 @@ export class RecipeManager implements RecipeManagerIntf {
         try {
             finalData = await recipe.transform(data, this._logger.toSimpleLogger(section), parameters);
         } catch(error) {
-            this._logger.failed(section, `An error occurred while transforming the data (message: ${error.message}).`);
+            this._logger.fatal(section, `An error occurred while transforming the data (message: ${error.message}).`);
             return;
         }
-        this._logger.ended(section, 'Transformation successfuly done!');
+        this._logger.finalLog(section, 'Transformation successfuly done!');
         
         // Return value
         return finalData;
@@ -262,10 +262,10 @@ export class RecipeManager implements RecipeManagerIntf {
     /**
      * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map<string, any>} [parameters] - List of values to pass to the recipe
-     * @returns {Promise<Map<string, DataCollectionStatisticsIntf> | undefined>} Returns the value from the recipe collection or undefined if something bad happens.
+     * @returns {Promise<Array<DataCollectionStatisticsIntf> | undefined>} Returns the value from the recipe collection or undefined if something bad happens.
      * @async
      */
-    private async _runRecipeCollection(alias: string, parameters: Map<string, any>): Promise<Map<string, DataCollectionStatisticsIntf> | undefined> {
+    private async _runRecipeCollection(alias: string, parameters: Map<string, any>): Promise<Array<DataCollectionStatisticsIntf> | undefined> {
 
         const section = `Run recipe collection "${alias}"`;
         const recipeCollection = this._recipeCollections.get(alias);
@@ -282,7 +282,7 @@ export class RecipeManager implements RecipeManagerIntf {
         try {
             recipes = recipeCollection.extract(this._logger.toSimpleLogger(section), parameters);
         } catch(error) {
-            this._logger.failed(section, `An error occurred while extracting the recipes (message: ${error.message}).`);
+            this._logger.fatal(section, `An error occurred while extracting the recipes (message: ${error.message}).`);
             return;
         }
         this._logger.log(section, `This recipe collection has ${recipes?.length} ${recipes?.length>1?'recipes':'recipe'}: ${recipes.join(', ')}...`);
@@ -295,7 +295,7 @@ export class RecipeManager implements RecipeManagerIntf {
         /** @type {Map<string, Error>}} */
         const recipesInError: Map<string, Error> = new Map();
         try {
-            this._logger.enableFailed(false);
+            this._logger.optimisticByPass = true;
             await Processor.forEach(recipes, async (/** @type {string} */ recipe: string) => {
                 try {
                     const recipeData = await this._runRecipe(recipe, parameters);
@@ -310,10 +310,10 @@ export class RecipeManager implements RecipeManagerIntf {
                 }
             });
         } catch(error) {
-            this._logger.failed(section, `An error occurred while running the recipes (message: ${error.message}).`);
+            this._logger.fatal(section, `An error occurred while running the recipes (message: ${error.message}).`);
             return;
         } finally {
-            this._logger.enableFailed(true);
+            this._logger.optimisticByPass = false;
         }
         this._logger.log(section, 'All datasets information successfuly retrieved from recipes!');
 
@@ -323,11 +323,10 @@ export class RecipeManager implements RecipeManagerIntf {
         this._logger.log(section, 'This recipe collection will now transform all this information...');
         const listRuleIds = recipeCollection.filterByScoreRuleIds(this._logger.toSimpleLogger(section), parameters);
         const isRuleFilterOn = listRuleIds?.length > 0 || false;
-        /** @type {Map<string, DataCollectionStatisticsIntf>} */
-        const finalData: Map<string, DataCollectionStatisticsIntf> = new Map();
+        const finalData: Array<DataCollectionStatisticsIntf> = [];
         try {
             // Add the successful recipes and their stats in the final list
-            await Processor.forEach(data, async ( records: Array<DataWithScore>, key: string) => {
+            await Processor.forEach(data, async ( records: Array<DataWithScore>, recipe: string) => {
                 const onlyBadRecords = records?.filter((r) => {
                     if (r.score && r.score > 0) {
                         if (isRuleFilterOn === true) {
@@ -347,31 +346,44 @@ export class RecipeManager implements RecipeManagerIntf {
                         series.set(id, series.has(id) ? (series.get(id) + 1) : 1);
                     });
                 });
-                const stats: DataCollectionStatisticsIntf = new DataCollectionStatistics();
-                stats.hadError = false;
-                stats.countAll = (records?.length ?? 0);
-                stats.countBad = (onlyBadRecords?.length ?? 0);
-                stats.countBadByRule = Array.from(series.keys()).map((id) => { return { 
-                    ruleId: id,
-                    ruleName: SecretSauce.GetScoreRuleDescription(id), 
-                    count: series.get(id)
-                }});
-                stats.data = onlyBadRecords;
-                finalData.set(key, stats);
+                finalData.push(new DataCollectionStatisticsOK(
+                    recipe,
+                    (records?.length ?? 0),
+                    (onlyBadRecords?.length ?? 0),
+                    Array.from(series.keys()).map((id) => { return { 
+                        ruleId: id,
+                        ruleName: SecretSauce.GetScoreRuleDescription(id), 
+                        count: series.get(id)
+                    }}),
+                    onlyBadRecords
+                ));
             });
 
             // Add the recipes in error in the final list
             recipesInError.forEach((lastError, recipe) => {
-                const stats: DataCollectionStatisticsIntf = new DataCollectionStatistics();
-                stats.hadError = true;
-                stats.lastErrorMessage = lastError?.message || 'Unknown error';
-                finalData.set(recipe, stats);
+                finalData.push(new DataCollectionStatisticsWithError(
+                    recipe,
+                    lastError?.message || 'Unknown error'
+                ));
             });
+
+            // Finally we order 
+            // The KO first (aka hasError = true) 
+            // Then for the stats without Issues, by bad counts desc
+            finalData.sort((a, b) => {
+                // if a has error but b has not, a is before b (-1)
+                // if a and b have errors, a is before b (-1)
+                if (a.hadError === true) return -1;
+                // if a has more count bad than b, a is before b (-1)
+                // if a has less count bad than b, a is after b (1)
+                return (a.countBad > b.countBad) ? -1 : 1;
+            })
+
         } catch(error) {
-            this._logger.failed(section, `An error occurred while transforming the data (message: ${error.message}).`);
+            this._logger.fatal(section, `An error occurred while transforming the data (message: ${error.message}).`);
             return;
         }
-        this._logger.ended(section, 'Transformation successfuly done!');
+        this._logger.finalLog(section, 'Transformation successfuly done!');
 
         // Return value
         return finalData;
@@ -401,7 +413,7 @@ export class RecipeManager implements RecipeManagerIntf {
         try {
             datasets = recipe.extract(this._logger.toSimpleLogger(section), parameters);
         } catch(error) {
-            this._logger.failed(section, `An error occurred while extracting the datasets (message: ${error.message}).`);
+            this._logger.fatal(section, `An error occurred while extracting the datasets (message: ${error.message}).`);
             return;
         }
         this._logger.log(section, `This recipe has ${datasets?.length} ${datasets?.length>1?'datasets':'dataset'}: ${datasets.map((d) => d instanceof DatasetRunInformation ? d.alias : d ).join(', ')}...`);
@@ -413,10 +425,10 @@ export class RecipeManager implements RecipeManagerIntf {
         try {
             this._datasetManager.clean(datasets);
         } catch(error) {
-            this._logger.failed(section, `An error occurred while cleaning the datasets (message: ${error.message}).`);
+            this._logger.fatal(section, `An error occurred while cleaning the datasets (message: ${error.message}).`);
             return;
         }
-        this._logger.ended(section, 'Datasets succesfully cleaned!');
+        this._logger.finalLog(section, 'Datasets succesfully cleaned!');
     }
 
 
@@ -442,7 +454,7 @@ export class RecipeManager implements RecipeManagerIntf {
         try {
             recipes = recipeCollection.extract(this._logger.toSimpleLogger(section), parameters);
         } catch(error) {
-            this._logger.failed(section, `An error occurred while extracting the recipes (message: ${error.message}).`);
+            this._logger.fatal(section, `An error occurred while extracting the recipes (message: ${error.message}).`);
             return;
         }
         this._logger.log(section, `This recipe collection has ${recipes?.length} ${recipes?.length>1?'recipes':'recipe'}: ${recipes.join(', ')}...`);
@@ -454,9 +466,9 @@ export class RecipeManager implements RecipeManagerIntf {
         try {
             recipes.forEach((recipe) => { this._cleanRecipe(recipe, parameters); });
         } catch(error) {
-            this._logger.failed(section, `An error occurred while cleaning the datasets (message: ${error.message}).`);
+            this._logger.fatal(section, `An error occurred while cleaning the datasets (message: ${error.message}).`);
             return;
         }
-        this._logger.ended(section, 'Datasets of these recipes succesfully cleaned!');
+        this._logger.finalLog(section, 'Datasets of these recipes succesfully cleaned!');
     }
 }

@@ -1341,12 +1341,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get global view of the org
-     * @returns {Promise<Map<string, DataCollectionStatisticsIntf>>} List of items to return
+     * @returns {Promise<Array<DataCollectionStatisticsIntf>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getGlobalView(): Promise<Map<string, DataCollectionStatisticsIntf>> {
+    public async getGlobalView(): Promise<Array<DataCollectionStatisticsIntf>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.GLOBAL_VIEW));
     }
@@ -1361,12 +1361,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get hardcoded URLs view of the org
-     * @returns {Promise<Map<string, DataCollectionStatisticsIntf>>} List of items to return
+     * @returns {Promise<Array<DataCollectionStatisticsIntf>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getHardcodedURLsView(): Promise<Map<string, DataCollectionStatisticsIntf>> {
+    public async getHardcodedURLsView(): Promise<Array<DataCollectionStatisticsIntf>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.HARDCODED_URLS_VIEW));
     }

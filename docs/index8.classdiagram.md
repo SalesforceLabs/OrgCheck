@@ -76,7 +76,7 @@ API *-- LoggerIntf : composition
 
 To create an instance of the Org Check API you would do:
 ```
-const api = new API({
+const api = ApiFactory.create({
     salesforce: {
         authentication: { accessToken: '........' },
         connection: { useJsForce: true }

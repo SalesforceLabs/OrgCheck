@@ -6,19 +6,23 @@
   "dependencies": {
     "@orgcheck/api": "8.0.0",
     "@oclif/core": "^4",
-    "@salesforce/core": "^8",
+    "@salesforce/core": "^8.2.7",
     "@salesforce/sf-plugins-core": "^12",
     "fflate": "^0.8.2",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
-    "@oclif/plugin-command-snapshot": "^5.1.9",
-    "@salesforce/cli-plugins-testkit": "^5.3.10",
+    "@eslint/eslintrc": "^3",
+    "@types/mocha": "^10",
+    "@eslint/js": "^8",
+    "@oclif/plugin-command-snapshot": "^5.2.3",
+    "@salesforce/cli-plugins-testkit": "^5.3.20",
     "@salesforce/dev-scripts": "^10",
-    "eslint-plugin-sf-plugin": "^1.18.6",
+    "eslint": "^8.57.0",
+    "eslint-plugin-sf-plugin": "^1.18.8",
     "oclif": "^4.14.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.5"
+    "typescript": "^5.5.4"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -46,143 +50,31 @@
     "devPlugins": [
       "@oclif/plugin-help"
     ],
-    "topics": {
-      "hello": {
-        "description": "Commands to say hello."
-      }
-    },
     "flexibleTaxonomy": true
   },
   "scripts": {
-    "build": "wireit",
+    "build": "yarn compile && yarn lint",
     "clean": "sf-clean",
     "clean-all": "sf-clean all",
-    "compile": "wireit",
+    "compile": "tsc -p . --pretty --incremental",
     "docs": "sf-docs",
-    "format": "wireit",
-    "link-check": "wireit",
-    "lint": "wireit",
+    "format": "prettier --write \"+(src|test|schemas)/**/*.+(ts|js|json)|command-snapshot.json\"",
+    "link-check": "node -e \"process.exit(process.env.CI ? 0 : 1)\" || linkinator \"**/*.md\" --skip \"CHANGELOG.md|node_modules|test/|confluence.internal.salesforce.com|my.salesforce.com|localhost|%s\" --markdown --retry --directory-listing --verbosity error",
+    "lint": "ESLINT_USE_FLAT_CONFIG=true eslint \"src/**/*.ts\" \"test/**/*.ts\" --color --cache --cache-location .eslintcache",
     "postinstall": "yarn husky install",
     "postpack": "sf-clean --ignore-signing-artifacts",
     "prepack": "sf-prepack",
-    "test": "wireit",
+    "test": "yarn test:compile && yarn test:only && yarn lint",
+    "test:compile": "tsc -p \"./test\" --pretty",
+    "test:command-reference": "node --loader ts-node/esm --no-warnings=ExperimentalWarning \"./bin/dev.js\" commandreference:generate --erroronwarnings",
+    "test:deprecation-policy": "yarn compile && node --loader ts-node/esm --no-warnings=ExperimentalWarning \"./bin/dev.js\" snapshot:compare",
+    "test:json-schema": "node --loader ts-node/esm --no-warnings=ExperimentalWarning \"./bin/dev.js\" schema:compare",
     "test:nuts": "nyc mocha \"**/*.nut.ts\" --slow 4500 --timeout 600000 --parallel",
-    "test:only": "wireit",
+    "test:only": "TS_NODE_PROJECT=test/tsconfig.json FORCE_COLOR=2 nyc mocha \"test/**/*.test.ts\"",
     "version": "oclif readme"
   },
   "publishConfig": {
     "access": "public"
-  },
-  "wireit": {
-    "build": {
-      "dependencies": [
-        "compile",
-        "lint"
-      ]
-    },
-    "compile": {
-      "command": "tsc -p . --pretty --incremental",
-      "files": [
-        "src/**/*.ts",
-        "**/tsconfig.json",
-        "messages/**"
-      ],
-      "output": [
-        "lib/**",
-        "*.tsbuildinfo"
-      ],
-      "clean": "if-file-deleted"
-    },
-    "format": {
-      "command": "prettier --write \"+(src|test|schemas)/**/*.+(ts|js|json)|command-snapshot.json\"",
-      "files": [
-        "src/**/*.ts",
-        "test/**/*.ts",
-        "schemas/**/*.json",
-        "command-snapshot.json",
-        ".prettier*"
-      ],
-      "output": []
-    },
-    "lint": {
-      "command": "eslint src test --color --cache --cache-location .eslintcache",
-      "files": [
-        "src/**/*.ts",
-        "test/**/*.ts",
-        "messages/**",
-        "**/.eslint*",
-        "**/tsconfig.json"
-      ],
-      "output": []
-    },
-    "test:compile": {
-      "command": "tsc -p \"./test\" --pretty",
-      "files": [
-        "test/**/*.ts",
-        "**/tsconfig.json"
-      ],
-      "output": []
-    },
-    "test": {
-      "dependencies": [
-        "test:compile",
-        "test:only",
-        "lint"
-      ]
-    },
-    "test:only": {
-      "command": "nyc mocha \"test/**/*.test.ts\"",
-      "env": {
-        "FORCE_COLOR": "2"
-      },
-      "files": [
-        "test/**/*.ts",
-        "src/**/*.ts",
-        "**/tsconfig.json",
-        ".mocha*",
-        "!*.nut.ts",
-        ".nycrc"
-      ],
-      "output": []
-    },
-    "test:command-reference": {
-      "command": "node --loader ts-node/esm --no-warnings=ExperimentalWarning \"./bin/dev.js\" commandreference:generate --erroronwarnings",
-      "files": [
-        "src/**/*.ts",
-        "messages/**",
-        "package.json"
-      ],
-      "output": [
-        "tmp/root"
-      ]
-    },
-    "test:deprecation-policy": {
-      "command": "node --loader ts-node/esm --no-warnings=ExperimentalWarning \"./bin/dev.js\" snapshot:compare",
-      "files": [
-        "src/**/*.ts"
-      ],
-      "output": [],
-      "dependencies": [
-        "compile"
-      ]
-    },
-    "test:json-schema": {
-      "command": "node --loader ts-node/esm --no-warnings=ExperimentalWarning \"./bin/dev.js\" schema:compare",
-      "files": [
-        "src/**/*.ts",
-        "schemas"
-      ],
-      "output": []
-    },
-    "link-check": {
-      "command": "node -e \"process.exit(process.env.CI ? 0 : 1)\" || linkinator \"**/*.md\" --skip \"CHANGELOG.md|node_modules|test/|confluence.internal.salesforce.com|my.salesforce.com|%s\" --markdown --retry --directory-listing --verbosity error",
-      "files": [
-        "./*.md",
-        "./!(CHANGELOG).md",
-        "messages/**/*.md"
-      ],
-      "output": []
-    }
   },
   "exports": "./lib/index.js",
   "type": "module",

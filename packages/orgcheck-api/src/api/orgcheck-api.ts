@@ -881,12 +881,12 @@ export interface ApiIntf {
 
     /**
      * @description Get global view of the org
-     * @returns {Promise<Map<string, DataCollectionStatisticsIntf>>} List of items to return
+     * @returns {Promise<Array<DataCollectionStatisticsIntf>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getGlobalView(): Promise<Map<string, DataCollectionStatisticsIntf>>;
+    getGlobalView(): Promise<Array<DataCollectionStatisticsIntf>>;
 
     /**
      * @description Remove all the cached information about global view
@@ -896,12 +896,12 @@ export interface ApiIntf {
 
     /**
      * @description Get hardcoded URLs view of the org
-     * @returns {Promise<Map<string, DataCollectionStatisticsIntf>>} List of items to return
+     * @returns {Promise<Array<DataCollectionStatisticsIntf>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getHardcodedURLsView(): Promise<Map<string, DataCollectionStatisticsIntf>>;
+    getHardcodedURLsView(): Promise<Array<DataCollectionStatisticsIntf>>;
 
     /**
      * @description Remove all the cached information about hardcoded URLs view

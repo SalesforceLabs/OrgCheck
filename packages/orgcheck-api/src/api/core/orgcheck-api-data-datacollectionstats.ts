@@ -2,6 +2,13 @@ import { Data } from 'src/api/core/orgcheck-api-data';
 
 export interface DataCollectionStatisticsIntf {
 
+    /**
+     * @description Name of the corresponding recipe
+     * @type {string}
+     * @public
+     */
+    recipeName: string;
+
     /** 
      * @description Indicates if an error occurred while building the collection
      * @type {boolean}

@@ -49,54 +49,6 @@ interface DataMatrixRowIntf {
 }
 
 /**
- * @description Information about the current Daily API Request usage limit
- */
-interface SalesforceUsageInformationIntf {
-    /**
-     * @description Current ratio (not percentage!) of Daily API Request limit usage
-     * @type {number}
-     * @public
-     */
-    currentUsageRatio: number;
-    /**
-     * @description Current percentage of Daily API Request limit usage
-     * @type {string}
-     * @public
-     */
-    currentUsagePercentage: string;
-    /**
-     * @description Threshold value when percentage is reaching a "warning" zone (not yet a "critical" zone)
-     * @type {number}
-     * @public
-     */
-    yellowThresholdPercentage: number;
-    /**
-     * @description Threshold value when percentage is reaching a "critical" zone.
-     * @type {number}
-     * @public
-     */
-    redThresholdPercentage: number;
-    /**
-     * @description Is the current percentage in the "OK" zone?
-     * @type {boolean}
-     * @public
-     */
-    isGreenZone: boolean;
-    /**
-     * @description Is the current percentage in the "warning" zone?
-     * @type {boolean}
-     * @public
-     */
-    isYellowZone: boolean;
-    /**
-     * @description Is the current percentage in the "critical" zone?
-     * @type {boolean}
-     * @public
-     */
-    isRedZone: boolean;
-}
-
-/**
  * @description Data aliases
  */
 declare enum DataAliases {
@@ -263,6 +215,189 @@ interface DataWithScoreAndDependencies extends DataWithScore {
  *   Such interface are created by a "data factory" (see DataFactory) BUT do not need any scoring.
  */
 interface DataWithoutScore extends Data {
+}
+
+interface DataCollectionStatisticsIntf {
+    /**
+     * @description Name of the corresponding recipe
+     * @type {string}
+     * @public
+     */
+    recipeName: string;
+    /**
+     * @description Indicates if an error occurred while building the collection
+     * @type {boolean}
+     * @public
+     */
+    hadError: boolean;
+    /**
+     * @description Last error message if any
+     * @type {string}
+     * @public
+     */
+    lastErrorMessage: string;
+    /**
+     * @description Number of all records
+     * @type {number}
+     * @public
+     */
+    countAll: number;
+    /**
+     * @description Number of records that are considered "bad" (i.e. at least one bad reason id)
+     * @type {number}
+     * @public
+     */
+    countBad: number;
+    /**
+     * @description Number of records that are considered "good" (i.e. no bad reason ids)
+     * @type {number}
+     * @public
+     */
+    countGood: number;
+    /**
+     * @description Number of bad records by rule
+     * @type {Array<{ruleId: number, ruleName: string, count: number}>}
+     * @default []
+     * @public
+     */
+    countBadByRule: Array<{
+        ruleId: number;
+        ruleName: string;
+        count: number;
+    }>;
+    /**
+     * @description List of all data items that are part of this collection
+     * @type {Array<Data>}
+     * @default []
+     * @public
+     */
+    data: Array<Data>;
+}
+
+/**
+ * @description Information about the current Daily API Request usage limit
+ */
+interface SalesforceUsageInformationIntf {
+    /**
+     * @description Current ratio (not percentage!) of Daily API Request limit usage
+     * @type {number}
+     * @public
+     */
+    currentUsageRatio: number;
+    /**
+     * @description Current percentage of Daily API Request limit usage
+     * @type {string}
+     * @public
+     */
+    currentUsagePercentage: string;
+    /**
+     * @description Threshold value when percentage is reaching a "warning" zone (not yet a "critical" zone)
+     * @type {number}
+     * @public
+     */
+    yellowThresholdPercentage: number;
+    /**
+     * @description Threshold value when percentage is reaching a "critical" zone.
+     * @type {number}
+     * @public
+     */
+    redThresholdPercentage: number;
+    /**
+     * @description Is the current percentage in the "OK" zone?
+     * @type {boolean}
+     * @public
+     */
+    isGreenZone: boolean;
+    /**
+     * @description Is the current percentage in the "warning" zone?
+     * @type {boolean}
+     * @public
+     */
+    isYellowZone: boolean;
+    /**
+     * @description Is the current percentage in the "critical" zone?
+     * @type {boolean}
+     * @public
+     */
+    isRedZone: boolean;
+}
+
+interface LoggerSetup {
+    /**
+     * @description Called when a given operation is started
+     * @param {string} operationName - the name of the operation
+     * @public
+     */
+    started(operationName: string): void;
+    /**
+     * @description Called when a message has been logged
+     * @param {string} operationName - the name of the operation
+     * @param {string} [message] - the message to log
+     * @public
+     */
+    messageLogged(operationName: string, message?: string): void;
+    /**
+     * @description The given operation ended with an error (with an optional error or message)
+     * @param {string} operationName - the name of the operation
+     * @param {Error | string} [error] - the error to log
+     * @public
+     */
+    endedWithError(operationName: string, error?: Error | string): void;
+    /**
+     * @description The given operation ended successfuly (with an optional message)
+     * @param {string} operationName - the name of the operation
+     * @param {string} [message] - the message to log
+     * @public
+     */
+    endedSuccessfully(operationName: string, message?: string): void;
+    /**
+     * @description Called when a given operation is stopped (normally or with an error)
+     * @param {string} operationName - the name of the operation
+     * @public
+     */
+    stopped(operationName: string): void;
+}
+
+interface SalesforceAuthenticationOptions {
+    accessToken?: string;
+    clientId?: string;
+    clientSecret?: string;
+    redirectUri?: string;
+}
+interface SalesforceManagerSetup {
+    connection?: any;
+    authenticationOptions?: SalesforceAuthenticationOptions;
+}
+
+interface StorageSetup {
+    /**
+     * @description Set an item in a storage
+     * @param {string} key - The key to set
+     * @param {string} value - The value to set
+     */
+    setItem(key: string, value: string): void;
+    /**
+     * @description Get an item from a storage
+     * @param {string} key - The key to set
+     * @returns {string} The stored value for the given key
+     */
+    getItem(key: string): string;
+    /**
+     * @description Removes an item from a storage
+     * @param {string} key - The key to remove
+     */
+    removeItem(key: string): void;
+    /**
+     * @description Get the nth key from a storage
+     * @param {number} n - The index of the key
+     * @returns {string} The nth key
+     */
+    key(n: number): string;
+    /**
+     * @description The size of a storage
+     * @property
+     */
+    length(): number;
 }
 
 interface SFDC_ApexTestMethodResult extends DataWithoutScore {
@@ -1939,6 +2074,162 @@ interface SFDC_CustomLabel extends DataWithScoreAndDependencies {
      * @public
      */
     lastModifiedDate: number;
+}
+
+interface SFDC_CustomTab extends DataWithScoreAndDependencies {
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
+     * @public
+     */
+    dataType: DataAliases.SFDC_CustomTab;
+    /**
+    * @description Unique identifier of this custom tab in the org.
+    * @type {string}
+    * @public
+    */
+    id: string;
+    /**
+     * @description Name of this custom tab in the org.
+     * @type {string}
+     * @public
+     */
+    name: string;
+    /**
+     * @description Type of this custom tab
+     * @type {string}
+     * @public
+     */
+    type: string;
+    /**
+     * @description Full description of that item
+     * @type {string}
+     * @public
+     */
+    description: string;
+    /**
+     * @description Unique list of hard coded Salesforce URLs in this item
+     * @type {Array<string>}
+     * @public
+     */
+    hardCodedURLs: Array<string>;
+    /**
+     * @description Unique list of hard coded Salesforce IDs in this item
+     * @type {Array<string>}
+     * @public
+     */
+    hardCodedIDs: Array<string>;
+    /**
+     * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    createdDate: number;
+    /**
+     * @description Date/Time when this item was last modified in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    lastModifiedDate: number;
+    /**
+     * @description Url to the group in the setup of the org.
+     * @type {string}
+     * @public
+     */
+    url: string;
+    /**
+     * @description Name of the package where this page is stored.
+     * @type {string}
+     * @public
+     */
+    package: string;
+}
+
+interface SFDC_Dashboard extends DataWithScore {
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
+     * @public
+     */
+    dataType: DataAliases.SFDC_Dashboard;
+    /**
+    * @description Unique identifier of this dashboard in the org.
+    * @type {string}
+    * @public
+    */
+    id: string;
+    /**
+     * @description Title of the dashboard.
+     * @type {string}
+     * @public
+     */
+    title: string;
+    /**
+     * @description Developer name of the dashboard.
+     * @type {string}
+     * @public
+     */
+    developerName: string;
+    /**
+     * @description Type of the dashboard.
+     * @type {string}
+     * @public
+     */
+    type: string;
+    /**
+     * @description Description of the dashboard.
+     * @type {string}
+     * @public
+     */
+    description: string;
+    /**
+     * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    createdDate: number;
+    /**
+     * @description Date/Time when this item was last modified in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    lastModifiedDate: number;
+    /**
+     * @description Date/Time when this dashboard was last viewed in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    lastViewedDate: number;
+    /**
+     * @description Date/Time when this dashboard was last referenced in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    lastReferencedDate: number;
+    /**
+     * @description Date/Time when this dashboard's result was last refreshed in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    resultRefreshedDate: number;
+    /**
+     * @description Name of the folder where this dashboard is stored.
+     * @type {string}
+     * @public
+     */
+    folderName: string;
+    /**
+     * @description Url to the dashboard in the setup of the org.
+     * @type {string}
+     * @public
+     */
+    url: string;
+    /**
+     * @description Name of the package where this dashboard is stored.
+     * @type {string}
+     * @public
+     */
+    package: string;
 }
 
 interface SFDC_Document extends DataWithScore {
@@ -3875,291 +4166,6 @@ interface SFDC_VisualForcePage extends DataWithScoreAndDependencies {
     url: string;
 }
 
-interface SFDC_CustomTab extends DataWithScoreAndDependencies {
-    /**
-     * @description Identifier of what this interface represents
-     * @type {DataAliases}
-     * @public
-     */
-    dataType: DataAliases.SFDC_CustomTab;
-    /**
-    * @description Unique identifier of this custom tab in the org.
-    * @type {string}
-    * @public
-    */
-    id: string;
-    /**
-     * @description Name of this custom tab in the org.
-     * @type {string}
-     * @public
-     */
-    name: string;
-    /**
-     * @description Type of this custom tab
-     * @type {string}
-     * @public
-     */
-    type: string;
-    /**
-     * @description Full description of that item
-     * @type {string}
-     * @public
-     */
-    description: string;
-    /**
-     * @description Unique list of hard coded Salesforce URLs in this item
-     * @type {Array<string>}
-     * @public
-     */
-    hardCodedURLs: Array<string>;
-    /**
-     * @description Unique list of hard coded Salesforce IDs in this item
-     * @type {Array<string>}
-     * @public
-     */
-    hardCodedIDs: Array<string>;
-    /**
-     * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.
-     * @type {number}
-     * @public
-     */
-    createdDate: number;
-    /**
-     * @description Date/Time when this item was last modified in the org. Information stored as a Unix timestamp.
-     * @type {number}
-     * @public
-     */
-    lastModifiedDate: number;
-    /**
-     * @description Url to the group in the setup of the org.
-     * @type {string}
-     * @public
-     */
-    url: string;
-    /**
-     * @description Name of the package where this page is stored.
-     * @type {string}
-     * @public
-     */
-    package: string;
-}
-
-interface SFDC_Dashboard extends DataWithScore {
-    /**
-     * @description Identifier of what this interface represents
-     * @type {DataAliases}
-     * @public
-     */
-    dataType: DataAliases.SFDC_Dashboard;
-    /**
-    * @description Unique identifier of this dashboard in the org.
-    * @type {string}
-    * @public
-    */
-    id: string;
-    /**
-     * @description Title of the dashboard.
-     * @type {string}
-     * @public
-     */
-    title: string;
-    /**
-     * @description Developer name of the dashboard.
-     * @type {string}
-     * @public
-     */
-    developerName: string;
-    /**
-     * @description Type of the dashboard.
-     * @type {string}
-     * @public
-     */
-    type: string;
-    /**
-     * @description Description of the dashboard.
-     * @type {string}
-     * @public
-     */
-    description: string;
-    /**
-     * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.
-     * @type {number}
-     * @public
-     */
-    createdDate: number;
-    /**
-     * @description Date/Time when this item was last modified in the org. Information stored as a Unix timestamp.
-     * @type {number}
-     * @public
-     */
-    lastModifiedDate: number;
-    /**
-     * @description Date/Time when this dashboard was last viewed in the org. Information stored as a Unix timestamp.
-     * @type {number}
-     * @public
-     */
-    lastViewedDate: number;
-    /**
-     * @description Date/Time when this dashboard was last referenced in the org. Information stored as a Unix timestamp.
-     * @type {number}
-     * @public
-     */
-    lastReferencedDate: number;
-    /**
-     * @description Date/Time when this dashboard's result was last refreshed in the org. Information stored as a Unix timestamp.
-     * @type {number}
-     * @public
-     */
-    resultRefreshedDate: number;
-    /**
-     * @description Name of the folder where this dashboard is stored.
-     * @type {string}
-     * @public
-     */
-    folderName: string;
-    /**
-     * @description Url to the dashboard in the setup of the org.
-     * @type {string}
-     * @public
-     */
-    url: string;
-    /**
-     * @description Name of the package where this dashboard is stored.
-     * @type {string}
-     * @public
-     */
-    package: string;
-}
-
-interface DataCollectionStatisticsIntf {
-    /**
-     * @description Indicates if an error occurred while building the collection
-     * @type {boolean}
-     * @public
-     */
-    hadError: boolean;
-    /**
-     * @description Last error message if any
-     * @type {string}
-     * @public
-     */
-    lastErrorMessage: string;
-    /**
-     * @description Number of all records
-     * @type {number}
-     * @public
-     */
-    countAll: number;
-    /**
-     * @description Number of records that are considered "bad" (i.e. at least one bad reason id)
-     * @type {number}
-     * @public
-     */
-    countBad: number;
-    /**
-     * @description Number of records that are considered "good" (i.e. no bad reason ids)
-     * @type {number}
-     * @public
-     */
-    countGood: number;
-    /**
-     * @description Number of bad records by rule
-     * @type {Array<{ruleId: number, ruleName: string, count: number}>}
-     * @default []
-     * @public
-     */
-    countBadByRule: Array<{
-        ruleId: number;
-        ruleName: string;
-        count: number;
-    }>;
-    /**
-     * @description List of all data items that are part of this collection
-     * @type {Array<Data>}
-     * @default []
-     * @public
-     */
-    data: Array<Data>;
-}
-
-/**
- * @description Basic logger Interface for
- */
-interface BasicLoggerIntf {
-    /**
-     * @description Check if this logger is a console fallback logger
-     * @returns {boolean} true if this logger is a console fallback logger, false otherwise
-     * @public
-     */
-    isConsoleFallback(): boolean;
-    /**
-     * @description The logger logs
-     * @param {string} operationName - the name of the operation
-     * @param {string} [message] - the message to log
-     * @public
-     */
-    log(operationName: string, message?: string): void;
-    /**
-     * @description The given operation ended (with an optional message)
-     * @param {string} operationName - the name of the operation
-     * @param {string} [message] - the message to log
-     * @public
-     */
-    ended(operationName: string, message?: string): void;
-    /**
-     * @description The given operation failed (with an optional message/error)
-     * @param {string} operationName - the name of the operation
-     * @param {Error | string} [error] - the error to log
-     * @public
-     */
-    failed(operationName: string, error?: Error | string): void;
-}
-
-interface LoggerSetup extends BasicLoggerIntf {
-}
-
-interface SalesforceAuthenticationOptions {
-    accessToken?: string;
-    clientId?: string;
-    clientSecret?: string;
-    redirectUri?: string;
-}
-interface SalesforceManagerSetup {
-    connection?: any;
-    authenticationOptions?: SalesforceAuthenticationOptions;
-}
-
-interface StorageSetup {
-    /**
-     * @description Set an item in a storage
-     * @param {string} key - The key to set
-     * @param {string} value - The value to set
-     */
-    setItem(key: string, value: string): void;
-    /**
-     * @description Get an item from a storage
-     * @param {string} key - The key to set
-     * @returns {string} The stored value for the given key
-     */
-    getItem(key: string): string;
-    /**
-     * @description Removes an item from a storage
-     * @param {string} key - The key to remove
-     */
-    removeItem(key: string): void;
-    /**
-     * @description Get the nth key from a storage
-     * @param {number} n - The index of the key
-     * @returns {string} The nth key
-     */
-    key(n: number): string;
-    /**
-     * @description The size of a storage
-     * @property
-     */
-    length(): number;
-}
-
 /**
  * @description Cache item interface
  */
@@ -4928,12 +4934,12 @@ interface ApiIntf {
     removeAllReportsFromCache(): void;
     /**
      * @description Get global view of the org
-     * @returns {Promise<Map<string, DataCollectionStatisticsIntf>>} List of items to return
+     * @returns {Promise<Array<DataCollectionStatisticsIntf>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getGlobalView(): Promise<Map<string, DataCollectionStatisticsIntf>>;
+    getGlobalView(): Promise<Array<DataCollectionStatisticsIntf>>;
     /**
      * @description Remove all the cached information about global view
      * @public
@@ -4941,12 +4947,12 @@ interface ApiIntf {
     removeGlobalViewFromCache(): void;
     /**
      * @description Get hardcoded URLs view of the org
-     * @returns {Promise<Map<string, DataCollectionStatisticsIntf>>} List of items to return
+     * @returns {Promise<Array<DataCollectionStatisticsIntf>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getHardcodedURLsView(): Promise<Map<string, DataCollectionStatisticsIntf>>;
+    getHardcodedURLsView(): Promise<Array<DataCollectionStatisticsIntf>>;
     /**
      * @description Remove all the cached information about hardcoded URLs view
      * @public
@@ -4955,787 +4961,52 @@ interface ApiIntf {
 }
 
 /**
- * @description Org Check API main class
+ * @description Org Check "score rule" used to qualify if an item is bad or not
+ * @public
  */
-declare class API implements ApiIntf {
+interface ScoreRule {
     /**
-     * @description String representation of the Org Check version in a form of Element [El,n]
-     * @type {string}
-     * @public
-     */
-    readonly version: string;
-    /**
-     * @description Numerical representation of the Salesforce API Version we use
+     * @description Unique identifier of that rule
      * @type {number}
      * @public
      */
-    readonly salesforceApiVersion: number;
+    id: number;
     /**
-     * @description Private Recipe Manager property used to run a recipe given its alias
-     * @type {RecipeManagerIntf}
-     * @private
-     */
-    private _recipeManager;
-    /**
-     * @description Private Dataset Manager property used to run a dataset given its alias
-     * @type {DatasetManagerIntf}
-     * @private
-     */
-    private _datasetManager;
-    /**
-     * @description Private Salesforce Manager property used to call the salesforce APIs using JsForce framework
-     * @type {SalesforceManagerIntf}
-     * @private
-     */
-    private _sfdcManager;
-    /**
-     * @description Private data cache manager to store data from datasetManager
-     * @type {DataCacheManagerIntf}
-     * @private
-     */
-    private _cacheManager;
-    /**
-     * @description Private Logger property used to send log information to the UI (if any)
-     * @type {LoggerIntf}
-     * @private
-     */
-    private _logger;
-    /**
-     * @description Is the current user accepted the terms manually to use Org Check in this org?
-     * @type {boolean}
-     * @private
-     */
-    private _usageTermsAcceptedManually;
-    /**
-     * @description Org Check constructor
-     * @param {ApiSetup} setup - the setup object to configure the Org Check API
-     */
-    constructor(setup: ApiSetup);
-    /**
-     * @description Remove all cache from dataset manager
-     * @public
-     */
-    removeAllFromCache(): void;
-    /**
-     * @description Get cache information from dataset manager
-     * @returns {Array<DataCacheItemIntf>} list of cache information
-     * @public
-     */
-    getCacheInformation(): Array<DataCacheItemIntf>;
-    /**
-     * @description Get cache data from dataset manager
-     * @param {string} itemName - the name of the cache item to get
-     * @returns {any} cached data
-     * @public
-     */
-    getCacheData(itemName: string): any;
-    /**
-     * @description Get the list of all Org Check "score rules" as a matrix
-     * @returns {DataMatrixIntf} Information about score rules as a matrix
-     * @public
-     */
-    getAllScoreRulesAsDataMatrix(): DataMatrixIntf;
-    /**
-     * @description Get the lastest Daily API Usage from JSForce, and the level of confidence we have in this ratio to continue using org check.
-     * @returns {SalesforceUsageInformationIntf} Percentage of the daily api usage and a confidence precentage.
-     * @public
-     */
-    get dailyApiRequestLimitInformation(): SalesforceUsageInformationIntf;
-    /**
-     * @description Send a request to run all tests in the org. When this method is finished, it does not mean all tests are run.
-     * @returns {Promise<string>} The Salesforce Id of the AsyncApexJob
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    runAllTestsAsync(): Promise<string>;
-    /**
-     * @description Compile the given list of Apex Classes and return the status of the compilation
-     * @param {Array<string>} apexClassIds - the list of Apex Class Ids to compile
-     * @returns {Promise<Map<string, { isSuccess: boolean, reasons?: Array<string>}>>} List of results by Apex Class ID
-     * @async
-     * @public
-     */
-    compileClasses(apexClassIds: Array<string>): Promise<Map<string, {
-        isSuccess: boolean;
-        reasons?: Array<string>;
-    }>>;
-    /**
-     * @description Get information about the organization
-     * @returns {Promise<SFDC_Organization>} Org information to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getOrganizationInformation(): Promise<SFDC_Organization>;
-    /**
-     * @description Check if we can use the current org according to the terms (specially if this is a production org)
-     * @returns {Promise<boolean>} true if this org can be used, false otehrwise.
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    checkUsageTerms(): Promise<boolean>;
-    /**
-     * @description Returns if the usage terms were accepted manually
-     * @returns {boolean} true if the usage terms were accepted manually, false otherwise
-     * @public
-     */
-    wereUsageTermsAcceptedManually(): boolean;
-    /**
-     * @description Accept manually the usage terms
-     * @public
-     */
-    acceptUsageTermsManually(): void;
-    /**
-     * @description Check if the current user can run the application
-     * @returns {Promise<boolean>} true if this user can run the application. Never returns false (see exception)
-     * @throws Exception if not enough permissions to run the application
-     * @async
-     * @public
-     */
-    checkCurrentUserPermissions(): Promise<boolean>;
-    /**
-     * @description Get information about the packages
-     * @returns {Promise<Array<SFDC_Package>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getPackages(): Promise<Array<SFDC_Package>>;
-    /**
-     * @description Remove all the cached information about packages
-     * @public
-     */
-    removeAllPackagesFromCache(): void;
-    /**
-     * @description Get information about the page layouts
-     * @param {string} namespace - the namespace of the package to filter the page layouts
-     * @param {string} sobjectType - the sobject type to filter the page layouts
-     * @param {string} sobject - the sobject to filter the page layouts
-     * @returns {Promise<Array<SFDC_PageLayout>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getPageLayouts(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_PageLayout>>;
-    /**
-     * @description Remove all the cached information about page layouts
-     * @public
-     */
-    removeAllPageLayoutsFromCache(): void;
-    /**
-     * @description Get information about the object types
-     * @returns {Promise<Array<SFDC_ObjectType>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getObjectTypes(): Promise<Array<SFDC_ObjectType>>;
-    /**
-     * @description Get information about the objects
-     * @param {string} namespace - the namespace of the package to filter the objects
-     * @param {string} sobjectType - the sobject type to filter the objects
-     * @returns {Promise<Array<SFDC_Object>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getObjects(namespace: string, sobjectType: string): Promise<Array<SFDC_Object>>;
-    /**
-     * @description Remove all the cached information about objects
-     * @public
-     */
-    removeAllObjectsFromCache(): void;
-    /**
-     * @description Get information about a specific sobject
-     * @param {string} sobject - the name of the sobject to get information about
-     * @returns {Promise<SFDC_Object>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getObject(sobject: string): Promise<SFDC_Object>;
-    /**
-     * @description Remove all the cached information about a specific sobject
-     * @param {string} sobject - the name of the sobject to remove from cache
-     * @public
-     */
-    removeObjectFromCache(sobject: string): void;
-    /**
-     * @description Get information about object permissions per parent (kind of matrix view)
-     * @param {string} namespace - the namespace of the package to filter the object permissions
-     * @returns {Promise<DataMatrixIntf>} Information about objects (list of string) and permissions (list of SFDC_ObjectPermissionsPerParent)
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getObjectPermissionsPerParent(namespace: string): Promise<DataMatrixIntf>;
-    /**
-     * @description Remove all the cached information about object permissions
-     * @public
-     */
-    removeAllObjectPermissionsFromCache(): void;
-    /**
-     * @description Get information about application permissions per parent (kind of matrix view)
-     * @param {string} namespace - the namespace of the package to filter the application permissions
-     * @returns {Promise<DataMatrixIntf>} Information about applications (list of string) and permissions (list of SFDC_AppPermissionsPerParent)
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getApplicationPermissionsPerParent(namespace: string): Promise<DataMatrixIntf>;
-    /**
-     * @description Remove all the cached information about application permissions
-     * @public
-     */
-    removeAllAppPermissionsFromCache(): void;
-    /**
-     * @description Get information about knowledge articles
-     * @returns {Promise<Array<SFDC_KnowledgeArticle>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getKnowledgeArticles(): Promise<Array<SFDC_KnowledgeArticle>>;
-    /**
-     * @description Remove all the cached information about knowledge articles
-     * @public
-     */
-    removeAllKnowledgeArticlesFromCache(): void;
-    /**
-     * @description Get information about Chatter groups
-     * @returns {Promise<Array<SFDC_CollaborationGroup>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getChatterGroups(): Promise<Array<SFDC_CollaborationGroup>>;
-    /**
-     * @description Remove all the cached information about Chatter groups
-     * @public
-     */
-    removeAllChatterGroupsFromCache(): void;
-    /**
-     * @description Get information about custom fields (filtered out by namespace/pakage, type and sobject)
-     * @param {string} namespace - the namespace of the package to filter the custom fields
-     * @param {string} sobjectType - the sobject type to filter the custom fields
-     * @param {string} sobject - the sobject to filter the custom fields
-     * @returns {Promise<Array<SFDC_Field>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getCustomFields(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_Field>>;
-    /**
-     * @description Remove all the cached information about custom fields
-     * @public
-     */
-    removeAllCustomFieldsFromCache(): void;
-    /**
-     * @description Get information about permission sets (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the permission sets
-     * @returns {Promise<Array<SFDC_PermissionSet>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getPermissionSets(namespace: string): Promise<Array<SFDC_PermissionSet>>;
-    /**
-     * @description Remove all the cached information about permission sets
-     * @public
-     */
-    removeAllPermSetsFromCache(): void;
-    /**
-     * @description Get information about permission set licenses
-     * @returns {Promise<Array<SFDC_PermissionSetLicense>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getPermissionSetLicenses(): Promise<Array<SFDC_PermissionSetLicense>>;
-    /**
-     * @description Remove all the cached information about permission set licenses
-     * @public
-     */
-    removeAllPermSetLicensesFromCache(): void;
-    /**
-     * @description Get information about profiles (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the profiles
-     * @returns {Promise<Array<SFDC_Profile>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getProfiles(namespace: string): Promise<Array<SFDC_Profile>>;
-    /**
-     * @description Remove all the cached information about profiles
-     * @public
-     */
-    removeAllProfilesFromCache(): void;
-    /**
-     * @description Get information about profile restrictions (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the profile restrictions
-     * @returns {Promise<Array<SFDC_ProfileRestrictions>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getProfileRestrictions(namespace: string): Promise<Array<SFDC_ProfileRestrictions>>;
-    /**
-     * @description Remove all the cached information about profile restrictions
-     * @public
-     */
-    removeAllProfileRestrictionsFromCache(): void;
-    /**
-     * @description Get information about profile password policies
-     * @returns {Promise<Array<SFDC_ProfilePasswordPolicy>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getProfilePasswordPolicies(): Promise<Array<SFDC_ProfilePasswordPolicy>>;
-    /**
-     * @description Remove all the cached information about profile password policies
-     * @public
-     */
-    removeAllProfilePasswordPoliciesFromCache(): void;
-    /**
-     * @description Get information about active users
-     * @returns {Promise<Array<SFDC_User>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getActiveUsers(): Promise<Array<SFDC_User>>;
-    /**
-     * @description Remove all the cached information about active users
-     * @public
-     */
-    removeAllActiveUsersFromCache(): void;
-    /**
-     * @description Get information about browsers
-     * @returns {Promise<Array<SFDC_Browser>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getBrowsers(): Promise<Array<SFDC_Browser>>;
-    /**
-     * @description Remove all the cached information about browsers
-     * @public
-     */
-    removeAllBrowsersFromCache(): void;
-    /**
-     * @description Get information about custom labels (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the custom labels
-     * @returns {Promise<Array<SFDC_CustomLabel>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getCustomLabels(namespace: string): Promise<Array<SFDC_CustomLabel>>;
-    /**
-     * @description Remove all the cached information about custom labels
-     * @public
-     */
-    removeAllCustomLabelsFromCache(): void;
-    /**
-     * @description Get information about custom tabs (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the custom tabs
-     * @returns {Promise<Array<SFDC_CustomTab>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getCustomTabs(namespace: string): Promise<Array<SFDC_CustomTab>>;
-    /**
-     * @description Remove all the cached information about custom tabs
-     * @public
-     */
-    removeAllCustomTabsFromCache(): void;
-    /**
-     * @description Get information about documents (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the documents
-     * @returns {Promise<Array<SFDC_Document>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getDocuments(namespace: string): Promise<Array<SFDC_Document>>;
-    /**
-     * @description Remove all the cached information about documents
-     * @public
-     */
-    removeAllDocumentsFromCache(): void;
-    /**
-     * @description Get information about LWCs (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the lightning web components
-     * @returns {Promise<Array<SFDC_LightningWebComponent>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getLightningWebComponents(namespace: string): Promise<Array<SFDC_LightningWebComponent>>;
-    /**
-     * @description Remove all the cached information about lightning web components
-     * @public
-     */
-    removeAllLightningWebComponentsFromCache(): void;
-    /**
-     * @description Get information about Aura Components (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the lightning aura components
-     * @returns {Promise<Array<SFDC_LightningAuraComponent>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getLightningAuraComponents(namespace: string): Promise<Array<SFDC_LightningAuraComponent>>;
-    /**
-     * @description Remove all the cached information about lightning aura components
-     * @public
-     */
-    removeAllLightningAuraComponentsFromCache(): void;
-    /**
-     * @description Get information about flexipages (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the lightning pages
-     * @returns {Promise<Array<SFDC_LightningPage>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getLightningPages(namespace: string): Promise<Array<SFDC_LightningPage>>;
-    /**
-     * @description Remove all the cached information about lightning pages
-     * @public
-     */
-    removeAllLightningPagesFromCache(): void;
-    /**
-     * @description Get information about VFCs (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the visualforce components
-     * @returns {Promise<Array<SFDC_VisualForceComponent>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getVisualForceComponents(namespace: string): Promise<Array<SFDC_VisualForceComponent>>;
-    /**
-     * @description Remove all the cached information about Visualforce Components
-     * @public
-     */
-    removeAllVisualForceComponentsFromCache(): void;
-    /**
-     * @description Get information about VFPs (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the visualforce pages
-     * @returns {Promise<Array<SFDC_VisualForcePage>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getVisualForcePages(namespace: string): Promise<Array<SFDC_VisualForcePage>>;
-    /**
-     * @description Remove all the cached information about Visualforce Pages
-     * @public
-     */
-    removeAllVisualForcePagesFromCache(): void;
-    /**
-     * @description Get information about Public Groups
-     * @returns {Promise<Array<SFDC_Group>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getPublicGroups(): Promise<Array<SFDC_Group>>;
-    /**
-     * @description Remove all the cached information about public groups
-     * @public
-     */
-    removeAllPublicGroupsFromCache(): void;
-    /**
-     * @description Get information about Queues
-     * @returns {Promise<Array<SFDC_Group>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getQueues(): Promise<Array<SFDC_Group>>;
-    /**
-     * @description Remove all the cached information about queues
-     * @public
-     */
-    removeAllQueuesFromCache(): void;
-    /**
-     * @description Get information about Apex Classes (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the apex classes
-     * @returns {Promise<Array<SFDC_ApexClass>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getApexClasses(namespace: string): Promise<Array<SFDC_ApexClass>>;
-    /**
-     * @description Remove all the cached information about apex classes
-     * @public
-     */
-    removeAllApexClassesFromCache(): void;
-    /**
-     * @description Get information about Apex Tests (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the apex tests
-     * @returns {Promise<Array<SFDC_ApexClass>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getApexTests(namespace: string): Promise<Array<SFDC_ApexClass>>;
-    /**
-     * @description Remove all the cached information about apex tests
-     * @public
-     */
-    removeAllApexTestsFromCache(): void;
-    /**
-     * @description Get information about Apex Uncompiled Classes (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the apex uncompiled classes
-     * @returns {Promise<Array<SFDC_ApexClass>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getApexUncompiled(namespace: string): Promise<Array<SFDC_ApexClass>>;
-    /**
-     * @description Remove all the cached information about apex uncompiled classes
-     * @public
-     */
-    removeAllApexUncompiledFromCache(): void;
-    /**
-     * @description Get information about Apex triggers (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the apex triggers
-     * @returns {Promise<Array<SFDC_ApexTrigger>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getApexTriggers(namespace: string): Promise<Array<SFDC_ApexTrigger>>;
-    /**
-     * @description Remove all the cached information about apex triggers
-     * @public
-     */
-    removeAllApexTriggersFromCache(): void;
-    /**
-     * @description Get information about User roles in a tabular view
-     * @returns {Promise<Array<SFDC_UserRole>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getRoles(): Promise<Array<SFDC_UserRole>>;
-    /**
-     * @description Remove all the cached information about roles
-     * @public
-     */
-    removeAllRolesFromCache(): void;
-    /**
-     * @description Get information about User Roles in a tree view
-     * @returns {Promise<SFDC_UserRole>} Tree
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getRolesTree(): Promise<SFDC_UserRole>;
-    /**
-     * @description Get information about Static Resources
-     * @param {string} namespace - the namespace of the package to filter the weblinks
-     * @returns {Promise<Array<SFDC_StaticResource>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getStaticResources(namespace: string): Promise<Array<SFDC_StaticResource>>;
-    /**
-     * @description Remove all the cached information about Static Resources
-     * @public
-     */
-    removeAllStaticResourcesFromCache(): void;
-    /**
-     * @description Get information about WebLinks
-     * @param {string} namespace - the namespace of the package to filter the weblinks
-     * @param {string} sobjectType - the sobject type to filter the weblinks
-     * @param {string} sobject - the sobject to filter the weblinks
-     * @returns {Promise<Array<SFDC_WebLink>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getWeblinks(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_WebLink>>;
-    /**
-     * @description Remove all the cached information about WebLinks
-     * @public
-     */
-    removeAllWeblinksFromCache(): void;
-    /**
-     * @description Get information about Workflows
-     * @returns {Promise<Array<SFDC_Workflow>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getWorkflows(): Promise<Array<SFDC_Workflow>>;
-    /**
-     * @description Remove all the cached information about workflows
-     * @public
-     */
-    removeAllWorkflowsFromCache(): void;
-    /**
-     * @description Get information about record types
-     * @param {string} namespace - the namespace of the package to filter the record types
-     * @param {string} sobjectType - the sobject type to filter the record types
-     * @param {string} sobject - the sobject to filter the record types
-     * @returns {Promise<Array<SFDC_RecordType>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getRecordTypes(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_RecordType>>;
-    /**
-     * @description Remove all the cached information about record types
-     * @public
-     */
-    removeAllRecordTypesFromCache(): void;
-    /**
-     * @description Get information about field permissions per parent (kind of matrix view) for a specific sobject
-     * @param {string} sobject - the name of the sobject to get information about
-     * @param {string} namespace - the namespace of the package to filter the field permissions
-     * @returns {Promise<DataMatrixIntf>} Information about fields (list of string) and permissions (list of SFDC_FieldPermissionsPerParent)
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getFieldPermissionsPerParent(sobject: string, namespace: string): Promise<DataMatrixIntf>;
-    /**
-     * @description Remove all the cached information about field permissions
-     * @public
-     */
-    removeAllFieldPermissionsFromCache(): void;
-    /**
-     * @description Get information about Flows
-     * @returns {Promise<Array<SFDC_Flow>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getFlows(): Promise<Array<SFDC_Flow>>;
-    /**
-     * @description Remove all the cached information about flows
-     * @public
-     */
-    removeAllFlowsFromCache(): void;
-    /**
-     * @description Get information about EmailTemplate
-     * @param {string} namespace - the namespace of the package to filter the email templates
-     * @returns {Promise<Array<SFDC_EmailTemplate>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getEmailTemplates(namespace: string): Promise<Array<SFDC_EmailTemplate>>;
-    /**
-     * @description Remove all the cached information about email template
-     * @public
-     */
-    removeAllEmailTemplatesFromCache(): void;
-    /**
-     * @description Get information about home page components
-     * @returns {Promise<Array<SFDC_HomePageComponent>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getHomePageComponents(): Promise<Array<SFDC_HomePageComponent>>;
-    /**
-     * @description Remove all the cached information about home page components
-     * @public
-     */
-    removeAllHomePageComponentsFromCache(): void;
-    /**
-     * @description Get information about Process Builders
-     * @returns {Promise<Array<SFDC_Flow>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getProcessBuilders(): Promise<Array<SFDC_Flow>>;
-    /**
-     * @description Remove all the cached information about process builders
-     * @public
-     */
-    removeAllProcessBuildersFromCache(): void;
-    /**
-     * @description Get information about Validation rules
-     * @param {string} namespace - the namespace of the package to filter the validation rules
-     * @param {string} sobjectType - the sobject type to filter the validation rules
-     * @param {string} sobject - the sobject to filter the validation rules
-     * @returns {Promise<Array<SFDC_ValidationRule>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getValidationRules(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_ValidationRule>>;
-    /**
-     * @description Remove all the cached information about validation rules
-     * @public
-     */
-    removeAllValidationRulesFromCache(): void;
-    /**
-     * @description Get information about dashboards
-     * @returns {Promise<Array<SFDC_Dashboard>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    getDashboards(): Promise<Array<SFDC_Dashboard>>;
-    /**
-     * @description Remove all the cached information about dashboards
-     * @public
-     */
-    removeAllDashboardsFromCache(): void;
-    /**
-     * @description Get information about reports
-     * @returns {Promise<Array<SFDC_Report>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
+     * @description Description of that rule
+     * @type {string}
      * @public
      */
-    getReports(): Promise<Array<SFDC_Report>>;
+    description: string;
     /**
-     * @description Remove all the cached information about reports
+     * @description Rule's formula with the data as only parameter. Function returns true or false.
+     * @type {Function}
      * @public
      */
-    removeAllReportsFromCache(): void;
+    formula: Function;
     /**
-     * @description Get global view of the org
-     * @returns {Promise<Map<string, DataCollectionStatisticsIntf>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
+     * @description Message to show if the formula returns false for a given data.
+     * @type {string}
      * @public
      */
-    getGlobalView(): Promise<Map<string, DataCollectionStatisticsIntf>>;
+    errorMessage: string;
     /**
-     * @description Remove all the cached information about global view
+     * @description Technical name of the field that is considered 'bad'
+     * @type {string}
      * @public
      */
-    removeGlobalViewFromCache(): void;
+    badField: string;
     /**
-     * @description Get hardcoded URLs view of the org
-     * @returns {Promise<Map<string, DataCollectionStatisticsIntf>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
+     * @description For which data this rule is applicable?
+     * @type {Array<any>}
      * @public
      */
-    getHardcodedURLsView(): Promise<Map<string, DataCollectionStatisticsIntf>>;
+    applicable: Array<DataAliases>;
     /**
-     * @description Remove all the cached information about hardcoded URLs view
+     * @description Category of the rule
+     * @type {string}
      * @public
      */
-    removeHardcodedURLsFromCache(): void;
+    category: string;
 }
 
 /**
@@ -5938,6 +5209,51 @@ interface ExportedTable {
      * @type {Array<Array<string>>}
      */
     rows: Array<Array<string>>;
+}
+
+interface Row {
+    /**
+     * @description Pre-calcultaed index of the row (needs to be recalculated when sroting for example!)
+     * @type {number}
+     * @public
+     */
+    index: number;
+    /**
+     * @description Name of the row
+     * @type {string}
+     * @public
+     */
+    name: string;
+    /**
+     * @description Score of the row if it has one
+     * @type {number}
+     * @public
+     */
+    score: number;
+    /**
+     * @description List of bad fields (must match column's value)
+    /* @type {Array<string>}
+     * @public
+     */
+    badFields: Array<string>;
+    /**
+     * @description List of reason id when this row is bad (can be empty, should not have duplicates)
+    /* @type {Array<string>}
+     * @public
+     */
+    badReasonIds: Array<string>;
+    /**
+     * @description List of cells in this row
+    /* @type {Array<any>}
+     * @public
+     */
+    cells: Array<any>;
+    /**
+     * @description Flag used when filtering the table. Meaning is obvious.
+    /* @type {boolean}
+     * @public
+     */
+    isVisible: boolean;
 }
 
 declare class ApexTestsTableDefinitions implements Table {
@@ -6894,6 +6210,20 @@ declare class ApexClassesTableDefinitions implements Table {
     orderSort: SortOrder;
 }
 
+declare class ApiFactory {
+    static create(setup: ApiSetup): ApiIntf;
+}
+declare class Rules {
+    static get(id: number): ScoreRule;
+}
+declare class TableFactory {
+    static createRows(tableDefintion: Table, rows: Array<any>, eachRow: Function, eachCell: Function): Array<Row>;
+    static createAndExport(tableDefintion: Table, records: Array<any>, title: string): ExportedTable;
+    static filterRows(rows: Array<Row>, searchInput: string): void;
+    static sortRows(tableDefintion: Table, rows: Array<Row>, columnIndex: number, order: SortOrder): void;
+    static asXlsx(source: Array<ExportedTable> | ExportedTable): ArrayBuffer;
+    static asRaw(tableDefintion: Table, rows: Array<Row>, title: string): ExportedTable;
+}
 declare class TableDefinitions {
     static ApexClasses: typeof ApexClassesTableDefinitions;
     static ApexTests: typeof ApexTestsTableDefinitions;
@@ -6952,218 +6282,5 @@ declare class TableDefinitions {
     static Workflows: typeof WorkflowsTableDefinitions;
 }
 
-declare class Exporter {
-    /**
-     * @param {Array<ExportedTable> | ExportedTable} source - Data to export
-     * @returns {ArrayBuffer} Generated XLS data
-     */
-    static exportAsXls(source: Array<ExportedTable> | ExportedTable): ArrayBuffer;
-}
-
-interface Row {
-    /**
-     * @description Pre-calcultaed index of the row (needs to be recalculated when sroting for example!)
-     * @type {number}
-     * @public
-     */
-    index: number;
-    /**
-     * @description Name of the row
-     * @type {string}
-     * @public
-     */
-    name: string;
-    /**
-     * @description Score of the row if it has one
-     * @type {number}
-     * @public
-     */
-    score: number;
-    /**
-     * @description List of bad fields (must match column's value)
-    /* @type {Array<string>}
-     * @public
-     */
-    badFields: Array<string>;
-    /**
-     * @description List of reason id when this row is bad (can be empty, should not have duplicates)
-    /* @type {Array<string>}
-     * @public
-     */
-    badReasonIds: Array<string>;
-    /**
-     * @description List of cells in this row
-    /* @type {Array<any>}
-     * @public
-     */
-    cells: Array<any>;
-    /**
-     * @description Flag used when filtering the table. Meaning is obvious.
-    /* @type {boolean}
-     * @public
-     */
-    isVisible: boolean;
-}
-
-declare class RowsFactory {
-    /**
-     * @description Create the rows of a table
-     * @param {Table} tableDefinition - Definition of the table
-     * @param {Array<any>} records - List of records
-     * @param {Function} onEachRowCallback - Callback to be called for each row
-     * @param {Function} onEachCellCallback - Callback to be called for each cell
-     * @returns {Array<Row>} List of rows
-     */
-    static create(tableDefinition: Table, records: Array<any>, onEachRowCallback: Function, onEachCellCallback: Function): Array<Row>;
-    /**
-     * @description Sort table
-     * @param {Table} tableDefintion - Definition of the table
-     * @param {Array<Row>} rows - List of rows
-     * @param {number} columnIndex - Index of the column to sort
-     * @param {SortOrder} order - Sort order, can be ASC or DESC
-     */
-    static sort(tableDefintion: Table, rows: Array<Row>, columnIndex: number, order: SortOrder): void;
-    /**
-     * @description Filter table
-     * @param {Array<Row>} rows - List of rows
-     * @param {string} searchInput - Search input
-     */
-    static filter(rows: Array<Row>, searchInput: string): void;
-    /**
-     * @description Export table
-     * @param {Table} tableDefintion - Definition of the table
-     * @param {Array<Row>} rows - List of rows
-     * @param {string} title - Title of the exported table
-     * @returns {ExportedTable} Exported table
-     */
-    static export(tableDefintion: Table, rows: Array<Row>, title: string): ExportedTable;
-    /**
-     * @description Export table
-     * @param {Table} tableDefintion - Definition of the table
-     * @param {Array<any>} records - List of records
-     * @param {string} title - Title of the exported table
-     * @returns {ExportedTable} Exported table
-     */
-    static createAndExport(tableDefintion: Table, records: Array<any>, title: string): ExportedTable;
-}
-
-/**
- * @description Org Check "score rule" used to qualify if an item is bad or not
- * @public
- */
-interface ScoreRule {
-    /**
-     * @description Unique identifier of that rule
-     * @type {number}
-     * @public
-     */
-    id: number;
-    /**
-     * @description Description of that rule
-     * @type {string}
-     * @public
-     */
-    description: string;
-    /**
-     * @description Rule's formula with the data as only parameter. Function returns true or false.
-     * @type {Function}
-     * @public
-     */
-    formula: Function;
-    /**
-     * @description Message to show if the formula returns false for a given data.
-     * @type {string}
-     * @public
-     */
-    errorMessage: string;
-    /**
-     * @description Technical name of the field that is considered 'bad'
-     * @type {string}
-     * @public
-     */
-    badField: string;
-    /**
-     * @description For which data this rule is applicable?
-     * @type {Array<any>}
-     * @public
-     */
-    applicable: Array<DataAliases>;
-    /**
-     * @description Category of the rule
-     * @type {string}
-     * @public
-     */
-    category: string;
-}
-
-/**
- * @description In Org Check, there are two main ingredients for our secret sauce: the score rules and
- *                  the current api version of an org. Of course this secret sauce object is unmutable.
- * @public
- */
-declare class SecretSauce {
-    /**
-     * @description Returns an unmutable list of all score rules.
-     * @returns {Array<ScoreRule>} List of score rules
-     * @static
-     * @readonly
-     */
-    static get AllScoreRules(): Array<ScoreRule>;
-    /**
-     * @description Returns an unmutable array of score rules only related to hardcoded urls.
-     * @returns {Array<number>} Score rues only related to hardcoded urls
-     * @static
-     * @readonly
-     */
-    static GetScoreRulesForHardCodedURLs(): Array<number>;
-    /**
-     * @description Returns an unmutable score rule given its id.
-     * @param {number} id - The ID of the score rule to retrieve.
-     * @returns {ScoreRule} The score rule given its id
-     * @static
-     * @readonly
-     */
-    static GetScoreRule(id: number): ScoreRule;
-    /**
-     * @description Returns the description of a given rule from its id.
-     * @param {number} id - The ID of the score rule.
-     * @returns {string} Description of the given rule
-     * @static
-     * @readonly
-     */
-    static GetScoreRuleDescription(id: number): string;
-    /**
-     * @description Returns the "potential" latest API version that a production org and non preview org can have
-     * @returns {number} Api Version to use
-     * @static
-     * @readonly
-     */
-    static get CurrentApiVersion(): number;
-}
-
-declare class ApiFactory {
-    static create(setup: ApiSetup): ApiIntf;
-}
-declare class OrgCheck {
-    API: typeof API;
-    rules: {
-        get: typeof SecretSauce.GetScoreRule;
-    };
-    export: {
-        asXlsx: typeof Exporter.exportAsXls;
-        asRaw: typeof RowsFactory.export;
-    };
-    ui: {
-        table: {
-            createRows: typeof RowsFactory.create;
-            createAndExport: typeof RowsFactory.createAndExport;
-            filterRows: typeof RowsFactory.filter;
-            sortRows: typeof RowsFactory.sort;
-            definitions: typeof TableDefinitions;
-        };
-    };
-}
-declare const orgcheck: OrgCheck;
-
-export { ApiFactory, orgcheck as default };
-export type { ApiIntf, ApiSetup, DataCollectionStatisticsIntf, LoggerSetup, SalesforceAuthenticationOptions, SalesforceManagerSetup, StorageSetup };
+export { ApexClassesTableDefinitions, ApexTestsTableDefinitions, ApexTriggersInObjectTableDefinitions, ApexTriggersTableDefinitions, ApexUncompiledTableDefinitions, ApiFactory, AppPermissionsTableDefinitions, AuraComponentsTableDefinitions, BrowsersTableDefinitions, ChatterGroupsTableDefinitions, CustomFieldsInObjectTableDefinitions, CustomFieldsTableDefinitions, CustomLabelsTableDefinitions, CustomTabsTableDefinitions, DashboardsTableDefinitions, DocumentsTableDefinitions, EmailTemplatesTableDefinitions, FieldPermissionsTableDefinitions, FieldSetsTableDefinitions, FlexiPagesInObjectTableDefinitions, FlexiPagesTableDefinitions, FlowsTableDefinitions, GlobalViewItemsTableDefinitions, HardCodedURLsTableDefinitions, HomePageComponentsTableDefinitions, KnowledgeArticlesTableDefinitions, LayoutsTableDefinitions, LightningWebComponentsTableDefinitions, LimitsTableDefinitions, ObjectPermissionsTableDefinitions, ObjectsTableDefinitions, PageLayoutsTableDefinitions, PermissionSetLicensesTableDefinitions, PermissionSetsTableDefinitions, ProcessBuildersTableDefinitions, ProfilePasswordPoliciesTableDefinitions, ProfileRestrictionsTableDefinitions, ProfilesTableDefinitions, PublicGroupsTableDefinitions, QueuesTableDefinitions, RecordTypesInObjectTableDefinitions, RecordTypesTableDefinitions, RelationshipsTableDefinitions, ReportsTableDefinitions, RolesTableDefinitions, Rules, ScoreRulesTableDefinitions, SortOrder, StandardFieldsTableDefinitions, StaticResourcesTableDefinitions, TableDefinitions, TableFactory, UsersTableDefinitions, ValidationRulesInObjectTableDefinitions, ValidationRulesTableDefinitions, VisualForceComponentsTableDefinitions, VisualForcePagesTableDefinitions, WebLinksTableDefinitions, WorkflowsTableDefinitions };
+export type { ApiIntf, ApiSetup, DataCollectionStatisticsIntf, ExportedTable, LoggerSetup, Row, SalesforceAuthenticationOptions, SalesforceManagerSetup, ScoreRule, StorageSetup, Table };

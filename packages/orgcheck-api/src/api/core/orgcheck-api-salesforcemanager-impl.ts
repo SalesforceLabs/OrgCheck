@@ -257,7 +257,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
             case SalesforceMetadataTypes.KNOWLEDGE_ARTICLE_VERSION: return `/${id}`;
             // Other types or even undefined type
             default: {
-                console.warn(`Type <${type}> not supported yet. Returning "/id" as url. FYI, id was <${id}>, parentId was <${parentId}> and parentType was <${parentType}>`);
+                //console.warn(`Type <${type}> not supported yet. Returning "/id" as url. FYI, id was <${id}>, parentId was <${parentId}> and parentType was <${parentType}>`);
                 return `/${id}`;
             }
         }
