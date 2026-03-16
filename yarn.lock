@@ -2202,9 +2202,9 @@ define-properties@^1.2.1:
     has-property-descriptors "^1.0.0"
     object-keys "^1.1.1"
 
-del@^8.0.0:
+del@^8.0.1:
   version "8.0.1"
-  resolved "https://registry.npmjs.org/del/-/del-8.0.1.tgz"
+  resolved "https://registry.yarnpkg.com/del/-/del-8.0.1.tgz#86772fe3a8c9f91bad0d7c6f79e04c6f310e50ac"
   integrity sha512-gPqh0mKTPvaUZGAuHbrBUYKZWBNAeHG7TU3QH5EhVwPMyKvmfJaNXhcD2jTcXsJRRcffuho4vaYweu80dRrMGA==
   dependencies:
     globby "^14.0.2"
@@ -4665,12 +4665,12 @@ rollup-plugin-copy@^3.5.0:
     globby "10.0.1"
     is-plain-object "^3.0.0"
 
-rollup-plugin-delete@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.npmjs.org/rollup-plugin-delete/-/rollup-plugin-delete-3.0.1.tgz"
-  integrity sha512-4tyijMQFwSDLA04DAHwbI2TrRwPiRwAqBQ17dxyr9CgHeHXLdgk8IDVWHFWPrL3UZJWrAmHohQ2MgmVghQDrlg==
+rollup-plugin-delete@^3.0.2:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/rollup-plugin-delete/-/rollup-plugin-delete-3.0.2.tgz#ed1abcacf762a77f1b4ea8ca51a4c913cc3ebef8"
+  integrity sha512-26GSi/aeYQ/hEBdG1rjEMeh+WUhiPZ3hGmSr9Ucj7mhLQ1P9j8KEgtYoybDp7OlIMj3eQjHHB9fnqhxNuVgfzA==
   dependencies:
-    del "^8.0.0"
+    del "^8.0.1"
 
 rollup@^4.59.0:
   version "4.59.0"

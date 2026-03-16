@@ -56,7 +56,7 @@
     "js-yaml": "^4.1.1",
     "rollup": "^4.59.0",
     "rollup-plugin-copy": "^3.5.0",
-    "rollup-plugin-delete": "^3.0.1",
+    "rollup-plugin-delete": "^3.0.2",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   }
 }
