@@ -6,6 +6,8 @@ import { LoggerSetup } from './orgcheck-api-setup-logger';
  */ 
 export class Logger implements LoggerIntf {
 
+    private _runningOperations: Set<string>;
+
     /**
      * @description Flag that turns fatal() to simple warning() if set to true
      * @type {boolean}
@@ -19,6 +21,7 @@ export class Logger implements LoggerIntf {
      */
     constructor(private readonly setup: LoggerSetup) {
         this.optimisticByPass = false;
+        this._runningOperations = new Set();
     }    
 
     /**
@@ -30,6 +33,10 @@ export class Logger implements LoggerIntf {
      * @public
      */
     public log(operationName: string, message?: string): void {
+        if (this._runningOperations.has(operationName) === false) {
+            this._runningOperations.add(operationName);
+            this.setup?.started(operationName);
+        }
         this.setup?.messageLogged(operationName, message);
     }
 
@@ -41,6 +48,10 @@ export class Logger implements LoggerIntf {
      */
     public finalLog(operationName: string, message?: string): void {
         this.setup.endedSuccessfully(operationName, message);
+        if (this._runningOperations.has(operationName) === true) {
+            this._runningOperations.delete(operationName);
+            this.setup?.stopped(operationName);
+        }
     }
 
     /**
@@ -52,15 +63,15 @@ export class Logger implements LoggerIntf {
      */
     public warn(operationName: string, error?: Error | string): void {
         if (error instanceof Error) {
-            this.setup?.messageLogged(operationName, `Warning: error.message`);
+            this.setup?.messageLogged(operationName, `Warning: ${error.message}`);
         } else {
-            this.setup?.messageLogged(operationName, `Warning: error}`);
+            this.setup?.messageLogged(operationName, `Warning: ${error}`);
         }
     }
 
     /**
-     * @description This method logs a fatal error for a given operation
-     *              The operation is supposed to be stopped after this call
+     * @description This method logs a fatal error for a given operation, and stop the operation
+     *              If bypass=true, we consider this call equivalent to finalLog
      * @param {string} operationName - the name of the operation
      * @param {Error | string} [error] - the error to log
      * @public
@@ -68,12 +79,16 @@ export class Logger implements LoggerIntf {
     public fatal(operationName: string, error?: Error | string): void {
         if (this.optimisticByPass === true) {
             if (error instanceof Error) {
-                this.setup?.messageLogged(operationName, `Warning: error.message`);
+                this.setup?.endedSuccessfully(operationName, `Fatal (by-passed): ${error.message}`);
             } else {
-                this.setup?.messageLogged(operationName, `Warning: error}`);
+                this.setup?.endedSuccessfully(operationName, `Fatal (by-passed): ${error}`);
             }
         } else {
             this.setup?.endedWithError(operationName, error);
+        }
+        if (this._runningOperations.has(operationName) === true) {
+            this._runningOperations.delete(operationName);
+            this.setup?.stopped(operationName);
         }
     }
 
