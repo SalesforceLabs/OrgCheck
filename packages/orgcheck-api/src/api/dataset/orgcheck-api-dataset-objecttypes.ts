@@ -3,7 +3,7 @@ import { DataFactoryIntf } from 'src/api/core/orgcheck-api-datafactory';
 import { Dataset } from 'src/api/core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_ObjectType, SObjectTypes } from 'src/api/data/orgcheck-api-data-objecttype';
+import { SfdcObjectType, SObjectTypes } from 'src/api/data/orgcheck-api-data-objecttype';
 
 /** @type {Array<{id: string, label: string}>} */ 
 const OBJECTTYPES: Array<{ id: string; label: string; }> = [
@@ -24,17 +24,17 @@ export class DatasetObjectTypes implements Dataset {
      * @param {SalesforceManagerIntf} _sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} _logger - Logger
-     * @returns {Promise<Map<string, SFDC_ObjectType>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcObjectType>>} The result of the dataset
      */
-    async run(_sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, _logger: SimpleLoggerIntf): Promise<Map<string, SFDC_ObjectType>> {
+    async run(_sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, _logger: SimpleLoggerIntf): Promise<Map<string, SfdcObjectType>> {
     
         // Init the factory and records
-        const objecTypeDataFactory = dataFactory.getInstance(DataAliases.SFDC_ObjectType);
+        const objecTypeDataFactory = dataFactory.getInstance(DataAliases.SfdcObjectType);
 
         // Return data
         return new Map(OBJECTTYPES.map((type) => [ 
             type.id, 
-            /** @type {SFDC_ObjectType} */
+            /** @type {SfdcObjectType} */
             objecTypeDataFactory.create({ properties: { id: type.id, label: type.label }}) 
         ]));
     } 

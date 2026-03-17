@@ -5,7 +5,7 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_UserRole } from 'src/api/data/orgcheck-api-data-userrole';
+import { SfdcUserRole } from 'src/api/data/orgcheck-api-data-userrole';
 
 export class DatasetUserRoles implements Dataset {
 
@@ -14,9 +14,9 @@ export class DatasetUserRoles implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_UserRole>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcUserRole>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_UserRole>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcUserRole>> {
 
         // First SOQL query
         logger?.log(`Querying REST API about UserRole in the org...`);            
@@ -28,7 +28,7 @@ export class DatasetUserRoles implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const userRoleDataFactory = dataFactory.getInstance(DataAliases.SFDC_UserRole);
+        const userRoleDataFactory = dataFactory.getInstance(DataAliases.SfdcUserRole);
 
         // Create the map
         const userRoleRecords = results[0];
@@ -36,14 +36,14 @@ export class DatasetUserRoles implements Dataset {
         const childrenByParent = new Map();
         /** @type {Array<any>} */ 
         const roots: Array<any> = [];
-        const roles: Map<string, SFDC_UserRole> = new Map(await Processor.map(userRoleRecords, async (/** @type {any} */ record: any) => {
+        const roles: Map<string, SfdcUserRole> = new Map(await Processor.map(userRoleRecords, async (/** @type {any} */ record: any) => {
 
             // Get the ID15 of this custom label
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            /** @type {SFDC_UserRole} */
-            const userRole: SFDC_UserRole = userRoleDataFactory.create({
+            /** @type {SfdcUserRole} */
+            const userRole: SfdcUserRole = userRoleDataFactory.create({
                 properties: {
                     id: id,
                     name: record.Name,
@@ -96,7 +96,7 @@ export class DatasetUserRoles implements Dataset {
     } 
 }
 
-const RECURSIVE_LEVEL_CALCULUS = (/** @type {SFDC_UserRole} */ parent: SFDC_UserRole, /** @type {Map<string, Array<SFDC_UserRole>>} */ childrenByParent: Map<string, Array<SFDC_UserRole>>) => {
+const RECURSIVE_LEVEL_CALCULUS = (/** @type {SfdcUserRole} */ parent: SfdcUserRole, /** @type {Map<string, Array<SfdcUserRole>>} */ childrenByParent: Map<string, Array<SfdcUserRole>>) => {
     const children = childrenByParent.get(parent.id);
     children?.forEach((child) => {
         child.level = parent.level + 1;

@@ -1,14 +1,14 @@
 import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
 import { DataWithoutScore } from 'src/api/core/orgcheck-api-data';
 
-export interface SFDC_ObjectRelationShip extends DataWithoutScore {
+export interface SfdcObjectRelationShip extends DataWithoutScore {
     
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_ObjectRelationShip;
+    dataType: DataAliases.SfdcObjectRelationShip;
         
      /**
      * @description Name

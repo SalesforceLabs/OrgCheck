@@ -3,9 +3,9 @@ import { Data } from 'src/api/core/orgcheck-api-data';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_User }from 'src/api/data/orgcheck-api-data-user';
+import { SfdcUser }from 'src/api/data/orgcheck-api-data-user';
 import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
-import { SFDC_Report }from 'src/api/data/orgcheck-api-data-report';
+import { SfdcReport }from 'src/api/data/orgcheck-api-data-report';
 
 export class RecipeReports implements Recipe {
 
@@ -30,8 +30,8 @@ export class RecipeReports implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data
-        const /** @type {Map<string, SFDC_Report>} */ reports: Map<string, SFDC_Report> = data.get(DatasetAliases.REPORTS);
-        const /** @type {Map<string, SFDC_User>} */ users: Map<string, SFDC_User> = data.get(DatasetAliases.INTERNALACTIVEUSERS);
+        const /** @type {Map<string, SfdcReport>} */ reports: Map<string, SfdcReport> = data.get(DatasetAliases.REPORTS);
+        const /** @type {Map<string, SfdcUser>} */ users: Map<string, SfdcUser> = data.get(DatasetAliases.INTERNALACTIVEUSERS);
 
         // Checking data
         if (!reports) throw new Error(`RecipeReports: Data from dataset alias 'REPORTS' was undefined.`);

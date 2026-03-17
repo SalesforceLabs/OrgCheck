@@ -1,18 +1,18 @@
 import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
 import { DataWithScore } from 'src/api/core/orgcheck-api-data';
-import { SFDC_User } from 'src/api/data/orgcheck-api-data-user';
+import { SfdcUser } from 'src/api/data/orgcheck-api-data-user';
 
 /**
  * @description Representation of a User Group in Org Check
  */
-export interface SFDC_Group extends DataWithScore {
+export interface SfdcGroup extends DataWithScore {
     
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_Group;
+    dataType: DataAliases.SfdcGroup;
 
      /**
      * @description Salesforce Id
@@ -79,10 +79,10 @@ export interface SFDC_Group extends DataWithScore {
 
     /**
      * @description List of direct user references
-     * @type {Array<SFDC_User>}
+     * @type {Array<SfdcUser>}
      * @public
      */
-    directUserRefs: Array<SFDC_User>;
+    directUserRefs: Array<SfdcUser>;
 
     /**
      * @description List of direct group ids
@@ -93,10 +93,10 @@ export interface SFDC_Group extends DataWithScore {
 
     /**
      * @description List of direct group references
-     * @type {Array<SFDC_Group>}
+     * @type {Array<SfdcGroup>}
      * @public
      */
-    directGroupRefs: Array<SFDC_Group>;
+    directGroupRefs: Array<SfdcGroup>;
 
     /**
      * @description Is this a public group?

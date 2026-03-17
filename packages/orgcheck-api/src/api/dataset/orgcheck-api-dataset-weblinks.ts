@@ -6,7 +6,7 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_WebLink } from 'src/api/data/orgcheck-api-data-weblink';
+import { SfdcWebLink } from 'src/api/data/orgcheck-api-data-weblink';
 
 export class DatasetWeblinks implements Dataset {
 
@@ -15,9 +15,9 @@ export class DatasetWeblinks implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_WebLink>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcWebLink>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_WebLink>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcWebLink>> {
 
         // First SOQL query
         logger?.log(`Querying REST API about WebLinks in the org...`);            
@@ -30,7 +30,7 @@ export class DatasetWeblinks implements Dataset {
         }], logger);
         
         // Init the factory and records
-        const webLinkDataFactory = dataFactory.getInstance(DataAliases.SFDC_WebLink);
+        const webLinkDataFactory = dataFactory.getInstance(DataAliases.SfdcWebLink);
 
         // Create the map
         const webLinkRecords = results[0];
@@ -44,14 +44,14 @@ export class DatasetWeblinks implements Dataset {
 
         // Create the map
         logger?.log(`Parsing ${webLinkRecords?.length} weblinks...`);
-        const webLinks: Map<string, SFDC_WebLink> = new Map(await Processor.map(webLinkRecords, async (/** @type {any} */ record: any) => {
+        const webLinks: Map<string, SfdcWebLink> = new Map(await Processor.map(webLinkRecords, async (/** @type {any} */ record: any) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            /** @type {SFDC_WebLink} */
-            const webLink: SFDC_WebLink = webLinkDataFactory.createWithScore({
+            /** @type {SfdcWebLink} */
+            const webLink: SfdcWebLink = webLinkDataFactory.createWithScore({
                 properties: {
                     id: id,
                     name: record.Name, 

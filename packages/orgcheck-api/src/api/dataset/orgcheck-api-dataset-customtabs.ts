@@ -6,7 +6,7 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_CustomTab } from 'src/api/data/orgcheck-api-data-customtab';
+import { SfdcCustomTab } from 'src/api/data/orgcheck-api-data-customtab';
 
 export class DatasetCustomTabs implements Dataset {
 
@@ -15,9 +15,9 @@ export class DatasetCustomTabs implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_CustomTab>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcCustomTab>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_CustomTab>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcCustomTab>> {
 
         // First SOQL queries
         logger?.log(`Querying Tooling API about CustomTab in the org...`);            
@@ -30,7 +30,7 @@ export class DatasetCustomTabs implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const customTabDataFactory = dataFactory.getInstance(DataAliases.SFDC_CustomTab);
+        const customTabDataFactory = dataFactory.getInstance(DataAliases.SfdcCustomTab);
 
         // Create the map
         const customTabRecords = results[0];
@@ -43,13 +43,13 @@ export class DatasetCustomTabs implements Dataset {
         );
 
         logger?.log(`Parsing ${customTabRecords?.length} custom tabs...`);
-        const customTabs: Map<string, SFDC_CustomTab> = new Map(await Processor.map(customTabRecords, (/** @type {any} */ record) => {
+        const customTabs: Map<string, SfdcCustomTab> = new Map(await Processor.map(customTabRecords, (/** @type {any} */ record) => {
 
             // Get the ID15 of this custom field
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            /** @type {SFDC_CustomTab} */
+            /** @type {SfdcCustomTab} */
             const customTab = customTabDataFactory.createWithScore({
                 properties: {
                     id: id,

@@ -1,14 +1,14 @@
 import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
 import { DataWithScore } from 'src/api/core/orgcheck-api-data';
 
-export interface SFDC_KnowledgeArticle extends DataWithScore {
+export interface SfdcKnowledgeArticle extends DataWithScore {
     
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_KnowledgeArticle;
+    dataType: DataAliases.SfdcKnowledgeArticle;
 
      /**
      * @description Unique identifier of this article in the org.

@@ -16,6 +16,14 @@ export interface LoggerSetup {
     messageLogged(operationName: string, message?: string): void;
 
     /**
+     * @description Called when a message has been logged for debug 
+     * @param {string} operationName - the name of the operation
+     * @param {string} [message] - the message to log for debugging
+     * @public
+     */
+    messageSilentlyLogged(operationName: string, message?: string): void;
+
+    /**
      * @description The given operation ended with an error (with an optional error or message)
      * @param {string} operationName - the name of the operation
      * @param {Error | string} [error] - the error to log

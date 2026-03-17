@@ -4,13 +4,13 @@ import { Data } from 'src/api/core/orgcheck-api-data';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_ApexClass }from 'src/api/data/orgcheck-api-data-apexclass';
+import { SfdcApexClass }from 'src/api/data/orgcheck-api-data-apexclass';
 import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
-const REGULAR_FILTER = (/** @type {SFDC_ApexClass} */ ac: SFDC_ApexClass) => ac.isTest === false && ac.needsRecompilation === false;
-const TEST_FILTER = (/** @type {SFDC_ApexClass} */ ac: SFDC_ApexClass) => ac.isTest === true && ac.needsRecompilation === false;
-const UNCOMPILED_FILTER = (/** @type {SFDC_ApexClass} */ ac: SFDC_ApexClass) => ac.needsRecompilation === true;
+const REGULAR_FILTER = (/** @type {SfdcApexClass} */ ac: SfdcApexClass) => ac.isTest === false && ac.needsRecompilation === false;
+const TEST_FILTER = (/** @type {SfdcApexClass} */ ac: SfdcApexClass) => ac.isTest === true && ac.needsRecompilation === false;
+const UNCOMPILED_FILTER = (/** @type {SfdcApexClass} */ ac: SfdcApexClass) => ac.needsRecompilation === true;
 
 const TESTS_TYPE = 'tests';
 const UNCOMPILED_TYPE = 'uncompiled';
@@ -71,16 +71,16 @@ class AbstractRecipeApexClasses implements Recipe {
     public async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data and parameters
-        const /** @type {Map<string, SFDC_ApexClass>} */ apexClasses: Map<string, SFDC_ApexClass> = data.get(DatasetAliases.APEXCLASSES);
+        const /** @type {Map<string, SfdcApexClass>} */ apexClasses: Map<string, SfdcApexClass> = data.get(DatasetAliases.APEXCLASSES);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
         if (!apexClasses) throw new Error(`RecipeApexClasses: Data from dataset alias 'APEXCLASSES' was undefined.`);
 
         // Augment and filter data
-        /** @type {Array<SFDC_ApexClass>} */
-        const array: Array<SFDC_ApexClass> = [];
-        await Processor.forEach(apexClasses, async (/** @type {SFDC_ApexClass} */ apexClass: SFDC_ApexClass) => {            
+        /** @type {Array<SfdcApexClass>} */
+        const array: Array<SfdcApexClass> = [];
+        await Processor.forEach(apexClasses, async (/** @type {SfdcApexClass} */ apexClass: SfdcApexClass) => {            
             // Augment data
             const results = await Promise.all([
                 Processor.map(apexClass.relatedTestClassIds, (/** @type {string} */ id: string) => apexClasses.get(id)),

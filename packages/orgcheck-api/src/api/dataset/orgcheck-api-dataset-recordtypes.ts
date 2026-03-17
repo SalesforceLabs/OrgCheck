@@ -5,7 +5,7 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_RecordType } from 'src/api/data/orgcheck-api-data-recordtype';
+import { SfdcRecordType } from 'src/api/data/orgcheck-api-data-recordtype';
 
 export class DatasetRecordTypes implements Dataset {
 
@@ -14,9 +14,9 @@ export class DatasetRecordTypes implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - List of optional argument to pass
-     * @returns {Promise<Map<string, SFDC_RecordType>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcRecordType>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_RecordType>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcRecordType>> {
 
         // First SOQL queries
         logger?.log(`Querying REST API about Record Types and Profiles in the org...`);            
@@ -27,20 +27,20 @@ export class DatasetRecordTypes implements Dataset {
             string: 'SELECT Id FROM Profile '
         }], logger);
 
-        const recordTypeDataFactory = dataFactory.getInstance(DataAliases.SFDC_RecordType);
+        const recordTypeDataFactory = dataFactory.getInstance(DataAliases.SfdcRecordType);
         const recordTypeRecords = results[0];
         const profileRecords = results[1];
 
         logger?.log(`Parsing ${recordTypeRecords?.length} record types...`);
         const recordTypeDevNameToId = new Map();
-        const recordTypes: Map<string, SFDC_RecordType> = new Map(await Processor.map(recordTypeRecords, async (/** @type {any} */ record: any) => {
+        const recordTypes: Map<string, SfdcRecordType> = new Map(await Processor.map(recordTypeRecords, async (/** @type {any} */ record: any) => {
         
             // Get the ID15 of this record type
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            /** @type {SFDC_RecordType} */
-            const recordType: SFDC_RecordType = recordTypeDataFactory.create({
+            /** @type {SfdcRecordType} */
+            const recordType: SfdcRecordType = recordTypeDataFactory.create({
                 properties: {
                     id: sfdcManager.caseSafeId(id), 
                     name: record.Name, 
@@ -86,7 +86,7 @@ export class DatasetRecordTypes implements Dataset {
         });
 
         // Then compute the score of record types 
-        await Processor.forEach(recordTypes, async (/** @type {SFDC_RecordType} */ recordType: SFDC_RecordType) => {
+        await Processor.forEach(recordTypes, async (/** @type {SfdcRecordType} */ recordType: SfdcRecordType) => {
             recordTypeDataFactory.computeScore(recordType);
         });
 

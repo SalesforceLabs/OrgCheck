@@ -5,8 +5,8 @@ import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_Object }from 'src/api/data/orgcheck-api-data-object';
-import { SFDC_ObjectType }from 'src/api/data/orgcheck-api-data-objecttype';
+import { SfdcObject }from 'src/api/data/orgcheck-api-data-object';
+import { SfdcObjectType }from 'src/api/data/orgcheck-api-data-objecttype';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
 export class RecipeObjects implements Recipe {
@@ -33,8 +33,8 @@ export class RecipeObjects implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data and parameters
-        const /** @type {Map<string, SFDC_ObjectType>} */ types: Map<string, SFDC_ObjectType> = data.get(DatasetAliases.OBJECTTYPES);
-        const /** @type {Map<string, SFDC_Object>} */ objects: Map<string, SFDC_Object> = data.get(DatasetAliases.OBJECTS);
+        const /** @type {Map<string, SfdcObjectType>} */ types: Map<string, SfdcObjectType> = data.get(DatasetAliases.OBJECTTYPES);
+        const /** @type {Map<string, SfdcObject>} */ objects: Map<string, SfdcObject> = data.get(DatasetAliases.OBJECTS);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
         const type = OrgCheckGlobalParameter.getSObjectTypeName(parameters);
 
@@ -43,9 +43,9 @@ export class RecipeObjects implements Recipe {
         if (!objects) throw new Error(`RecipeObjects: Data from dataset alias 'OBJECTS' was undefined.`);
 
         // Augment and Filter data
-        /** @type {Array<SFDC_Object>} */ 
-        const array: Array<SFDC_Object> = [];
-        await Processor.forEach(objects, async (/** @type {SFDC_Object} */ object: SFDC_Object) => {
+        /** @type {Array<SfdcObject>} */ 
+        const array: Array<SfdcObject> = [];
+        await Processor.forEach(objects, async (/** @type {SfdcObject} */ object: SfdcObject) => {
             // Augment data
             const typeRef = types.get(object.typeId);
             if (typeRef) {

@@ -98,14 +98,13 @@ export class Logger implements LoggerIntf {
      * @returns {SimpleLoggerIntf} - a simple logger
      */ 
     public toSimpleLogger(operationName: string): SimpleLoggerIntf {
+        const that = this;
         return { 
             log: (message) => { 
-                this.setup?.messageLogged(operationName, message);
+                that.setup?.messageLogged(operationName, message);
             },
             debug: (message) => { 
-                if (console && console.debug) {
-                    console.debug(`${new Date().toISOString()} - ${operationName} - ${message}`);
-                }
+                that.setup?.messageSilentlyLogged(operationName, message);
             }
         };
     }

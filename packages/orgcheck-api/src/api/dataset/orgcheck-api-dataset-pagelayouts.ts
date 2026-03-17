@@ -5,7 +5,7 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_PageLayout } from 'src/api/data/orgcheck-api-data-pagelayout';
+import { SfdcPageLayout } from 'src/api/data/orgcheck-api-data-pagelayout';
 
 export class DatasetPageLayouts implements Dataset {
 
@@ -14,9 +14,9 @@ export class DatasetPageLayouts implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_PageLayout>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcPageLayout>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_PageLayout>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcPageLayout>> {
 
         // First SOQL queries
         logger?.log(`Querying Tooling API about Layout and ProfileLayout in the org...`);            
@@ -35,7 +35,7 @@ export class DatasetPageLayouts implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const pageLayoutDataFactory = dataFactory.getInstance(DataAliases.SFDC_PageLayout);
+        const pageLayoutDataFactory = dataFactory.getInstance(DataAliases.SfdcPageLayout);
 
         // Create the map
         const pageLayoutRecords = results[0];
@@ -49,14 +49,14 @@ export class DatasetPageLayouts implements Dataset {
         const pageLayoutDependencies = await sfdcManager.dependenciesQuery(pageLayoutIds, logger);
 
         logger?.log(`Parsing ${pageLayoutRecords?.length} page layouts...`);
-        const pageLayouts: Map<string, SFDC_PageLayout> = new Map(await Processor.map(pageLayoutRecords, (/** @type {any} */ record: any) => {
+        const pageLayouts: Map<string, SfdcPageLayout> = new Map(await Processor.map(pageLayoutRecords, (/** @type {any} */ record: any) => {
 
             // Get the ID15 of this page layout
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            /** @type {SFDC_PageLayout} */
-            const pageLayout: SFDC_PageLayout = pageLayoutDataFactory.create({
+            /** @type {SfdcPageLayout} */
+            const pageLayout: SfdcPageLayout = pageLayoutDataFactory.create({
                 properties: {
                     id: id,
                     name: record.Name,
@@ -123,7 +123,7 @@ export class DatasetPageLayouts implements Dataset {
         });
 
         // Compute the score of all items
-        await Processor.forEach(pageLayouts, async (/** @type {SFDC_PageLayout} */ pageLayout: SFDC_PageLayout) => {
+        await Processor.forEach(pageLayouts, async (/** @type {SfdcPageLayout} */ pageLayout: SfdcPageLayout) => {
             pageLayoutDataFactory.computeScore(pageLayout);
         });
 

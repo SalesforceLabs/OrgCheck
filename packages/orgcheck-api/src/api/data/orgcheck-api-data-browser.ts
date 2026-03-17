@@ -4,14 +4,14 @@ import { DataWithScore } from 'src/api/core/orgcheck-api-data';
 /**
  * @description Representation of a browser used by salesforce users while visiting the "Application" in this org
  */
-export interface SFDC_Browser extends DataWithScore {
+export interface SfdcBrowser extends DataWithScore {
     
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_Browser;
+    dataType: DataAliases.SfdcBrowser;
 
      /**
      * @description full name of the browser as it appears in LoginHistory (name + version)

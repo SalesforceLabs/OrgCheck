@@ -6,7 +6,7 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_ApexTrigger } from 'src/api/data/orgcheck-api-data-apextrigger';
+import { SfdcApexTrigger } from 'src/api/data/orgcheck-api-data-apextrigger';
 
 export class DatasetApexTriggers implements Dataset {
 
@@ -15,9 +15,9 @@ export class DatasetApexTriggers implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_ApexTrigger>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcApexTrigger>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_ApexTrigger>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcApexTrigger>> {
 
         // First SOQL query
         logger?.log(`Querying Tooling API about ApexTrigger in the org...`);            
@@ -37,7 +37,7 @@ export class DatasetApexTriggers implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const apexTriggerDataFactory = dataFactory.getInstance(DataAliases.SFDC_ApexTrigger);
+        const apexTriggerDataFactory = dataFactory.getInstance(DataAliases.SfdcApexTrigger);
         const apexTriggerRecords = results[0];
 
         // Then retreive dependencies
@@ -49,7 +49,7 @@ export class DatasetApexTriggers implements Dataset {
 
         // Create the map
         logger?.log(`Parsing ${apexTriggerRecords?.length} apex triggers...`);
-        const apexTriggers: Map<string, SFDC_ApexTrigger> = new Map(await Processor.map(
+        const apexTriggers: Map<string, SfdcApexTrigger> = new Map(await Processor.map(
             apexTriggerRecords,
             (/** @type {any} */ record: any) => {
 
@@ -57,8 +57,8 @@ export class DatasetApexTriggers implements Dataset {
                 const id = sfdcManager.caseSafeId(record.Id);
 
                 // Create the instance
-                /** @type {SFDC_ApexTrigger} */
-                const apexTrigger: SFDC_ApexTrigger = apexTriggerDataFactory.create({
+                /** @type {SfdcApexTrigger} */
+                const apexTrigger: SfdcApexTrigger = apexTriggerDataFactory.create({
                     properties: {
                         id: id,
                         name: record.Name,

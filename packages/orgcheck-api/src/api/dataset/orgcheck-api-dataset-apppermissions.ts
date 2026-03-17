@@ -4,7 +4,7 @@ import { Dataset } from 'src/api/core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_AppPermission } from 'src/api/data/orgcheck-api-data-apppermission';
+import { SfdcAppPermission } from 'src/api/data/orgcheck-api-data-apppermission';
 
 export class DatasetAppPermissions implements Dataset {
 
@@ -13,9 +13,9 @@ export class DatasetAppPermissions implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_AppPermission>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcAppPermission>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_AppPermission>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcAppPermission>> {
 
         // First SOQL query
         logger?.log(`Querying REST API about SetupEntityAccess for TabSet in the org...`);            
@@ -30,7 +30,7 @@ export class DatasetAppPermissions implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const appPermissionDataFactory = dataFactory.getInstance(DataAliases.SFDC_AppPermission);
+        const appPermissionDataFactory = dataFactory.getInstance(DataAliases.SfdcAppPermission);
         const appMenuItems = results[0];
         const setupEntityAccesses = results[1];
 
@@ -42,7 +42,7 @@ export class DatasetAppPermissions implements Dataset {
 
         // Create the map
         logger?.log(`Parsing ${setupEntityAccesses?.length} Setup Entity Accesses...`);
-        const appPermissions: Map<string, SFDC_AppPermission> = new Map(await Processor.map(setupEntityAccesses, 
+        const appPermissions: Map<string, SfdcAppPermission> = new Map(await Processor.map(setupEntityAccesses, 
             (/** @type {any} */ record: any) => {
                 // Get the ID15 of this application
                 const appId = sfdcManager.caseSafeId(record.SetupEntityId);
@@ -52,8 +52,8 @@ export class DatasetAppPermissions implements Dataset {
                 const accesses = appMenuItemAccesses.get(appId);
 
                 // Create the instance
-                /** @type {SFDC_AppPermission} */
-                const appPermission: SFDC_AppPermission = appPermissionDataFactory.create({
+                /** @type {SfdcAppPermission} */
+                const appPermission: SfdcAppPermission = appPermissionDataFactory.create({
                     properties: {
                         appId: appId,
                         parentId: parentId,

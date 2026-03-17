@@ -4,7 +4,7 @@ import { Dataset } from 'src/api/core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_Object } from 'src/api/data/orgcheck-api-data-object';
+import { SfdcObject } from 'src/api/data/orgcheck-api-data-object';
 
 export class DatasetObjects implements Dataset {
 
@@ -13,12 +13,12 @@ export class DatasetObjects implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_Object>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcObject>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_Object>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcObject>> {
 
         // Init the factory and records
-        const objectDataFactory = dataFactory.getInstance(DataAliases.SFDC_Object);
+        const objectDataFactory = dataFactory.getInstance(DataAliases.SfdcObject);
 
         // Two actions to perform in parallel, global describe and an additional entity definition soql query
         logger?.log(`Performing a global describe and in parallel a SOQL query to EntityDefinition...`);            
@@ -127,7 +127,7 @@ export class DatasetObjects implements Dataset {
 
         // Create the map
         logger?.log(`Parsing ${objectsDescription?.length} objects...`);
-        const objects: Map<string, SFDC_Object> = new Map(await Processor.map(
+        const objects: Map<string, SfdcObject> = new Map(await Processor.map(
             objectsDescription,
             (/** @type {any} */ object: any) => {
 
@@ -136,8 +136,8 @@ export class DatasetObjects implements Dataset {
                 const durableId = entity.DurableId;
 
                 // Create the instance
-                /** @type {SFDC_Object} */
-                const obj: SFDC_Object = objectDataFactory.createWithScore({
+                /** @type {SfdcObject} */
+                const obj: SfdcObject = objectDataFactory.createWithScore({
                     properties: {
                         id: object.name,
                         label: object.label,

@@ -1,15 +1,15 @@
 import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
 import { DataWithScore } from 'src/api/core/orgcheck-api-data';
-import { SFDC_Object } from 'src/api/data/orgcheck-api-data-object';
+import { SfdcObject } from 'src/api/data/orgcheck-api-data-object';
 
-export interface SFDC_RecordType extends DataWithScore {
+export interface SfdcRecordType extends DataWithScore {
     
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_RecordType;
+    dataType: DataAliases.SfdcRecordType;
     
      /**
      * @description Salesforce Id
@@ -83,8 +83,8 @@ export interface SFDC_RecordType extends DataWithScore {
 
     /**
      * @description Object reference of this record type
-     * @type {SFDC_Object}
+     * @type {SfdcObject}
      * @public
      */
-    objectRef: SFDC_Object;
+    objectRef: SfdcObject;
 }

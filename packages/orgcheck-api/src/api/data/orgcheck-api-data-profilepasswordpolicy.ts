@@ -1,14 +1,14 @@
 import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
 import { DataWithScore } from 'src/api/core/orgcheck-api-data';
 
-export interface SFDC_ProfilePasswordPolicy extends DataWithScore {
+export interface SfdcProfilePasswordPolicy extends DataWithScore {
     
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_ProfilePasswordPolicy;
+    dataType: DataAliases.SfdcProfilePasswordPolicy;
     
      /** 
      * @description The duration of the login lockout, in minutes. If users are locked out, they 

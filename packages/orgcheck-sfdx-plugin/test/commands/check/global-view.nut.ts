@@ -1,6 +1,7 @@
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
-import { CheckResult } from '../../../src/commands/check/global-view.js';
+import * as orgcheck from '@orgcheck/api';
+import { OrgCheckOutput } from '../../../src/orgcheck-sfplugin/orgcheck-sfplugin-check-output.js';
 
 let testSession: TestSession;
 
@@ -14,9 +15,9 @@ describe('check global-view NUTs', () => {
   });
 
   it('should run', () => {
-    const result = execCmd<CheckResult>('check global-view --json', {
+    const output = execCmd<OrgCheckOutput<orgcheck.DataCollectionStatisticsIntf[]>>('check global-view --json', {
       ensureExitCode: 0,
     }).jsonOutput?.result;
-    expect(result?.length).to.be.greaterThan(0);
+    expect(output?.results?.length).to.be.greaterThan(0);
   });
 });

@@ -3,7 +3,7 @@ import { Data } from 'src/api/core/orgcheck-api-data';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_Browser }from 'src/api/data/orgcheck-api-data-browser';
+import { SfdcBrowser }from 'src/api/data/orgcheck-api-data-browser';
 import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 
 export class RecipeBrowsers implements Recipe {
@@ -29,7 +29,7 @@ export class RecipeBrowsers implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data and parameters
-        const /** @type {Map<string, SFDC_Browser>} */ browsers: Map<string, SFDC_Browser> = data.get(DatasetAliases.BROWSERS);
+        const /** @type {Map<string, SfdcBrowser>} */ browsers: Map<string, SfdcBrowser> = data.get(DatasetAliases.BROWSERS);
 
         // Checking data
         if (!browsers) throw new Error(`RecipeBrowsers: Data from dataset alias 'BROWSERS' was undefined.`);

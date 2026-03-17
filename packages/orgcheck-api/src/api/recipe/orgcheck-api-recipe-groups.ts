@@ -4,12 +4,12 @@ import { Data } from 'src/api/core/orgcheck-api-data';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_User }from 'src/api/data/orgcheck-api-data-user';
-import { SFDC_Group }from 'src/api/data/orgcheck-api-data-group';
+import { SfdcUser }from 'src/api/data/orgcheck-api-data-user';
+import { SfdcGroup }from 'src/api/data/orgcheck-api-data-group';
 import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 
-const QUEUE_FILTER = (/** @type {SFDC_Group} */ g: SFDC_Group) => g.isQueue === true; 
-const PUBLICGROUP_FILTER = (/** @type {SFDC_Group} */ g: SFDC_Group) => g.isPublicGroup === true;
+const QUEUE_FILTER = (/** @type {SfdcGroup} */ g: SfdcGroup) => g.isQueue === true; 
+const PUBLICGROUP_FILTER = (/** @type {SfdcGroup} */ g: SfdcGroup) => g.isPublicGroup === true;
 
 const QUEUE_TYPE = 'queue';
 const PUBLICGROUP_TYPE = 'publicgroup';
@@ -62,17 +62,17 @@ class AbstractRecipeGroups implements Recipe {
     public async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data and parameters
-        const /** @type {Map<string, SFDC_Group>} */ groups: Map<string, SFDC_Group> = data.get(DatasetAliases.PUBLICGROUPSANDQUEUES);
-        const /** @type {Map<string, SFDC_User>} */ users: Map<string, SFDC_User> = data.get(DatasetAliases.INTERNALACTIVEUSERS);
+        const /** @type {Map<string, SfdcGroup>} */ groups: Map<string, SfdcGroup> = data.get(DatasetAliases.PUBLICGROUPSANDQUEUES);
+        const /** @type {Map<string, SfdcUser>} */ users: Map<string, SfdcUser> = data.get(DatasetAliases.INTERNALACTIVEUSERS);
 
         // Checking data
         if (!groups) throw new Error(`RecipePublicGroups: Data from dataset alias 'PUBLICGROUPSANDQUEUES' was undefined.`);
         if (!users) throw new Error(`RecipePublicGroups: Data from dataset alias 'INTERNALACTIVEUSERS' was undefined.`);
 
         // Augment and filter data
-        /** @type {Array<SFDC_Group>} */ 
-        const array: Array<SFDC_Group> = [];
-        await Processor.forEach(groups, async (/** @type {SFDC_Group} */ group: SFDC_Group) => {
+        /** @type {Array<SfdcGroup>} */ 
+        const array: Array<SfdcGroup> = [];
+        await Processor.forEach(groups, async (/** @type {SfdcGroup} */ group: SfdcGroup) => {
             // Augment data
             group.directUserRefs = await Processor.map(
                 group.directUserIds,

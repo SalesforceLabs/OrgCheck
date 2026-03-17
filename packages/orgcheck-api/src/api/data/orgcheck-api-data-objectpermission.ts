@@ -1,19 +1,19 @@
 import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
 import { DataWithScore } from 'src/api/core/orgcheck-api-data';
-import { SFDC_PermissionSet } from 'src/api/data/orgcheck-api-data-permissionset';
-import { SFDC_Profile } from 'src/api/data/orgcheck-api-data-profile';
+import { SfdcPermissionSet } from 'src/api/data/orgcheck-api-data-permissionset';
+import { SfdcProfile } from 'src/api/data/orgcheck-api-data-profile';
 
 /**
  * @description Representation of a SObject permissions (CRUD) for a specific parent (profile or permission set) in Org Check
  */
-export interface SFDC_ObjectPermission extends DataWithScore {
+export interface SfdcObjectPermission extends DataWithScore {
     
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_ObjectPermission;
+    dataType: DataAliases.SfdcObjectPermission;
     
      /**
      * @description Salesforce Id of the related parent (profile or permission set)
@@ -24,10 +24,10 @@ export interface SFDC_ObjectPermission extends DataWithScore {
     
     /**
      * @description Reference of the related parent
-     * @type {SFDC_Profile | SFDC_PermissionSet}
+     * @type {SfdcProfile | SfdcPermissionSet}
      * @public
      */
-    parentRef: SFDC_Profile | SFDC_PermissionSet;
+    parentRef: SfdcProfile | SfdcPermissionSet;
     
     /** 
      * @description The object’s API name. For example, Merchandise__c

@@ -3,9 +3,9 @@ import { Data } from 'src/api/core/orgcheck-api-data';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_User }from 'src/api/data/orgcheck-api-data-user';
+import { SfdcUser }from 'src/api/data/orgcheck-api-data-user';
 import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
-import { SFDC_Dashboard }from 'src/api/data/orgcheck-api-data-dashboard';
+import { SfdcDashboard }from 'src/api/data/orgcheck-api-data-dashboard';
 
 export class RecipeDashboards implements Recipe {
 
@@ -30,8 +30,8 @@ export class RecipeDashboards implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data
-        const /** @type {Map<string, SFDC_Dashboard>} */ dashboards: Map<string, SFDC_Dashboard> = data.get(DatasetAliases.DASHBOARDS);
-        const /** @type {Map<string, SFDC_User>} */ users: Map<string, SFDC_User> = data.get(DatasetAliases.INTERNALACTIVEUSERS);
+        const /** @type {Map<string, SfdcDashboard>} */ dashboards: Map<string, SfdcDashboard> = data.get(DatasetAliases.DASHBOARDS);
+        const /** @type {Map<string, SfdcUser>} */ users: Map<string, SfdcUser> = data.get(DatasetAliases.INTERNALACTIVEUSERS);
 
         // Checking data
         if (!dashboards) throw new Error(`RecipeDashboards: Data from dataset alias 'DASHBOARDS' was undefined.`);

@@ -1,15 +1,15 @@
 import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
 import { DataWithScore } from 'src/api/core/orgcheck-api-data';
-import { SFDC_User } from 'src/api/data/orgcheck-api-data-user';
+import { SfdcUser } from 'src/api/data/orgcheck-api-data-user';
 
-export interface SFDC_UserRole extends DataWithScore {
+export interface SfdcUserRole extends DataWithScore {
     
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_UserRole;
+    dataType: DataAliases.SfdcUserRole;
     
     /**
      * @description Salesforce Id
@@ -48,10 +48,10 @@ export interface SFDC_UserRole extends DataWithScore {
 
     /**
      * @description The related parent reference
-     * @type {SFDC_UserRole}}
+     * @type {SfdcUserRole}}
      * @public
      */
-    parentRef: SFDC_UserRole;
+    parentRef: SfdcUserRole;
 
     /**
      * @description Level of this role in the global role hierarchy
@@ -83,10 +83,10 @@ export interface SFDC_UserRole extends DataWithScore {
     
     /**
      * @description Array of active member user references
-     * @type {Array<SFDC_User>}
+     * @type {Array<SfdcUser>}
      * @public
      */
-    activeMemberRefs: Array<SFDC_User>;
+    activeMemberRefs: Array<SfdcUser>;
     
     /**
      * @description Does this role have active members?

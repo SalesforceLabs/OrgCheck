@@ -4,7 +4,7 @@ import { Dataset } from 'src/api/core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_Application } from 'src/api/data/orgcheck-api-data-application';
+import { SfdcApplication } from 'src/api/data/orgcheck-api-data-application';
 
 export class DatasetApplications implements Dataset {
 
@@ -13,9 +13,9 @@ export class DatasetApplications implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_Application>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcApplication>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_Application>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcApplication>> {
 
         // First SOQL query
         logger?.log(`Querying REST API about Applications (tab set typed) in the org...`);            
@@ -26,19 +26,19 @@ export class DatasetApplications implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const applicationDataFactory = dataFactory.getInstance(DataAliases.SFDC_Application);
+        const applicationDataFactory = dataFactory.getInstance(DataAliases.SfdcApplication);
         const applicationRecords = results[0];
 
         // Create the map
         logger?.log(`Parsing ${applicationRecords?.length} applications...`);
-        const applications: Map<string, SFDC_Application> = new Map(await Processor.map(applicationRecords, (/** @type {any} */ record: any) => {
+        const applications: Map<string, SfdcApplication> = new Map(await Processor.map(applicationRecords, (/** @type {any} */ record: any) => {
 
             // Get the ID15 of this application
             const id = sfdcManager.caseSafeId(record.ApplicationId);
 
             // Create the instance
-            /** @type {SFDC_Application} */
-            const application: SFDC_Application = applicationDataFactory.create({
+            /** @type {SfdcApplication} */
+            const application: SfdcApplication = applicationDataFactory.create({
                 properties: {
                     id: id,
                     name: record.Name, 

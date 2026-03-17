@@ -5,7 +5,7 @@ import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_PermissionSet }from 'src/api/data/orgcheck-api-data-permissionset';
+import { SfdcPermissionSet }from 'src/api/data/orgcheck-api-data-permissionset';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
 export class RecipePermissionSets implements Recipe {
@@ -34,16 +34,16 @@ export class RecipePermissionSets implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data and parameters
-        const /** @type {Map<string, SFDC_PermissionSet>} */ permissionSets: Map<string, SFDC_PermissionSet> = data.get(DatasetAliases.PERMISSIONSETS);
+        const /** @type {Map<string, SfdcPermissionSet>} */ permissionSets: Map<string, SfdcPermissionSet> = data.get(DatasetAliases.PERMISSIONSETS);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
         if (!permissionSets) throw new Error(`RecipePermissionSets: Data from dataset alias 'PERMISSIONSETS' was undefined.`);
 
         // Augment and Filter data
-        /** @type {Array<SFDC_PermissionSet>} */
-        const array: Array<SFDC_PermissionSet> = [];
-        await Processor.forEach(permissionSets, async (/** @type {SFDC_PermissionSet} */ permissionSet: SFDC_PermissionSet) => {
+        /** @type {Array<SfdcPermissionSet>} */
+        const array: Array<SfdcPermissionSet> = [];
+        await Processor.forEach(permissionSets, async (/** @type {SfdcPermissionSet} */ permissionSet: SfdcPermissionSet) => {
             // Augment data
             const results = await Promise.all([
                 Processor.map(permissionSet.permissionSetIds, (/** @type {string} */ id: string) => permissionSets.get(id)),

@@ -6,7 +6,7 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_VisualForceComponent } from 'src/api/data/orgcheck-api-data-visualforcecomponent';
+import { SfdcVisualForceComponent } from 'src/api/data/orgcheck-api-data-visualforcecomponent';
 
 export class DatasetVisualForceComponents implements Dataset {
     
@@ -15,9 +15,9 @@ export class DatasetVisualForceComponents implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_VisualForceComponent>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcVisualForceComponent>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_VisualForceComponent>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcVisualForceComponent>> {
 
         // First SOQL query
         logger?.log(`Querying Tooling API about ApexComponent in the org...`);            
@@ -30,7 +30,7 @@ export class DatasetVisualForceComponents implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const componentDataFactory = dataFactory.getInstance(DataAliases.SFDC_VisualForceComponent);
+        const componentDataFactory = dataFactory.getInstance(DataAliases.SfdcVisualForceComponent);
         const componentRecords = results[0];
 
         // Then retreive dependencies
@@ -42,14 +42,14 @@ export class DatasetVisualForceComponents implements Dataset {
 
         // Create the map
         logger?.log(`Parsing ${componentRecords?.length} visualforce components...`);
-        const components: Map<string, SFDC_VisualForceComponent> = new Map(await Processor.map(componentRecords, (/** @type {any} */ record: any) => {
+        const components: Map<string, SfdcVisualForceComponent> = new Map(await Processor.map(componentRecords, (/** @type {any} */ record: any) => {
 
             // Get the ID15 of this custom field
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            /** @type {SFDC_VisualForceComponent} */
-            const component: SFDC_VisualForceComponent = componentDataFactory.create({
+            /** @type {SfdcVisualForceComponent} */
+            const component: SfdcVisualForceComponent = componentDataFactory.create({
                 properties: {
                     id: id,
                     name: record.Name,

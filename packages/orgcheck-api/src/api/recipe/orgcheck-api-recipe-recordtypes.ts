@@ -5,9 +5,9 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
 import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
-import { SFDC_RecordType }from 'src/api/data/orgcheck-api-data-recordtype';
-import { SFDC_Object }from 'src/api/data/orgcheck-api-data-object';
-import { SFDC_ObjectType }from 'src/api/data/orgcheck-api-data-objecttype';
+import { SfdcRecordType }from 'src/api/data/orgcheck-api-data-recordtype';
+import { SfdcObject }from 'src/api/data/orgcheck-api-data-object';
+import { SfdcObjectType }from 'src/api/data/orgcheck-api-data-objecttype';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
 export class RecipeRecordType implements Recipe {
@@ -37,9 +37,9 @@ export class RecipeRecordType implements Recipe {
     async transform(data: Map<string, any>, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data and parameters
-        const /** @type {Map<string, SFDC_RecordType>} */ recordTypes: Map<string, SFDC_RecordType> = data.get(DatasetAliases.RECORDTYPES);
-        const /** @type {Map<string, SFDC_ObjectType>} */ types: Map<string, SFDC_ObjectType> = data.get(DatasetAliases.OBJECTTYPES);
-        const /** @type {Map<string, SFDC_Object>} */ objects: Map<string, SFDC_Object> = data.get(DatasetAliases.OBJECTS);
+        const /** @type {Map<string, SfdcRecordType>} */ recordTypes: Map<string, SfdcRecordType> = data.get(DatasetAliases.RECORDTYPES);
+        const /** @type {Map<string, SfdcObjectType>} */ types: Map<string, SfdcObjectType> = data.get(DatasetAliases.OBJECTTYPES);
+        const /** @type {Map<string, SfdcObject>} */ objects: Map<string, SfdcObject> = data.get(DatasetAliases.OBJECTS);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
         const objecttype = OrgCheckGlobalParameter.getSObjectTypeName(parameters);
         const object = OrgCheckGlobalParameter.getSObjectName(parameters);
@@ -51,9 +51,9 @@ export class RecipeRecordType implements Recipe {
         
 
         // Augment and filter data
-        /** @type {Array<SFDC_RecordType>} */ 
-        const array: Array<SFDC_RecordType> = [];
-        await Processor.forEach(recordTypes, async (/** @type {SFDC_RecordType} */ recordType: SFDC_RecordType) => {
+        /** @type {Array<SfdcRecordType>} */ 
+        const array: Array<SfdcRecordType> = [];
+        await Processor.forEach(recordTypes, async (/** @type {SfdcRecordType} */ recordType: SfdcRecordType) => {
             // Augment data
             const objectRef = objects.get(recordType.objectId);
             if (objectRef) {

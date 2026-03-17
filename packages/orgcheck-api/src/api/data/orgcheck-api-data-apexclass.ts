@@ -1,14 +1,14 @@
 import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
 import { DataWithScoreAndDependencies, DataWithoutScore } from 'src/api/core/orgcheck-api-data';
 
-export interface SFDC_ApexTestMethodResult extends DataWithoutScore {
+export interface SfdcApexTestMethodResult extends DataWithoutScore {
 
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_ApexTestMethodResult;
+    dataType: DataAliases.SfdcApexTestMethodResult;
 
      /**
      * @description Name of this method
@@ -91,14 +91,14 @@ export interface SFDC_ApexTestMethodResult extends DataWithoutScore {
 /**
  * @description Representation of an Apex Class in Org Check
  */
-export interface SFDC_ApexClass extends DataWithScoreAndDependencies {
+export interface SfdcApexClass extends DataWithScoreAndDependencies {
 
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_ApexClass;
+    dataType: DataAliases.SfdcApexClass;
 
      /**
      * @description Salesforce Id
@@ -228,17 +228,17 @@ export interface SFDC_ApexClass extends DataWithScoreAndDependencies {
 
     /**
      * @description List of test methods that were OK in the last run results but took more than 20 seconds
-     * @type {Array<SFDC_ApexTestMethodResult>}
+     * @type {Array<SfdcApexTestMethodResult>}
      * @public
      */
-    testPassedButLongMethods: Array<SFDC_ApexTestMethodResult>;
+    testPassedButLongMethods: Array<SfdcApexTestMethodResult>;
 
     /**
      * @description List of test methods that were OK in the last run results
-     * @type {Array<SFDC_ApexTestMethodResult>}
+     * @type {Array<SfdcApexTestMethodResult>}
      * @public
      */
-    testFailedMethods: Array<SFDC_ApexTestMethodResult>;
+    testFailedMethods: Array<SfdcApexTestMethodResult>;
 
     /**
      * @description Date/Time when this test class was last run. Information stored as a Unix timestamp.
@@ -319,10 +319,10 @@ export interface SFDC_ApexClass extends DataWithScoreAndDependencies {
 
     /**
      * @description List of test class that participate in the current code coverage of this class (if this is a not test class).
-     * @type {Array<SFDC_ApexClass>}
+     * @type {Array<SfdcApexClass>}
      * @public
      */
-    relatedTestClassRefs: Array<SFDC_ApexClass>;
+    relatedTestClassRefs: Array<SfdcApexClass>;
 
     /**
      * @description List of class Ids that are tested by this class (if this is a test class).
@@ -333,10 +333,10 @@ export interface SFDC_ApexClass extends DataWithScoreAndDependencies {
 
     /**
      * @description List of class that are tested by this class (if this is a test class).
-     * @type {Array<SFDC_ApexClass>}
+     * @type {Array<SfdcApexClass>}
      * @public
      */
-    relatedClassRefs: Array<SFDC_ApexClass>;
+    relatedClassRefs: Array<SfdcApexClass>;
     
     /**
      * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.

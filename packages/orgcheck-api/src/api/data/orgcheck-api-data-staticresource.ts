@@ -1,14 +1,14 @@
 import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
 import { DataWithScoreAndDependencies } from 'src/api/core/orgcheck-api-data';
 
-export interface SFDC_StaticResource extends DataWithScoreAndDependencies {
+export interface SfdcStaticResource extends DataWithScoreAndDependencies {
     
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_StaticResource;
+    dataType: DataAliases.SfdcStaticResource;
         
      /**
      * @description Salesforce Id

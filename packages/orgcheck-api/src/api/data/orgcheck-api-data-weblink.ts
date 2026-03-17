@@ -1,15 +1,15 @@
 import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
 import { DataWithScoreAndDependencies } from 'src/api/core/orgcheck-api-data';
-import { SFDC_Object } from 'src/api/data/orgcheck-api-data-object';
+import { SfdcObject } from 'src/api/data/orgcheck-api-data-object';
 
-export interface SFDC_WebLink extends DataWithScoreAndDependencies {
+export interface SfdcWebLink extends DataWithScoreAndDependencies {
     
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_WebLink;
+    dataType: DataAliases.SfdcWebLink;
         
      /**
      * @description Salesforce Id
@@ -97,8 +97,8 @@ export interface SFDC_WebLink extends DataWithScoreAndDependencies {
     
     /**
      * @description Reference of the object for this trigger
-     * @type {SFDC_Object}
+     * @type {SfdcObject}
      * @public
      */
-    objectRef: SFDC_Object;
+    objectRef: SfdcObject;
 }

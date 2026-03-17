@@ -4,7 +4,7 @@ import { Data } from 'src/api/core/orgcheck-api-data';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_LightningAuraComponent }from 'src/api/data/orgcheck-api-data-lightningauracomponent';
+import { SfdcLightningAuraComponent }from 'src/api/data/orgcheck-api-data-lightningauracomponent';
 import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
@@ -32,16 +32,16 @@ export class RecipeLightningAuraComponents implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data and parameters
-        const /** @type {Map<string, SFDC_LightningAuraComponent>} */ components: Map<string, SFDC_LightningAuraComponent> = data.get(DatasetAliases.LIGHTNINGAURACOMPONENTS);
+        const /** @type {Map<string, SfdcLightningAuraComponent>} */ components: Map<string, SfdcLightningAuraComponent> = data.get(DatasetAliases.LIGHTNINGAURACOMPONENTS);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
         if (!components) throw new Error(`RecipeLightningAuraComponents: Data from dataset alias 'LIGHTNINGAURACOMPONENTS' was undefined.`);
 
         // Filter data
-        /** @type {Array<SFDC_LightningAuraComponent>} */
-        const array: Array<SFDC_LightningAuraComponent> = [];
-        await Processor.forEach(components, async (/** @type {SFDC_LightningAuraComponent} */ component: SFDC_LightningAuraComponent) => {
+        /** @type {Array<SfdcLightningAuraComponent>} */
+        const array: Array<SfdcLightningAuraComponent> = [];
+        await Processor.forEach(components, async (/** @type {SfdcLightningAuraComponent} */ component: SfdcLightningAuraComponent) => {
             if (namespace === OrgCheckGlobalParameter.ALL_VALUES || component.package === namespace) {
                 array.push(component);
             }

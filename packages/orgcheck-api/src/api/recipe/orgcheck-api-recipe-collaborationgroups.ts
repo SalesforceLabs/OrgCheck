@@ -4,7 +4,7 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
 import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
-import { SFDC_CollaborationGroup }from 'src/api/data/orgcheck-api-data-collaborationgroup';
+import { SfdcCollaborationGroup }from 'src/api/data/orgcheck-api-data-collaborationgroup';
 
 export class RecipeCollaborationGroups implements Recipe {
 
@@ -31,7 +31,7 @@ export class RecipeCollaborationGroups implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data
-        const /** @type {Map<string, SFDC_CollaborationGroup>} */ groups: Map<string, SFDC_CollaborationGroup> = data.get(DatasetAliases.COLLABORATIONGROUPS);
+        const /** @type {Map<string, SfdcCollaborationGroup>} */ groups: Map<string, SfdcCollaborationGroup> = data.get(DatasetAliases.COLLABORATIONGROUPS);
 
         // Checking data
         if (!groups) throw new Error(`RecipeCollaborationGroups: Data from dataset alias 'COLLABORATIONGROUPS' was undefined.`);

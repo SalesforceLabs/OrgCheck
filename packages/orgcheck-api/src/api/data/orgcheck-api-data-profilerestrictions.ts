@@ -1,15 +1,15 @@
 import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
 import { DataWithScore, DataWithoutScore } from 'src/api/core/orgcheck-api-data';
-import { SFDC_Profile } from 'src/api/data/orgcheck-api-data-profile';
+import { SfdcProfile } from 'src/api/data/orgcheck-api-data-profile';
 
-export interface SFDC_ProfileRestrictions extends DataWithScore {
+export interface SfdcProfileRestrictions extends DataWithScore {
     
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_ProfileRestrictions;
+    dataType: DataAliases.SfdcProfileRestrictions;
 
      /**
      * @description Salesforce Id of the corresponding Profile
@@ -20,34 +20,34 @@ export interface SFDC_ProfileRestrictions extends DataWithScore {
 
     /**
      * @description Reference to the corresponding Profile
-     * @type {SFDC_Profile}
+     * @type {SfdcProfile}
      * @public
      */
-    profileRef: SFDC_Profile;
+    profileRef: SfdcProfile;
 
     /**
      * @description IP Range Restriction list for this profile
-     * @type {Array<SFDC_ProfileIpRangeRestriction>}
+     * @type {Array<SfdcProfileIpRangeRestriction>}
      * @public
      */
-    ipRanges: Array<SFDC_ProfileIpRangeRestriction>;
+    ipRanges: Array<SfdcProfileIpRangeRestriction>;
 
     /**
      * @description Login Hour Restriction list for this profile
-     * @type {Array<SFDC_ProfileLoginHourRestriction>}
+     * @type {Array<SfdcProfileLoginHourRestriction>}
      * @public
      */
-    loginHours: Array<SFDC_ProfileLoginHourRestriction>;
+    loginHours: Array<SfdcProfileLoginHourRestriction>;
 }
 
-export interface SFDC_ProfileIpRangeRestriction extends DataWithoutScore {
+export interface SfdcProfileIpRangeRestriction extends DataWithoutScore {
     
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_ProfileIpRangeRestriction;
+    dataType: DataAliases.SfdcProfileIpRangeRestriction;
 
      /**
      * @description Start IP address
@@ -78,14 +78,14 @@ export interface SFDC_ProfileIpRangeRestriction extends DataWithoutScore {
     difference: number;
 }
 
-export interface SFDC_ProfileLoginHourRestriction extends DataWithoutScore {
+export interface SfdcProfileLoginHourRestriction extends DataWithoutScore {
     
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_ProfileLoginHourRestriction;
+    dataType: DataAliases.SfdcProfileLoginHourRestriction;
 
      /**
      * @description Starting hour of the restriction (HH:MM format)

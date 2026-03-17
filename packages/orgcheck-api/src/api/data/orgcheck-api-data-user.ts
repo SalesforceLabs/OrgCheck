@@ -1,16 +1,16 @@
 import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
 import { DataWithScore } from 'src/api/core/orgcheck-api-data';
-import { SFDC_PermissionSet } from 'src/api/data/orgcheck-api-data-permissionset';
-import { SFDC_Profile } from 'src/api/data/orgcheck-api-data-profile';
+import { SfdcPermissionSet } from 'src/api/data/orgcheck-api-data-permissionset';
+import { SfdcProfile } from 'src/api/data/orgcheck-api-data-profile';
 
-export interface SFDC_User extends DataWithScore {
+export interface SfdcUser extends DataWithScore {
     
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_User;
+    dataType: DataAliases.SfdcUser;
 
      /**
      * @description Salesforce Id
@@ -70,10 +70,10 @@ export interface SFDC_User extends DataWithScore {
 
     /**
      * @description Crresponding Profile reference used by this user
-     * @type {SFDC_Profile}
+     * @type {SfdcProfile}
      * @public
      */
-    profileRef: SFDC_Profile;
+    profileRef: SfdcProfile;
 
     /**
      * @description Set of sensible system permissions granted to this users (like view all etc.)
@@ -84,10 +84,10 @@ export interface SFDC_User extends DataWithScore {
 
     /**
      * @description Set of sensible system permissions along with the Profile or PermSet that grants them to this users (like view all etc.)
-     * @type {{apiEnabled: Array<SFDC_Profile>, viewSetup: Array<SFDC_Profile>, modifyAllData: Array<SFDC_Profile>, viewAllData: Array<SFDC_Profile>, manageUsers: Array<SFDC_Profile>, customizeApplication: Array<SFDC_Profile>}}
+     * @type {{apiEnabled: Array<SfdcProfile>, viewSetup: Array<SfdcProfile>, modifyAllData: Array<SfdcProfile>, viewAllData: Array<SfdcProfile>, manageUsers: Array<SfdcProfile>, customizeApplication: Array<SfdcProfile>}}
      * @public
      */
-    importantPermissionsGrantedBy: { apiEnabled: Array<SFDC_Profile>; viewSetup: Array<SFDC_Profile>; modifyAllData: Array<SFDC_Profile>; viewAllData: Array<SFDC_Profile>; manageUsers: Array<SFDC_Profile>; customizeApplication: Array<SFDC_Profile>; };
+    importantPermissionsGrantedBy: { apiEnabled: Array<SfdcProfile>; viewSetup: Array<SfdcProfile>; modifyAllData: Array<SfdcProfile>; viewAllData: Array<SfdcProfile>; manageUsers: Array<SfdcProfile>; customizeApplication: Array<SfdcProfile>; };
 
     /**
      * @description Is this user admin-like (has some powerful permissions)
@@ -119,10 +119,10 @@ export interface SFDC_User extends DataWithScore {
 
     /**
      * @description List of permission set references assigned to this user
-     * @type {Array<SFDC_PermissionSet>}
+     * @type {Array<SfdcPermissionSet>}
      * @public
      */
-    permissionSetRefs: Array<SFDC_PermissionSet>;
+    permissionSetRefs: Array<SfdcPermissionSet>;
 
     /**
      * @description Number of direct logins to salesforce

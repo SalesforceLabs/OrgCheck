@@ -1,14 +1,14 @@
 import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
 import { DataWithScoreAndDependencies } from 'src/api/core/orgcheck-api-data';
 
-export interface SFDC_CustomTab extends DataWithScoreAndDependencies {
+export interface SfdcCustomTab extends DataWithScoreAndDependencies {
 
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_CustomTab;
+    dataType: DataAliases.SfdcCustomTab;
 
      /**
      * @description Unique identifier of this custom tab in the org.

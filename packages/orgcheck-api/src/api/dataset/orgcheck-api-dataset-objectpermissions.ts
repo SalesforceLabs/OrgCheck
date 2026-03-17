@@ -4,7 +4,7 @@ import { Dataset } from 'src/api/core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_ObjectPermission } from 'src/api/data/orgcheck-api-data-objectpermission';
+import { SfdcObjectPermission } from 'src/api/data/orgcheck-api-data-objectpermission';
 
 export class DatasetObjectPermissions implements Dataset {
 
@@ -13,9 +13,9 @@ export class DatasetObjectPermissions implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_ObjectPermission>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcObjectPermission>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_ObjectPermission>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcObjectPermission>> {
 
         // First SOQL query
         logger?.log(`Querying REST API about ObjectPermissions in the org...`);            
@@ -28,17 +28,17 @@ export class DatasetObjectPermissions implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const permissionDataFactory = dataFactory.getInstance(DataAliases.SFDC_ObjectPermission);
+        const permissionDataFactory = dataFactory.getInstance(DataAliases.SfdcObjectPermission);
 
         // Create the map
         const permissionRecords = results[0];
         logger?.log(`Parsing ${permissionRecords?.length} object permissions...`);
-        const permissions: Map<string, SFDC_ObjectPermission> = new Map(await Processor.map(
+        const permissions: Map<string, SfdcObjectPermission> = new Map(await Processor.map(
             permissionRecords,
             (/** @type {any} */ record: any) => {
                 // Create the instance
-                /** @type {SFDC_ObjectPermission} */
-                const permission: SFDC_ObjectPermission = permissionDataFactory.create({
+                /** @type {SfdcObjectPermission} */
+                const permission: SfdcObjectPermission = permissionDataFactory.create({
                     properties: {
                         parentId: sfdcManager.caseSafeId(record.Parent.IsOwnedByProfile === true ? record.Parent.ProfileId : record.ParentId),
                         objectType: record.SobjectType,

@@ -5,7 +5,7 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_ValidationRule } from 'src/api/data/orgcheck-api-data-validationrule';
+import { SfdcValidationRule } from 'src/api/data/orgcheck-api-data-validationrule';
 
 export class DatasetValidationRules implements Dataset {
 
@@ -14,9 +14,9 @@ export class DatasetValidationRules implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - List of optional argument to pass
-     * @returns {Promise<Map<string, SFDC_ValidationRule>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcValidationRule>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_ValidationRule>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcValidationRule>> {
 
         // First SOQL query
         logger?.log(`Querying Tooling API about Validaiton Rules in the org...`);            
@@ -29,19 +29,19 @@ export class DatasetValidationRules implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const validationRuleDataFactory = dataFactory.getInstance(DataAliases.SFDC_ValidationRule);
+        const validationRuleDataFactory = dataFactory.getInstance(DataAliases.SfdcValidationRule);
 
         // Create the map
         const validationRuleRecords = results[0];
         logger?.log(`Parsing ${validationRuleRecords?.length} validation rules...`);
-        const validationRules: Map<string, SFDC_ValidationRule> = new Map(await Processor.map(validationRuleRecords, async (/** @type {any} */ record: any) => {
+        const validationRules: Map<string, SfdcValidationRule> = new Map(await Processor.map(validationRuleRecords, async (/** @type {any} */ record: any) => {
         
             // Get the ID15 of this validaiton rule
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            /** @type {SFDC_ValidationRule} */
-            const validationRule: SFDC_ValidationRule = validationRuleDataFactory.createWithScore({
+            /** @type {SfdcValidationRule} */
+            const validationRule: SfdcValidationRule = validationRuleDataFactory.createWithScore({
                 properties: {
                     id: sfdcManager.caseSafeId(id), 
                     name: record.ValidationName, 

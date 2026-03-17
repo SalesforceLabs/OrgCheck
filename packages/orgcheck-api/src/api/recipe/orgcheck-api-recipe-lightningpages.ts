@@ -5,8 +5,8 @@ import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_LightningPage }from 'src/api/data/orgcheck-api-data-lightningpage';
-import { SFDC_Object }from 'src/api/data/orgcheck-api-data-object';
+import { SfdcLightningPage }from 'src/api/data/orgcheck-api-data-lightningpage';
+import { SfdcObject }from 'src/api/data/orgcheck-api-data-object';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
 export class RecipeLightningPages implements Recipe {
@@ -36,8 +36,8 @@ export class RecipeLightningPages implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data and parameters
-        const /** @type {Map<string, SFDC_LightningPage>} */ pages: Map<string, SFDC_LightningPage> = data.get(DatasetAliases.LIGHTNINGPAGES);
-        const /** @type {Map<string, SFDC_Object>} */ objects: Map<string, SFDC_Object> = data.get(DatasetAliases.OBJECTS);
+        const /** @type {Map<string, SfdcLightningPage>} */ pages: Map<string, SfdcLightningPage> = data.get(DatasetAliases.LIGHTNINGPAGES);
+        const /** @type {Map<string, SfdcObject>} */ objects: Map<string, SfdcObject> = data.get(DatasetAliases.OBJECTS);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
@@ -45,9 +45,9 @@ export class RecipeLightningPages implements Recipe {
         if (!objects) throw new Error(`RecipeLightningPages: Data from dataset alias 'OBJECTS' was undefined.`);
 
         // Augment and filter data
-        /** @type {Array<SFDC_LightningPage>} */ 
-        const array: Array<SFDC_LightningPage> = [];
-        await Processor.forEach(pages, async (/** @type {SFDC_LightningPage} */ page: SFDC_LightningPage) => {
+        /** @type {Array<SfdcLightningPage>} */ 
+        const array: Array<SfdcLightningPage> = [];
+        await Processor.forEach(pages, async (/** @type {SfdcLightningPage} */ page: SfdcLightningPage) => {
             // Augment data
             if (page.objectId) {
                 // if objectId was specified in the page, get the reference of the object

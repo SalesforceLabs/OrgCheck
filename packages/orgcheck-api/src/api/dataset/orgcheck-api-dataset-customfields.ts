@@ -7,7 +7,7 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_Field } from 'src/api/data/orgcheck-api-data-field';
+import { SfdcField } from 'src/api/data/orgcheck-api-data-field';
 
 const EXCLUDED_OBJECT_PREFIXES = [ 
     '00a', // Comment for custom objects
@@ -25,9 +25,9 @@ export class DatasetCustomFields implements Dataset {
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
      * @param {Map<string, any>} parameters - The parameters
-     * @returns {Promise<Map<string, SFDC_Field>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcField>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Map<string, SFDC_Field>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Map<string, SfdcField>> {
 
         const fullObjectApiName = OrgCheckGlobalParameter.getSObjectName(parameters);
 
@@ -42,7 +42,7 @@ export class DatasetCustomFields implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const fieldDataFactory = dataFactory.getInstance(DataAliases.SFDC_Field);
+        const fieldDataFactory = dataFactory.getInstance(DataAliases.SfdcField);
         const customFieldRecords = results[0];
 
         logger?.log(`Parsing ${customFieldRecords?.length} custom fields...`);        
@@ -81,7 +81,7 @@ export class DatasetCustomFields implements Dataset {
         );
 
         // Create the map
-        const customFields: Map<string, SFDC_Field> = new Map(await Processor.map(records, (/** @type {any} */ record: any) => {
+        const customFields: Map<string, SfdcField> = new Map(await Processor.map(records, (/** @type {any} */ record: any) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
@@ -90,8 +90,8 @@ export class DatasetCustomFields implements Dataset {
             const entityInfo = entityInfoByCustomFieldId.get(id);
 
             // Create the instance
-            /** @type {SFDC_Field} */
-            const customField: SFDC_Field = fieldDataFactory.create({
+            /** @type {SfdcField} */
+            const customField: SfdcField = fieldDataFactory.create({
                 properties: {
                     id: id,
                     name: record.DeveloperName,

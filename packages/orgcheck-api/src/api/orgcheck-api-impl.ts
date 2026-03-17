@@ -14,43 +14,43 @@ import { SalesforceManager } from 'src/api/core/orgcheck-api-salesforcemanager-i
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
 import { SalesforceUsageInformationIntf } from 'src/api/core/orgcheck-api-limit-usageinformation';
 import { SecretSauce } from 'src/api/core/orgcheck-api-secretsauce';
-import { SFDC_ApexClass } from 'src/api/data/orgcheck-api-data-apexclass';
-import { SFDC_ApexTrigger } from 'src/api/data/orgcheck-api-data-apextrigger';
-import { SFDC_Browser } from 'src/api/data/orgcheck-api-data-browser';
-import { SFDC_CollaborationGroup } from 'src/api/data/orgcheck-api-data-collaborationgroup';
-import { SFDC_CustomLabel } from 'src/api/data/orgcheck-api-data-customlabel';
-import { SFDC_Document } from 'src/api/data/orgcheck-api-data-document';
-import { SFDC_EmailTemplate } from 'src/api/data/orgcheck-api-data-emailtemplate';
-import { SFDC_Field } from 'src/api/data/orgcheck-api-data-field';
-import { SFDC_Flow } from 'src/api/data/orgcheck-api-data-flow';
-import { SFDC_Group } from 'src/api/data/orgcheck-api-data-group';
-import { SFDC_HomePageComponent } from 'src/api/data/orgcheck-api-data-homepagecomponent';
-import { SFDC_KnowledgeArticle } from 'src/api/data/orgcheck-api-data-knowledgearticle';
-import { SFDC_LightningAuraComponent } from 'src/api/data/orgcheck-api-data-lightningauracomponent';
-import { SFDC_LightningPage } from 'src/api/data/orgcheck-api-data-lightningpage';
-import { SFDC_LightningWebComponent } from 'src/api/data/orgcheck-api-data-lightningwebcomponent';
-import { SFDC_Object } from 'src/api/data/orgcheck-api-data-object';
-import { SFDC_ObjectType } from 'src/api/data/orgcheck-api-data-objecttype';
-import { SFDC_Organization } from 'src/api/data/orgcheck-api-data-organization';
-import { SFDC_Package } from 'src/api/data/orgcheck-api-data-package';
-import { SFDC_PageLayout } from 'src/api/data/orgcheck-api-data-pagelayout';
-import { SFDC_PermissionSet } from 'src/api/data/orgcheck-api-data-permissionset';
-import { SFDC_PermissionSetLicense } from 'src/api/data/orgcheck-api-data-permissionsetlicense';
-import { SFDC_Profile } from 'src/api/data/orgcheck-api-data-profile';
-import { SFDC_ProfilePasswordPolicy } from 'src/api/data/orgcheck-api-data-profilepasswordpolicy';
-import { SFDC_ProfileRestrictions } from 'src/api/data/orgcheck-api-data-profilerestrictions';
-import { SFDC_RecordType } from 'src/api/data/orgcheck-api-data-recordtype';
-import { SFDC_Report } from 'src/api/data/orgcheck-api-data-report';
-import { SFDC_StaticResource } from 'src/api/data/orgcheck-api-data-staticresource';
-import { SFDC_User } from 'src/api/data/orgcheck-api-data-user';
-import { SFDC_UserRole } from 'src/api/data/orgcheck-api-data-userrole';
-import { SFDC_ValidationRule } from 'src/api/data/orgcheck-api-data-validationrule';
-import { SFDC_VisualForceComponent } from 'src/api/data/orgcheck-api-data-visualforcecomponent';
-import { SFDC_VisualForcePage } from 'src/api/data/orgcheck-api-data-visualforcepage';
-import { SFDC_WebLink } from 'src/api/data/orgcheck-api-data-weblink';
-import { SFDC_Workflow } from 'src/api/data/orgcheck-api-data-workflow';
-import { SFDC_CustomTab } from 'src/api/data/orgcheck-api-data-customtab';
-import { SFDC_Dashboard } from 'src/api/data/orgcheck-api-data-dashboard';
+import { SfdcApexClass } from 'src/api/data/orgcheck-api-data-apexclass';
+import { SfdcApexTrigger } from 'src/api/data/orgcheck-api-data-apextrigger';
+import { SfdcBrowser } from 'src/api/data/orgcheck-api-data-browser';
+import { SfdcCollaborationGroup } from 'src/api/data/orgcheck-api-data-collaborationgroup';
+import { SfdcCustomLabel } from 'src/api/data/orgcheck-api-data-customlabel';
+import { SfdcDocument } from 'src/api/data/orgcheck-api-data-document';
+import { SfdcEmailTemplate } from 'src/api/data/orgcheck-api-data-emailtemplate';
+import { SfdcField } from 'src/api/data/orgcheck-api-data-field';
+import { SfdcFlow } from 'src/api/data/orgcheck-api-data-flow';
+import { SfdcGroup } from 'src/api/data/orgcheck-api-data-group';
+import { SfdcHomePageComponent } from 'src/api/data/orgcheck-api-data-homepagecomponent';
+import { SfdcKnowledgeArticle } from 'src/api/data/orgcheck-api-data-knowledgearticle';
+import { SfdcLightningAuraComponent } from 'src/api/data/orgcheck-api-data-lightningauracomponent';
+import { SfdcLightningPage } from 'src/api/data/orgcheck-api-data-lightningpage';
+import { SfdcLightningWebComponent } from 'src/api/data/orgcheck-api-data-lightningwebcomponent';
+import { SfdcObject } from 'src/api/data/orgcheck-api-data-object';
+import { SfdcObjectType } from 'src/api/data/orgcheck-api-data-objecttype';
+import { SfdcOrganization } from 'src/api/data/orgcheck-api-data-organization';
+import { SfdcPackage } from 'src/api/data/orgcheck-api-data-package';
+import { SfdcPageLayout } from 'src/api/data/orgcheck-api-data-pagelayout';
+import { SfdcPermissionSet } from 'src/api/data/orgcheck-api-data-permissionset';
+import { SfdcPermissionSetLicense } from 'src/api/data/orgcheck-api-data-permissionsetlicense';
+import { SfdcProfile } from 'src/api/data/orgcheck-api-data-profile';
+import { SfdcProfilePasswordPolicy } from 'src/api/data/orgcheck-api-data-profilepasswordpolicy';
+import { SfdcProfileRestrictions } from 'src/api/data/orgcheck-api-data-profilerestrictions';
+import { SfdcRecordType } from 'src/api/data/orgcheck-api-data-recordtype';
+import { SfdcReport } from 'src/api/data/orgcheck-api-data-report';
+import { SfdcStaticResource } from 'src/api/data/orgcheck-api-data-staticresource';
+import { SfdcUser } from 'src/api/data/orgcheck-api-data-user';
+import { SfdcUserRole } from 'src/api/data/orgcheck-api-data-userrole';
+import { SfdcValidationRule } from 'src/api/data/orgcheck-api-data-validationrule';
+import { SfdcVisualForceComponent } from 'src/api/data/orgcheck-api-data-visualforcecomponent';
+import { SfdcVisualForcePage } from 'src/api/data/orgcheck-api-data-visualforcepage';
+import { SfdcWebLink } from 'src/api/data/orgcheck-api-data-weblink';
+import { SfdcWorkflow } from 'src/api/data/orgcheck-api-data-workflow';
+import { SfdcCustomTab } from 'src/api/data/orgcheck-api-data-customtab';
+import { SfdcDashboard } from 'src/api/data/orgcheck-api-data-dashboard';
 import { Storage } from 'src/api/core/orgcheck-api-storage-impl';
 import { Compressor } from 'src/api/core/orgcheck-api-compressor-impl';
 import { ApiSetup, ApiIntf } from 'src/api/orgcheck-api';
@@ -251,12 +251,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about the organization
-     * @returns {Promise<SFDC_Organization>} Org information to return
+     * @returns {Promise<SfdcOrganization>} Org information to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getOrganizationInformation(): Promise<SFDC_Organization> {
+    public async getOrganizationInformation(): Promise<SfdcOrganization> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.ORGANIZATION));
     }
@@ -319,12 +319,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about the packages
-     * @returns {Promise<Array<SFDC_Package>>} List of items to return
+     * @returns {Promise<Array<SfdcPackage>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getPackages(): Promise<Array<SFDC_Package>> {
+    public async getPackages(): Promise<Array<SfdcPackage>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PACKAGES));
     }
@@ -342,12 +342,12 @@ export class API implements ApiIntf {
      * @param {string} namespace - the namespace of the package to filter the page layouts
      * @param {string} sobjectType - the sobject type to filter the page layouts
      * @param {string} sobject - the sobject to filter the page layouts
-     * @returns {Promise<Array<SFDC_PageLayout>>} List of items to return
+     * @returns {Promise<Array<SfdcPageLayout>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getPageLayouts(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_PageLayout>> {
+    public async getPageLayouts(namespace: string, sobjectType: string, sobject: string): Promise<Array<SfdcPageLayout>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PAGE_LAYOUTS, new Map([
             [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
@@ -366,12 +366,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about the object types
-     * @returns {Promise<Array<SFDC_ObjectType>>} List of items to return
+     * @returns {Promise<Array<SfdcObjectType>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getObjectTypes(): Promise<Array<SFDC_ObjectType>> {
+    public async getObjectTypes(): Promise<Array<SfdcObjectType>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.OBJECT_TYPES));
     }
@@ -380,12 +380,12 @@ export class API implements ApiIntf {
      * @description Get information about the objects 
      * @param {string} namespace - the namespace of the package to filter the objects
      * @param {string} sobjectType - the sobject type to filter the objects
-     * @returns {Promise<Array<SFDC_Object>>} List of items to return
+     * @returns {Promise<Array<SfdcObject>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getObjects(namespace: string, sobjectType: string): Promise<Array<SFDC_Object>> {
+    public async getObjects(namespace: string, sobjectType: string): Promise<Array<SfdcObject>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.OBJECTS, new Map([
             [OrgCheckGlobalParameter.PACKAGE_NAME, namespace],
@@ -404,12 +404,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about a specific sobject
      * @param {string} sobject - the name of the sobject to get information about
-     * @returns {Promise<SFDC_Object>} List of items to return
+     * @returns {Promise<SfdcObject>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getObject(sobject: string): Promise<SFDC_Object> {
+    public async getObject(sobject: string): Promise<SfdcObject> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.OBJECT, new Map([
             [OrgCheckGlobalParameter.SOBJECT_NAME, sobject]
@@ -428,7 +428,7 @@ export class API implements ApiIntf {
     /**
      * @description Get information about object permissions per parent (kind of matrix view)
      * @param {string} namespace - the namespace of the package to filter the object permissions
-     * @returns {Promise<DataMatrixIntf>} Information about objects (list of string) and permissions (list of SFDC_ObjectPermissionsPerParent)
+     * @returns {Promise<DataMatrixIntf>} Information about objects (list of string) and permissions (list of SfdcObjectPermissionsPerParent)
      * @throws Exception from recipe manager
      * @async
      * @public
@@ -451,7 +451,7 @@ export class API implements ApiIntf {
     /**
      * @description Get information about application permissions per parent (kind of matrix view)
      * @param {string} namespace - the namespace of the package to filter the application permissions
-     * @returns {Promise<DataMatrixIntf>} Information about applications (list of string) and permissions (list of SFDC_AppPermissionsPerParent)
+     * @returns {Promise<DataMatrixIntf>} Information about applications (list of string) and permissions (list of SfdcAppPermissionsPerParent)
      * @throws Exception from recipe manager
      * @async
      * @public
@@ -473,12 +473,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about knowledge articles
-     * @returns {Promise<Array<SFDC_KnowledgeArticle>>} List of items to return
+     * @returns {Promise<Array<SfdcKnowledgeArticle>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getKnowledgeArticles(): Promise<Array<SFDC_KnowledgeArticle>> {
+    public async getKnowledgeArticles(): Promise<Array<SfdcKnowledgeArticle>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.KNOWLEDGE_ARTICLES));
     }
@@ -493,12 +493,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about Chatter groups
-     * @returns {Promise<Array<SFDC_CollaborationGroup>>} List of items to return
+     * @returns {Promise<Array<SfdcCollaborationGroup>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getChatterGroups(): Promise<Array<SFDC_CollaborationGroup>> {
+    public async getChatterGroups(): Promise<Array<SfdcCollaborationGroup>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.COLLABORATION_GROUPS));
     }
@@ -516,12 +516,12 @@ export class API implements ApiIntf {
      * @param {string} namespace - the namespace of the package to filter the custom fields
      * @param {string} sobjectType - the sobject type to filter the custom fields
      * @param {string} sobject - the sobject to filter the custom fields
-     * @returns {Promise<Array<SFDC_Field>>} List of items to return
+     * @returns {Promise<Array<SfdcField>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getCustomFields(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_Field>> {
+    public async getCustomFields(namespace: string, sobjectType: string, sobject: string): Promise<Array<SfdcField>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.CUSTOM_FIELDS, new Map([
             [OrgCheckGlobalParameter.PACKAGE_NAME, namespace], 
@@ -541,12 +541,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about permission sets (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the permission sets
-     * @returns {Promise<Array<SFDC_PermissionSet>>} List of items to return
+     * @returns {Promise<Array<SfdcPermissionSet>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getPermissionSets(namespace: string): Promise<Array<SFDC_PermissionSet>> {
+    public async getPermissionSets(namespace: string): Promise<Array<SfdcPermissionSet>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PERMISSION_SETS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -563,12 +563,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about permission set licenses
-     * @returns {Promise<Array<SFDC_PermissionSetLicense>>} List of items to return
+     * @returns {Promise<Array<SfdcPermissionSetLicense>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getPermissionSetLicenses(): Promise<Array<SFDC_PermissionSetLicense>> {
+    public async getPermissionSetLicenses(): Promise<Array<SfdcPermissionSetLicense>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PERMISSION_SET_LICENSES));
     }
@@ -583,13 +583,13 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about profiles (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the profiles
-     * @returns {Promise<Array<SFDC_Profile>>} List of items to return
+     * @param {string} [namespace] - the namespace of the package to filter the profiles
+     * @returns {Promise<Array<SfdcProfile>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getProfiles(namespace: string): Promise<Array<SFDC_Profile>> {
+    public async getProfiles(namespace?: string): Promise<Array<SfdcProfile>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PROFILES, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -607,12 +607,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about profile restrictions (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the profile restrictions
-     * @returns {Promise<Array<SFDC_ProfileRestrictions>>} List of items to return
+     * @returns {Promise<Array<SfdcProfileRestrictions>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getProfileRestrictions(namespace: string): Promise<Array<SFDC_ProfileRestrictions>> {
+    public async getProfileRestrictions(namespace: string): Promise<Array<SfdcProfileRestrictions>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PROFILE_RESTRICTIONS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -629,12 +629,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about profile password policies
-     * @returns {Promise<Array<SFDC_ProfilePasswordPolicy>>} List of items to return
+     * @returns {Promise<Array<SfdcProfilePasswordPolicy>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getProfilePasswordPolicies(): Promise<Array<SFDC_ProfilePasswordPolicy>> {
+    public async getProfilePasswordPolicies(): Promise<Array<SfdcProfilePasswordPolicy>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PROFILE_PWD_POLICIES));
     }
@@ -649,12 +649,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about active users
-     * @returns {Promise<Array<SFDC_User>>} List of items to return
+     * @returns {Promise<Array<SfdcUser>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getActiveUsers(): Promise<Array<SFDC_User>> {
+    public async getActiveUsers(): Promise<Array<SfdcUser>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.INTERNAL_ACTIVE_USERS));
     }
@@ -669,12 +669,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about browsers
-     * @returns {Promise<Array<SFDC_Browser>>} List of items to return
+     * @returns {Promise<Array<SfdcBrowser>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getBrowsers(): Promise<Array<SFDC_Browser>> {
+    public async getBrowsers(): Promise<Array<SfdcBrowser>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.BROWSERS));
     }
@@ -690,12 +690,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about custom labels (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the custom labels
-     * @returns {Promise<Array<SFDC_CustomLabel>>} List of items to return
+     * @returns {Promise<Array<SfdcCustomLabel>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getCustomLabels(namespace: string): Promise<Array<SFDC_CustomLabel>> {
+    public async getCustomLabels(namespace: string): Promise<Array<SfdcCustomLabel>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.CUSTOM_LABELS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -713,12 +713,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about custom tabs (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the custom tabs
-     * @returns {Promise<Array<SFDC_CustomTab>>} List of items to return
+     * @returns {Promise<Array<SfdcCustomTab>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getCustomTabs(namespace: string): Promise<Array<SFDC_CustomTab>> {
+    public async getCustomTabs(namespace: string): Promise<Array<SfdcCustomTab>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.CUSTOM_TABS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -736,12 +736,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about documents (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the documents
-     * @returns {Promise<Array<SFDC_Document>>} List of items to return
+     * @returns {Promise<Array<SfdcDocument>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getDocuments(namespace: string): Promise<Array<SFDC_Document>> {
+    public async getDocuments(namespace: string): Promise<Array<SfdcDocument>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.DOCUMENTS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -759,12 +759,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about LWCs (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the lightning web components
-     * @returns {Promise<Array<SFDC_LightningWebComponent>>} List of items to return
+     * @returns {Promise<Array<SfdcLightningWebComponent>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getLightningWebComponents(namespace: string): Promise<Array<SFDC_LightningWebComponent>> {
+    public async getLightningWebComponents(namespace: string): Promise<Array<SfdcLightningWebComponent>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.LIGHTNING_WEB_COMPONENTS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -782,12 +782,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about Aura Components (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the lightning aura components
-     * @returns {Promise<Array<SFDC_LightningAuraComponent>>} List of items to return
+     * @returns {Promise<Array<SfdcLightningAuraComponent>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getLightningAuraComponents(namespace: string): Promise<Array<SFDC_LightningAuraComponent>> {
+    public async getLightningAuraComponents(namespace: string): Promise<Array<SfdcLightningAuraComponent>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.LIGHTNING_AURA_COMPONENTS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -805,12 +805,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about flexipages (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the lightning pages
-     * @returns {Promise<Array<SFDC_LightningPage>>} List of items to return
+     * @returns {Promise<Array<SfdcLightningPage>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getLightningPages(namespace: string): Promise<Array<SFDC_LightningPage>> {
+    public async getLightningPages(namespace: string): Promise<Array<SfdcLightningPage>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.LIGHTNING_PAGES, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -828,12 +828,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about VFCs (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the visualforce components
-     * @returns {Promise<Array<SFDC_VisualForceComponent>>} List of items to return
+     * @returns {Promise<Array<SfdcVisualForceComponent>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getVisualForceComponents(namespace: string): Promise<Array<SFDC_VisualForceComponent>> {
+    public async getVisualForceComponents(namespace: string): Promise<Array<SfdcVisualForceComponent>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.VISUALFORCE_COMPONENTS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -851,12 +851,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about VFPs (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the visualforce pages
-     * @returns {Promise<Array<SFDC_VisualForcePage>>} List of items to return
+     * @returns {Promise<Array<SfdcVisualForcePage>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getVisualForcePages(namespace: string): Promise<Array<SFDC_VisualForcePage>> {
+    public async getVisualForcePages(namespace: string): Promise<Array<SfdcVisualForcePage>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.VISUALFORCE_PAGES, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -873,12 +873,12 @@ export class API implements ApiIntf {
     
     /**
      * @description Get information about Public Groups
-     * @returns {Promise<Array<SFDC_Group>>} List of items to return
+     * @returns {Promise<Array<SfdcGroup>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getPublicGroups(): Promise<Array<SFDC_Group>> {
+    public async getPublicGroups(): Promise<Array<SfdcGroup>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PUBLIC_GROUPS));
     }
@@ -893,12 +893,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about Queues
-     * @returns {Promise<Array<SFDC_Group>>} List of items to return
+     * @returns {Promise<Array<SfdcGroup>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getQueues(): Promise<Array<SFDC_Group>> {
+    public async getQueues(): Promise<Array<SfdcGroup>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.QUEUES));
     }
@@ -914,12 +914,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about Apex Classes (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the apex classes
-     * @returns {Promise<Array<SFDC_ApexClass>>} List of items to return
+     * @returns {Promise<Array<SfdcApexClass>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getApexClasses(namespace: string): Promise<Array<SFDC_ApexClass>> {
+    public async getApexClasses(namespace: string): Promise<Array<SfdcApexClass>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.APEX_CLASSES, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -937,12 +937,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about Apex Tests (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the apex tests
-     * @returns {Promise<Array<SFDC_ApexClass>>} List of items to return
+     * @returns {Promise<Array<SfdcApexClass>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getApexTests(namespace: string): Promise<Array<SFDC_ApexClass>> {
+    public async getApexTests(namespace: string): Promise<Array<SfdcApexClass>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.APEX_TESTS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -960,12 +960,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about Apex Uncompiled Classes (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the apex uncompiled classes
-     * @returns {Promise<Array<SFDC_ApexClass>>} List of items to return
+     * @returns {Promise<Array<SfdcApexClass>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getApexUncompiled(namespace: string): Promise<Array<SFDC_ApexClass>> {
+    public async getApexUncompiled(namespace: string): Promise<Array<SfdcApexClass>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.APEX_UNCOMPILED, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -983,12 +983,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about Apex triggers (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the apex triggers
-     * @returns {Promise<Array<SFDC_ApexTrigger>>} List of items to return
+     * @returns {Promise<Array<SfdcApexTrigger>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getApexTriggers(namespace: string): Promise<Array<SFDC_ApexTrigger>> {
+    public async getApexTriggers(namespace: string): Promise<Array<SfdcApexTrigger>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.APEX_TRIGGERS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -1005,12 +1005,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about User roles in a tabular view
-     * @returns {Promise<Array<SFDC_UserRole>>} List of items to return
+     * @returns {Promise<Array<SfdcUserRole>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getRoles(): Promise<Array<SFDC_UserRole>> {
+    public async getRoles(): Promise<Array<SfdcUserRole>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.USER_ROLES));
     }
@@ -1025,12 +1025,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about User Roles in a tree view
-     * @returns {Promise<SFDC_UserRole>} Tree
+     * @returns {Promise<SfdcUserRole>} Tree
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getRolesTree(): Promise<SFDC_UserRole> {
+    public async getRolesTree(): Promise<SfdcUserRole> {
         // Get data
         const allRoles = (await this.getRoles());
         // @ts-ignore
@@ -1040,7 +1040,7 @@ export class API implements ApiIntf {
         //   - value is the node with properties: 
         //        * 'id' (mandatory string), 
         //        * 'children' (optional array), and,
-        //        * 'record' (undefined for root, mandatory for other than root -- of type: SFDC_UserRole)
+        //        * 'record' (undefined for root, mandatory for other than root -- of type: SfdcUserRole)
         const allNodes = new Map();
         // Key for artificial ROOT
         const ROOT_KEY = '__i am root__';
@@ -1070,12 +1070,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about Static Resources
      * @param {string} namespace - the namespace of the package to filter the weblinks
-     * @returns {Promise<Array<SFDC_StaticResource>>} List of items to return
+     * @returns {Promise<Array<SfdcStaticResource>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getStaticResources(namespace: string): Promise<Array<SFDC_StaticResource>> {
+    public async getStaticResources(namespace: string): Promise<Array<SfdcStaticResource>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.STATIC_RESOURCES, new Map([
             [OrgCheckGlobalParameter.PACKAGE_NAME, namespace]
@@ -1092,15 +1092,15 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about WebLinks
-     * @param {string} namespace - the namespace of the package to filter the weblinks
-     * @param {string} sobjectType - the sobject type to filter the weblinks
-     * @param {string} sobject - the sobject to filter the weblinks
-     * @returns {Promise<Array<SFDC_WebLink>>} List of items to return
+     * @param {string} [namespace] - the namespace of the package to filter the weblinks
+     * @param {string} [sobjectType] - the sobject type to filter the weblinks
+     * @param {string} [sobject] - the sobject to filter the weblinks
+     * @returns {Promise<Array<SfdcWebLink>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getWeblinks(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_WebLink>> {
+    public async getWeblinks(namespace?: string, sobjectType?: string, sobject?: string): Promise<Array<SfdcWebLink>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.WEBLINKS, new Map([
             [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
@@ -1119,12 +1119,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about Workflows
-     * @returns {Promise<Array<SFDC_Workflow>>} List of items to return
+     * @returns {Promise<Array<SfdcWorkflow>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getWorkflows(): Promise<Array<SFDC_Workflow>> {
+    public async getWorkflows(): Promise<Array<SfdcWorkflow>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.WORKFLOWS));
     }
@@ -1142,12 +1142,12 @@ export class API implements ApiIntf {
      * @param {string} namespace - the namespace of the package to filter the record types
      * @param {string} sobjectType - the sobject type to filter the record types
      * @param {string} sobject - the sobject to filter the record types
-     * @returns {Promise<Array<SFDC_RecordType>>} List of items to return
+     * @returns {Promise<Array<SfdcRecordType>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getRecordTypes(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_RecordType>> {
+    public async getRecordTypes(namespace: string, sobjectType: string, sobject: string): Promise<Array<SfdcRecordType>> {
         // @ts-ignore    
         return (await this._recipeManager.run(RecipeAliases.RECORD_TYPES, new Map([
             [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
@@ -1168,7 +1168,7 @@ export class API implements ApiIntf {
      * @description Get information about field permissions per parent (kind of matrix view) for a specific sobject
      * @param {string} sobject - the name of the sobject to get information about
      * @param {string} namespace - the namespace of the package to filter the field permissions
-     * @returns {Promise<DataMatrixIntf>} Information about fields (list of string) and permissions (list of SFDC_FieldPermissionsPerParent)
+     * @returns {Promise<DataMatrixIntf>} Information about fields (list of string) and permissions (list of SfdcFieldPermissionsPerParent)
      * @throws Exception from recipe manager
      * @async
      * @public
@@ -1191,12 +1191,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about Flows
-     * @returns {Promise<Array<SFDC_Flow>>} List of items to return
+     * @returns {Promise<Array<SfdcFlow>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getFlows(): Promise<Array<SFDC_Flow>> {
+    public async getFlows(): Promise<Array<SfdcFlow>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.FLOWS));
     }
@@ -1212,12 +1212,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about EmailTemplate
      * @param {string} namespace - the namespace of the package to filter the email templates
-     * @returns {Promise<Array<SFDC_EmailTemplate>>} List of items to return
+     * @returns {Promise<Array<SfdcEmailTemplate>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getEmailTemplates(namespace: string): Promise<Array<SFDC_EmailTemplate>> {
+    public async getEmailTemplates(namespace: string): Promise<Array<SfdcEmailTemplate>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.EMAIL_TEMPLATES, new Map([
             [OrgCheckGlobalParameter.PACKAGE_NAME, namespace]
@@ -1234,12 +1234,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about home page components
-     * @returns {Promise<Array<SFDC_HomePageComponent>>} List of items to return
+     * @returns {Promise<Array<SfdcHomePageComponent>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getHomePageComponents(): Promise<Array<SFDC_HomePageComponent>> {
+    public async getHomePageComponents(): Promise<Array<SfdcHomePageComponent>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.HOME_PAGE_COMPONENTS));
     }
@@ -1254,12 +1254,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about Process Builders
-     * @returns {Promise<Array<SFDC_Flow>>} List of items to return
+     * @returns {Promise<Array<SfdcFlow>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getProcessBuilders(): Promise<Array<SFDC_Flow>> {
+    public async getProcessBuilders(): Promise<Array<SfdcFlow>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PROCESS_BUILDERS));
     }
@@ -1277,12 +1277,12 @@ export class API implements ApiIntf {
      * @param {string} namespace - the namespace of the package to filter the validation rules
      * @param {string} sobjectType - the sobject type to filter the validation rules
      * @param {string} sobject - the sobject to filter the validation rules
-     * @returns {Promise<Array<SFDC_ValidationRule>>} List of items to return
+     * @returns {Promise<Array<SfdcValidationRule>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getValidationRules(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_ValidationRule>> {
+    public async getValidationRules(namespace: string, sobjectType: string, sobject: string): Promise<Array<SfdcValidationRule>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.VALIDATION_RULES, new Map([
             [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
@@ -1301,12 +1301,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about dashboards
-     * @returns {Promise<Array<SFDC_Dashboard>>} List of items to return
+     * @returns {Promise<Array<SfdcDashboard>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getDashboards(): Promise<Array<SFDC_Dashboard>> {
+    public async getDashboards(): Promise<Array<SfdcDashboard>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.DASHBOARDS));
     }
@@ -1321,12 +1321,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about reports
-     * @returns {Promise<Array<SFDC_Report>>} List of items to return
+     * @returns {Promise<Array<SfdcReport>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getReports(): Promise<Array<SFDC_Report>> {
+    public async getReports(): Promise<Array<SfdcReport>> {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.REPORTS));
     }

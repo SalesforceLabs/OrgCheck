@@ -4,7 +4,7 @@ import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_ProfilePasswordPolicy }from 'src/api/data/orgcheck-api-data-profilepasswordpolicy';
+import { SfdcProfilePasswordPolicy }from 'src/api/data/orgcheck-api-data-profilepasswordpolicy';
 
 export class RecipeProfilePasswordPolicies implements Recipe {
 
@@ -29,7 +29,7 @@ export class RecipeProfilePasswordPolicies implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data
-        const /** @type {Map<string, SFDC_ProfilePasswordPolicy>} */ policies: Map<string, SFDC_ProfilePasswordPolicy> = data.get(DatasetAliases.PROFILEPWDPOLICIES);
+        const /** @type {Map<string, SfdcProfilePasswordPolicy>} */ policies: Map<string, SfdcProfilePasswordPolicy> = data.get(DatasetAliases.PROFILEPWDPOLICIES);
 
         // Checking data
         if (!policies) throw new Error(`RecipeProfilePasswordPolicies: Data from dataset alias 'PROFILEPWDPOLICIES' was undefined.`);

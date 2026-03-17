@@ -33,7 +33,7 @@
     "types": "./dist/orgcheck.d.ts",
     "dependencies": {
         "fflate": "^0.8.2",
-        "jsforce": "^3.10.14",
+        "jsforce": "^1.11.1",
         "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
     }
 }

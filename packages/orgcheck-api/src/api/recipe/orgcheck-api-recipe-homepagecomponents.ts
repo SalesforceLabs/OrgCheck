@@ -4,7 +4,7 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
 import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
-import { SFDC_HomePageComponent }from 'src/api/data/orgcheck-api-data-homepagecomponent';
+import { SfdcHomePageComponent }from 'src/api/data/orgcheck-api-data-homepagecomponent';
 
 export class RecipeHomePageComponents implements Recipe {
 
@@ -31,7 +31,7 @@ export class RecipeHomePageComponents implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data
-        const /** @type {Map<string, SFDC_HomePageComponent>} */ pages: Map<string, SFDC_HomePageComponent> = data.get(DatasetAliases.HOMEPAGECOMPONENTS);
+        const /** @type {Map<string, SfdcHomePageComponent>} */ pages: Map<string, SfdcHomePageComponent> = data.get(DatasetAliases.HOMEPAGECOMPONENTS);
 
         // Checking data
         if (!pages) throw new Error(`RecipeHomePageComponents: Data from dataset alias 'HOMEPAGECOMPONENTS' was undefined.`);

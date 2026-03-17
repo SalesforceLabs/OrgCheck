@@ -4,14 +4,14 @@ import { DataWithScoreAndDependencies } from 'src/api/core/orgcheck-api-data';
 /**
  * @description Representation of a Lightning Aura Component in Org Check
  */
-export interface SFDC_LightningAuraComponent extends DataWithScoreAndDependencies {
+export interface SfdcLightningAuraComponent extends DataWithScoreAndDependencies {
     
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_LightningAuraComponent;
+    dataType: DataAliases.SfdcLightningAuraComponent;
         
      /**
      * @description Salesforce Id

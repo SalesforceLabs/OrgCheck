@@ -1,15 +1,15 @@
 import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
 import { DataWithScore } from 'src/api/core/orgcheck-api-data';
-import { SFDC_Object } from 'src/api/data/orgcheck-api-data-object';
+import { SfdcObject } from 'src/api/data/orgcheck-api-data-object';
 
-export interface SFDC_ValidationRule extends DataWithScore {
+export interface SfdcValidationRule extends DataWithScore {
     
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_ValidationRule;
+    dataType: DataAliases.SfdcValidationRule;
 
      /**
      * @description Salesforce Id
@@ -62,10 +62,10 @@ export interface SFDC_ValidationRule extends DataWithScore {
 
     /**
      * @description Reference of the object for this rule
-     * @type {SFDC_Object}
+     * @type {SfdcObject}
      * @public
      */
-    objectRef: SFDC_Object;
+    objectRef: SfdcObject;
 
     /**
      * @description Name of the potential namespace/package where this item comes from. Empty string if none.

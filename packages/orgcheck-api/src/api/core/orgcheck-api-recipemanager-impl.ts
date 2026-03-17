@@ -299,11 +299,12 @@ export class RecipeManager implements RecipeManagerIntf {
             await Processor.forEach(recipes, async (/** @type {string} */ recipe: string) => {
                 try {
                     const recipeData = await this._runRecipe(recipe, parameters);
-                    if (Array.isArray(recipeData)) {
-                        // @ts-ignore
+                    if (recipeData && Array.isArray(recipeData)) {
                         data.set(recipe, recipeData);
+                    } else if (recipeData) {
+                        throw new TypeError(`The recipe "${recipe}" did not return an array of data as expected (type was ${typeof recipeData} and value was ${JSON.stringify(recipeData)}).`);
                     } else {
-                        throw new TypeError(`The recipe "${recipe}" did not return an array of data as expected.`);
+                        throw new TypeError(`The recipe "${recipe}" did not return an array of data as expected (null or undefined value).`);
                     }
                 } catch(error) {
                     recipesInError.set(recipe, error);

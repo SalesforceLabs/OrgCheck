@@ -1,4 +1,289 @@
 /**
+ * @description This interface describe the field/property name in a Row where we find the "value" to show
+ */
+interface WhereToGetData {
+    /**
+     * @description Property containing the value
+     * @type {string}
+     */
+    value: string;
+}
+/**
+ * @description This interface describe the field/property name in a Row where we find the "values" to iterate over
+ */
+interface WhereToGetMultipleData {
+    /**
+     * @description Property containing the values
+     * @type {string}
+     */
+    values: string;
+}
+/**
+ * @description The score is the value in this case, and we add the fields to find the id and name of the item that has this score
+ */
+interface WhereToGetScoreData extends WhereToGetData {
+    /**
+     * @description Property containing the Salesforce ID of the entity that has this score
+     * @type {string}
+     */
+    id: string;
+    /**
+     * @description Property containing the name/label of the entity that has this score
+     * @type {string}
+     */
+    name: string;
+}
+/**
+ * @description The text is the value in this case, no additional field needed
+ */
+interface WhereToGetTextData extends WhereToGetData {
+}
+/**
+ * @description The URL is the value in this case, and we add the field to find the label for the hyperlink
+ */
+interface WhereToGetLinkData extends WhereToGetData {
+    /**
+     * @description Property containing the label to be used in the link
+     * @type {string}
+     */
+    label: string;
+}
+/**
+ * @description The Object is the value in this case, and we add a method to render this object as a string
+ */
+interface WhereToGetObjectData extends WhereToGetData {
+    /**
+     * @description Template function to generate a text based on the object
+     * @type {function(any): string}
+     */
+    template(arg0: any): string;
+}
+/**
+ * @description Values is the list, Value is the field to get the object (for each item)
+ */
+interface WhereToGetObjectsData extends WhereToGetObjectData, WhereToGetMultipleData {
+}
+/**
+ * @description Values is the list, Value is the field to get the text (for each item)
+ */
+interface WhereToGetTextsData extends WhereToGetTextData, WhereToGetMultipleData {
+}
+/**
+ * @description Values is the list, Value is the field to get the URL (for each item)
+ */
+interface WhereToGetLinksData extends WhereToGetLinkData, WhereToGetMultipleData {
+}
+
+interface Modifier {
+    /**
+     * @description If value is empty (undefined, empty string, numerical zero, empty list, etc...), this is the substitute text to use
+     * @type {string}
+     */
+    valueIfEmpty?: string;
+    /**
+     * @description If text value has more than this maximum length of characters, the string will be truncated accordingly.
+     * @type {number}
+     */
+    maximumLength?: number;
+    /**
+     * @description If text value will be rendered as preformatted (like code or formulas etc.)
+     * @type {boolean}
+     */
+    preformatted?: boolean;
+    /**
+ * @description If the value is less that this value, the text will be substituted.
+ * @type {number}
+ */
+    minimum?: number;
+    /**
+     * @description If value is less than 'min', this is the substitute text to use
+     * @type {string}
+     */
+    valueBeforeMin?: string;
+    /**
+     * @description If the value is greater that this value, the text will be substituted.
+     * @type {number}
+     */
+    maximum?: number;
+    /**
+     * @description If value is greater than 'max', this is the substitute text to use
+     * @type {string}
+     */
+    valueAfterMax?: string;
+}
+
+declare enum ColumnType {
+    IDX = "index",
+    SCR = "score",
+    TXT = "text",
+    TXTS = "texts",
+    NUM = "numeric",
+    PRC = "percentage",
+    URL = "id",
+    URLS = "ids",
+    CHK = "boolean",
+    DTM = "datetime",
+    DEP = "dependencies",
+    OBJS = "objects"
+}
+
+declare enum Orientation {
+    HORIZONTAL = "horizontal",
+    VERTICAL = "vertical"
+}
+
+interface TableColumn {
+    /**
+     * @description Label used in the header of the column
+     * @type {string}
+     */
+    label: string;
+    /**
+     * @description Type used in the header of the column
+     * @type {ColumnType}
+     */
+    type: ColumnType;
+    /**
+     * @description Defines how to retrieve the data -- in which property
+     * @type { WhereToGetTextData | WhereToGetScoreData | WhereToGetLinkData | WhereToGetObjectData | WhereToGetTextsData | WhereToGetLinksData | WhereToGetObjectsData }
+     */
+    data?: WhereToGetTextData | WhereToGetScoreData | WhereToGetLinkData | WhereToGetObjectData | WhereToGetTextsData | WhereToGetLinksData | WhereToGetObjectsData;
+    /**
+     * @description Optional modifier around the data
+     * @type { Modifier }
+     */
+    modifier?: Modifier;
+    /**
+     * @description In which orientation the column should be. This is optional, by default the column will be horizontal.
+     * @type {Orientation}
+     */
+    orientation?: Orientation;
+}
+
+declare enum SortOrder {
+    DESC = "desc",
+    ASC = "asc"
+}
+
+interface Table {
+    /**
+     * @description List of columns in a table
+     * @type {Array<TableColumn>}
+     */
+    columns: Array<TableColumn>;
+    /**
+     * @description Which index column is used for ordering?
+     * @type {number}
+     */
+    orderIndex: number;
+    /**
+     * @description What is the sort order: ASC or DESC?
+     * @type {SortOrder}
+     */
+    orderSort: SortOrder;
+}
+interface ExportedTable {
+    /**
+     * @description Name of the exported table (like a title)
+     * @type {string}
+     */
+    header: string;
+    /**
+     * @description List of column labels
+     * @type {Array<string>}
+     */
+    columns: Array<string>;
+    /**
+     * @description List of rows with cells
+     * @type {Array<Array<string>>}
+     */
+    rows: Array<Array<string>>;
+}
+
+declare class ApexClassesTableDefinitions implements Table {
+    /**
+     * @description List of columns in a table
+     * @type {Array<TableColumn>}
+     */
+    columns: Array<TableColumn>;
+    /**
+     * @description Which index column is used for ordering?
+     * @type {number}
+     */
+    orderIndex: number;
+    /**
+     * @description What is the sort order: ASC or DESC?
+     * @type {SortOrder}
+     */
+    orderSort: SortOrder;
+}
+
+declare class ApexTestsTableDefinitions implements Table {
+    /**
+     * @description List of columns in a table
+     * @type {Array<TableColumn>}
+     */
+    columns: Array<TableColumn>;
+    /**
+     * @description Which index column is used for ordering?
+     * @type {number}
+     */
+    orderIndex: number;
+    /**
+     * @description What is the sort order: ASC or DESC?
+     * @type {SortOrder}
+     */
+    orderSort: SortOrder;
+}
+
+declare class AbstractApexTriggersTableDefinitions implements Table {
+    /**
+     * @description Constructor to specify if this table is in a context of an object.
+     * @param {boolean} isObjectInformationNeeded - Is the object information needed in the table (true by default) (true by default)
+     */
+    constructor(isObjectInformationNeeded: boolean);
+    /**
+     * @description List of columns in a table
+     * @type {Array<TableColumn>}
+     */
+    columns: Array<TableColumn>;
+    /**
+     * @description Which index column is used for ordering?
+     * @type {number}
+     */
+    orderIndex: number;
+    /**
+     * @description What is the sort order: ASC or DESC?
+     * @type {SortOrder}
+     */
+    orderSort: SortOrder;
+}
+declare class ApexTriggersTableDefinitions extends AbstractApexTriggersTableDefinitions {
+    constructor();
+}
+declare class ApexTriggersInObjectTableDefinitions extends AbstractApexTriggersTableDefinitions {
+    constructor();
+}
+
+declare class ApexUncompiledTableDefinitions implements Table {
+    /**
+     * @description List of columns in a table
+     * @type {Array<TableColumn>}
+     */
+    columns: Array<TableColumn>;
+    /**
+     * @description Which index column is used for ordering?
+     * @type {number}
+     */
+    orderIndex: number;
+    /**
+     * @description What is the sort order: ASC or DESC?
+     * @type {SortOrder}
+     */
+    orderSort: SortOrder;
+}
+
+/**
  * @description This interface represents a matrix data
  * @example Example of a DataMatrix would be:
  *               {
@@ -52,54 +337,54 @@ interface DataMatrixRowIntf {
  * @description Data aliases
  */
 declare enum DataAliases {
-    SFDC_ApexTestMethodResult = "Apex Test Method",
-    SFDC_ApexClass = "Apex Class",
-    SFDC_ApexTrigger = "Apex Trigger",
-    SFDC_Application = "Application",
-    SFDC_AppPermission = "App Permission",
-    SFDC_Browser = "Browser",
-    SFDC_CollaborationGroup = "Chatter Group",
-    SFDC_CustomLabel = "Custom Label",
-    SFDC_CustomTab = "Custom Tab",
-    SFDC_Dashboard = "Dashboard",
-    SFDC_Document = "Document",
-    SFDC_EmailTemplate = "Email Template",
-    SFDC_Field = "Field",
-    SFDC_FieldPermission = "Field Permission",
-    SFDC_FieldSet = "Field Set",
-    SFDC_Flow = "Flow",
-    SFDC_FlowVersion = "Flow Version",
-    SFDC_Group = "Group",
-    SFDC_HomePageComponent = "Home Page",
-    SFDC_KnowledgeArticle = "Article",
-    SFDC_LightningAuraComponent = "Aura Component",
-    SFDC_LightningPage = "Page",
-    SFDC_LightningWebComponent = "Lightning Web Component",
-    SFDC_Limit = "Limit",
-    SFDC_Object = "Object",
-    SFDC_ObjectPermission = "CRUD",
-    SFDC_ObjectRelationShip = "Relationship",
-    SFDC_ObjectType = "Object Type",
-    SFDC_Organization = "Organization",
-    SFDC_Package = "Package",
-    SFDC_PageLayout = "Page Layout",
-    SFDC_PermissionSet = "Permission Set",
-    SFDC_PermissionSetLicense = "Permission Set License",
-    SFDC_Profile = "Profile",
-    SFDC_ProfilePasswordPolicy = "Password Policy",
-    SFDC_ProfileRestrictions = "Profile Restrictions",
-    SFDC_ProfileIpRangeRestriction = "Profile Ip Range Restrictions",
-    SFDC_ProfileLoginHourRestriction = "Profile Login Hour Restrictions",
-    SFDC_RecordType = "Record Type",
-    SFDC_Report = "Report",
-    SFDC_StaticResource = "Sstatic Resource",
-    SFDC_User = "User",
-    SFDC_UserRole = "Role",
-    SFDC_ValidationRule = "Validation Rule",
-    SFDC_VisualForceComponent = "Visualforce Component",
-    SFDC_VisualForcePage = "Visualforce Page",
-    SFDC_WebLink = "Web Link",
-    SFDC_Workflow = "Workflow"
+    SfdcApexTestMethodResult = "Apex Test Method",
+    SfdcApexClass = "Apex Class",
+    SfdcApexTrigger = "Apex Trigger",
+    SfdcApplication = "Application",
+    SfdcAppPermission = "App Permission",
+    SfdcBrowser = "Browser",
+    SfdcCollaborationGroup = "Chatter Group",
+    SfdcCustomLabel = "Custom Label",
+    SfdcCustomTab = "Custom Tab",
+    SfdcDashboard = "Dashboard",
+    SfdcDocument = "Document",
+    SfdcEmailTemplate = "Email Template",
+    SfdcField = "Field",
+    SfdcFieldPermission = "Field Permission",
+    SfdcFieldSet = "Field Set",
+    SfdcFlow = "Flow",
+    SfdcFlowVersion = "Flow Version",
+    SfdcGroup = "Group",
+    SfdcHomePageComponent = "Home Page",
+    SfdcKnowledgeArticle = "Article",
+    SfdcLightningAuraComponent = "Aura Component",
+    SfdcLightningPage = "Page",
+    SfdcLightningWebComponent = "Lightning Web Component",
+    SfdcLimit = "Limit",
+    SfdcObject = "Object",
+    SfdcObjectPermission = "CRUD",
+    SfdcObjectRelationShip = "Relationship",
+    SfdcObjectType = "Object Type",
+    SfdcOrganization = "Organization",
+    SfdcPackage = "Package",
+    SfdcPageLayout = "Page Layout",
+    SfdcPermissionSet = "Permission Set",
+    SfdcPermissionSetLicense = "Permission Set License",
+    SfdcProfile = "Profile",
+    SfdcProfilePasswordPolicy = "Password Policy",
+    SfdcProfileRestrictions = "Profile Restrictions",
+    SfdcProfileIpRangeRestriction = "Profile Ip Range Restrictions",
+    SfdcProfileLoginHourRestriction = "Profile Login Hour Restrictions",
+    SfdcRecordType = "Record Type",
+    SfdcReport = "Report",
+    SfdcStaticResource = "Sstatic Resource",
+    SfdcUser = "User",
+    SfdcUserRole = "Role",
+    SfdcValidationRule = "Validation Rule",
+    SfdcVisualForceComponent = "Visualforce Component",
+    SfdcVisualForcePage = "Visualforce Page",
+    SfdcWebLink = "Web Link",
+    SfdcWorkflow = "Workflow"
 }
 
 /**
@@ -337,6 +622,13 @@ interface LoggerSetup {
      */
     messageLogged(operationName: string, message?: string): void;
     /**
+     * @description Called when a message has been logged for debug
+     * @param {string} operationName - the name of the operation
+     * @param {string} [message] - the message to log for debugging
+     * @public
+     */
+    messageSilentlyLogged(operationName: string, message?: string): void;
+    /**
      * @description The given operation ended with an error (with an optional error or message)
      * @param {string} operationName - the name of the operation
      * @param {Error | string} [error] - the error to log
@@ -400,13 +692,13 @@ interface StorageSetup {
     length(): number;
 }
 
-interface SFDC_ApexTestMethodResult extends DataWithoutScore {
+interface SfdcApexTestMethodResult extends DataWithoutScore {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_ApexTestMethodResult;
+    dataType: DataAliases.SfdcApexTestMethodResult;
     /**
     * @description Name of this method
     * @type {string}
@@ -477,13 +769,13 @@ interface SFDC_ApexTestMethodResult extends DataWithoutScore {
 /**
  * @description Representation of an Apex Class in Org Check
  */
-interface SFDC_ApexClass extends DataWithScoreAndDependencies {
+interface SfdcApexClass extends DataWithScoreAndDependencies {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_ApexClass;
+    dataType: DataAliases.SfdcApexClass;
     /**
     * @description Salesforce Id
     * @type {string}
@@ -594,16 +886,16 @@ interface SFDC_ApexClass extends DataWithScoreAndDependencies {
     methodsCount: number;
     /**
      * @description List of test methods that were OK in the last run results but took more than 20 seconds
-     * @type {Array<SFDC_ApexTestMethodResult>}
+     * @type {Array<SfdcApexTestMethodResult>}
      * @public
      */
-    testPassedButLongMethods: Array<SFDC_ApexTestMethodResult>;
+    testPassedButLongMethods: Array<SfdcApexTestMethodResult>;
     /**
      * @description List of test methods that were OK in the last run results
-     * @type {Array<SFDC_ApexTestMethodResult>}
+     * @type {Array<SfdcApexTestMethodResult>}
      * @public
      */
-    testFailedMethods: Array<SFDC_ApexTestMethodResult>;
+    testFailedMethods: Array<SfdcApexTestMethodResult>;
     /**
      * @description Date/Time when this test class was last run. Information stored as a Unix timestamp.
      * @type {number}
@@ -672,10 +964,10 @@ interface SFDC_ApexClass extends DataWithScoreAndDependencies {
     relatedTestClassIds: Array<string>;
     /**
      * @description List of test class that participate in the current code coverage of this class (if this is a not test class).
-     * @type {Array<SFDC_ApexClass>}
+     * @type {Array<SfdcApexClass>}
      * @public
      */
-    relatedTestClassRefs: Array<SFDC_ApexClass>;
+    relatedTestClassRefs: Array<SfdcApexClass>;
     /**
      * @description List of class Ids that are tested by this class (if this is a test class).
      * @type {Array<string>}
@@ -684,10 +976,10 @@ interface SFDC_ApexClass extends DataWithScoreAndDependencies {
     relatedClassIds: Array<string>;
     /**
      * @description List of class that are tested by this class (if this is a test class).
-     * @type {Array<SFDC_ApexClass>}
+     * @type {Array<SfdcApexClass>}
      * @public
      */
-    relatedClassRefs: Array<SFDC_ApexClass>;
+    relatedClassRefs: Array<SfdcApexClass>;
     /**
      * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.
      * @type {number}
@@ -705,13 +997,13 @@ interface SFDC_ApexClass extends DataWithScoreAndDependencies {
 /**
  * @description Representation of a Standard Field or a Custom Field in Org Check
  */
-interface SFDC_Field extends DataWithScoreAndDependencies {
+interface SfdcField extends DataWithScoreAndDependencies {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_Field;
+    dataType: DataAliases.SfdcField;
     /**
      * @description Salesforce Id
      * @type {string}
@@ -768,10 +1060,10 @@ interface SFDC_Field extends DataWithScoreAndDependencies {
     objectId: string;
     /**
      * @description Reference of the object for this field
-     * @type {SFDC_Object}
+     * @type {SfdcObject}
      * @public
      */
-    objectRef: SFDC_Object;
+    objectRef: SfdcObject;
     /**
      * @description Is tgis field custom or standard
      * @type {boolean}
@@ -855,13 +1147,13 @@ interface SFDC_Field extends DataWithScoreAndDependencies {
 /**
  * @description Representation of a Field Set in Org Check
  */
-interface SFDC_FieldSet extends DataWithScore {
+interface SfdcFieldSet extends DataWithScore {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_FieldSet;
+    dataType: DataAliases.SfdcFieldSet;
     /**
     * @description Salesforce Id
     * @type {string}
@@ -891,13 +1183,13 @@ interface SFDC_FieldSet extends DataWithScore {
 /**
  * @description Representation of a Lightning Page in Org Check
  */
-interface SFDC_LightningPage extends DataWithScoreAndDependencies {
+interface SfdcLightningPage extends DataWithScoreAndDependencies {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_LightningPage;
+    dataType: DataAliases.SfdcLightningPage;
     /**
     * @description Salesforce Id
     * @type {string}
@@ -942,10 +1234,10 @@ interface SFDC_LightningPage extends DataWithScoreAndDependencies {
     objectId: string;
     /**
      * @description Reference of the related object for this page (if any)
-     * @type {SFDC_Object}
+     * @type {SfdcObject}
      * @public
      */
-    objectRef: SFDC_Object;
+    objectRef: SfdcObject;
     /**
      * @description Full description of that item
      * @type {string}
@@ -993,13 +1285,13 @@ interface SFDC_LightningPage extends DataWithScoreAndDependencies {
 /**
  * @description Representation of a SObject Limit in Org Check
  */
-interface SFDC_Limit extends DataWithScore {
+interface SfdcLimit extends DataWithScore {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_Limit;
+    dataType: DataAliases.SfdcLimit;
     /**
     * @description Salesforce Id
     * @type {string}
@@ -1044,13 +1336,13 @@ interface SFDC_Limit extends DataWithScore {
     type: string;
 }
 
-interface SFDC_ObjectRelationShip extends DataWithoutScore {
+interface SfdcObjectRelationShip extends DataWithoutScore {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_ObjectRelationShip;
+    dataType: DataAliases.SfdcObjectRelationShip;
     /**
     * @description Name
     * @type {string}
@@ -1083,13 +1375,13 @@ interface SFDC_ObjectRelationShip extends DataWithoutScore {
     isRestrictedDelete: boolean;
 }
 
-interface SFDC_ObjectType extends DataWithoutScore {
+interface SfdcObjectType extends DataWithoutScore {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_ObjectType;
+    dataType: DataAliases.SfdcObjectType;
     /**
     * @description Technical representation of this type
     * @type {string}
@@ -1104,13 +1396,13 @@ interface SFDC_ObjectType extends DataWithoutScore {
     label: string;
 }
 
-interface SFDC_PageLayout extends DataWithScoreAndDependencies {
+interface SfdcPageLayout extends DataWithScoreAndDependencies {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_PageLayout;
+    dataType: DataAliases.SfdcPageLayout;
     /**
     * @description Salesforce Id
     * @type {string}
@@ -1143,10 +1435,10 @@ interface SFDC_PageLayout extends DataWithScoreAndDependencies {
     objectId: string;
     /**
      * @description Object reference of this page layout
-     * @type {SFDC_Object}
+     * @type {SfdcObject}
      * @public
      */
-    objectRef: SFDC_Object;
+    objectRef: SfdcObject;
     /**
      * @description Number of profiles assigned to this page layout
      * @type {number}
@@ -1191,13 +1483,13 @@ interface SFDC_PageLayout extends DataWithScoreAndDependencies {
     nbFields: number;
 }
 
-interface SFDC_RecordType extends DataWithScore {
+interface SfdcRecordType extends DataWithScore {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_RecordType;
+    dataType: DataAliases.SfdcRecordType;
     /**
     * @description Salesforce Id
     * @type {string}
@@ -1260,19 +1552,19 @@ interface SFDC_RecordType extends DataWithScore {
     objectId: string;
     /**
      * @description Object reference of this record type
-     * @type {SFDC_Object}
+     * @type {SfdcObject}
      * @public
      */
-    objectRef: SFDC_Object;
+    objectRef: SfdcObject;
 }
 
-interface SFDC_ValidationRule extends DataWithScore {
+interface SfdcValidationRule extends DataWithScore {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_ValidationRule;
+    dataType: DataAliases.SfdcValidationRule;
     /**
     * @description Salesforce Id
     * @type {string}
@@ -1317,10 +1609,10 @@ interface SFDC_ValidationRule extends DataWithScore {
     objectId: string;
     /**
      * @description Reference of the object for this rule
-     * @type {SFDC_Object}
+     * @type {SfdcObject}
      * @public
      */
-    objectRef: SFDC_Object;
+    objectRef: SfdcObject;
     /**
      * @description Name of the potential namespace/package where this item comes from. Empty string if none.
      * @type {string}
@@ -1347,13 +1639,13 @@ interface SFDC_ValidationRule extends DataWithScore {
     url: string;
 }
 
-interface SFDC_WebLink extends DataWithScoreAndDependencies {
+interface SfdcWebLink extends DataWithScoreAndDependencies {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_WebLink;
+    dataType: DataAliases.SfdcWebLink;
     /**
     * @description Salesforce Id
     * @type {string}
@@ -1428,19 +1720,19 @@ interface SFDC_WebLink extends DataWithScoreAndDependencies {
     objectId: string;
     /**
      * @description Reference of the object for this trigger
-     * @type {SFDC_Object}
+     * @type {SfdcObject}
      * @public
      */
-    objectRef: SFDC_Object;
+    objectRef: SfdcObject;
 }
 
-interface SFDC_Workflow extends DataWithScore {
+interface SfdcWorkflow extends DataWithScore {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_Workflow;
+    dataType: DataAliases.SfdcWorkflow;
     /**
     * @description Salesforce Id
     * @type {string}
@@ -1512,13 +1804,13 @@ interface SFDC_Workflow extends DataWithScore {
 /**
  * @description Representation of as SObject in Org Check
  */
-interface SFDC_Object extends DataWithScore {
+interface SfdcObject extends DataWithScore {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_Object;
+    dataType: DataAliases.SfdcObject;
     /**
     * @description Salesforce Id
     * @type {string}
@@ -1599,10 +1891,10 @@ interface SFDC_Object extends DataWithScore {
     typeId: string;
     /**
      * @description Reference of the type of this object
-     * @type {SFDC_ObjectType}
+     * @type {SfdcObjectType}
      * @public
      */
-    typeRef: SFDC_ObjectType;
+    typeRef: SfdcObjectType;
     /**
      * @description Full description of that item
      * @type {string}
@@ -1629,10 +1921,10 @@ interface SFDC_Object extends DataWithScore {
     apexTriggerIds: Array<string>;
     /**
      * @description Corresponding Apex Trigger references fot this object
-     * @type {Array<SFDC_ApexTrigger>}
+     * @type {Array<SfdcApexTrigger>}
      * @public
      */
-    apexTriggerRefs: Array<SFDC_ApexTrigger>;
+    apexTriggerRefs: Array<SfdcApexTrigger>;
     /**
      * @description Number of apex triggers (active or not) for this object
      * @type {number}
@@ -1641,16 +1933,16 @@ interface SFDC_Object extends DataWithScore {
     nbApexTriggers: number;
     /**
      * @description List of field Sets for this object
-     * @type {Array<SFDC_FieldSet>}
+     * @type {Array<SfdcFieldSet>}
      * @public
      */
-    fieldSets: Array<SFDC_FieldSet>;
+    fieldSets: Array<SfdcFieldSet>;
     /**
      * @description List of layouts for this object
-     * @type {Array<SFDC_PageLayout>}
+     * @type {Array<SfdcPageLayout>}
      * @public
      */
-    layouts: Array<SFDC_PageLayout>;
+    layouts: Array<SfdcPageLayout>;
     /**
      * @description Number of page layouts for this object
      * @type {number}
@@ -1659,22 +1951,22 @@ interface SFDC_Object extends DataWithScore {
     nbPageLayouts: number;
     /**
      * @description List of Ligthning Pages for this object
-     * @type {Array<SFDC_LightningPage>}
+     * @type {Array<SfdcLightningPage>}
      * @public
      */
-    flexiPages: Array<SFDC_LightningPage>;
+    flexiPages: Array<SfdcLightningPage>;
     /**
      * @description Limits for this object
-     * @type {Array<SFDC_Limit>}
+     * @type {Array<SfdcLimit>}
      * @public
      */
-    limits: Array<SFDC_Limit>;
+    limits: Array<SfdcLimit>;
     /**
      * @description List of validation rules for this object
-     * @type {Array<SFDC_ValidationRule>}
+     * @type {Array<SfdcValidationRule>}
      * @public
      */
-    validationRules: Array<SFDC_ValidationRule>;
+    validationRules: Array<SfdcValidationRule>;
     /**
      * @description Number of validation rules for this object
      * @type {number}
@@ -1683,16 +1975,16 @@ interface SFDC_Object extends DataWithScore {
     nbValidationRules: number;
     /**
      * @description List of web links for this object
-     * @type {Array<SFDC_WebLink>}
+     * @type {Array<SfdcWebLink>}
      * @public
      */
-    webLinks: Array<SFDC_WebLink>;
+    webLinks: Array<SfdcWebLink>;
     /**
      * @description List of standard fields for this object
-     * @type {Array<SFDC_Field>}
+     * @type {Array<SfdcField>}
      * @public
      */
-    standardFields: Array<SFDC_Field>;
+    standardFields: Array<SfdcField>;
     /**
      * @description List of custom field Ids for this object
      * @type {Array<string>}
@@ -1707,16 +1999,16 @@ interface SFDC_Object extends DataWithScore {
     nbCustomFields: number;
     /**
      * @description List of custom field references for this object
-     * @type {Array<SFDC_Field>}
+     * @type {Array<SfdcField>}
      * @public
      */
-    customFieldRefs: Array<SFDC_Field>;
+    customFieldRefs: Array<SfdcField>;
     /**
      * @description List of record types for this object
-     * @type {Array<SFDC_RecordType>}
+     * @type {Array<SfdcRecordType>}
      * @public
      */
-    recordTypes: Array<SFDC_RecordType>;
+    recordTypes: Array<SfdcRecordType>;
     /**
      * @description Number of record types for this object
      * @type {number}
@@ -1731,10 +2023,10 @@ interface SFDC_Object extends DataWithScore {
     workflowRuleIds: Array<string>;
     /**
      * @description Corresponding Workflow Rules references fot this object
-     * @type {Array<SFDC_Workflow>}
+     * @type {Array<SfdcWorkflow>}
      * @public
      */
-    workflowRuleRefs: Array<SFDC_Workflow>;
+    workflowRuleRefs: Array<SfdcWorkflow>;
     /**
      * @description Number of workflow rules for this object
      * @type {number}
@@ -1743,10 +2035,10 @@ interface SFDC_Object extends DataWithScore {
     nbWorkflowRules: number;
     /**
      * @description List of relationships for this object
-     * @type {Array<SFDC_ObjectRelationShip>}
+     * @type {Array<SfdcObjectRelationShip>}
      * @public
      */
-    relationships: Array<SFDC_ObjectRelationShip>;
+    relationships: Array<SfdcObjectRelationShip>;
     /**
      * @description Number of records for this object (including deleted ones)
      * @type {number}
@@ -1758,13 +2050,13 @@ interface SFDC_Object extends DataWithScore {
 /**
  * @description Representation of an Apex Trigger in Org Check
  */
-interface SFDC_ApexTrigger extends DataWithScoreAndDependencies {
+interface SfdcApexTrigger extends DataWithScoreAndDependencies {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_ApexTrigger;
+    dataType: DataAliases.SfdcApexTrigger;
     /**
     * @description Salesforce Id
     * @type {string}
@@ -1857,10 +2149,10 @@ interface SFDC_ApexTrigger extends DataWithScoreAndDependencies {
     objectId: string;
     /**
      * @description Reference of the object for this trigger
-     * @type {SFDC_Object}
+     * @type {SfdcObject}
      * @public
      */
-    objectRef: SFDC_Object;
+    objectRef: SfdcObject;
     /**
      * @description Is this trigger containing SOQL statement?
      * @type {boolean}
@@ -1902,13 +2194,13 @@ interface SFDC_ApexTrigger extends DataWithScoreAndDependencies {
 /**
  * @description Representation of a browser used by salesforce users while visiting the "Application" in this org
  */
-interface SFDC_Browser extends DataWithScore {
+interface SfdcBrowser extends DataWithScore {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_Browser;
+    dataType: DataAliases.SfdcBrowser;
     /**
     * @description full name of the browser as it appears in LoginHistory (name + version)
     * @type {string}
@@ -1935,13 +2227,13 @@ interface SFDC_Browser extends DataWithScore {
     nbApplicationLogin: number;
 }
 
-interface SFDC_CollaborationGroup extends DataWithScore {
+interface SfdcCollaborationGroup extends DataWithScore {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_CollaborationGroup;
+    dataType: DataAliases.SfdcCollaborationGroup;
     /**
     * @description Unique identifier of this group in the org.
     * @type {string}
@@ -2001,13 +2293,13 @@ interface SFDC_CollaborationGroup extends DataWithScore {
 /**
  * @description Representation of a Custom Label in Org Check
  */
-interface SFDC_CustomLabel extends DataWithScoreAndDependencies {
+interface SfdcCustomLabel extends DataWithScoreAndDependencies {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_CustomLabel;
+    dataType: DataAliases.SfdcCustomLabel;
     /**
     * @description Salesforce Id
     * @type {string}
@@ -2076,13 +2368,13 @@ interface SFDC_CustomLabel extends DataWithScoreAndDependencies {
     lastModifiedDate: number;
 }
 
-interface SFDC_CustomTab extends DataWithScoreAndDependencies {
+interface SfdcCustomTab extends DataWithScoreAndDependencies {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_CustomTab;
+    dataType: DataAliases.SfdcCustomTab;
     /**
     * @description Unique identifier of this custom tab in the org.
     * @type {string}
@@ -2145,13 +2437,13 @@ interface SFDC_CustomTab extends DataWithScoreAndDependencies {
     package: string;
 }
 
-interface SFDC_Dashboard extends DataWithScore {
+interface SfdcDashboard extends DataWithScore {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_Dashboard;
+    dataType: DataAliases.SfdcDashboard;
     /**
     * @description Unique identifier of this dashboard in the org.
     * @type {string}
@@ -2232,13 +2524,13 @@ interface SFDC_Dashboard extends DataWithScore {
     package: string;
 }
 
-interface SFDC_Document extends DataWithScore {
+interface SfdcDocument extends DataWithScore {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_Document;
+    dataType: DataAliases.SfdcDocument;
     /**
     * @description Unique identifier of this document in the org.
     * @type {string}
@@ -2319,13 +2611,13 @@ interface SFDC_Document extends DataWithScore {
     package: string;
 }
 
-interface SFDC_EmailTemplate extends DataWithScore {
+interface SfdcEmailTemplate extends DataWithScore {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_EmailTemplate;
+    dataType: DataAliases.SfdcEmailTemplate;
     /**
     * @description Salesforce Id
     * @type {string}
@@ -2433,13 +2725,13 @@ interface SFDC_EmailTemplate extends DataWithScore {
 /**
  * Represents a Flow Definition and its Flow Version children
  */
-interface SFDC_Flow extends DataWithScoreAndDependencies {
+interface SfdcFlow extends DataWithScoreAndDependencies {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_Flow;
+    dataType: DataAliases.SfdcFlow;
     /**
      * @description Salesforce Id
      * @type {string}
@@ -2472,10 +2764,10 @@ interface SFDC_Flow extends DataWithScoreAndDependencies {
     currentVersionId: string;
     /**
      * @description Reference of the current flow version being used by this flow
-     * @type {SFDC_FlowVersion}
+     * @type {SfdcFlowVersion}
      * @public
      */
-    currentVersionRef: SFDC_FlowVersion;
+    currentVersionRef: SfdcFlowVersion;
     /**
      * @description Is the current flow version of this flow is the latest version of this flow?
      * @type {boolean}
@@ -2534,13 +2826,13 @@ interface SFDC_Flow extends DataWithScoreAndDependencies {
 /**
  * Represents a Flow Version
  */
-interface SFDC_FlowVersion extends DataWithoutScore {
+interface SfdcFlowVersion extends DataWithoutScore {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_FlowVersion;
+    dataType: DataAliases.SfdcFlowVersion;
     /**
      * @description Salesforce Id
      * @type {string}
@@ -2675,13 +2967,13 @@ interface SFDC_FlowVersion extends DataWithoutScore {
     lfsViolations: Array<string>;
 }
 
-interface SFDC_PermissionSet extends DataWithScore {
+interface SfdcPermissionSet extends DataWithScore {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_PermissionSet;
+    dataType: DataAliases.SfdcPermissionSet;
     /**
      * @description Salesforce Id
      * @type {string}
@@ -2805,10 +3097,10 @@ interface SFDC_PermissionSet extends DataWithScore {
     permissionSetIds: Array<string>;
     /**
      * @description Corresponding references of the permission sets associated with the current group (if it's a group!)
-     * @type {Array<SFDC_PermissionSet>}
+     * @type {Array<SfdcPermissionSet>}
      * @public
      */
-    permissionSetRefs: Array<SFDC_PermissionSet>;
+    permissionSetRefs: Array<SfdcPermissionSet>;
     /**
      * @description List of permission set group Salesforce Ids that include the current permission set (if it's NOT a group!)
      * @type {Array<string>}
@@ -2817,19 +3109,19 @@ interface SFDC_PermissionSet extends DataWithScore {
     permissionSetGroupIds: Array<string>;
     /**
      * @description Corresponding references of the permission set groups that include the current permission set (if it's NOT a group!)
-     * @type {Array<SFDC_PermissionSet>}
+     * @type {Array<SfdcPermissionSet>}
      * @public
      */
-    permissionSetGroupRefs: Array<SFDC_PermissionSet>;
+    permissionSetGroupRefs: Array<SfdcPermissionSet>;
 }
 
-interface SFDC_Profile extends DataWithScore {
+interface SfdcProfile extends DataWithScore {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_Profile;
+    dataType: DataAliases.SfdcProfile;
     /**
     * @description Salesforce Id
     * @type {string}
@@ -2929,13 +3221,13 @@ interface SFDC_Profile extends DataWithScore {
     isAdminLike: boolean;
 }
 
-interface SFDC_User extends DataWithScore {
+interface SfdcUser extends DataWithScore {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_User;
+    dataType: DataAliases.SfdcUser;
     /**
     * @description Salesforce Id
     * @type {string}
@@ -2986,10 +3278,10 @@ interface SFDC_User extends DataWithScore {
     profileId: string;
     /**
      * @description Crresponding Profile reference used by this user
-     * @type {SFDC_Profile}
+     * @type {SfdcProfile}
      * @public
      */
-    profileRef: SFDC_Profile;
+    profileRef: SfdcProfile;
     /**
      * @description Set of sensible system permissions granted to this users (like view all etc.)
      * @type {{apiEnabled: boolean, viewSetup: boolean, modifyAllData: boolean, viewAllData: boolean, manageUsers: boolean, customizeApplication: boolean}}
@@ -3005,16 +3297,16 @@ interface SFDC_User extends DataWithScore {
     };
     /**
      * @description Set of sensible system permissions along with the Profile or PermSet that grants them to this users (like view all etc.)
-     * @type {{apiEnabled: Array<SFDC_Profile>, viewSetup: Array<SFDC_Profile>, modifyAllData: Array<SFDC_Profile>, viewAllData: Array<SFDC_Profile>, manageUsers: Array<SFDC_Profile>, customizeApplication: Array<SFDC_Profile>}}
+     * @type {{apiEnabled: Array<SfdcProfile>, viewSetup: Array<SfdcProfile>, modifyAllData: Array<SfdcProfile>, viewAllData: Array<SfdcProfile>, manageUsers: Array<SfdcProfile>, customizeApplication: Array<SfdcProfile>}}
      * @public
      */
     importantPermissionsGrantedBy: {
-        apiEnabled: Array<SFDC_Profile>;
-        viewSetup: Array<SFDC_Profile>;
-        modifyAllData: Array<SFDC_Profile>;
-        viewAllData: Array<SFDC_Profile>;
-        manageUsers: Array<SFDC_Profile>;
-        customizeApplication: Array<SFDC_Profile>;
+        apiEnabled: Array<SfdcProfile>;
+        viewSetup: Array<SfdcProfile>;
+        modifyAllData: Array<SfdcProfile>;
+        viewAllData: Array<SfdcProfile>;
+        manageUsers: Array<SfdcProfile>;
+        customizeApplication: Array<SfdcProfile>;
     };
     /**
      * @description Is this user admin-like (has some powerful permissions)
@@ -3042,10 +3334,10 @@ interface SFDC_User extends DataWithScore {
     permissionSetIds: Array<string>;
     /**
      * @description List of permission set references assigned to this user
-     * @type {Array<SFDC_PermissionSet>}
+     * @type {Array<SfdcPermissionSet>}
      * @public
      */
-    permissionSetRefs: Array<SFDC_PermissionSet>;
+    permissionSetRefs: Array<SfdcPermissionSet>;
     /**
      * @description Number of direct logins to salesforce
      * @type {number}
@@ -3075,13 +3367,13 @@ interface SFDC_User extends DataWithScore {
 /**
  * @description Representation of a User Group in Org Check
  */
-interface SFDC_Group extends DataWithScore {
+interface SfdcGroup extends DataWithScore {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_Group;
+    dataType: DataAliases.SfdcGroup;
     /**
     * @description Salesforce Id
     * @type {string}
@@ -3138,10 +3430,10 @@ interface SFDC_Group extends DataWithScore {
     directUserIds: Array<string>;
     /**
      * @description List of direct user references
-     * @type {Array<SFDC_User>}
+     * @type {Array<SfdcUser>}
      * @public
      */
-    directUserRefs: Array<SFDC_User>;
+    directUserRefs: Array<SfdcUser>;
     /**
      * @description List of direct group ids
      * @type {Array<string>}
@@ -3150,10 +3442,10 @@ interface SFDC_Group extends DataWithScore {
     directGroupIds: Array<string>;
     /**
      * @description List of direct group references
-     * @type {Array<SFDC_Group>}
+     * @type {Array<SfdcGroup>}
      * @public
      */
-    directGroupRefs: Array<SFDC_Group>;
+    directGroupRefs: Array<SfdcGroup>;
     /**
      * @description Is this a public group?
      * @type {boolean}
@@ -3174,13 +3466,13 @@ interface SFDC_Group extends DataWithScore {
     type: string;
 }
 
-interface SFDC_HomePageComponent extends DataWithScoreAndDependencies {
+interface SfdcHomePageComponent extends DataWithScoreAndDependencies {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_HomePageComponent;
+    dataType: DataAliases.SfdcHomePageComponent;
     /**
      * @description Unique identifier of this page in the org.
      * @type {string}
@@ -3237,13 +3529,13 @@ interface SFDC_HomePageComponent extends DataWithScoreAndDependencies {
     package: string;
 }
 
-interface SFDC_KnowledgeArticle extends DataWithScore {
+interface SfdcKnowledgeArticle extends DataWithScore {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_KnowledgeArticle;
+    dataType: DataAliases.SfdcKnowledgeArticle;
     /**
     * @description Unique identifier of this article in the org.
     * @type {string}
@@ -3309,13 +3601,13 @@ interface SFDC_KnowledgeArticle extends DataWithScore {
 /**
  * @description Representation of a Lightning Aura Component in Org Check
  */
-interface SFDC_LightningAuraComponent extends DataWithScoreAndDependencies {
+interface SfdcLightningAuraComponent extends DataWithScoreAndDependencies {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_LightningAuraComponent;
+    dataType: DataAliases.SfdcLightningAuraComponent;
     /**
     * @description Salesforce Id
     * @type {string}
@@ -3369,13 +3661,13 @@ interface SFDC_LightningAuraComponent extends DataWithScoreAndDependencies {
 /**
  * @description Representation of a Lightning Web Component in Org Check
  */
-interface SFDC_LightningWebComponent extends DataWithScoreAndDependencies {
+interface SfdcLightningWebComponent extends DataWithScoreAndDependencies {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_LightningWebComponent;
+    dataType: DataAliases.SfdcLightningWebComponent;
     /**
     * @description Salesforce Id
     * @type {string}
@@ -3426,13 +3718,13 @@ interface SFDC_LightningWebComponent extends DataWithScoreAndDependencies {
     url: string;
 }
 
-interface SFDC_Organization extends DataWithoutScore {
+interface SfdcOrganization extends DataWithoutScore {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_Organization;
+    dataType: DataAliases.SfdcOrganization;
     /**
     * @description Salesforce Id
     * @type {string}
@@ -3483,13 +3775,13 @@ interface SFDC_Organization extends DataWithoutScore {
     localNamespace: string;
 }
 
-interface SFDC_Package extends DataWithScore {
+interface SfdcPackage extends DataWithScore {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_Package;
+    dataType: DataAliases.SfdcPackage;
     /**
     * @description Salesforce Id
     * @type {string}
@@ -3516,13 +3808,13 @@ interface SFDC_Package extends DataWithScore {
     type: string;
 }
 
-interface SFDC_PermissionSetLicense extends DataWithScore {
+interface SfdcPermissionSetLicense extends DataWithScore {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_PermissionSetLicense;
+    dataType: DataAliases.SfdcPermissionSetLicense;
     /**
     * @description Salesforce Id of this item
     * @type {string}
@@ -3567,10 +3859,10 @@ interface SFDC_PermissionSetLicense extends DataWithScore {
     permissionSetIds: Array<string>;
     /**
      * @description Corresponding references of the permission set associated with the current license
-     * @type {Array<SFDC_PermissionSet>}
+     * @type {Array<SfdcPermissionSet>}
      * @public
      */
-    permissionSetRefs: Array<SFDC_PermissionSet>;
+    permissionSetRefs: Array<SfdcPermissionSet>;
     /**
      * @description Number of distinct users assigned to the permission set license
      * @type {number}
@@ -3615,13 +3907,13 @@ interface SFDC_PermissionSetLicense extends DataWithScore {
     url: string;
 }
 
-interface SFDC_ProfilePasswordPolicy extends DataWithScore {
+interface SfdcProfilePasswordPolicy extends DataWithScore {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_ProfilePasswordPolicy;
+    dataType: DataAliases.SfdcProfilePasswordPolicy;
     /**
     * @description The duration of the login lockout, in minutes. If users are locked out, they
     *                  must wait until the lockout period expires. Valid values: 0, 15, 30, 60
@@ -3700,13 +3992,13 @@ interface SFDC_ProfilePasswordPolicy extends DataWithScore {
     profileName: string;
 }
 
-interface SFDC_ProfileRestrictions extends DataWithScore {
+interface SfdcProfileRestrictions extends DataWithScore {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_ProfileRestrictions;
+    dataType: DataAliases.SfdcProfileRestrictions;
     /**
     * @description Salesforce Id of the corresponding Profile
     * @type {string}
@@ -3715,30 +4007,30 @@ interface SFDC_ProfileRestrictions extends DataWithScore {
     profileId: string;
     /**
      * @description Reference to the corresponding Profile
-     * @type {SFDC_Profile}
+     * @type {SfdcProfile}
      * @public
      */
-    profileRef: SFDC_Profile;
+    profileRef: SfdcProfile;
     /**
      * @description IP Range Restriction list for this profile
-     * @type {Array<SFDC_ProfileIpRangeRestriction>}
+     * @type {Array<SfdcProfileIpRangeRestriction>}
      * @public
      */
-    ipRanges: Array<SFDC_ProfileIpRangeRestriction>;
+    ipRanges: Array<SfdcProfileIpRangeRestriction>;
     /**
      * @description Login Hour Restriction list for this profile
-     * @type {Array<SFDC_ProfileLoginHourRestriction>}
+     * @type {Array<SfdcProfileLoginHourRestriction>}
      * @public
      */
-    loginHours: Array<SFDC_ProfileLoginHourRestriction>;
+    loginHours: Array<SfdcProfileLoginHourRestriction>;
 }
-interface SFDC_ProfileIpRangeRestriction extends DataWithoutScore {
+interface SfdcProfileIpRangeRestriction extends DataWithoutScore {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_ProfileIpRangeRestriction;
+    dataType: DataAliases.SfdcProfileIpRangeRestriction;
     /**
     * @description Start IP address
     * @type {string}
@@ -3764,13 +4056,13 @@ interface SFDC_ProfileIpRangeRestriction extends DataWithoutScore {
      */
     difference: number;
 }
-interface SFDC_ProfileLoginHourRestriction extends DataWithoutScore {
+interface SfdcProfileLoginHourRestriction extends DataWithoutScore {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_ProfileLoginHourRestriction;
+    dataType: DataAliases.SfdcProfileLoginHourRestriction;
     /**
     * @description Starting hour of the restriction (HH:MM format)
     * @type {string}
@@ -3797,13 +4089,13 @@ interface SFDC_ProfileLoginHourRestriction extends DataWithoutScore {
     difference: number;
 }
 
-interface SFDC_Report extends DataWithScore {
+interface SfdcReport extends DataWithScore {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_Report;
+    dataType: DataAliases.SfdcReport;
     /**
     * @description Unique identifier of this report in the org.
     * @type {string}
@@ -3884,13 +4176,13 @@ interface SFDC_Report extends DataWithScore {
     package: string;
 }
 
-interface SFDC_StaticResource extends DataWithScoreAndDependencies {
+interface SfdcStaticResource extends DataWithScoreAndDependencies {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_StaticResource;
+    dataType: DataAliases.SfdcStaticResource;
     /**
     * @description Salesforce Id
     * @type {string}
@@ -3941,13 +4233,13 @@ interface SFDC_StaticResource extends DataWithScoreAndDependencies {
     url: string;
 }
 
-interface SFDC_UserRole extends DataWithScore {
+interface SfdcUserRole extends DataWithScore {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_UserRole;
+    dataType: DataAliases.SfdcUserRole;
     /**
      * @description Salesforce Id
      * @type {string}
@@ -3980,10 +4272,10 @@ interface SFDC_UserRole extends DataWithScore {
     parentId: string;
     /**
      * @description The related parent reference
-     * @type {SFDC_UserRole}}
+     * @type {SfdcUserRole}}
      * @public
      */
-    parentRef: SFDC_UserRole;
+    parentRef: SfdcUserRole;
     /**
      * @description Level of this role in the global role hierarchy
      * @type {number}
@@ -4010,10 +4302,10 @@ interface SFDC_UserRole extends DataWithScore {
     activeMemberIds: Array<string>;
     /**
      * @description Array of active member user references
-     * @type {Array<SFDC_User>}
+     * @type {Array<SfdcUser>}
      * @public
      */
-    activeMemberRefs: Array<SFDC_User>;
+    activeMemberRefs: Array<SfdcUser>;
     /**
      * @description Does this role have active members?
      * @type {boolean}
@@ -4022,13 +4314,13 @@ interface SFDC_UserRole extends DataWithScore {
     hasActiveMembers: boolean;
 }
 
-interface SFDC_VisualForceComponent extends DataWithScoreAndDependencies {
+interface SfdcVisualForceComponent extends DataWithScoreAndDependencies {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_VisualForceComponent;
+    dataType: DataAliases.SfdcVisualForceComponent;
     /**
     * @description Salesforce Id
     * @type {string}
@@ -4091,13 +4383,13 @@ interface SFDC_VisualForceComponent extends DataWithScoreAndDependencies {
     url: string;
 }
 
-interface SFDC_VisualForcePage extends DataWithScoreAndDependencies {
+interface SfdcVisualForcePage extends DataWithScoreAndDependencies {
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_VisualForcePage;
+    dataType: DataAliases.SfdcVisualForcePage;
     /**
     * @description Salesforce Id
     * @type {string}
@@ -4284,12 +4576,12 @@ interface ApiIntf {
     }>>;
     /**
      * @description Get information about the organization
-     * @returns {Promise<SFDC_Organization>} Org information to return
+     * @returns {Promise<SfdcOrganization>} Org information to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getOrganizationInformation(): Promise<SFDC_Organization>;
+    getOrganizationInformation(): Promise<SfdcOrganization>;
     /**
      * @description Check if we can use the current org according to the terms (specially if this is a production org)
      * @returns {Promise<boolean>} true if this org can be used, false otehrwise.
@@ -4319,12 +4611,12 @@ interface ApiIntf {
     checkCurrentUserPermissions(): Promise<boolean>;
     /**
      * @description Get information about the packages
-     * @returns {Promise<Array<SFDC_Package>>} List of items to return
+     * @returns {Promise<Array<SfdcPackage>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getPackages(): Promise<Array<SFDC_Package>>;
+    getPackages(): Promise<Array<SfdcPackage>>;
     /**
      * @description Remove all the cached information about packages
      * @public
@@ -4332,15 +4624,15 @@ interface ApiIntf {
     removeAllPackagesFromCache(): void;
     /**
      * @description Get information about the page layouts
-     * @param {string} namespace - the namespace of the package to filter the page layouts
-     * @param {string} sobjectType - the sobject type to filter the page layouts
-     * @param {string} sobject - the sobject to filter the page layouts
-     * @returns {Promise<Array<SFDC_PageLayout>>} List of items to return
+     * @param {string} [namespace] - the namespace of the package to filter the page layouts
+     * @param {string} [sobjectType] - the sobject type to filter the page layouts
+     * @param {string} [sobject] - the sobject to filter the page layouts
+     * @returns {Promise<Array<SfdcPageLayout>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getPageLayouts(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_PageLayout>>;
+    getPageLayouts(namespace?: string, sobjectType?: string, sobject?: string): Promise<Array<SfdcPageLayout>>;
     /**
      * @description Remove all the cached information about page layouts
      * @public
@@ -4348,22 +4640,22 @@ interface ApiIntf {
     removeAllPageLayoutsFromCache(): void;
     /**
      * @description Get information about the object types
-     * @returns {Promise<Array<SFDC_ObjectType>>} List of items to return
+     * @returns {Promise<Array<SfdcObjectType>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getObjectTypes(): Promise<Array<SFDC_ObjectType>>;
+    getObjectTypes(): Promise<Array<SfdcObjectType>>;
     /**
      * @description Get information about the objects
-     * @param {string} namespace - the namespace of the package to filter the objects
-     * @param {string} sobjectType - the sobject type to filter the objects
-     * @returns {Promise<Array<SFDC_Object>>} List of items to return
+     * @param {string} [namespace] - the namespace of the package to filter the objects
+     * @param {string} [sobjectType] - the sobject type to filter the objects
+     * @returns {Promise<Array<SfdcObject>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getObjects(namespace: string, sobjectType: string): Promise<Array<SFDC_Object>>;
+    getObjects(namespace?: string, sobjectType?: string): Promise<Array<SfdcObject>>;
     /**
      * @description Remove all the cached information about objects
      * @public
@@ -4372,12 +4664,12 @@ interface ApiIntf {
     /**
      * @description Get information about a specific sobject
      * @param {string} sobject - the name of the sobject to get information about
-     * @returns {Promise<SFDC_Object>} List of items to return
+     * @returns {Promise<SfdcObject>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getObject(sobject: string): Promise<SFDC_Object>;
+    getObject(sobject: string): Promise<SfdcObject>;
     /**
      * @description Remove all the cached information about a specific sobject
      * @param {string} sobject - the name of the sobject to remove from cache
@@ -4386,13 +4678,13 @@ interface ApiIntf {
     removeObjectFromCache(sobject: string): void;
     /**
      * @description Get information about object permissions per parent (kind of matrix view)
-     * @param {string} namespace - the namespace of the package to filter the object permissions
-     * @returns {Promise<DataMatrixIntf>} Information about objects (list of string) and permissions (list of SFDC_ObjectPermissionsPerParent)
+     * @param {string} [namespace] - the namespace of the package to filter the object permissions
+     * @returns {Promise<DataMatrixIntf>} Information about objects (list of string) and permissions (list of SfdcObjectPermissionsPerParent)
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getObjectPermissionsPerParent(namespace: string): Promise<DataMatrixIntf>;
+    getObjectPermissionsPerParent(namespace?: string): Promise<DataMatrixIntf>;
     /**
      * @description Remove all the cached information about object permissions
      * @public
@@ -4400,13 +4692,13 @@ interface ApiIntf {
     removeAllObjectPermissionsFromCache(): void;
     /**
      * @description Get information about application permissions per parent (kind of matrix view)
-     * @param {string} namespace - the namespace of the package to filter the application permissions
-     * @returns {Promise<DataMatrixIntf>} Information about applications (list of string) and permissions (list of SFDC_AppPermissionsPerParent)
+     * @param {string} [namespace] - the namespace of the package to filter the application permissions
+     * @returns {Promise<DataMatrixIntf>} Information about applications (list of string) and permissions (list of SfdcAppPermissionsPerParent)
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getApplicationPermissionsPerParent(namespace: string): Promise<DataMatrixIntf>;
+    getApplicationPermissionsPerParent(namespace?: string): Promise<DataMatrixIntf>;
     /**
      * @description Remove all the cached information about application permissions
      * @public
@@ -4414,12 +4706,12 @@ interface ApiIntf {
     removeAllAppPermissionsFromCache(): void;
     /**
      * @description Get information about knowledge articles
-     * @returns {Promise<Array<SFDC_KnowledgeArticle>>} List of items to return
+     * @returns {Promise<Array<SfdcKnowledgeArticle>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getKnowledgeArticles(): Promise<Array<SFDC_KnowledgeArticle>>;
+    getKnowledgeArticles(): Promise<Array<SfdcKnowledgeArticle>>;
     /**
      * @description Remove all the cached information about knowledge articles
      * @public
@@ -4427,12 +4719,12 @@ interface ApiIntf {
     removeAllKnowledgeArticlesFromCache(): void;
     /**
      * @description Get information about Chatter groups
-     * @returns {Promise<Array<SFDC_CollaborationGroup>>} List of items to return
+     * @returns {Promise<Array<SfdcCollaborationGroup>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getChatterGroups(): Promise<Array<SFDC_CollaborationGroup>>;
+    getChatterGroups(): Promise<Array<SfdcCollaborationGroup>>;
     /**
      * @description Remove all the cached information about Chatter groups
      * @public
@@ -4440,15 +4732,15 @@ interface ApiIntf {
     removeAllChatterGroupsFromCache(): void;
     /**
      * @description Get information about custom fields (filtered out by namespace/pakage, type and sobject)
-     * @param {string} namespace - the namespace of the package to filter the custom fields
-     * @param {string} sobjectType - the sobject type to filter the custom fields
-     * @param {string} sobject - the sobject to filter the custom fields
-     * @returns {Promise<Array<SFDC_Field>>} List of items to return
+     * @param {string} [namespace] - the namespace of the package to filter the custom fields
+     * @param {string} [sobjectType] - the sobject type to filter the custom fields
+     * @param {string} [sobject] - the sobject to filter the custom fields
+     * @returns {Promise<Array<SfdcField>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getCustomFields(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_Field>>;
+    getCustomFields(namespace?: string, sobjectType?: string, sobject?: string): Promise<Array<SfdcField>>;
     /**
      * @description Remove all the cached information about custom fields
      * @public
@@ -4456,13 +4748,13 @@ interface ApiIntf {
     removeAllCustomFieldsFromCache(): void;
     /**
      * @description Get information about permission sets (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the permission sets
-     * @returns {Promise<Array<SFDC_PermissionSet>>} List of items to return
+     * @param {string} [namespace] - the namespace of the package to filter the permission sets
+     * @returns {Promise<Array<SfdcPermissionSet>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getPermissionSets(namespace: string): Promise<Array<SFDC_PermissionSet>>;
+    getPermissionSets(namespace?: string): Promise<Array<SfdcPermissionSet>>;
     /**
      * @description Remove all the cached information about permission sets
      * @public
@@ -4470,12 +4762,12 @@ interface ApiIntf {
     removeAllPermSetsFromCache(): void;
     /**
      * @description Get information about permission set licenses
-     * @returns {Promise<Array<SFDC_PermissionSetLicense>>} List of items to return
+     * @returns {Promise<Array<SfdcPermissionSetLicense>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getPermissionSetLicenses(): Promise<Array<SFDC_PermissionSetLicense>>;
+    getPermissionSetLicenses(): Promise<Array<SfdcPermissionSetLicense>>;
     /**
      * @description Remove all the cached information about permission set licenses
      * @public
@@ -4483,13 +4775,13 @@ interface ApiIntf {
     removeAllPermSetLicensesFromCache(): void;
     /**
      * @description Get information about profiles (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the profiles
-     * @returns {Promise<Array<SFDC_Profile>>} List of items to return
+     * @param {string} [namespace] - the namespace of the package to filter the profiles
+     * @returns {Promise<Array<SfdcProfile>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getProfiles(namespace: string): Promise<Array<SFDC_Profile>>;
+    getProfiles(namespace?: string): Promise<Array<SfdcProfile>>;
     /**
      * @description Remove all the cached information about profiles
      * @public
@@ -4497,13 +4789,13 @@ interface ApiIntf {
     removeAllProfilesFromCache(): void;
     /**
      * @description Get information about profile restrictions (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the profile restrictions
-     * @returns {Promise<Array<SFDC_ProfileRestrictions>>} List of items to return
+     * @param {string} [namespace] - the namespace of the package to filter the profile restrictions
+     * @returns {Promise<Array<SfdcProfileRestrictions>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getProfileRestrictions(namespace: string): Promise<Array<SFDC_ProfileRestrictions>>;
+    getProfileRestrictions(namespace?: string): Promise<Array<SfdcProfileRestrictions>>;
     /**
      * @description Remove all the cached information about profile restrictions
      * @public
@@ -4511,12 +4803,12 @@ interface ApiIntf {
     removeAllProfileRestrictionsFromCache(): void;
     /**
      * @description Get information about profile password policies
-     * @returns {Promise<Array<SFDC_ProfilePasswordPolicy>>} List of items to return
+     * @returns {Promise<Array<SfdcProfilePasswordPolicy>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getProfilePasswordPolicies(): Promise<Array<SFDC_ProfilePasswordPolicy>>;
+    getProfilePasswordPolicies(): Promise<Array<SfdcProfilePasswordPolicy>>;
     /**
      * @description Remove all the cached information about profile password policies
      * @public
@@ -4524,12 +4816,12 @@ interface ApiIntf {
     removeAllProfilePasswordPoliciesFromCache(): void;
     /**
      * @description Get information about active users
-     * @returns {Promise<Array<SFDC_User>>} List of items to return
+     * @returns {Promise<Array<SfdcUser>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getActiveUsers(): Promise<Array<SFDC_User>>;
+    getActiveUsers(): Promise<Array<SfdcUser>>;
     /**
      * @description Remove all the cached information about active users
      * @public
@@ -4537,12 +4829,12 @@ interface ApiIntf {
     removeAllActiveUsersFromCache(): void;
     /**
      * @description Get information about browsers
-     * @returns {Promise<Array<SFDC_Browser>>} List of items to return
+     * @returns {Promise<Array<SfdcBrowser>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getBrowsers(): Promise<Array<SFDC_Browser>>;
+    getBrowsers(): Promise<Array<SfdcBrowser>>;
     /**
      * @description Remove all the cached information about browsers
      * @public
@@ -4550,13 +4842,13 @@ interface ApiIntf {
     removeAllBrowsersFromCache(): void;
     /**
      * @description Get information about custom labels (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the custom labels
-     * @returns {Promise<Array<SFDC_CustomLabel>>} List of items to return
+     * @param {string} [namespace] - the namespace of the package to filter the custom labels
+     * @returns {Promise<Array<SfdcCustomLabel>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getCustomLabels(namespace: string): Promise<Array<SFDC_CustomLabel>>;
+    getCustomLabels(namespace?: string): Promise<Array<SfdcCustomLabel>>;
     /**
      * @description Remove all the cached information about custom labels
      * @public
@@ -4564,13 +4856,13 @@ interface ApiIntf {
     removeAllCustomLabelsFromCache(): void;
     /**
      * @description Get information about custom tabs (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the custom tabs
-     * @returns {Promise<Array<SFDC_CustomTab>>} List of items to return
+     * @param {string} [namespace] - the namespace of the package to filter the custom tabs
+     * @returns {Promise<Array<SfdcCustomTab>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getCustomTabs(namespace: string): Promise<Array<SFDC_CustomTab>>;
+    getCustomTabs(namespace?: string): Promise<Array<SfdcCustomTab>>;
     /**
      * @description Remove all the cached information about custom tabs
      * @public
@@ -4578,13 +4870,13 @@ interface ApiIntf {
     removeAllCustomTabsFromCache(): void;
     /**
      * @description Get information about documents (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the documents
-     * @returns {Promise<Array<SFDC_Document>>} List of items to return
+     * @param {string} [namespace] - the namespace of the package to filter the documents
+     * @returns {Promise<Array<SfdcDocument>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getDocuments(namespace: string): Promise<Array<SFDC_Document>>;
+    getDocuments(namespace?: string): Promise<Array<SfdcDocument>>;
     /**
      * @description Remove all the cached information about documents
      * @public
@@ -4592,13 +4884,13 @@ interface ApiIntf {
     removeAllDocumentsFromCache(): void;
     /**
      * @description Get information about LWCs (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the lightning web components
-     * @returns {Promise<Array<SFDC_LightningWebComponent>>} List of items to return
+     * @param {string} [namespace] - the namespace of the package to filter the lightning web components
+     * @returns {Promise<Array<SfdcLightningWebComponent>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getLightningWebComponents(namespace: string): Promise<Array<SFDC_LightningWebComponent>>;
+    getLightningWebComponents(namespace?: string): Promise<Array<SfdcLightningWebComponent>>;
     /**
      * @description Remove all the cached information about lightning web components
      * @public
@@ -4606,13 +4898,13 @@ interface ApiIntf {
     removeAllLightningWebComponentsFromCache(): void;
     /**
      * @description Get information about Aura Components (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the lightning aura components
-     * @returns {Promise<Array<SFDC_LightningAuraComponent>>} List of items to return
+     * @param {string} [namespace] - the namespace of the package to filter the lightning aura components
+     * @returns {Promise<Array<SfdcLightningAuraComponent>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getLightningAuraComponents(namespace: string): Promise<Array<SFDC_LightningAuraComponent>>;
+    getLightningAuraComponents(namespace?: string): Promise<Array<SfdcLightningAuraComponent>>;
     /**
      * @description Remove all the cached information about lightning aura components
      * @public
@@ -4620,13 +4912,13 @@ interface ApiIntf {
     removeAllLightningAuraComponentsFromCache(): void;
     /**
      * @description Get information about flexipages (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the lightning pages
-     * @returns {Promise<Array<SFDC_LightningPage>>} List of items to return
+     * @param {string} [namespace] - the namespace of the package to filter the lightning pages
+     * @returns {Promise<Array<SfdcLightningPage>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getLightningPages(namespace: string): Promise<Array<SFDC_LightningPage>>;
+    getLightningPages(namespace?: string): Promise<Array<SfdcLightningPage>>;
     /**
      * @description Remove all the cached information about lightning pages
      * @public
@@ -4634,13 +4926,13 @@ interface ApiIntf {
     removeAllLightningPagesFromCache(): void;
     /**
      * @description Get information about VFCs (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the visualforce components
-     * @returns {Promise<Array<SFDC_VisualForceComponent>>} List of items to return
+     * @param {string} [namespace] - the namespace of the package to filter the visualforce components
+     * @returns {Promise<Array<SfdcVisualForceComponent>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getVisualForceComponents(namespace: string): Promise<Array<SFDC_VisualForceComponent>>;
+    getVisualForceComponents(namespace?: string): Promise<Array<SfdcVisualForceComponent>>;
     /**
      * @description Remove all the cached information about Visualforce Components
      * @public
@@ -4648,13 +4940,13 @@ interface ApiIntf {
     removeAllVisualForceComponentsFromCache(): void;
     /**
      * @description Get information about VFPs (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the visualforce pages
-     * @returns {Promise<Array<SFDC_VisualForcePage>>} List of items to return
+     * @param {string} [namespace] - the namespace of the package to filter the visualforce pages
+     * @returns {Promise<Array<SfdcVisualForcePage>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getVisualForcePages(namespace: string): Promise<Array<SFDC_VisualForcePage>>;
+    getVisualForcePages(namespace?: string): Promise<Array<SfdcVisualForcePage>>;
     /**
      * @description Remove all the cached information about Visualforce Pages
      * @public
@@ -4662,12 +4954,12 @@ interface ApiIntf {
     removeAllVisualForcePagesFromCache(): void;
     /**
      * @description Get information about Public Groups
-     * @returns {Promise<Array<SFDC_Group>>} List of items to return
+     * @returns {Promise<Array<SfdcGroup>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getPublicGroups(): Promise<Array<SFDC_Group>>;
+    getPublicGroups(): Promise<Array<SfdcGroup>>;
     /**
      * @description Remove all the cached information about public groups
      * @public
@@ -4675,12 +4967,12 @@ interface ApiIntf {
     removeAllPublicGroupsFromCache(): void;
     /**
      * @description Get information about Queues
-     * @returns {Promise<Array<SFDC_Group>>} List of items to return
+     * @returns {Promise<Array<SfdcGroup>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getQueues(): Promise<Array<SFDC_Group>>;
+    getQueues(): Promise<Array<SfdcGroup>>;
     /**
      * @description Remove all the cached information about queues
      * @public
@@ -4688,13 +4980,13 @@ interface ApiIntf {
     removeAllQueuesFromCache(): void;
     /**
      * @description Get information about Apex Classes (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the apex classes
-     * @returns {Promise<Array<SFDC_ApexClass>>} List of items to return
+     * @param {string} [namespace] - the namespace of the package to filter the apex classes
+     * @returns {Promise<Array<SfdcApexClass>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getApexClasses(namespace: string): Promise<Array<SFDC_ApexClass>>;
+    getApexClasses(namespace?: string): Promise<Array<SfdcApexClass>>;
     /**
      * @description Remove all the cached information about apex classes
      * @public
@@ -4702,13 +4994,13 @@ interface ApiIntf {
     removeAllApexClassesFromCache(): void;
     /**
      * @description Get information about Apex Tests (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the apex tests
-     * @returns {Promise<Array<SFDC_ApexClass>>} List of items to return
+     * @param {string} [namespace] - the namespace of the package to filter the apex tests
+     * @returns {Promise<Array<SfdcApexClass>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getApexTests(namespace: string): Promise<Array<SFDC_ApexClass>>;
+    getApexTests(namespace?: string): Promise<Array<SfdcApexClass>>;
     /**
      * @description Remove all the cached information about apex tests
      * @public
@@ -4716,13 +5008,13 @@ interface ApiIntf {
     removeAllApexTestsFromCache(): void;
     /**
      * @description Get information about Apex Uncompiled Classes (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the apex uncompiled classes
-     * @returns {Promise<Array<SFDC_ApexClass>>} List of items to return
+     * @param {string} [namespace] - the namespace of the package to filter the apex uncompiled classes
+     * @returns {Promise<Array<SfdcApexClass>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getApexUncompiled(namespace: string): Promise<Array<SFDC_ApexClass>>;
+    getApexUncompiled(namespace?: string): Promise<Array<SfdcApexClass>>;
     /**
      * @description Remove all the cached information about apex uncompiled classes
      * @public
@@ -4730,13 +5022,13 @@ interface ApiIntf {
     removeAllApexUncompiledFromCache(): void;
     /**
      * @description Get information about Apex triggers (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the apex triggers
-     * @returns {Promise<Array<SFDC_ApexTrigger>>} List of items to return
+     * @param {string} [namespace] - the namespace of the package to filter the apex triggers
+     * @returns {Promise<Array<SfdcApexTrigger>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getApexTriggers(namespace: string): Promise<Array<SFDC_ApexTrigger>>;
+    getApexTriggers(namespace?: string): Promise<Array<SfdcApexTrigger>>;
     /**
      * @description Remove all the cached information about apex triggers
      * @public
@@ -4744,12 +5036,12 @@ interface ApiIntf {
     removeAllApexTriggersFromCache(): void;
     /**
      * @description Get information about User roles in a tabular view
-     * @returns {Promise<Array<SFDC_UserRole>>} List of items to return
+     * @returns {Promise<Array<SfdcUserRole>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getRoles(): Promise<Array<SFDC_UserRole>>;
+    getRoles(): Promise<Array<SfdcUserRole>>;
     /**
      * @description Remove all the cached information about roles
      * @public
@@ -4757,21 +5049,21 @@ interface ApiIntf {
     removeAllRolesFromCache(): void;
     /**
      * @description Get information about User Roles in a tree view
-     * @returns {Promise<SFDC_UserRole>} Tree
+     * @returns {Promise<SfdcUserRole>} Tree
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getRolesTree(): Promise<SFDC_UserRole>;
+    getRolesTree(): Promise<SfdcUserRole>;
     /**
      * @description Get information about Static Resources
-     * @param {string} namespace - the namespace of the package to filter the weblinks
-     * @returns {Promise<Array<SFDC_StaticResource>>} List of items to return
+     * @param {string} [namespace] - the namespace of the package to filter the weblinks
+     * @returns {Promise<Array<SfdcStaticResource>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getStaticResources(namespace: string): Promise<Array<SFDC_StaticResource>>;
+    getStaticResources(namespace?: string): Promise<Array<SfdcStaticResource>>;
     /**
      * @description Remove all the cached information about Static Resources
      * @public
@@ -4779,15 +5071,15 @@ interface ApiIntf {
     removeAllStaticResourcesFromCache(): void;
     /**
      * @description Get information about WebLinks
-     * @param {string} namespace - the namespace of the package to filter the weblinks
-     * @param {string} sobjectType - the sobject type to filter the weblinks
-     * @param {string} sobject - the sobject to filter the weblinks
-     * @returns {Promise<Array<SFDC_WebLink>>} List of items to return
+     * @param {string} [namespace] - the namespace of the package to filter the weblinks
+     * @param {string} [sobjectType] - the sobject type to filter the weblinks
+     * @param {string} [sobject] - the sobject to filter the weblinks
+     * @returns {Promise<Array<SfdcWebLink>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getWeblinks(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_WebLink>>;
+    getWeblinks(namespace?: string, sobjectType?: string, sobject?: string): Promise<Array<SfdcWebLink>>;
     /**
      * @description Remove all the cached information about WebLinks
      * @public
@@ -4795,12 +5087,12 @@ interface ApiIntf {
     removeAllWeblinksFromCache(): void;
     /**
      * @description Get information about Workflows
-     * @returns {Promise<Array<SFDC_Workflow>>} List of items to return
+     * @returns {Promise<Array<SfdcWorkflow>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getWorkflows(): Promise<Array<SFDC_Workflow>>;
+    getWorkflows(): Promise<Array<SfdcWorkflow>>;
     /**
      * @description Remove all the cached information about workflows
      * @public
@@ -4808,15 +5100,15 @@ interface ApiIntf {
     removeAllWorkflowsFromCache(): void;
     /**
      * @description Get information about record types
-     * @param {string} namespace - the namespace of the package to filter the record types
-     * @param {string} sobjectType - the sobject type to filter the record types
-     * @param {string} sobject - the sobject to filter the record types
-     * @returns {Promise<Array<SFDC_RecordType>>} List of items to return
+     * @param {string} [namespace] - the namespace of the package to filter the record types
+     * @param {string} [sobjectType] - the sobject type to filter the record types
+     * @param {string} [sobject] - the sobject to filter the record types
+     * @returns {Promise<Array<SfdcRecordType>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getRecordTypes(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_RecordType>>;
+    getRecordTypes(namespace?: string, sobjectType?: string, sobject?: string): Promise<Array<SfdcRecordType>>;
     /**
      * @description Remove all the cached information about record types
      * @public
@@ -4825,13 +5117,13 @@ interface ApiIntf {
     /**
      * @description Get information about field permissions per parent (kind of matrix view) for a specific sobject
      * @param {string} sobject - the name of the sobject to get information about
-     * @param {string} namespace - the namespace of the package to filter the field permissions
-     * @returns {Promise<DataMatrixIntf>} Information about fields (list of string) and permissions (list of SFDC_FieldPermissionsPerParent)
+     * @param {string} [namespace] - the namespace of the package to filter the field permissions
+     * @returns {Promise<DataMatrixIntf>} Information about fields (list of string) and permissions (list of SfdcFieldPermissionsPerParent)
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getFieldPermissionsPerParent(sobject: string, namespace: string): Promise<DataMatrixIntf>;
+    getFieldPermissionsPerParent(sobject: string, namespace?: string): Promise<DataMatrixIntf>;
     /**
      * @description Remove all the cached information about field permissions
      * @public
@@ -4839,12 +5131,12 @@ interface ApiIntf {
     removeAllFieldPermissionsFromCache(): void;
     /**
      * @description Get information about Flows
-     * @returns {Promise<Array<SFDC_Flow>>} List of items to return
+     * @returns {Promise<Array<SfdcFlow>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getFlows(): Promise<Array<SFDC_Flow>>;
+    getFlows(): Promise<Array<SfdcFlow>>;
     /**
      * @description Remove all the cached information about flows
      * @public
@@ -4852,13 +5144,13 @@ interface ApiIntf {
     removeAllFlowsFromCache(): void;
     /**
      * @description Get information about EmailTemplate
-     * @param {string} namespace - the namespace of the package to filter the email templates
-     * @returns {Promise<Array<SFDC_EmailTemplate>>} List of items to return
+     * @param {string} [namespace] - the namespace of the package to filter the email templates
+     * @returns {Promise<Array<SfdcEmailTemplate>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getEmailTemplates(namespace: string): Promise<Array<SFDC_EmailTemplate>>;
+    getEmailTemplates(namespace?: string): Promise<Array<SfdcEmailTemplate>>;
     /**
      * @description Remove all the cached information about email template
      * @public
@@ -4866,12 +5158,12 @@ interface ApiIntf {
     removeAllEmailTemplatesFromCache(): void;
     /**
      * @description Get information about home page components
-     * @returns {Promise<Array<SFDC_HomePageComponent>>} List of items to return
+     * @returns {Promise<Array<SfdcHomePageComponent>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getHomePageComponents(): Promise<Array<SFDC_HomePageComponent>>;
+    getHomePageComponents(): Promise<Array<SfdcHomePageComponent>>;
     /**
      * @description Remove all the cached information about home page components
      * @public
@@ -4879,12 +5171,12 @@ interface ApiIntf {
     removeAllHomePageComponentsFromCache(): void;
     /**
      * @description Get information about Process Builders
-     * @returns {Promise<Array<SFDC_Flow>>} List of items to return
+     * @returns {Promise<Array<SfdcFlow>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getProcessBuilders(): Promise<Array<SFDC_Flow>>;
+    getProcessBuilders(): Promise<Array<SfdcFlow>>;
     /**
      * @description Remove all the cached information about process builders
      * @public
@@ -4892,15 +5184,15 @@ interface ApiIntf {
     removeAllProcessBuildersFromCache(): void;
     /**
      * @description Get information about Validation rules
-     * @param {string} namespace - the namespace of the package to filter the validation rules
-     * @param {string} sobjectType - the sobject type to filter the validation rules
-     * @param {string} sobject - the sobject to filter the validation rules
-     * @returns {Promise<Array<SFDC_ValidationRule>>} List of items to return
+     * @param {string} [namespace] - the namespace of the package to filter the validation rules
+     * @param {string} [sobjectType] - the sobject type to filter the validation rules
+     * @param {string} [sobject] - the sobject to filter the validation rules
+     * @returns {Promise<Array<SfdcValidationRule>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getValidationRules(namespace: string, sobjectType: string, sobject: string): Promise<Array<SFDC_ValidationRule>>;
+    getValidationRules(namespace?: string, sobjectType?: string, sobject?: string): Promise<Array<SfdcValidationRule>>;
     /**
      * @description Remove all the cached information about validation rules
      * @public
@@ -4908,12 +5200,12 @@ interface ApiIntf {
     removeAllValidationRulesFromCache(): void;
     /**
      * @description Get information about dashboards
-     * @returns {Promise<Array<SFDC_Dashboard>>} List of items to return
+     * @returns {Promise<Array<SfdcDashboard>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getDashboards(): Promise<Array<SFDC_Dashboard>>;
+    getDashboards(): Promise<Array<SfdcDashboard>>;
     /**
      * @description Remove all the cached information about dashboards
      * @public
@@ -4921,12 +5213,12 @@ interface ApiIntf {
     removeAllDashboardsFromCache(): void;
     /**
      * @description Get information about reports
-     * @returns {Promise<Array<SFDC_Report>>} List of items to return
+     * @returns {Promise<Array<SfdcReport>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getReports(): Promise<Array<SFDC_Report>>;
+    getReports(): Promise<Array<SfdcReport>>;
     /**
      * @description Remove all the cached information about reports
      * @public
@@ -4960,368 +5252,7 @@ interface ApiIntf {
     removeHardcodedURLsFromCache(): void;
 }
 
-/**
- * @description Org Check "score rule" used to qualify if an item is bad or not
- * @public
- */
-interface ScoreRule {
-    /**
-     * @description Unique identifier of that rule
-     * @type {number}
-     * @public
-     */
-    id: number;
-    /**
-     * @description Description of that rule
-     * @type {string}
-     * @public
-     */
-    description: string;
-    /**
-     * @description Rule's formula with the data as only parameter. Function returns true or false.
-     * @type {Function}
-     * @public
-     */
-    formula: Function;
-    /**
-     * @description Message to show if the formula returns false for a given data.
-     * @type {string}
-     * @public
-     */
-    errorMessage: string;
-    /**
-     * @description Technical name of the field that is considered 'bad'
-     * @type {string}
-     * @public
-     */
-    badField: string;
-    /**
-     * @description For which data this rule is applicable?
-     * @type {Array<any>}
-     * @public
-     */
-    applicable: Array<DataAliases>;
-    /**
-     * @description Category of the rule
-     * @type {string}
-     * @public
-     */
-    category: string;
-}
-
-/**
- * @description This interface describe the field/property name in a Row where we find the "value" to show
- */
-interface WhereToGetData {
-    /**
-     * @description Property containing the value
-     * @type {string}
-     */
-    value: string;
-}
-/**
- * @description This interface describe the field/property name in a Row where we find the "values" to iterate over
- */
-interface WhereToGetMultipleData {
-    /**
-     * @description Property containing the values
-     * @type {string}
-     */
-    values: string;
-}
-/**
- * @description The score is the value in this case, and we add the fields to find the id and name of the item that has this score
- */
-interface WhereToGetScoreData extends WhereToGetData {
-    /**
-     * @description Property containing the Salesforce ID of the entity that has this score
-     * @type {string}
-     */
-    id: string;
-    /**
-     * @description Property containing the name/label of the entity that has this score
-     * @type {string}
-     */
-    name: string;
-}
-/**
- * @description The text is the value in this case, no additional field needed
- */
-interface WhereToGetTextData extends WhereToGetData {
-}
-/**
- * @description The URL is the value in this case, and we add the field to find the label for the hyperlink
- */
-interface WhereToGetLinkData extends WhereToGetData {
-    /**
-     * @description Property containing the label to be used in the link
-     * @type {string}
-     */
-    label: string;
-}
-/**
- * @description The Object is the value in this case, and we add a method to render this object as a string
- */
-interface WhereToGetObjectData extends WhereToGetData {
-    /**
-     * @description Template function to generate a text based on the object
-     * @type {function(any): string}
-     */
-    template(arg0: any): string;
-}
-/**
- * @description Values is the list, Value is the field to get the object (for each item)
- */
-interface WhereToGetObjectsData extends WhereToGetObjectData, WhereToGetMultipleData {
-}
-/**
- * @description Values is the list, Value is the field to get the text (for each item)
- */
-interface WhereToGetTextsData extends WhereToGetTextData, WhereToGetMultipleData {
-}
-/**
- * @description Values is the list, Value is the field to get the URL (for each item)
- */
-interface WhereToGetLinksData extends WhereToGetLinkData, WhereToGetMultipleData {
-}
-
-interface Modifier {
-    /**
-     * @description If value is empty (undefined, empty string, numerical zero, empty list, etc...), this is the substitute text to use
-     * @type {string}
-     */
-    valueIfEmpty?: string;
-    /**
-     * @description If text value has more than this maximum length of characters, the string will be truncated accordingly.
-     * @type {number}
-     */
-    maximumLength?: number;
-    /**
-     * @description If text value will be rendered as preformatted (like code or formulas etc.)
-     * @type {boolean}
-     */
-    preformatted?: boolean;
-    /**
- * @description If the value is less that this value, the text will be substituted.
- * @type {number}
- */
-    minimum?: number;
-    /**
-     * @description If value is less than 'min', this is the substitute text to use
-     * @type {string}
-     */
-    valueBeforeMin?: string;
-    /**
-     * @description If the value is greater that this value, the text will be substituted.
-     * @type {number}
-     */
-    maximum?: number;
-    /**
-     * @description If value is greater than 'max', this is the substitute text to use
-     * @type {string}
-     */
-    valueAfterMax?: string;
-}
-
-declare enum ColumnType {
-    IDX = "index",
-    SCR = "score",
-    TXT = "text",
-    TXTS = "texts",
-    NUM = "numeric",
-    PRC = "percentage",
-    URL = "id",
-    URLS = "ids",
-    CHK = "boolean",
-    DTM = "datetime",
-    DEP = "dependencies",
-    OBJS = "objects"
-}
-
-declare enum Orientation {
-    HORIZONTAL = "horizontal",
-    VERTICAL = "vertical"
-}
-
-interface TableColumn {
-    /**
-     * @description Label used in the header of the column
-     * @type {string}
-     */
-    label: string;
-    /**
-     * @description Type used in the header of the column
-     * @type {ColumnType}
-     */
-    type: ColumnType;
-    /**
-     * @description Defines how to retrieve the data -- in which property
-     * @type { WhereToGetTextData | WhereToGetScoreData | WhereToGetLinkData | WhereToGetObjectData | WhereToGetTextsData | WhereToGetLinksData | WhereToGetObjectsData }
-     */
-    data?: WhereToGetTextData | WhereToGetScoreData | WhereToGetLinkData | WhereToGetObjectData | WhereToGetTextsData | WhereToGetLinksData | WhereToGetObjectsData;
-    /**
-     * @description Optional modifier around the data
-     * @type { Modifier }
-     */
-    modifier?: Modifier;
-    /**
-     * @description In which orientation the column should be. This is optional, by default the column will be horizontal.
-     * @type {Orientation}
-     */
-    orientation?: Orientation;
-}
-
-declare enum SortOrder {
-    DESC = "desc",
-    ASC = "asc"
-}
-
-interface Table {
-    /**
-     * @description List of columns in a table
-     * @type {Array<TableColumn>}
-     */
-    columns: Array<TableColumn>;
-    /**
-     * @description Which index column is used for ordering?
-     * @type {number}
-     */
-    orderIndex: number;
-    /**
-     * @description What is the sort order: ASC or DESC?
-     * @type {SortOrder}
-     */
-    orderSort: SortOrder;
-}
-interface ExportedTable {
-    /**
-     * @description Name of the exported table (like a title)
-     * @type {string}
-     */
-    header: string;
-    /**
-     * @description List of column labels
-     * @type {Array<string>}
-     */
-    columns: Array<string>;
-    /**
-     * @description List of rows with cells
-     * @type {Array<Array<string>>}
-     */
-    rows: Array<Array<string>>;
-}
-
-interface Row {
-    /**
-     * @description Pre-calcultaed index of the row (needs to be recalculated when sroting for example!)
-     * @type {number}
-     * @public
-     */
-    index: number;
-    /**
-     * @description Name of the row
-     * @type {string}
-     * @public
-     */
-    name: string;
-    /**
-     * @description Score of the row if it has one
-     * @type {number}
-     * @public
-     */
-    score: number;
-    /**
-     * @description List of bad fields (must match column's value)
-    /* @type {Array<string>}
-     * @public
-     */
-    badFields: Array<string>;
-    /**
-     * @description List of reason id when this row is bad (can be empty, should not have duplicates)
-    /* @type {Array<string>}
-     * @public
-     */
-    badReasonIds: Array<string>;
-    /**
-     * @description List of cells in this row
-    /* @type {Array<any>}
-     * @public
-     */
-    cells: Array<any>;
-    /**
-     * @description Flag used when filtering the table. Meaning is obvious.
-    /* @type {boolean}
-     * @public
-     */
-    isVisible: boolean;
-}
-
-declare class ApexTestsTableDefinitions implements Table {
-    /**
-     * @description List of columns in a table
-     * @type {Array<TableColumn>}
-     */
-    columns: Array<TableColumn>;
-    /**
-     * @description Which index column is used for ordering?
-     * @type {number}
-     */
-    orderIndex: number;
-    /**
-     * @description What is the sort order: ASC or DESC?
-     * @type {SortOrder}
-     */
-    orderSort: SortOrder;
-}
-
-declare class AbstractApexTriggersTableDefinitions implements Table {
-    /**
-     * @description Constructor to specify if this table is in a context of an object.
-     * @param {boolean} isObjectInformationNeeded - Is the object information needed in the table (true by default) (true by default)
-     */
-    constructor(isObjectInformationNeeded: boolean);
-    /**
-     * @description List of columns in a table
-     * @type {Array<TableColumn>}
-     */
-    columns: Array<TableColumn>;
-    /**
-     * @description Which index column is used for ordering?
-     * @type {number}
-     */
-    orderIndex: number;
-    /**
-     * @description What is the sort order: ASC or DESC?
-     * @type {SortOrder}
-     */
-    orderSort: SortOrder;
-}
-declare class ApexTriggersTableDefinitions extends AbstractApexTriggersTableDefinitions {
-    constructor();
-}
-declare class ApexTriggersInObjectTableDefinitions extends AbstractApexTriggersTableDefinitions {
-    constructor();
-}
-
-declare class ApexUncompiledTableDefinitions implements Table {
-    /**
-     * @description List of columns in a table
-     * @type {Array<TableColumn>}
-     */
-    columns: Array<TableColumn>;
-    /**
-     * @description Which index column is used for ordering?
-     * @type {number}
-     */
-    orderIndex: number;
-    /**
-     * @description What is the sort order: ASC or DESC?
-     * @type {SortOrder}
-     */
-    orderSort: SortOrder;
-}
-
-declare class ObjectPermissionsTableDefinitions implements Table {
+declare class AppPermissionsTableDefinitions implements Table {
     private _matrix;
     /**
      * @description Constructor to specify a datamatrix to use
@@ -5733,7 +5664,7 @@ declare class LimitsTableDefinitions implements Table {
     orderSort: SortOrder;
 }
 
-declare class AppPermissionsTableDefinitions implements Table {
+declare class ObjectPermissionsTableDefinitions implements Table {
     private _matrix;
     /**
      * @description Constructor to specify a datamatrix to use
@@ -6005,6 +5936,100 @@ declare class RolesTableDefinitions implements Table {
     orderSort: SortOrder;
 }
 
+interface Row {
+    /**
+     * @description Pre-calcultaed index of the row (needs to be recalculated when sroting for example!)
+     * @type {number}
+     * @public
+     */
+    index: number;
+    /**
+     * @description Name of the row
+     * @type {string}
+     * @public
+     */
+    name: string;
+    /**
+     * @description Score of the row if it has one
+     * @type {number}
+     * @public
+     */
+    score: number;
+    /**
+     * @description List of bad fields (must match column's value)
+    /* @type {Array<string>}
+     * @public
+     */
+    badFields: Array<string>;
+    /**
+     * @description List of reason id when this row is bad (can be empty, should not have duplicates)
+    /* @type {Array<string>}
+     * @public
+     */
+    badReasonIds: Array<string>;
+    /**
+     * @description List of cells in this row
+    /* @type {Array<any>}
+     * @public
+     */
+    cells: Array<any>;
+    /**
+     * @description Flag used when filtering the table. Meaning is obvious.
+    /* @type {boolean}
+     * @public
+     */
+    isVisible: boolean;
+}
+
+/**
+ * @description Org Check "score rule" used to qualify if an item is bad or not
+ * @public
+ */
+interface ScoreRule {
+    /**
+     * @description Unique identifier of that rule
+     * @type {number}
+     * @public
+     */
+    id: number;
+    /**
+     * @description Description of that rule
+     * @type {string}
+     * @public
+     */
+    description: string;
+    /**
+     * @description Rule's formula with the data as only parameter. Function returns true or false.
+     * @type {Function}
+     * @public
+     */
+    formula: Function;
+    /**
+     * @description Message to show if the formula returns false for a given data.
+     * @type {string}
+     * @public
+     */
+    errorMessage: string;
+    /**
+     * @description Technical name of the field that is considered 'bad'
+     * @type {string}
+     * @public
+     */
+    badField: string;
+    /**
+     * @description For which data this rule is applicable?
+     * @type {Array<any>}
+     * @public
+     */
+    applicable: Array<DataAliases>;
+    /**
+     * @description Category of the rule
+     * @type {string}
+     * @public
+     */
+    category: string;
+}
+
 declare class ScoreRulesTableDefinitions implements Table {
     private _matrix;
     /**
@@ -6192,24 +6217,6 @@ declare class WorkflowsTableDefinitions implements Table {
     orderSort: SortOrder;
 }
 
-declare class ApexClassesTableDefinitions implements Table {
-    /**
-     * @description List of columns in a table
-     * @type {Array<TableColumn>}
-     */
-    columns: Array<TableColumn>;
-    /**
-     * @description Which index column is used for ordering?
-     * @type {number}
-     */
-    orderIndex: number;
-    /**
-     * @description What is the sort order: ASC or DESC?
-     * @type {SortOrder}
-     */
-    orderSort: SortOrder;
-}
-
 declare class ApiFactory {
     static create(setup: ApiSetup): ApiIntf;
 }
@@ -6283,4 +6290,4 @@ declare class TableDefinitions {
 }
 
 export { ApexClassesTableDefinitions, ApexTestsTableDefinitions, ApexTriggersInObjectTableDefinitions, ApexTriggersTableDefinitions, ApexUncompiledTableDefinitions, ApiFactory, AppPermissionsTableDefinitions, AuraComponentsTableDefinitions, BrowsersTableDefinitions, ChatterGroupsTableDefinitions, CustomFieldsInObjectTableDefinitions, CustomFieldsTableDefinitions, CustomLabelsTableDefinitions, CustomTabsTableDefinitions, DashboardsTableDefinitions, DocumentsTableDefinitions, EmailTemplatesTableDefinitions, FieldPermissionsTableDefinitions, FieldSetsTableDefinitions, FlexiPagesInObjectTableDefinitions, FlexiPagesTableDefinitions, FlowsTableDefinitions, GlobalViewItemsTableDefinitions, HardCodedURLsTableDefinitions, HomePageComponentsTableDefinitions, KnowledgeArticlesTableDefinitions, LayoutsTableDefinitions, LightningWebComponentsTableDefinitions, LimitsTableDefinitions, ObjectPermissionsTableDefinitions, ObjectsTableDefinitions, PageLayoutsTableDefinitions, PermissionSetLicensesTableDefinitions, PermissionSetsTableDefinitions, ProcessBuildersTableDefinitions, ProfilePasswordPoliciesTableDefinitions, ProfileRestrictionsTableDefinitions, ProfilesTableDefinitions, PublicGroupsTableDefinitions, QueuesTableDefinitions, RecordTypesInObjectTableDefinitions, RecordTypesTableDefinitions, RelationshipsTableDefinitions, ReportsTableDefinitions, RolesTableDefinitions, Rules, ScoreRulesTableDefinitions, SortOrder, StandardFieldsTableDefinitions, StaticResourcesTableDefinitions, TableDefinitions, TableFactory, UsersTableDefinitions, ValidationRulesInObjectTableDefinitions, ValidationRulesTableDefinitions, VisualForceComponentsTableDefinitions, VisualForcePagesTableDefinitions, WebLinksTableDefinitions, WorkflowsTableDefinitions };
-export type { ApiIntf, ApiSetup, DataCollectionStatisticsIntf, ExportedTable, LoggerSetup, Row, SalesforceAuthenticationOptions, SalesforceManagerSetup, ScoreRule, StorageSetup, Table };
+export type { ApiIntf, ApiSetup, DataCollectionStatisticsIntf, DataMatrixIntf, ExportedTable, LoggerSetup, Row, SalesforceAuthenticationOptions, SalesforceManagerSetup, SalesforceUsageInformationIntf, ScoreRule, SfdcApexClass, SfdcApexTrigger, SfdcBrowser, SfdcCollaborationGroup, SfdcCustomLabel, SfdcCustomTab, SfdcDashboard, SfdcDocument, SfdcEmailTemplate, SfdcField, SfdcFlow, SfdcGroup, SfdcHomePageComponent, SfdcKnowledgeArticle, SfdcLightningAuraComponent, SfdcLightningPage, SfdcLightningWebComponent, SfdcObject, SfdcObjectType, SfdcOrganization, SfdcPackage, SfdcPageLayout, SfdcPermissionSet, SfdcPermissionSetLicense, SfdcProfile, SfdcProfilePasswordPolicy, SfdcProfileRestrictions, SfdcRecordType, SfdcReport, SfdcStaticResource, SfdcUser, SfdcUserRole, SfdcValidationRule, SfdcVisualForceComponent, SfdcVisualForcePage, SfdcWebLink, SfdcWorkflow, StorageSetup, Table };

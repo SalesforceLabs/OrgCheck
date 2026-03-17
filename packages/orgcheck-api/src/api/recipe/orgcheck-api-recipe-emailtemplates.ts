@@ -4,7 +4,7 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
 import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
-import { SFDC_EmailTemplate }from 'src/api/data/orgcheck-api-data-emailtemplate';
+import { SfdcEmailTemplate }from 'src/api/data/orgcheck-api-data-emailtemplate';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
@@ -32,16 +32,16 @@ export class RecipeEmailTemplates implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data and parameters
-        const /** @type {Map<string, SFDC_EmailTemplate>} */ emailTemplates: Map<string, SFDC_EmailTemplate> = data.get(DatasetAliases.EMAILTEMPLATES);
+        const /** @type {Map<string, SfdcEmailTemplate>} */ emailTemplates: Map<string, SfdcEmailTemplate> = data.get(DatasetAliases.EMAILTEMPLATES);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
         if (!emailTemplates) throw new Error(`RecipeDocuments: Data from dataset alias 'EMAILTEMPLATES' was undefined.`);
 
         // Filter data
-        /** @type {Array<SFDC_EmailTemplate>} */
-        const array: Array<SFDC_EmailTemplate> = [];
-        await Processor.forEach(emailTemplates, async (/** @type {SFDC_EmailTemplate} */ emailTemplate: SFDC_EmailTemplate) => {
+        /** @type {Array<SfdcEmailTemplate>} */
+        const array: Array<SfdcEmailTemplate> = [];
+        await Processor.forEach(emailTemplates, async (/** @type {SfdcEmailTemplate} */ emailTemplate: SfdcEmailTemplate) => {
             if (namespace === OrgCheckGlobalParameter.ALL_VALUES || emailTemplate.package === namespace) {
                 array.push(emailTemplate);
             }

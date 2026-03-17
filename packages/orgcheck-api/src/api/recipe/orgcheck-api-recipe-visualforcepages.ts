@@ -5,7 +5,7 @@ import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_VisualForcePage }from 'src/api/data/orgcheck-api-data-visualforcepage';
+import { SfdcVisualForcePage }from 'src/api/data/orgcheck-api-data-visualforcepage';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
 export class RecipeVisualForcePages implements Recipe {
@@ -32,16 +32,16 @@ export class RecipeVisualForcePages implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data and parameters
-        const /** @type {Map<string, SFDC_VisualForcePage>} */ pages: Map<string, SFDC_VisualForcePage> = data.get(DatasetAliases.VISUALFORCEPAGES);
+        const /** @type {Map<string, SfdcVisualForcePage>} */ pages: Map<string, SfdcVisualForcePage> = data.get(DatasetAliases.VISUALFORCEPAGES);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
         if (!pages) throw new Error(`RecipeVisualForcePages: Data from dataset alias 'VISUALFORCEPAGES' was undefined.`);
 
         // Filter data
-        /** @type {Array<SFDC_VisualForcePage>} */ 
-        const array: Array<SFDC_VisualForcePage> = [];
-        await Processor.forEach(pages, async (/** @type {SFDC_VisualForcePage} */ page: SFDC_VisualForcePage) => {
+        /** @type {Array<SfdcVisualForcePage>} */ 
+        const array: Array<SfdcVisualForcePage> = [];
+        await Processor.forEach(pages, async (/** @type {SfdcVisualForcePage} */ page: SfdcVisualForcePage) => {
             if (namespace === OrgCheckGlobalParameter.ALL_VALUES || page.package === namespace) {
                 array.push(page);
             }

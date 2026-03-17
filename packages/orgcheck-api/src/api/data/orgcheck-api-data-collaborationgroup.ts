@@ -1,14 +1,14 @@
 import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
 import { DataWithScore } from 'src/api/core/orgcheck-api-data';
 
-export interface SFDC_CollaborationGroup extends DataWithScore {
+export interface SfdcCollaborationGroup extends DataWithScore {
     
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_CollaborationGroup;
+    dataType: DataAliases.SfdcCollaborationGroup;
     
      /**
      * @description Unique identifier of this group in the org.

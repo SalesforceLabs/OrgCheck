@@ -5,7 +5,7 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_Report } from 'src/api/data/orgcheck-api-data-report';
+import { SfdcReport } from 'src/api/data/orgcheck-api-data-report';
 
 export class DatasetReports implements Dataset {
 
@@ -14,9 +14,9 @@ export class DatasetReports implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_Report>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcReport>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_Report>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcReport>> {
 
         // First SOQL queries
         logger?.log(`Querying REST API about reports in the org...`);            
@@ -28,19 +28,19 @@ export class DatasetReports implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const reportDataFactory = dataFactory.getInstance(DataAliases.SFDC_Report);
+        const reportDataFactory = dataFactory.getInstance(DataAliases.SfdcReport);
 
         // Create the map
         const reportRecords = results[0];
         logger?.log(`Parsing ${reportRecords?.length} reports...`);
-        const reports: Map<string, SFDC_Report> = new Map(await Processor.map(reportRecords, async (/** @type {any} */ record: any) => {
+        const reports: Map<string, SfdcReport> = new Map(await Processor.map(reportRecords, async (/** @type {any} */ record: any) => {
         
             // Get the ID15 of this report
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            /** @type {SFDC_Report} */
-            const report: SFDC_Report = reportDataFactory.createWithScore({
+            /** @type {SfdcReport} */
+            const report: SfdcReport = reportDataFactory.createWithScore({
                 properties: {
                     id: id,
                     name: record.Name,

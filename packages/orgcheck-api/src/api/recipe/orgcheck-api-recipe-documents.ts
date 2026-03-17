@@ -4,7 +4,7 @@ import { Data } from 'src/api/core/orgcheck-api-data';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_Document }from 'src/api/data/orgcheck-api-data-document';
+import { SfdcDocument }from 'src/api/data/orgcheck-api-data-document';
 import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
@@ -32,16 +32,16 @@ export class RecipeDocuments implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data and parameters
-        const /** @type {Map<string, SFDC_Document>} */ documents: Map<string, SFDC_Document> = data.get(DatasetAliases.DOCUMENTS);
+        const /** @type {Map<string, SfdcDocument>} */ documents: Map<string, SfdcDocument> = data.get(DatasetAliases.DOCUMENTS);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
         if (!documents) throw new Error(`RecipeDocuments: Data from dataset alias 'DOCUMENTS' was undefined.`);
 
         // Filter data
-        /** @type {Array<SFDC_Document>} */
-        const array: Array<SFDC_Document> = [];
-        await Processor.forEach(documents, async (/** @type {SFDC_Document} */ document: SFDC_Document) => {
+        /** @type {Array<SfdcDocument>} */
+        const array: Array<SfdcDocument> = [];
+        await Processor.forEach(documents, async (/** @type {SfdcDocument} */ document: SfdcDocument) => {
             if (namespace === OrgCheckGlobalParameter.ALL_VALUES || document.package === namespace) {
                 array.push(document);
             }

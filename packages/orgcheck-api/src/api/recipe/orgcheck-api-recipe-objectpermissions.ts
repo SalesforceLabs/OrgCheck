@@ -6,9 +6,9 @@ import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { DataMatrixFactory } from 'src/api/core/orgcheck-api-data-matrix-factory';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_ObjectPermission }from 'src/api/data/orgcheck-api-data-objectpermission';
-import { SFDC_PermissionSet }from 'src/api/data/orgcheck-api-data-permissionset';
-import { SFDC_Profile }from 'src/api/data/orgcheck-api-data-profile';
+import { SfdcObjectPermission }from 'src/api/data/orgcheck-api-data-objectpermission';
+import { SfdcPermissionSet }from 'src/api/data/orgcheck-api-data-permissionset';
+import { SfdcProfile }from 'src/api/data/orgcheck-api-data-profile';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
 export class RecipeObjectPermissions implements Recipe {
@@ -39,9 +39,9 @@ export class RecipeObjectPermissions implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data and parameters
-        const /** @type {Map<string, SFDC_ObjectPermission>} */ objectPermissions: Map<string, SFDC_ObjectPermission> = data.get(DatasetAliases.OBJECTPERMISSIONS);
-        const /** @type {Map<string, SFDC_Profile>} */ profiles: Map<string, SFDC_Profile> = data.get(DatasetAliases.PROFILES);
-        const /** @type {Map<string, SFDC_PermissionSet>} */ permissionSets: Map<string, SFDC_PermissionSet> = data.get(DatasetAliases.PERMISSIONSETS);
+        const /** @type {Map<string, SfdcObjectPermission>} */ objectPermissions: Map<string, SfdcObjectPermission> = data.get(DatasetAliases.OBJECTPERMISSIONS);
+        const /** @type {Map<string, SfdcProfile>} */ profiles: Map<string, SfdcProfile> = data.get(DatasetAliases.PROFILES);
+        const /** @type {Map<string, SfdcPermissionSet>} */ permissionSets: Map<string, SfdcPermissionSet> = data.get(DatasetAliases.PERMISSIONSETS);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
@@ -51,8 +51,8 @@ export class RecipeObjectPermissions implements Recipe {
 
         // Augment and Filter data
         const workingMatrix = DataMatrixFactory.create();
-        /** @type {Map<string, SFDC_Profile | SFDC_PermissionSet>} */
-        await Processor.forEach(objectPermissions, async (/** @type {SFDC_ObjectPermission} */ op: SFDC_ObjectPermission) => {
+        /** @type {Map<string, SfdcProfile | SfdcPermissionSet>} */
+        await Processor.forEach(objectPermissions, async (/** @type {SfdcObjectPermission} */ op: SfdcObjectPermission) => {
             // Augment data
             const parentRef = (op.parentId.startsWith('0PS') === true ? permissionSets : profiles).get(op.parentId);
             if (parentRef) {

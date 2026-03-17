@@ -5,7 +5,7 @@ import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparamet
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_FieldPermission } from 'src/api/data/orgcheck-api-data-fieldpermission';
+import { SfdcFieldPermission } from 'src/api/data/orgcheck-api-data-fieldpermission';
 
 export class DatasetFieldPermissions implements Dataset {
 
@@ -15,9 +15,9 @@ export class DatasetFieldPermissions implements Dataset {
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
      * @param {Map<string, any>} parameters - The parameters
-     * @returns {Promise<Map<string, SFDC_FieldPermission>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcFieldPermission>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Map<string, SFDC_FieldPermission>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Map<string, SfdcFieldPermission>> {
 
         const fullObjectApiName = OrgCheckGlobalParameter.getSObjectName(parameters);
 
@@ -30,12 +30,12 @@ export class DatasetFieldPermissions implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const fieldPermissionDataFactory = dataFactory.getInstance(DataAliases.SFDC_FieldPermission);
+        const fieldPermissionDataFactory = dataFactory.getInstance(DataAliases.SfdcFieldPermission);
         const permissions = results[0];
 
         // Create the map
         logger?.log(`Parsing ${permissions?.length} Field Permissions...`);
-        const fieldPermissions: Map<string, SFDC_FieldPermission> = new Map(await Processor.map(permissions, 
+        const fieldPermissions: Map<string, SfdcFieldPermission> = new Map(await Processor.map(permissions, 
             (/** @type {any} */ record: any) => {
                 // Get the ID15 of this parent
                 const parentId = sfdcManager.caseSafeId(record.Parent.IsOwnedByProfile === true ? record.Parent.ProfileId : record.ParentId);
@@ -45,8 +45,8 @@ export class DatasetFieldPermissions implements Dataset {
                 const fieldName = indeOfDot === -1 ? record.Field : record.Field.substring(indeOfDot + 1);
 
                 // Create the instance
-                /** @type {SFDC_FieldPermission} */
-                const fieldPermission: SFDC_FieldPermission = fieldPermissionDataFactory.create({
+                /** @type {SfdcFieldPermission} */
+                const fieldPermission: SfdcFieldPermission = fieldPermissionDataFactory.create({
                     properties: {
                         fieldApiName: fieldName,
                         parentId: parentId,

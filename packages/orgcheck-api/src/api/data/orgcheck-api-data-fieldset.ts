@@ -4,14 +4,14 @@ import { DataWithScore } from 'src/api/core/orgcheck-api-data';
 /**
  * @description Representation of a Field Set in Org Check
  */
-export interface SFDC_FieldSet extends DataWithScore {
+export interface SfdcFieldSet extends DataWithScore {
     
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_FieldSet;
+    dataType: DataAliases.SfdcFieldSet;
         
      /**
      * @description Salesforce Id

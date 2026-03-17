@@ -1,18 +1,18 @@
 import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
 import { DataWithScoreAndDependencies } from 'src/api/core/orgcheck-api-data';
-import { SFDC_Object } from 'src/api/data/orgcheck-api-data-object';
+import { SfdcObject } from 'src/api/data/orgcheck-api-data-object';
 
 /**
  * @description Representation of an Apex Trigger in Org Check
  */
-export interface SFDC_ApexTrigger extends DataWithScoreAndDependencies {
+export interface SfdcApexTrigger extends DataWithScoreAndDependencies {
 
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_ApexTrigger;
+    dataType: DataAliases.SfdcApexTrigger;
     
      /**
      * @description Salesforce Id
@@ -121,10 +121,10 @@ export interface SFDC_ApexTrigger extends DataWithScoreAndDependencies {
     
     /**
      * @description Reference of the object for this trigger
-     * @type {SFDC_Object}
+     * @type {SfdcObject}
      * @public
      */
-    objectRef: SFDC_Object;
+    objectRef: SfdcObject;
     
     /**
      * @description Is this trigger containing SOQL statement?

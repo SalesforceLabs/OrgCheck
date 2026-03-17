@@ -5,7 +5,7 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_PermissionSetLicense } from 'src/api/data/orgcheck-api-data-permissionsetlicense';
+import { SfdcPermissionSetLicense } from 'src/api/data/orgcheck-api-data-permissionsetlicense';
 
 export class DatasetPermissionSetLicenses implements Dataset {
 
@@ -14,9 +14,9 @@ export class DatasetPermissionSetLicenses implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_PermissionSetLicense>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcPermissionSetLicense>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_PermissionSetLicense>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcPermissionSetLicense>> {
 
         // First SOQL queries
         logger?.log(`Querying REST API about PermissionSetLicenses in the org...`);            
@@ -39,21 +39,21 @@ export class DatasetPermissionSetLicenses implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const permissionSetLicenseDataFactory = dataFactory.getInstance(DataAliases.SFDC_PermissionSetLicense);
+        const permissionSetLicenseDataFactory = dataFactory.getInstance(DataAliases.SfdcPermissionSetLicense);
         const permissionSetLicenseRecords = results[0];
         const permissionSetsWithLicenseRecords = results[1];
         const assigneePermSetsWithLicenseRecords = results[2];
 
         // Create the map
         logger?.log(`Parsing ${permissionSetLicenseRecords?.length} permission sets licenses...`);
-        const permissionSetLicenses: Map<string, SFDC_PermissionSetLicense> = new Map(await Processor.map(permissionSetLicenseRecords, (/** @type {any} */ record: any) => {
+        const permissionSetLicenses: Map<string, SfdcPermissionSetLicense> = new Map(await Processor.map(permissionSetLicenseRecords, (/** @type {any} */ record: any) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
         
             // Create the instance
-            /** @type {SFDC_PermissionSetLicense} */
-            const permissionSetLicense: SFDC_PermissionSetLicense = permissionSetLicenseDataFactory.create({
+            /** @type {SfdcPermissionSetLicense} */
+            const permissionSetLicense: SfdcPermissionSetLicense = permissionSetLicenseDataFactory.create({
                 properties: {
                     id: id,
                     name: record.MasterLabel,

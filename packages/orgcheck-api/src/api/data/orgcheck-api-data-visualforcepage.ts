@@ -1,14 +1,14 @@
 import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
 import { DataWithScoreAndDependencies } from 'src/api/core/orgcheck-api-data';
 
-export interface SFDC_VisualForcePage extends DataWithScoreAndDependencies {
+export interface SfdcVisualForcePage extends DataWithScoreAndDependencies {
     
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_VisualForcePage;
+    dataType: DataAliases.SfdcVisualForcePage;
         
      /**
      * @description Salesforce Id

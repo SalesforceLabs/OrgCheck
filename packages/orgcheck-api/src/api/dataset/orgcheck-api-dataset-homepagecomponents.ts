@@ -6,7 +6,7 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_HomePageComponent } from 'src/api/data/orgcheck-api-data-homepagecomponent';
+import { SfdcHomePageComponent } from 'src/api/data/orgcheck-api-data-homepagecomponent';
 
 export class DatasetHomePageComponents implements Dataset {
 
@@ -15,12 +15,12 @@ export class DatasetHomePageComponents implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_HomePageComponent>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcHomePageComponent>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_HomePageComponent>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcHomePageComponent>> {
 
         // First SOQL queries
-        logger?.log(`Querying Tooling API about SFDC_HomePageComponent in the org...`);            
+        logger?.log(`Querying Tooling API about SfdcHomePageComponent in the org...`);            
         const results = await sfdcManager.soqlQuery([{
             tooling: true,
             string: 'SELECT Id, Name, Body, CreatedDate, LastModifiedDate, NamespacePrefix '+
@@ -29,7 +29,7 @@ export class DatasetHomePageComponents implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const homePageDataFactory = dataFactory.getInstance(DataAliases.SFDC_HomePageComponent);
+        const homePageDataFactory = dataFactory.getInstance(DataAliases.SfdcHomePageComponent);
 
         // Create the map
         const homePageRecords = results[0];
@@ -42,14 +42,14 @@ export class DatasetHomePageComponents implements Dataset {
         );
 
         logger?.log(`Parsing ${homePageRecords?.length} homepage components...`);
-        const homePages: Map<string, SFDC_HomePageComponent> = new Map(await Processor.map(homePageRecords, (/** @type {any} */ record: any) => {
+        const homePages: Map<string, SfdcHomePageComponent> = new Map(await Processor.map(homePageRecords, (/** @type {any} */ record: any) => {
 
             // Get the ID15 of this custom field
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            /** @type {SFDC_HomePageComponent} */
-            const homePage: SFDC_HomePageComponent = homePageDataFactory.create({
+            /** @type {SfdcHomePageComponent} */
+            const homePage: SfdcHomePageComponent = homePageDataFactory.create({
                 properties: {
                     id: id,
                     name: record.Name,

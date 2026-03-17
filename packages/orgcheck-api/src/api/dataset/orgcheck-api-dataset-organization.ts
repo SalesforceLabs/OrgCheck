@@ -3,7 +3,7 @@ import { DataFactoryIntf } from 'src/api/core/orgcheck-api-datafactory';
 import { Dataset } from 'src/api/core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_Organization } from 'src/api/data/orgcheck-api-data-organization';
+import { SfdcOrganization } from 'src/api/data/orgcheck-api-data-organization';
 
 const ORGTYPE_PROD = 'Production';
 const ORGTYPE_DE = 'Developer Edition';
@@ -17,9 +17,9 @@ export class DatasetOrganization implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<SFDC_Organization>} The result of the dataset
+     * @returns {Promise<SfdcOrganization>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<SFDC_Organization> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<SfdcOrganization> {
 
         // First SOQL query
         logger?.log(`Querying REST API about Organization in the org...`); 
@@ -40,7 +40,7 @@ export class DatasetOrganization implements Dataset {
         logger?.log(`Parsing the result...`);
 
         // Init the factory and records
-        const organizationDataFactory = dataFactory.getInstance(DataAliases.SFDC_Organization);
+        const organizationDataFactory = dataFactory.getInstance(DataAliases.SfdcOrganization);
 
         // Set the type
         let type;
@@ -50,8 +50,8 @@ export class DatasetOrganization implements Dataset {
         else type = ORGTYPE_PROD;
 
         // Create the data
-        /** @type {SFDC_Organization} */
-        const organization: SFDC_Organization = organizationDataFactory.create({
+        /** @type {SfdcOrganization} */
+        const organization: SfdcOrganization = organizationDataFactory.create({
             properties: {
                 id: sfdcManager.caseSafeId(record.Id),
                 name: record.Name,

@@ -4,8 +4,8 @@ import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_PermissionSetLicense }from 'src/api/data/orgcheck-api-data-permissionsetlicense';
-import { SFDC_PermissionSet }from 'src/api/data/orgcheck-api-data-permissionset';
+import { SfdcPermissionSetLicense }from 'src/api/data/orgcheck-api-data-permissionsetlicense';
+import { SfdcPermissionSet }from 'src/api/data/orgcheck-api-data-permissionset';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 
 export class RecipePermissionSetLicenses implements Recipe {
@@ -34,15 +34,15 @@ export class RecipePermissionSetLicenses implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data
-        const /** @type {Map<string, SFDC_PermissionSetLicense>} */ permissionSetLicenses: Map<string, SFDC_PermissionSetLicense> = data.get(DatasetAliases.PERMISSIONSETLICENSES);
-        const /** @type {Map<string, SFDC_PermissionSet>} */ permissionSets: Map<string, SFDC_PermissionSet> = data.get(DatasetAliases.PERMISSIONSETS);
+        const /** @type {Map<string, SfdcPermissionSetLicense>} */ permissionSetLicenses: Map<string, SfdcPermissionSetLicense> = data.get(DatasetAliases.PERMISSIONSETLICENSES);
+        const /** @type {Map<string, SfdcPermissionSet>} */ permissionSets: Map<string, SfdcPermissionSet> = data.get(DatasetAliases.PERMISSIONSETS);
 
         // Checking data
         if (!permissionSetLicenses) throw new Error(`RecipePermissionSetLicenses: Data from dataset alias 'PERMISSIONSETLICENSES' was undefined.`);
         if (!permissionSets) throw new Error(`RecipePermissionSetLicenses: Data from dataset alias 'PERMISSIONSETS' was undefined.`);
 
         // Augment data
-        await Processor.forEach(permissionSetLicenses, async (/** @type {SFDC_PermissionSetLicense} */ permissionSetLicense: SFDC_PermissionSetLicense) => {
+        await Processor.forEach(permissionSetLicenses, async (/** @type {SfdcPermissionSetLicense} */ permissionSetLicense: SfdcPermissionSetLicense) => {
             permissionSetLicense.permissionSetRefs = await Processor.map(
                 permissionSetLicense.permissionSetIds,
                 (/** @type {string} */ id: string) => permissionSets.get(id),

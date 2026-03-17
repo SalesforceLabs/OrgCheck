@@ -4,9 +4,9 @@ import { Data } from 'src/api/core/orgcheck-api-data';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_User }from 'src/api/data/orgcheck-api-data-user';
-import { SFDC_PermissionSet }from 'src/api/data/orgcheck-api-data-permissionset';
-import { SFDC_Profile }from 'src/api/data/orgcheck-api-data-profile';
+import { SfdcUser }from 'src/api/data/orgcheck-api-data-user';
+import { SfdcPermissionSet }from 'src/api/data/orgcheck-api-data-permissionset';
+import { SfdcProfile }from 'src/api/data/orgcheck-api-data-profile';
 import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 
 export class RecipeInternalActiveUsers implements Recipe {
@@ -36,9 +36,9 @@ export class RecipeInternalActiveUsers implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data
-        const /** @type {Map<string, SFDC_User>} */ users: Map<string, SFDC_User> = data.get(DatasetAliases.INTERNALACTIVEUSERS);
-        const /** @type {Map<string, SFDC_Profile>} */ profiles: Map<string, SFDC_Profile> = data.get(DatasetAliases.PROFILES);
-        const /** @type {Map<string, SFDC_PermissionSet>} */ permissionSets: Map<string, SFDC_PermissionSet> = data.get(DatasetAliases.PERMISSIONSETS);
+        const /** @type {Map<string, SfdcUser>} */ users: Map<string, SfdcUser> = data.get(DatasetAliases.INTERNALACTIVEUSERS);
+        const /** @type {Map<string, SfdcProfile>} */ profiles: Map<string, SfdcProfile> = data.get(DatasetAliases.PROFILES);
+        const /** @type {Map<string, SfdcPermissionSet>} */ permissionSets: Map<string, SfdcPermissionSet> = data.get(DatasetAliases.PERMISSIONSETS);
 
         // Checking data
         if (!users) throw new Error(`RecipeActiveUsers: Data from dataset alias 'INTERNALACTIVEUSERS' was undefined.`);
@@ -46,7 +46,7 @@ export class RecipeInternalActiveUsers implements Recipe {
         if (!permissionSets) throw new Error(`RecipeActiveUsers: Data from dataset alias 'PERMISSIONSETS' was undefined.`);
 
         // Augment data
-        await Processor.forEach(users, async (/** @type {SFDC_User} */ user: SFDC_User) => {
+        await Processor.forEach(users, async (/** @type {SfdcUser} */ user: SfdcUser) => {
             const profileRef = profiles.get(user.profileId);
             if (profileRef) {
                 user.profileRef = profileRef;
@@ -69,7 +69,7 @@ export class RecipeInternalActiveUsers implements Recipe {
                     .filter((permName) => user.profileRef.importantPermissions[permName] === true)
                     .forEach((permName) => user.importantPermissionsGrantedBy[permName].push(user.profileRef));
             }
-            await Processor.forEach(user.permissionSetRefs, async (/** @type {SFDC_PermissionSet} */ permissionSet: SFDC_PermissionSet) => {
+            await Processor.forEach(user.permissionSetRefs, async (/** @type {SfdcPermissionSet} */ permissionSet: SfdcPermissionSet) => {
                 Object.keys(permissionSet.importantPermissions)
                     .filter((permName) => permissionSet.importantPermissions[permName] === true)
                     .forEach((permName) => user.importantPermissionsGrantedBy[permName].push(permissionSet));

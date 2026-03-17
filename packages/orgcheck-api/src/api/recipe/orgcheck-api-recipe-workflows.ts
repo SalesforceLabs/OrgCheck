@@ -4,7 +4,7 @@ import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_Workflow }from 'src/api/data/orgcheck-api-data-workflow';
+import { SfdcWorkflow }from 'src/api/data/orgcheck-api-data-workflow';
 
 export class RecipeWorkflows implements Recipe {
 
@@ -29,7 +29,7 @@ export class RecipeWorkflows implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data
-        const /** @type {Map<string, SFDC_Workflow>} */ workflows: Map<string, SFDC_Workflow> = data.get(DatasetAliases.WORKFLOWS);
+        const /** @type {Map<string, SfdcWorkflow>} */ workflows: Map<string, SfdcWorkflow> = data.get(DatasetAliases.WORKFLOWS);
 
         // Checking data
         if (!workflows) throw new Error(`RecipeWorkflows: Data from dataset alias 'WORKFLOWS' was undefined.`);

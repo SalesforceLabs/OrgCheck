@@ -5,7 +5,7 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_PermissionSet } from 'src/api/data/orgcheck-api-data-permissionset';
+import { SfdcPermissionSet } from 'src/api/data/orgcheck-api-data-permissionset';
 
 export class DatasetPermissionSets implements Dataset {
 
@@ -14,9 +14,9 @@ export class DatasetPermissionSets implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_PermissionSet>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcPermissionSet>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_PermissionSet>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcPermissionSet>> {
 
         // First SOQL queries
         logger?.log(`Querying REST API about PermissionSet, PermissionSetAssignment and PermissionSet (with a PermissionSetGroupId populated) in the org...`);            
@@ -69,11 +69,11 @@ export class DatasetPermissionSets implements Dataset {
         const psAssignmentRecords = results[5];
 
         // Init the factory and records
-        const permissionSetDataFactory = dataFactory.getInstance(DataAliases.SFDC_PermissionSet);
+        const permissionSetDataFactory = dataFactory.getInstance(DataAliases.SfdcPermissionSet);
 
         // Create the map of permission sets
         logger?.log(`Parsing ${permissionSetRecords?.length} permission sets...`);
-        const permissionSets: Map<string, SFDC_PermissionSet> = new Map(await Processor.map(permissionSetRecords, (/** @type {any} */ record: any) => {
+        const permissionSets: Map<string, SfdcPermissionSet> = new Map(await Processor.map(permissionSetRecords, (/** @type {any} */ record: any) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
@@ -82,8 +82,8 @@ export class DatasetPermissionSets implements Dataset {
             const isPermissionSetGroup = (record.Type === 'Group'); // other values can be 'Regular', 'Standard', 'Session'
 
             // Create the instance
-            /** @type {SFDC_PermissionSet} */
-            const permissionSet: SFDC_PermissionSet = permissionSetDataFactory.create({
+            /** @type {SfdcPermissionSet} */
+            const permissionSet: SfdcPermissionSet = permissionSetDataFactory.create({
                 properties: {
                     id: id,
                     name: record.Name,
@@ -179,7 +179,7 @@ export class DatasetPermissionSets implements Dataset {
 
         // Compute scores for all permission sets
         logger?.log(`Computing the score for ${permissionSets.size} permission sets...`);
-        await Processor.forEach(permissionSets, async (/** @type {SFDC_PermissionSet} */ permissionSet: SFDC_PermissionSet) => {
+        await Processor.forEach(permissionSets, async (/** @type {SfdcPermissionSet} */ permissionSet: SfdcPermissionSet) => {
             if (psgMemberCountSumByPermissionSetId.get(permissionSet.id) === 0) {
                 permissionSet.allIncludingGroupsAreEmpty = true;
             }

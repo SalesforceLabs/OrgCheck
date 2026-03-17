@@ -4,7 +4,7 @@ import { Dataset } from 'src/api/core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_ProfilePasswordPolicy } from 'src/api/data/orgcheck-api-data-profilepasswordpolicy';
+import { SfdcProfilePasswordPolicy } from 'src/api/data/orgcheck-api-data-profilepasswordpolicy';
 
 export class DatasetProfilePasswordPolicies implements Dataset {
 
@@ -13,9 +13,9 @@ export class DatasetProfilePasswordPolicies implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_ProfilePasswordPolicy>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcProfilePasswordPolicy>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_ProfilePasswordPolicy>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcProfilePasswordPolicy>> {
 
         // First Metadata API query
         logger?.log(`Querying Metadata API about ProfilePasswordPolicy...`);
@@ -29,17 +29,17 @@ export class DatasetProfilePasswordPolicies implements Dataset {
         if (!profilePasswordPolicies) return new Map();
 
         // Init the factory and records
-        const policyDataFactory = dataFactory.getInstance(DataAliases.SFDC_ProfilePasswordPolicy);
+        const policyDataFactory = dataFactory.getInstance(DataAliases.SfdcProfilePasswordPolicy);
 
         // Create the map
         logger?.log(`Parsing ${profilePasswordPolicies?.length} profile password policies...`);        
-        const policies: Map<string, SFDC_ProfilePasswordPolicy> = new Map(
+        const policies: Map<string, SfdcProfilePasswordPolicy> = new Map(
             await Processor.map(
                 profilePasswordPolicies,
                 (/** @type {any} */ ppp: any) => {
                     // Create the instance
-                    /** @type {SFDC_ProfilePasswordPolicy} */
-                    const policy: SFDC_ProfilePasswordPolicy = policyDataFactory.createWithScore({
+                    /** @type {SfdcProfilePasswordPolicy} */
+                    const policy: SfdcProfilePasswordPolicy = policyDataFactory.createWithScore({
                         properties: {
                             lockoutInterval: parseInt(ppp.lockoutInterval, 10),
                             maxLoginAttempts: parseInt(ppp.maxLoginAttempts, 10),

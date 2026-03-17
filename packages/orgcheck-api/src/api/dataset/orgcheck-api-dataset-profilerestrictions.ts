@@ -4,7 +4,7 @@ import { Dataset } from 'src/api/core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_ProfileRestrictions } from 'src/api/data/orgcheck-api-data-profilerestrictions';
+import { SfdcProfileRestrictions } from 'src/api/data/orgcheck-api-data-profilerestrictions';
 
 const COMPUTE_NUMBER_FROM_IP = (/** @type {string} */ ip: string) => {
     return ip?.split('.').reduce((prev, currentItem, currentIndex, array) => { 
@@ -21,9 +21,9 @@ export class DatasetProfileRestrictions implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_ProfileRestrictions>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcProfileRestrictions>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_ProfileRestrictions>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcProfileRestrictions>> {
 
         // First SOQL query
         // (only ids because metadata can't be read via SOQL in bulk!
@@ -38,9 +38,9 @@ export class DatasetProfileRestrictions implements Dataset {
         const profileIds = await Processor.map(profileIdRecords, (/** @type {any} */ record: any) => record.Id);
 
         // Init the factories
-        const restrictionsFactory = dataFactory.getInstance(DataAliases.SFDC_ProfileRestrictions);
-        const ipRangeDataFactory = dataFactory.getInstance(DataAliases.SFDC_ProfileIpRangeRestriction);
-        const loginHourDataFactory = dataFactory.getInstance(DataAliases.SFDC_ProfileLoginHourRestriction);
+        const restrictionsFactory = dataFactory.getInstance(DataAliases.SfdcProfileRestrictions);
+        const ipRangeDataFactory = dataFactory.getInstance(DataAliases.SfdcProfileIpRangeRestriction);
+        const loginHourDataFactory = dataFactory.getInstance(DataAliases.SfdcProfileLoginHourRestriction);
 
         // Get information about profiles using metadata
         logger?.log(`Calling Tooling API Composite to get more information about these ${profileIds?.length} profiles...`);
@@ -48,7 +48,7 @@ export class DatasetProfileRestrictions implements Dataset {
 
         // Create the map
         logger?.log(`Parsing ${records?.length} profile restrictions...`);
-        const profileRestrictions: Map<string, SFDC_ProfileRestrictions> = new Map(await Processor.map(records, async (/** @type {any} */ record: any) => {
+        const profileRestrictions: Map<string, SfdcProfileRestrictions> = new Map(await Processor.map(records, async (/** @type {any} */ record: any) => {
 
             // Get the ID15 of this profile
             const profileId = sfdcManager.caseSafeId(record.Id);
@@ -61,7 +61,7 @@ export class DatasetProfileRestrictions implements Dataset {
                     (/** @type {string} */ day: string) => {
                         const hourStart = record.Metadata.loginHours[day + 'Start'];
                         const hourEnd = record.Metadata.loginHours[day + 'End'];
-                        /** @type {SFDC_ProfileLoginHourRestriction} */
+                        /** @type {SfdcProfileLoginHourRestriction} */
                         return loginHourDataFactory.create({
                             properties: {
                                 day: day,
@@ -82,7 +82,7 @@ export class DatasetProfileRestrictions implements Dataset {
                     (/** @type {any} */ range: any) => {
                         const startNumber = COMPUTE_NUMBER_FROM_IP(range.startAddress);
                         const endNumber = COMPUTE_NUMBER_FROM_IP(range.endAddress);
-                        /** @type {SFDC_ProfileIpRangeRestriction} */
+                        /** @type {SfdcProfileIpRangeRestriction} */
                         return ipRangeDataFactory.create({
                             properties: {
                                 startAddress: range.startAddress,

@@ -5,7 +5,7 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_CustomLabel } from 'src/api/data/orgcheck-api-data-customlabel';
+import { SfdcCustomLabel } from 'src/api/data/orgcheck-api-data-customlabel';
 
 export class DatasetCustomLabels implements Dataset {
 
@@ -14,9 +14,9 @@ export class DatasetCustomLabels implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_CustomLabel>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcCustomLabel>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_CustomLabel>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcCustomLabel>> {
 
         // First SOQL query
         logger?.log(`Querying Tooling API about ExternalString in the org...`);            
@@ -29,7 +29,7 @@ export class DatasetCustomLabels implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const labelDataFactory = dataFactory.getInstance(DataAliases.SFDC_CustomLabel);
+        const labelDataFactory = dataFactory.getInstance(DataAliases.SfdcCustomLabel);
         const customLabelRecords = results[0];
 
         // Then retreive dependencies
@@ -41,14 +41,14 @@ export class DatasetCustomLabels implements Dataset {
         
         // Create the map
         logger?.log(`Parsing ${customLabelRecords?.length} custom labels...`);
-        const customLabels: Map<string, SFDC_CustomLabel> = new Map(await Processor.map(customLabelRecords, (/** @type {any} */ record: any) => {
+        const customLabels: Map<string, SfdcCustomLabel> = new Map(await Processor.map(customLabelRecords, (/** @type {any} */ record: any) => {
 
             // Get the ID15 of this custom label
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            /** @type {SFDC_CustomLabel} */
-            const customLabel: SFDC_CustomLabel = labelDataFactory.createWithScore({
+            /** @type {SfdcCustomLabel} */
+            const customLabel: SfdcCustomLabel = labelDataFactory.createWithScore({
                 properties: {
                     id: id,
                     name: record.Name,

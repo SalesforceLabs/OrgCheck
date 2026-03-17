@@ -5,7 +5,7 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_LightningPage } from 'src/api/data/orgcheck-api-data-lightningpage';
+import { SfdcLightningPage } from 'src/api/data/orgcheck-api-data-lightningpage';
 
 export class DatasetLightningPages implements Dataset {
 
@@ -14,9 +14,9 @@ export class DatasetLightningPages implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_LightningPage>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcLightningPage>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_LightningPage>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcLightningPage>> {
 
         // First SOQL query
         logger?.log(`Querying Tooling API about FlexiPage in the org...`);            
@@ -30,7 +30,7 @@ export class DatasetLightningPages implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const pageDataFactory = dataFactory.getInstance(DataAliases.SFDC_LightningPage);
+        const pageDataFactory = dataFactory.getInstance(DataAliases.SfdcLightningPage);
         const pageRecords = results[0];
 
         // Get the page Ids
@@ -42,14 +42,14 @@ export class DatasetLightningPages implements Dataset {
 
         // Create the map
         logger?.log(`Parsing ${pageRecords?.length} lightning pages...`);
-        const pages: Map<string, SFDC_LightningPage> = new Map(await Processor.map(pageRecords, (/** @type {any} */ record: any) => {
+        const pages: Map<string, SfdcLightningPage> = new Map(await Processor.map(pageRecords, (/** @type {any} */ record: any) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            /** @type {SFDC_LightningPage} */
-            const page: SFDC_LightningPage = pageDataFactory.create({
+            /** @type {SfdcLightningPage} */
+            const page: SfdcLightningPage = pageDataFactory.create({
                 properties: {
                     id: id,
                     name: record.MasterLabel,
@@ -84,7 +84,7 @@ export class DatasetLightningPages implements Dataset {
             const id = sfdcManager.caseSafeId(metadataRecord.Id);
 
             // Get the page layout
-            const page: SFDC_LightningPage | undefined = pages.get(id);
+            const page: SfdcLightningPage | undefined = pages.get(id);
             if (page) {
 
                 // Set the metadata info
@@ -120,7 +120,7 @@ export class DatasetLightningPages implements Dataset {
         });
 
         // Compute the score of all items
-        await Processor.forEach(pages, async (/** @type {SFDC_LightningPage} */ page: SFDC_LightningPage) => {
+        await Processor.forEach(pages, async (/** @type {SfdcLightningPage} */ page: SfdcLightningPage) => {
             pageDataFactory.computeScore(page);
         });
 

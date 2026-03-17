@@ -5,7 +5,7 @@ import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_VisualForceComponent }from 'src/api/data/orgcheck-api-data-visualforcecomponent';
+import { SfdcVisualForceComponent }from 'src/api/data/orgcheck-api-data-visualforcecomponent';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
 export class RecipeVisualForceComponents implements Recipe {
@@ -32,16 +32,16 @@ export class RecipeVisualForceComponents implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data and parameters
-        const /** @type {Map<string, SFDC_VisualForceComponent>} */ components: Map<string, SFDC_VisualForceComponent> = data.get(DatasetAliases.VISUALFORCECOMPONENTS);
+        const /** @type {Map<string, SfdcVisualForceComponent>} */ components: Map<string, SfdcVisualForceComponent> = data.get(DatasetAliases.VISUALFORCECOMPONENTS);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
         if (!components) throw new Error(`RecipeVisualForceComponents: Data from dataset alias 'VISUALFORCECOMPONENTS' was undefined.`);
 
         // Filter data
-        /** @type {Array<SFDC_VisualForceComponent>} */ 
-        const array: Array<SFDC_VisualForceComponent> = [];
-        await Processor.forEach(components, async (/** @type {SFDC_VisualForceComponent} */ component: SFDC_VisualForceComponent) => {
+        /** @type {Array<SfdcVisualForceComponent>} */ 
+        const array: Array<SfdcVisualForceComponent> = [];
+        await Processor.forEach(components, async (/** @type {SfdcVisualForceComponent} */ component: SfdcVisualForceComponent) => {
             if (namespace === OrgCheckGlobalParameter.ALL_VALUES || component.package === namespace) {
                 array.push(component);
             }

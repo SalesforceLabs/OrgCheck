@@ -11,7 +11,7 @@ permalink: /development/
 
 This guide will walk you through setting up a developer environment allowing you to deploy Org Check as your own unlocked package.
 
-This page is also a good start if you want to participate in the project and propose your own PR o the team!
+This page is also a good start if you want to participate in the project and propose your own PR to the team!
 
 
 ## Prerequisites
@@ -34,7 +34,7 @@ git clone https://github.com/SalesforceLabs/OrgCheck.git
 cd OrgCheck
 ```
 
-Make sure your user is correclty setup in git:
+Make sure your user is correctly set up in git:
 ```bash
 git config --global user.name "<Your Fullname>"
 git config --global user.email "<Your Email>"
@@ -67,7 +67,9 @@ You need two developer orgs:
 
 ## Step 4: Update Project Definition
 
-Create a fresh `sfdx-project.json` file with your namespace:
+> **Note:** Org Check uses a monorepo. The Salesforce app is in `packages/orgcheck-salesforce-app`. The Org Check API (JavaScript/TypeScript) is in `packages/orgcheck-api`. Run Salesforce CLI commands from `packages/orgcheck-salesforce-app` or adjust paths accordingly.
+
+Create a fresh `sfdx-project.json` file with your namespace in `packages/orgcheck-salesforce-app`:
 
 ```json
 {
@@ -87,10 +89,10 @@ Replace `<namespace>` with your actual namespace.
 ## Step 5: Create the Package
 
 > Pre-requisite: `sf plugins install @salesforce/plugin-packaging`
-Create an Unlocked package based on OrgCheck using the Salesforce CLI(Recommended for debugging):
+Create an Unlocked package based on OrgCheck using the Salesforce CLI (recommended for debugging). Run from `packages/orgcheck-salesforce-app`:
 
 ```bash
-sf package create --name "Org Check Unlocked" --package-type Unlocked --path force-app --target-dev-hub <devhubalias>
+cd packages/orgcheck-salesforce-app && sf package create --name "Org Check Unlocked" --package-type Unlocked --path force-app --target-dev-hub <devhubalias>
 ```
 
 Alternatively, you can also create and test the OrgCheck App as a Managed package:
@@ -101,17 +103,22 @@ sf package create --name "Org Check" --package-type Managed --path force-app --t
 
 ## Step 6: Create the JavaScript files
 
-Use `yarn build:js` to generate the necessary JavaScript files:
+Build the Org Check API package (produces `packages/orgcheck-api/dist/orgcheck.js`):
 ```bash
-yarn install && yarn build:js
+yarn install && yarn workspace @orgcheck/api build
 ```
 
 ## Step 7: Create the Static Resource
 
-Use `build-static-resource.sh` (bash) or `build-static-resource.ps1`(powershell) to generate a Static resource at: force-app/main/default/staticresources/OrgCheck_SR.resource
+From the `@orgcheck/salesforce-app` package, run the build script to generate the static resource at `force-app/main/default/staticresources/OrgCheck_SR.resource`:
 
 ```bash
-build/build-static-resource.sh
+yarn workspace @orgcheck/salesforce-app build
+```
+
+Or from the salesforce-app directory:
+```bash
+cd packages/orgcheck-salesforce-app && node ./build/static-resource/build-static-resource.js
 ```
 
 ## Step 8: Create a Package Version

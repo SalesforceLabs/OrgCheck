@@ -5,7 +5,7 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_Profile } from 'src/api/data/orgcheck-api-data-profile';
+import { SfdcProfile } from 'src/api/data/orgcheck-api-data-profile';
 
 export class DatasetProfiles implements Dataset {
 
@@ -14,9 +14,9 @@ export class DatasetProfiles implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_Profile>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcProfile>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_Profile>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcProfile>> {
 
         // First SOQL query
         logger?.log(`Querying REST API about PermissionSet with IsOwnedByProfile=true in the org...`);            
@@ -56,18 +56,18 @@ export class DatasetProfiles implements Dataset {
         const assignmentRecords = results[3];
 
         // Init the factory and records
-        const profileDataFactory = dataFactory.getInstance(DataAliases.SFDC_Profile);
+        const profileDataFactory = dataFactory.getInstance(DataAliases.SfdcProfile);
 
         // Create the map of profiles
         logger?.log(`Parsing ${profileRecords?.length} profiles...`);
-        const profiles: Map<string, SFDC_Profile> = new Map(await Processor.map(profileRecords, (/** @type {any} */ record: any) => {
+        const profiles: Map<string, SfdcProfile> = new Map(await Processor.map(profileRecords, (/** @type {any} */ record: any) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.ProfileId);
 
             // Create the instance
-            /** @type {SFDC_Profile} */
-            const profile: SFDC_Profile = profileDataFactory.create({
+            /** @type {SfdcProfile} */
+            const profile: SfdcProfile = profileDataFactory.create({
                 properties: {
                     id: id,
                     name: record.Profile.Name,
@@ -130,7 +130,7 @@ export class DatasetProfiles implements Dataset {
 
         // Compute scores for all permission sets
         logger?.log(`Computing the score for ${profiles.size} profiles...`);
-        await Processor.forEach(profiles, async (/** @type {SFDC_Profile} */ profile: SFDC_Profile) => {
+        await Processor.forEach(profiles, async (/** @type {SfdcProfile} */ profile: SfdcProfile) => {
             profileDataFactory.computeScore(profile);
         });
 

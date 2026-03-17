@@ -3,7 +3,7 @@ import { Data } from 'src/api/core/orgcheck-api-data';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_Document }from 'src/api/data/orgcheck-api-data-document';
+import { SfdcDocument }from 'src/api/data/orgcheck-api-data-document';
 import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 
 export class RecipeKnowledgeArticles implements Recipe {
@@ -29,7 +29,7 @@ export class RecipeKnowledgeArticles implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data
-        const /** @type {Map<string, SFDC_Document>} */ articles: Map<string, SFDC_Document> = data.get(DatasetAliases.KNOWLEDGEARTICLES);
+        const /** @type {Map<string, SfdcDocument>} */ articles: Map<string, SfdcDocument> = data.get(DatasetAliases.KNOWLEDGEARTICLES);
 
         // Checking data
         if (!articles) throw new Error(`RecipeDocuments: Data from dataset alias 'KNOWLEDGEARTICLES' was undefined.`);

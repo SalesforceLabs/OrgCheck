@@ -1,15 +1,15 @@
 import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
 import { DataWithScoreAndDependencies } from 'src/api/core/orgcheck-api-data';
-import { SFDC_Object } from 'src/api/data/orgcheck-api-data-object';
+import { SfdcObject } from 'src/api/data/orgcheck-api-data-object';
 
-export interface SFDC_PageLayout extends DataWithScoreAndDependencies {
+export interface SfdcPageLayout extends DataWithScoreAndDependencies {
     
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_PageLayout;
+    dataType: DataAliases.SfdcPageLayout;
         
      /**
      * @description Salesforce Id
@@ -48,10 +48,10 @@ export interface SFDC_PageLayout extends DataWithScoreAndDependencies {
 
     /**
      * @description Object reference of this page layout 
-     * @type {SFDC_Object}
+     * @type {SfdcObject}
      * @public
      */
-    objectRef: SFDC_Object;
+    objectRef: SfdcObject;
 
     /**
      * @description Number of profiles assigned to this page layout

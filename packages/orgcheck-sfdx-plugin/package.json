@@ -4,8 +4,9 @@
   "version": "8.0.0",
   "private": true,
   "dependencies": {
-    "@orgcheck/api": "8.0.0",
+    "@flow-scanner/lightning-flow-scanner-core": "^6.19.1",
     "@oclif/core": "^4",
+    "@orgcheck/api": "8.0.0",
     "@salesforce/core": "^8.2.7",
     "@salesforce/sf-plugins-core": "^12",
     "fflate": "^0.8.2",
@@ -13,11 +14,11 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@types/mocha": "^10",
     "@eslint/js": "^8",
     "@oclif/plugin-command-snapshot": "^5.2.3",
     "@salesforce/cli-plugins-testkit": "^5.3.20",
     "@salesforce/dev-scripts": "^10",
+    "@types/mocha": "^10",
     "eslint": "^8.57.0",
     "eslint-plugin-sf-plugin": "^1.18.8",
     "oclif": "^4.14.0",
@@ -71,7 +72,11 @@
     "test:json-schema": "node --loader ts-node/esm --no-warnings=ExperimentalWarning \"./bin/dev.js\" schema:compare",
     "test:nuts": "nyc mocha \"**/*.nut.ts\" --slow 4500 --timeout 600000 --parallel",
     "test:only": "TS_NODE_PROJECT=test/tsconfig.json FORCE_COLOR=2 nyc mocha \"test/**/*.test.ts\"",
-    "version": "oclif readme"
+    "version": "oclif readme",
+    "command:global-view": "./bin/dev.js check global-view -o apexGuru --json",
+    "command:hardcoded-urls": "./bin/dev.js check hardcoded-urls -o apexGuru --json",
+    "command:object": "./bin/dev.js check object -s Account -o apexGuru --verbose --json ",
+    "command:profiles": "./bin/dev.js check profiles -o apexGuru --verbose --json "
   },
   "publishConfig": {
     "access": "public"

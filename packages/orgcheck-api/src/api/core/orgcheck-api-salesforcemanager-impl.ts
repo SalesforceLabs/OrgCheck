@@ -632,7 +632,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
                 try {
                     // Call the tooling composite request
                     const results = await this._connection.tooling.request({
-                        url: `/tooling/composite`, // here JsForce will automatically complete the start of the URI
+                        url: `/services/data/v${this.apiVersion}.0/tooling/composite`, 
                         method: 'POST',
                         body: JSON.stringify(body), 
                         headers: { 'Content-Type': 'application/json' }
@@ -704,9 +704,11 @@ export class SalesforceManager implements SalesforceManagerIntf {
                             `There was an error while calling Composite Tooling API to get dependencies. `,
                             errorCode,
                             { 
+                                'ApiVersion': `${this.apiVersion}`,
                                 'AllIds': JSON.stringify(ids ?? []) || '[]',
                                 'HttpStatusCode': response.httpStatusCode,
-                                'HttpResponse': JSON.stringify(response?.body ?? {}) || 'N/A',
+                                'HttpRequest': JSON.stringify(response?.body ?? {}) || 'N/A',
+                                'InitialBodies': JSON.stringify(bodies ?? []) || 'N/A',
                                 'Where': 'SalesforceManagerImpl.dependenciesQuery'
                             }
                         );
@@ -855,7 +857,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
                 try {
                     // Call the tooling composite request
                     const results = await this._connection.tooling.request({
-                        url: `/tooling/composite`, // here JsForce will automatically complete the start of the URI
+                        url: `/services/data/v${this.apiVersion}.0/tooling/composite`, 
                         method: 'POST',
                         body: JSON.stringify(body), 
                         headers: { 'Content-Type': 'application/json' }
@@ -987,7 +989,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         logger?.log(`Counting the nb records for the sobject: ${sobjectDevName}.`);
         const result = await this._connection.request({ 
-            url: `/limits/recordCount?sObjects=${sobjectDevName}`, 
+            url: `/services/data/v${this.apiVersion}.0/limits/recordCount?sObjects=${sobjectDevName}`, 
             method: 'GET' 
         });
         // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
@@ -1010,7 +1012,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         logger?.log(`Asking to run asynchronously all tests in this org.`);
         const result = await this._connection.request({ 
-            url: `/tooling/runTestsAsynchronous`,
+            url: `/services/data/v${this.apiVersion}.0/tooling/runTestsAsynchronous`,
             method: 'POST',
             body: '{ "testLevel": "RunAllTestsInOrg", "skipCodeCoverage": false }', // double quote is mandatory by SFDC Json parser.
             headers: { 'Content-Type': 'application/json' }
@@ -1079,7 +1081,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
             this._watchDog?.afterRequest(); // if limit has been reached, we reject the promise with a specific error and stop the process
             // Call the tooling composite request
             return this._connection.tooling.request({
-                url: `/tooling/composite`,
+                url: `/services/data/v${this.apiVersion}.0/tooling/composite`,
                 method: 'POST',
                 body: JSON.stringify(body), 
                 headers: { 'Content-Type': 'application/json' }

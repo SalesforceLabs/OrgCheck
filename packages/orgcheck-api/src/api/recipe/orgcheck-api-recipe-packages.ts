@@ -4,7 +4,7 @@ import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_Package }from 'src/api/data/orgcheck-api-data-package';
+import { SfdcPackage }from 'src/api/data/orgcheck-api-data-package';
 
 export class RecipePackages implements Recipe {
 
@@ -29,7 +29,7 @@ export class RecipePackages implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data
-        const /** @type {Map<string, SFDC_Package>} */ packages: Map<string, SFDC_Package> = data.get(DatasetAliases.PACKAGES);
+        const /** @type {Map<string, SfdcPackage>} */ packages: Map<string, SfdcPackage> = data.get(DatasetAliases.PACKAGES);
 
         // Checking data
         if (!packages) throw new Error(`RecipePackages: Data from dataset alias 'PACKAGES' was undefined.`);

@@ -16,6 +16,7 @@ class LoggerSetupForTest implements LoggerSetup {
   public messageLogged(): void {
     this.nbmessageLogged++;
   };
+  public messageSilentlyLogged(): void { }
   public endedWithError(): void {
     this.nbEndedOperationsKO++;
   };

@@ -35,8 +35,8 @@ Storage --|> StorageIntf : implements
 
 ## Starting point: the API class!
 
-The starting point in the Org Check api is the `API` class (how original!) located in the 
-file build/src/api/orgcheck-api.js
+The starting point in the Org Check API is the `API` class (in `packages/orgcheck-api/src/api/orgcheck-api-impl.ts`), 
+built and exported as `packages/orgcheck-api/dist/orgcheck.js`.
 
 ### Diagram of the API class
 
@@ -52,14 +52,14 @@ classDiagram
         +dailyApiRequestLimitInformation() SalesforceUsageInformation
         +runAllTestsAsync() string
         +compileClasses(Array~string~ apexClassIds) Map~string, any~
-        +getOrganizationInformation() SFDC_Organization
+        +getOrganizationInformation() SfdcOrganization
         +checkUsageTerms() boolean
         +wereUsageTermsAcceptedManually() boolean
         +acceptUsageTermsManually()
         +checkCurrentUserPermissions() boolean
-        +getPackages() Array~SFDC_Package~
+        +getPackages() Array~SfdcPackage~
         +removeAllPackagesFromCache()
-        +getPageLayouts(string namespace, string sobjectType, string sobject) Array~SFDC_PageLayout~
+        +getPageLayouts(string namespace, string sobjectType, string sobject) Array~SfdcPageLayout~
         +removeAllPageLayoutsFromCache()
         +get...()
         +removeAll...FromCache()
@@ -78,31 +78,35 @@ To create an instance of the Org Check API you would do:
 ```
 const api = ApiFactory.create({
     salesforce: {
-        authentication: { accessToken: '........' },
-        connection: { useJsForce: true }
+        authenticationOptions: { accessToken: '........' },
+        connection: connection  // optional: jsforce Connection instance
     },
     storage: { 
-        localImpl: this.localStorage,
-        compression: { useFflate: true },
-        encoding: { useFflate: true }
+        setItem: (key, value) => { ... },
+        getItem: (key) => { ... },
+        removeItem: (key) => { ... },
+        key: (n) => { ... },
+        length: () => { ... }
     },
     logSettings: {
-        isConsoleFallback: () => { return true; },
-        log: (section, message) => { ... },
-        ended: (section, message) => { ... },
-        failed: (section, error) => { ... }
+        started: (operationName) => { ... },
+        messageLogged: (operationName, message) => { ... },
+        endedWithError: (operationName, error) => { ... },
+        endedSuccessfully: (operationName, message) => { ... },
+        stopped: (operationName) => { ... }
     }
 });
 ```
 
-At this point we get only an access token to connect to a Salesforce org. We are actively working 
-on implementing the authentication with a connected app/external app approach.
+The `salesforce` setup accepts either `authenticationOptions` (with `accessToken`) or a `connection` 
+(jsforce Connection instance) to connect to a Salesforce org.
 
-The api will store as much as it can in a local storage. As of now the implementation that is used 
-is the one from the browser. Using the third party fflate help us reducing the size of the data 
-being stored. Note: it does not encrypt the data!
+The `storage` setup provides key-value persistence with `setItem`, `getItem`, `removeItem`, `key`, and 
+`length`. The browser app uses `localStorage`; the fflate library is used for compression when storing 
+data. Note: it does not encrypt the data!
 
-Finally, the api will use a set of methods to notify the user about how is the process going. 
+The `logSettings` setup provides callbacks for progress tracking: `started`, `messageLogged`, 
+`endedWithError`, `endedSuccessfully`, and `stopped`. 
 
 Once initialiazed, and before processing further, you should check if the terms of conditions are 
 auto-approved (non production environment) or need to be approved manually (production environment) 
@@ -118,54 +122,54 @@ All these methods are `async`.
 ```mermaid
 classDiagram
     class API {
-        +getOrganizationInformation() SFDC_Organization
-        +getPackages() Array~SFDC_Package~
-        +getPageLayouts(namespace, sobjectType, sobject) Array~SFDC_PageLayout~
-        +getObjectTypes() Array~SFDC_ObjectType~
-        +getObjects(namespace, sobjectType) Array~SFDC_Object~
-        +getObject(sobject) SFDC_Object
+        +getOrganizationInformation() SfdcOrganization
+        +getPackages() Array~SfdcPackage~
+        +getPageLayouts(namespace, sobjectType, sobject) Array~SfdcPageLayout~
+        +getObjectTypes() Array~SfdcObjectType~
+        +getObjects(namespace, sobjectType) Array~SfdcObject~
+        +getObject(sobject) SfdcObject
         +getObjectPermissionsPerParent(namespace) DataMatrixIntf
         +getApplicationPermissionsPerParent(namespace) DataMatrixIntf
-        +getKnowledgeArticles() Array~SFDC_KnowledgeArticle~
-        +getChatterGroups() Array~SFDC_CollaborationGroup~
-        +getCustomFields(namespace, sobjectType, sobject) Array~SFDC_Fiel~
-        +getPermissionSets(namespace) Array~SFDC_PermissionSet~
-        +getPermissionSetLicenses() Array~SFDC_PermissionSetLicense~
-        +getProfiles(namespace) Array~SFDC_Profile~
-        +getProfileRestrictions(namespace) Array~SFDC_ProfileRestrictions~
-        +getProfilePasswordPolicies() Array~SFDC_ProfilePasswordPolicy~
-        +getActiveUsers() Array~SFDC_User~
-        +getBrowsers() Array~SFDC_Browser~
-        +getCustomLabels(namespace) Array~SFDC_CustomLabel~
-        +getCustomTabs(namespace) Array~SFDC_CustomTab~
-        +getDocuments(namespace) Array~SFDC_Document~
-        +getLightningWebComponents(namespace) Array~SFDC_LightningWebComponent~
-        +getLightningAuraComponents(namespace) Array~SFDC_LightningAuraComponent~
-        +getLightningPages(namespace) Array~SFDC_LightningPage~
-        +getVisualForceComponents(namespace) Array~SFDC_VisualForceComponent~
-        +getVisualForcePages(namespace) Array~SFDC_VisualForcePage~
-        +getPublicGroups() Array~SFDC_Group~
-        +getQueues() Array~SFDC_Group~
-        +getApexClasses(namespace) Array~SFDC_ApexClass~
-        +getApexTests(namespace) Array~SFDC_ApexClass~
-        +getApexUncompiled(namespace) Array~SFDC_ApexClass~
-        +getApexTriggers(namespace) Array~SFDC_ApexTrigger~
-        +getRoles() Array~SFDC_UserRole~
-        +getRolesTree() SFDC_UserRole
-        +getStaticResources(namespace) Array~SFDC_StaticResource~
-        +getWeblinks(namespace, sobjectType, sobject) Array~SFDC_WebLink~
-        +getWorkflows() Array~SFDC_Workflow~
-        +getRecordTypes(namespace, sobjectType, sobject) Array~SFDC_RecordType~
+        +getKnowledgeArticles() Array~SfdcKnowledgeArticle~
+        +getChatterGroups() Array~SfdcCollaborationGroup~
+        +getCustomFields(namespace, sobjectType, sobject) Array~SfdcField~
+        +getPermissionSets(namespace) Array~SfdcPermissionSet~
+        +getPermissionSetLicenses() Array~SfdcPermissionSetLicense~
+        +getProfiles(namespace) Array~SfdcProfile~
+        +getProfileRestrictions(namespace) Array~SfdcProfileRestrictions~
+        +getProfilePasswordPolicies() Array~SfdcProfilePasswordPolicy~
+        +getActiveUsers() Array~SfdcUser~
+        +getBrowsers() Array~SfdcBrowser~
+        +getCustomLabels(namespace) Array~SfdcCustomLabel~
+        +getCustomTabs(namespace) Array~SfdcCustomTab~
+        +getDocuments(namespace) Array~SfdcDocument~
+        +getLightningWebComponents(namespace) Array~SfdcLightningWebComponent~
+        +getLightningAuraComponents(namespace) Array~SfdcLightningAuraComponent~
+        +getLightningPages(namespace) Array~SfdcLightningPage~
+        +getVisualForceComponents(namespace) Array~SfdcVisualForceComponent~
+        +getVisualForcePages(namespace) Array~SfdcVisualForcePage~
+        +getPublicGroups() Array~SfdcGroup~
+        +getQueues() Array~SfdcGroup~
+        +getApexClasses(namespace) Array~SfdcApexClass~
+        +getApexTests(namespace) Array~SfdcApexClass~
+        +getApexUncompiled(namespace) Array~SfdcApexClass~
+        +getApexTriggers(namespace) Array~SfdcApexTrigger~
+        +getRoles() Array~SfdcUserRole~
+        +getRolesTree() SfdcUserRole
+        +getStaticResources(namespace) Array~SfdcStaticResource~
+        +getWeblinks(namespace, sobjectType, sobject) Array~SfdcWebLink~
+        +getWorkflows() Array~SfdcWorkflow~
+        +getRecordTypes(namespace, sobjectType, sobject) Array~SfdcRecordType~
         +getFieldPermissionsPerParent(sobject, namespace) DataMatrixIntf
-        +getFlows() Array~SFDC_Flow~
-        +getEmailTemplates(namespace) Array~SFDC_EmailTemplate~
-        +getHomePageComponents() Array~SFDC_HomePageComponent~
-        +getProcessBuilders() Array~SFDC_Flow~
-        +getValidationRules(namespace, sobjectType, sobject) Array~SFDC_ValidationRule~
-        +getDashboards() Array~SFDC_Dashboard~
-        +getReports() Array~SFDC_Report~
-        +getGlobalView() Map~string, DataCollectionStatisticsIntf~
-        +getHardcodedURLsView() Map~string, DataCollectionStatisticsIntf~
+        +getFlows() Array~SfdcFlow~
+        +getEmailTemplates(namespace) Array~SfdcEmailTemplate~
+        +getHomePageComponents() Array~SfdcHomePageComponent~
+        +getProcessBuilders() Array~SfdcFlow~
+        +getValidationRules(namespace, sobjectType, sobject) Array~SfdcValidationRule~
+        +getDashboards() Array~SfdcDashboard~
+        +getReports() Array~SfdcReport~
+        +getGlobalView() Array~DataCollectionStatisticsIntf~
+        +getHardcodedURLsView() Array~DataCollectionStatisticsIntf~
 }
 ```
 
@@ -186,9 +190,9 @@ The `Recipe` is not the place to calculate or modify the score of the data, this
 A `Dataset` can be defined as a data retriever.
 
 Most of the time, the dataset will use the salesforce manager to read information from the org (SOQL, 
-SOSL, Tooling, Describe, etc.) and then will map that data into the corresponding `SFDC_*` object.
+SOSL, Tooling, Describe, etc.) and then will map that data into the corresponding `Sfdc*` object.
 
-Data factories are used to create the `SFDC_*` objects and also to compute the objects' scores.
+Data factories are used to create the `Sfdc*` objects and also to compute the objects' scores.
 
 Scores are calculated based on the `SecretSauce` class.
 

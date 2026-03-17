@@ -5,7 +5,7 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_Group } from 'src/api/data/orgcheck-api-data-group';
+import { SfdcGroup } from 'src/api/data/orgcheck-api-data-group';
 
 export class DatasetGroups implements Dataset {
 
@@ -14,9 +14,9 @@ export class DatasetGroups implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - List of optional argument to pass
-     * @returns {Promise<Map<string, SFDC_Group>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcGroup>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_Group>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcGroup>> {
 
         // First SOQL query
         logger?.log(`Querying REST API about Group in the org...`);            
@@ -27,12 +27,12 @@ export class DatasetGroups implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const groupDataFactory = dataFactory.getInstance(DataAliases.SFDC_Group);
+        const groupDataFactory = dataFactory.getInstance(DataAliases.SfdcGroup);
 
         // Create the map
         const groupRecords = results[0];
         logger?.log(`Parsing ${groupRecords?.length} groups...`);
-        const groups: Map<string, SFDC_Group> = new Map(await Processor.map(groupRecords, async (/** @type {any} */ record: any) => {
+        const groups: Map<string, SfdcGroup> = new Map(await Processor.map(groupRecords, async (/** @type {any} */ record: any) => {
         
             // Get the ID15 of this custom field
             const groupId = sfdcManager.caseSafeId(record.Id);
@@ -82,8 +82,8 @@ export class DatasetGroups implements Dataset {
             }
 
             // Create the instance (common one)
-            /** @type {SFDC_Group} */
-            const group: SFDC_Group = groupDataFactory.createWithScore({
+            /** @type {SfdcGroup} */
+            const group: SfdcGroup = groupDataFactory.createWithScore({
                 properties: {
                     id: groupId,
                     name: groupName, 

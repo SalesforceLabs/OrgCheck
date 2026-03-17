@@ -4,14 +4,14 @@ import { DataWithoutScore } from 'src/api/core/orgcheck-api-data';
 /**
  * @description Representation of an Application in Org Check
  */
-export interface SFDC_Application extends DataWithoutScore {
+export interface SfdcApplication extends DataWithoutScore {
 
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_Application;
+    dataType: DataAliases.SfdcApplication;
     
     /**
      * @description Salesforce Id of the application

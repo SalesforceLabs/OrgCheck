@@ -87,10 +87,10 @@ const __queryMoreMock = jest.fn(async function (locator: string) {
 });
 
 const __requestMock = jest.fn(async function (httpRequest) {
-  if (httpRequest?.url?.startsWith('/limits/recordCount')) {
+  if (httpRequest?.url?.includes('.0/limits/recordCount')) {
     return Promise.resolve(0);
   }
-  if (httpRequest?.url?.startsWith('/tooling/composite') || httpRequest?.url?.startsWith('/composite')) {
+  if (httpRequest?.url?.includes('.0/tooling/composite') || httpRequest?.url?.includes('.0/composite')) {
     const body = JSON.parse(httpRequest.body);
     return Promise.resolve({ 
       compositeResponse: body.compositeRequest.map((c: any) => {

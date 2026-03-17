@@ -4,7 +4,7 @@ import { Dataset } from 'src/api/core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_Browser } from 'src/api/data/orgcheck-api-data-browser';
+import { SfdcBrowser } from 'src/api/data/orgcheck-api-data-browser';
 
 export class DatasetBrowsers implements Dataset {
 
@@ -13,9 +13,9 @@ export class DatasetBrowsers implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_Browser>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcBrowser>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_Browser>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcBrowser>> {
 
         // SOQL query
         logger?.log(`Querying REST API about LoginHistory in the org...`);            
@@ -28,7 +28,7 @@ export class DatasetBrowsers implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const browserDataFactory = dataFactory.getInstance(DataAliases.SFDC_Browser);
+        const browserDataFactory = dataFactory.getInstance(DataAliases.SfdcBrowser);
 
         // Create the map
         const browserRecords = results[0];
@@ -43,13 +43,13 @@ export class DatasetBrowsers implements Dataset {
             const version = Number.parseInt(versionAsText, 10) ?? NaN;
 
             if (browsers.has(name)) {
-                /** @type {SFDC_Browser} */
-                const browser: SFDC_Browser = browsers.get(name);
+                /** @type {SfdcBrowser} */
+                const browser: SfdcBrowser = browsers.get(name);
                 // Update the number of logins
                 browser.nbApplicationLogin += record.CntBrowser;
             } else {
-                /** @type {SFDC_Browser} */
-                const browser: SFDC_Browser = browserDataFactory.create({
+                /** @type {SfdcBrowser} */
+                const browser: SfdcBrowser = browserDataFactory.create({
                     properties: {
                         fullName: record.Browser,
                         name: name,

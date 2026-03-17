@@ -5,7 +5,7 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_KnowledgeArticle } from 'src/api/data/orgcheck-api-data-knowledgearticle';
+import { SfdcKnowledgeArticle } from 'src/api/data/orgcheck-api-data-knowledgearticle';
 
 export class DatasetKnowledgeArticles implements Dataset {
 
@@ -14,9 +14,9 @@ export class DatasetKnowledgeArticles implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_KnowledgeArticle>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcKnowledgeArticle>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_KnowledgeArticle>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcKnowledgeArticle>> {
 
         // First SOSL query
         logger?.log(`Querying SOSL about published KnowledgeArticleVersion containing Salesforce domains...`);            
@@ -30,20 +30,20 @@ export class DatasetKnowledgeArticles implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const knowledgeArticleDataFactory = dataFactory.getInstance(DataAliases.SFDC_KnowledgeArticle);
+        const knowledgeArticleDataFactory = dataFactory.getInstance(DataAliases.SfdcKnowledgeArticle);
         const knowledgeArticleRecords = results[0];
 
         // Create the map
         logger?.log(`Parsing ${knowledgeArticleRecords?.length} articles...`);
-        const knowledgeArticles: Map<string, SFDC_KnowledgeArticle> = new Map(await Processor.map(knowledgeArticleRecords, (/** @type {any} */ record: any) => {
+        const knowledgeArticles: Map<string, SfdcKnowledgeArticle> = new Map(await Processor.map(knowledgeArticleRecords, (/** @type {any} */ record: any) => {
 
             // Get the ID15 of this version and article
             const versionId = sfdcManager.caseSafeId(record.Id);
             const articeId = sfdcManager.caseSafeId(record.KnowledgeArticleId);
 
             // Create the instance
-            /** @type {SFDC_KnowledgeArticle} */
-            const knowledgeArticle: SFDC_KnowledgeArticle = knowledgeArticleDataFactory.createWithScore({
+            /** @type {SfdcKnowledgeArticle} */
+            const knowledgeArticle: SfdcKnowledgeArticle = knowledgeArticleDataFactory.createWithScore({
                 properties: {
                     id: articeId,
                     number: record.ArticleNumber,

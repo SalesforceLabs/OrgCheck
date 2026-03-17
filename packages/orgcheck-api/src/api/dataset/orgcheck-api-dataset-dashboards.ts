@@ -5,7 +5,7 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_Dashboard } from 'src/api/data/orgcheck-api-data-dashboard';
+import { SfdcDashboard } from 'src/api/data/orgcheck-api-data-dashboard';
 
 export class DatasetDashboards implements Dataset {
 
@@ -14,9 +14,9 @@ export class DatasetDashboards implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_Dashboard>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcDashboard>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_Dashboard>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcDashboard>> {
 
         // First SOQL queries
         logger?.log(`Querying REST API about dashboards in the org...`);            
@@ -29,19 +29,19 @@ export class DatasetDashboards implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const dashboardDataFactory = dataFactory.getInstance(DataAliases.SFDC_Dashboard);
+        const dashboardDataFactory = dataFactory.getInstance(DataAliases.SfdcDashboard);
 
         // Create the map
         const dashboardRecords = results[0];
         logger?.log(`Parsing ${dashboardRecords?.length} dashboards...`);
-        const dashboards: Map<string, SFDC_Dashboard> = new Map(await Processor.map(dashboardRecords, async (/** @type {any} */ record: any) => {
+        const dashboards: Map<string, SfdcDashboard> = new Map(await Processor.map(dashboardRecords, async (/** @type {any} */ record: any) => {
         
             // Get the ID15 of this dashboard
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            /** @type {SFDC_Dashboard} */
-            const dashboard: SFDC_Dashboard = dashboardDataFactory.createWithScore({
+            /** @type {SfdcDashboard} */
+            const dashboard: SfdcDashboard = dashboardDataFactory.createWithScore({
                 properties: {
                     id: id,
                     folderName: record.FolderName, 

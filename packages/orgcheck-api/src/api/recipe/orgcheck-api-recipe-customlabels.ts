@@ -4,7 +4,7 @@ import { Data } from 'src/api/core/orgcheck-api-data';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_CustomLabel }from 'src/api/data/orgcheck-api-data-customlabel';
+import { SfdcCustomLabel }from 'src/api/data/orgcheck-api-data-customlabel';
 import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
@@ -32,16 +32,16 @@ export class RecipeCustomLabels implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data and parameters
-        const /** @type {Map<string, SFDC_CustomLabel>} */ customLabels: Map<string, SFDC_CustomLabel> = data.get(DatasetAliases.CUSTOMLABELS);
+        const /** @type {Map<string, SfdcCustomLabel>} */ customLabels: Map<string, SfdcCustomLabel> = data.get(DatasetAliases.CUSTOMLABELS);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
         if (!customLabels) throw new Error(`RecipeCustomLabels: Data from dataset alias 'CUSTOMLABELS' was undefined.`);
 
         // Filter data
-        /** @type {Array<SFDC_CustomLabel>} */
-        const array: Array<SFDC_CustomLabel> = [];
-        await Processor.forEach(customLabels, async (/** @type {SFDC_CustomLabel} */ customLabel: SFDC_CustomLabel) => {
+        /** @type {Array<SfdcCustomLabel>} */
+        const array: Array<SfdcCustomLabel> = [];
+        await Processor.forEach(customLabels, async (/** @type {SfdcCustomLabel} */ customLabel: SfdcCustomLabel) => {
             if (namespace === OrgCheckGlobalParameter.ALL_VALUES || customLabel.package === namespace) {
                 array.push(customLabel);
             }

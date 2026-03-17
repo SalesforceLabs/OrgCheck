@@ -4,7 +4,7 @@ import { Data } from 'src/api/core/orgcheck-api-data';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_Flow }from 'src/api/data/orgcheck-api-data-flow';
+import { SfdcFlow }from 'src/api/data/orgcheck-api-data-flow';
 import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 
 export class RecipeFlows implements Recipe {
@@ -30,15 +30,15 @@ export class RecipeFlows implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data
-        const /** @type {Map<string, SFDC_Flow>} */ flows: Map<string, SFDC_Flow> = data.get(DatasetAliases.FLOWS);
+        const /** @type {Map<string, SfdcFlow>} */ flows: Map<string, SfdcFlow> = data.get(DatasetAliases.FLOWS);
 
         // Checking data and filter
         if (!flows) throw new Error(`RecipeFlows: Data from dataset alias 'FLOWS' was undefined.`);
 
         // Filter data
-        /** @type {Array<SFDC_Flow>} */
-        const array: Array<SFDC_Flow> = [];
-        await Processor.forEach(flows, async (/** @type {SFDC_Flow} */ flow: SFDC_Flow) => {
+        /** @type {Array<SfdcFlow>} */
+        const array: Array<SfdcFlow> = [];
+        await Processor.forEach(flows, async (/** @type {SfdcFlow} */ flow: SfdcFlow) => {
             if (flow.isProcessBuilder === false) {
                 array.push(flow);
             }

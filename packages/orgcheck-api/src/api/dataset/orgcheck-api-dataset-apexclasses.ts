@@ -6,7 +6,7 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_ApexClass, SFDC_ApexTestMethodResult } from 'src/api/data/orgcheck-api-data-apexclass';
+import { SfdcApexClass, SfdcApexTestMethodResult } from 'src/api/data/orgcheck-api-data-apexclass';
 
 export class DatasetApexClasses implements Dataset {
 
@@ -15,9 +15,9 @@ export class DatasetApexClasses implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_ApexClass>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcApexClass>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_ApexClass>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcApexClass>> {
 
         // First SOQL queries
         logger?.log(`Querying Tooling API about ApexClass, ApexCodeCoverage, ApexCodeCoverageAggregate and AsyncApexJob in the org...`);            
@@ -48,8 +48,8 @@ export class DatasetApexClasses implements Dataset {
         }], logger);
         
         // Init the factory and records and records
-        const apexClassDataFactory = dataFactory.getInstance(DataAliases.SFDC_ApexClass);
-        const apexTestResultDataFactory = dataFactory.getInstance(DataAliases.SFDC_ApexTestMethodResult);
+        const apexClassDataFactory = dataFactory.getInstance(DataAliases.SfdcApexClass);
+        const apexTestResultDataFactory = dataFactory.getInstance(DataAliases.SfdcApexTestMethodResult);
         const apexClassRecords = results[0];
         const asyncApexJobRecords = results[1];
         const apexTestResultRecords = results[2];
@@ -89,17 +89,17 @@ export class DatasetApexClasses implements Dataset {
         const apexCodeCoverageRecords = [].concat(... results2[0]);
         const apexCodeCoverageAggRecords = [].concat(... results2[1]);
 
-        // Create instances of SFDC_ApexClass
+        // Create instances of SfdcApexClass
         logger?.log(`Parsing ${apexClassRecords?.length} apex classes...`);
-        /** @type {Map<string, SFDC_ApexClass>} */
-        const apexClasses: Map<string, SFDC_ApexClass> = new Map(await Processor.map(apexClassRecords, async (/** @type {any} */ record: any) => {
+        /** @type {Map<string, SfdcApexClass>} */
+        const apexClasses: Map<string, SfdcApexClass> = new Map(await Processor.map(apexClassRecords, async (/** @type {any} */ record: any) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
             
             // Create the instance
-            /** @type {SFDC_ApexClass} */
-            const apexClass: SFDC_ApexClass = apexClassDataFactory.create({
+            /** @type {SfdcApexClass} */
+            const apexClass: SfdcApexClass = apexClassDataFactory.create({
                 properties: {
                     id: id,
                     name: record.Name,
@@ -264,8 +264,8 @@ export class DatasetApexClasses implements Dataset {
                             tc.testFailedMethods = [];
                         }
                         if (tc.lastTestRunDate === record.ApexTestRunResult?.CreatedDate) {
-                            /** @type {SFDC_ApexTestMethodResult} */
-                            const result: SFDC_ApexTestMethodResult = apexTestResultDataFactory.create({ 
+                            /** @type {SfdcApexTestMethodResult} */
+                            const result: SfdcApexTestMethodResult = apexTestResultDataFactory.create({ 
                                 properties: {
                                     methodName: record.MethodName,
                                     isSuccessful: record.Outcome === 'Pass',
@@ -293,7 +293,7 @@ export class DatasetApexClasses implements Dataset {
 
         // FINALLY!!!! Compute the score of all items
         logger?.log(`Computing scores for ${apexClasses.size} Apex classes...`);
-        await Processor.forEach(apexClasses, async (/** @type {SFDC_ApexClass} */ apexClass: SFDC_ApexClass) => {
+        await Processor.forEach(apexClasses, async (/** @type {SfdcApexClass} */ apexClass: SfdcApexClass) => {
             apexClassDataFactory.computeScore(apexClass);
         });
 

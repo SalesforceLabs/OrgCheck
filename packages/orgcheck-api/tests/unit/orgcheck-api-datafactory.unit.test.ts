@@ -8,8 +8,8 @@ describe('orgcheck-api-datafactory', () => {
         expect(factory).toBeDefined();
     });
     describe('checks if datafactoryinstance is working fine for data with score and no dependencies', () => {
-        // export interface SFDC_Browser extends DataWithScore { .... }
-        const factory = new DataFactory().getInstance(DataAliases.SFDC_Browser);
+        // export interface SfdcBrowser extends DataWithScore { .... }
+        const factory = new DataFactory().getInstance(DataAliases.SfdcBrowser);
         it('should pass with data with score and no dependencies', () => {
             const data = factory.createWithScore({
                 properties: {
@@ -39,8 +39,8 @@ describe('orgcheck-api-datafactory', () => {
         });
     });
     describe('checks if datafactoryinstance is working fine for data with score and dependencies', () => {
-        // export interface SFDC_ApexClass extends DataWithScoreAndDependencies { ... }
-        const factory = new DataFactory().getInstance(DataAliases.SFDC_ApexClass);
+        // export interface SfdcApexClass extends DataWithScoreAndDependencies { ... }
+        const factory = new DataFactory().getInstance(DataAliases.SfdcApexClass);
         it('should pass with data with score and with dependencies', () => {
             const data = factory.createWithScore({ 
                 properties: {},
@@ -66,8 +66,8 @@ describe('orgcheck-api-datafactory', () => {
         });
     });
     describe('checks if datafactoryinstance is working fine for data without score', () => {
-        // export interface SFDC_ApexTestMethodResult extends DataWithoutScore { ... }
-        const factory = new DataFactory().getInstance(DataAliases.SFDC_ApexTestMethodResult);
+        // export interface SfdcApexTestMethodResult extends DataWithoutScore { ... }
+        const factory = new DataFactory().getInstance(DataAliases.SfdcApexTestMethodResult);
         it('should pass with data without score (and not dependencies)', () => {
             const data = factory.createWithScore({ properties: {} });
             const properties = Object.keys(data);

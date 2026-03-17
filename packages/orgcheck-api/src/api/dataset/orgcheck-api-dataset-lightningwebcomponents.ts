@@ -5,7 +5,7 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_LightningWebComponent } from 'src/api/data/orgcheck-api-data-lightningwebcomponent';
+import { SfdcLightningWebComponent } from 'src/api/data/orgcheck-api-data-lightningwebcomponent';
 
 export class DatasetLightningWebComponents implements Dataset {
 
@@ -14,9 +14,9 @@ export class DatasetLightningWebComponents implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_LightningWebComponent>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcLightningWebComponent>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_LightningWebComponent>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcLightningWebComponent>> {
 
         // First SOQL query
         logger?.log(`Querying Tooling API about LightningComponentBundle in the org...`);            
@@ -29,7 +29,7 @@ export class DatasetLightningWebComponents implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const componentDataFactory = dataFactory.getInstance(DataAliases.SFDC_LightningWebComponent);
+        const componentDataFactory = dataFactory.getInstance(DataAliases.SfdcLightningWebComponent);
         const componentRecords = results[0];
 
         // Then retreive dependencies
@@ -41,14 +41,14 @@ export class DatasetLightningWebComponents implements Dataset {
 
         // Create the map
         logger?.log(`Parsing ${componentRecords?.length} lightning web components...`);
-        const components: Map<string, SFDC_LightningWebComponent> = new Map(await Processor.map(componentRecords, (/** @type {any} */ record: any) => {
+        const components: Map<string, SfdcLightningWebComponent> = new Map(await Processor.map(componentRecords, (/** @type {any} */ record: any) => {
 
             // Get the ID15 of this custom field
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            /** @type {SFDC_LightningWebComponent} */
-            const component: SFDC_LightningWebComponent = componentDataFactory.createWithScore({
+            /** @type {SfdcLightningWebComponent} */
+            const component: SfdcLightningWebComponent = componentDataFactory.createWithScore({
                 properties: {
                     id: id,
                     name: record.MasterLabel,

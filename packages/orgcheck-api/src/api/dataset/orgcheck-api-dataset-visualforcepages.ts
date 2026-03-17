@@ -6,7 +6,7 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_VisualForcePage } from 'src/api/data/orgcheck-api-data-visualforcepage';
+import { SfdcVisualForcePage } from 'src/api/data/orgcheck-api-data-visualforcepage';
 
 export class DatasetVisualForcePages implements Dataset {
 
@@ -15,9 +15,9 @@ export class DatasetVisualForcePages implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_VisualForcePage>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcVisualForcePage>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_VisualForcePage>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcVisualForcePage>> {
 
         // First SOQL query
         logger?.log(`Querying Tooling API about ApexPage in the org...`);            
@@ -30,7 +30,7 @@ export class DatasetVisualForcePages implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const pageDataFactory = dataFactory.getInstance(DataAliases.SFDC_VisualForcePage);
+        const pageDataFactory = dataFactory.getInstance(DataAliases.SfdcVisualForcePage);
         const pageRecords = results[0];
 
         // Then retreive dependencies
@@ -42,14 +42,14 @@ export class DatasetVisualForcePages implements Dataset {
 
         // Create the map
         logger?.log(`Parsing ${pageRecords?.length} visualforce pages...`);
-        const pages: Map<string, SFDC_VisualForcePage> = new Map(await Processor.map(pageRecords, (/** @type {any} */ record: any) => {
+        const pages: Map<string, SfdcVisualForcePage> = new Map(await Processor.map(pageRecords, (/** @type {any} */ record: any) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            /** @type {SFDC_VisualForcePage} */
-            const page: SFDC_VisualForcePage = pageDataFactory.create({
+            /** @type {SfdcVisualForcePage} */
+            const page: SfdcVisualForcePage = pageDataFactory.create({
                 properties: {
                     id: id,
                     name: record.Name,

@@ -5,8 +5,8 @@ import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_Profile }from 'src/api/data/orgcheck-api-data-profile';
-import { SFDC_ProfileRestrictions }from 'src/api/data/orgcheck-api-data-profilerestrictions';
+import { SfdcProfile }from 'src/api/data/orgcheck-api-data-profile';
+import { SfdcProfileRestrictions }from 'src/api/data/orgcheck-api-data-profilerestrictions';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
 export class RecipeProfileRestrictions implements Recipe {
@@ -36,8 +36,8 @@ export class RecipeProfileRestrictions implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data and parameters
-        const /** @type {Map<string, SFDC_Profile>} */ profiles: Map<string, SFDC_Profile> = data.get(DatasetAliases.PROFILES);
-        const /** @type {Map<string, SFDC_ProfileRestrictions>} */ profileRestrictions: Map<string, SFDC_ProfileRestrictions> = data.get(DatasetAliases.PROFILERESTRICTIONS);
+        const /** @type {Map<string, SfdcProfile>} */ profiles: Map<string, SfdcProfile> = data.get(DatasetAliases.PROFILES);
+        const /** @type {Map<string, SfdcProfileRestrictions>} */ profileRestrictions: Map<string, SfdcProfileRestrictions> = data.get(DatasetAliases.PROFILERESTRICTIONS);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
@@ -45,9 +45,9 @@ export class RecipeProfileRestrictions implements Recipe {
         if (!profileRestrictions) throw new Error(`RecipeProfileRestrictions: Data from dataset alias 'PROFILERESTRICTIONS' was undefined.`);
 
         // Augment and Filter data
-        /** @type {Array<SFDC_ProfileRestrictions>} */
-        const array: Array<SFDC_ProfileRestrictions> = [];
-        await Processor.forEach(profileRestrictions, async (/** @type {SFDC_ProfileRestrictions} */ restriction: SFDC_ProfileRestrictions) => {
+        /** @type {Array<SfdcProfileRestrictions>} */
+        const array: Array<SfdcProfileRestrictions> = [];
+        await Processor.forEach(profileRestrictions, async (/** @type {SfdcProfileRestrictions} */ restriction: SfdcProfileRestrictions) => {
             // Augment data
             const profileRef = profiles.get(restriction.profileId);
             if (profileRef) {

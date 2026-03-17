@@ -5,7 +5,7 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_Workflow } from 'src/api/data/orgcheck-api-data-workflow';
+import { SfdcWorkflow } from 'src/api/data/orgcheck-api-data-workflow';
 
 export class DatasetWorkflows implements Dataset {
 
@@ -14,9 +14,9 @@ export class DatasetWorkflows implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_Workflow>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcWorkflow>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_Workflow>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcWorkflow>> {
 
         // First SOQL query
         // (only ids because metadata can't be read via SOQL in bulk!
@@ -32,7 +32,7 @@ export class DatasetWorkflows implements Dataset {
         const workflowRuleIds = await Processor.map(workflowRuleRecords, (/** @type {any} */ record: any) => record.Id);
 
         // Init the factory and records
-        const workflowDataFactory = dataFactory.getInstance(DataAliases.SFDC_Workflow);
+        const workflowDataFactory = dataFactory.getInstance(DataAliases.SfdcWorkflow);
 
         // Get information about flows and process builders using metadata
         logger?.log(`Calling Tooling API Composite to get more information about these ${workflowRuleIds?.length} workflow rules...`);
@@ -40,14 +40,14 @@ export class DatasetWorkflows implements Dataset {
 
         // Create the map
         logger?.log(`Parsing ${records?.length} workflows...`);
-        const workflows: Map<string, SFDC_Workflow> = new Map(await Processor.map(records, async (/** @type {any} */ record: any) => {
+        const workflows: Map<string, SfdcWorkflow> = new Map(await Processor.map(records, async (/** @type {any} */ record: any) => {
 
             // Get the ID15 of this user
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            /** @type {SFDC_Workflow} */
-            const workflow: SFDC_Workflow = workflowDataFactory.create({
+            /** @type {SfdcWorkflow} */
+            const workflow: SfdcWorkflow = workflowDataFactory.create({
                 properties: {
                     id: id,
                     name: record.FullName,

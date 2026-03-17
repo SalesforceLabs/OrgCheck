@@ -4,7 +4,7 @@ import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_ObjectType }from 'src/api/data/orgcheck-api-data-objecttype';
+import { SfdcObjectType }from 'src/api/data/orgcheck-api-data-objecttype';
 
 export class RecipeObjectTypes implements Recipe {
 
@@ -29,7 +29,7 @@ export class RecipeObjectTypes implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data
-        const /** @type {Map<string, SFDC_ObjectType>} */ types: Map<string, SFDC_ObjectType> = data.get(DatasetAliases.OBJECTTYPES);
+        const /** @type {Map<string, SfdcObjectType>} */ types: Map<string, SfdcObjectType> = data.get(DatasetAliases.OBJECTTYPES);
 
         // Checking data
         if (!types) throw new Error(`RecipeObjectTypes: Data from dataset alias 'OBJECTTYPES' was undefined.`);

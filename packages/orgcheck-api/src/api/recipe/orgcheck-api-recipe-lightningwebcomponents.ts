@@ -5,7 +5,7 @@ import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_LightningWebComponent }from 'src/api/data/orgcheck-api-data-lightningwebcomponent';
+import { SfdcLightningWebComponent }from 'src/api/data/orgcheck-api-data-lightningwebcomponent';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
 export class RecipeLightningWebComponents implements Recipe {
@@ -32,16 +32,16 @@ export class RecipeLightningWebComponents implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data and parameters
-        const  /** @type {Map<string, SFDC_LightningWebComponent>} */ components: Map<string, SFDC_LightningWebComponent> = data.get(DatasetAliases.LIGHTNINGWEBCOMPONENTS);
+        const  /** @type {Map<string, SfdcLightningWebComponent>} */ components: Map<string, SfdcLightningWebComponent> = data.get(DatasetAliases.LIGHTNINGWEBCOMPONENTS);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
         if (!components) throw new Error(`RecipeLightningWebComponents: Data from dataset alias 'LIGHTNINGWEBCOMPONENTS' was undefined.`);
 
         // Filter data
-        /** @type {Array<SFDC_LightningWebComponent>} */ 
-        const array: Array<SFDC_LightningWebComponent> = [];
-        await Processor.forEach(components, async (/** @type {SFDC_LightningWebComponent} */ component: SFDC_LightningWebComponent) => {
+        /** @type {Array<SfdcLightningWebComponent>} */ 
+        const array: Array<SfdcLightningWebComponent> = [];
+        await Processor.forEach(components, async (/** @type {SfdcLightningWebComponent} */ component: SfdcLightningWebComponent) => {
             if (namespace === OrgCheckGlobalParameter.ALL_VALUES || component.package === namespace) {
                 array.push(component);
             }

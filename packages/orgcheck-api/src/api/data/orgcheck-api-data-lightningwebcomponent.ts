@@ -4,14 +4,14 @@ import { DataWithScoreAndDependencies } from 'src/api/core/orgcheck-api-data';
 /**
  * @description Representation of a Lightning Web Component in Org Check
  */
-export interface SFDC_LightningWebComponent extends DataWithScoreAndDependencies {
+export interface SfdcLightningWebComponent extends DataWithScoreAndDependencies {
     
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_LightningWebComponent;
+    dataType: DataAliases.SfdcLightningWebComponent;
         
      /**
      * @description Salesforce Id

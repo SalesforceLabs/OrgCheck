@@ -1,101 +1,101 @@
-import { SFDC_ApexClass, SFDC_ApexTestMethodResult } from 'src/api/data/orgcheck-api-data-apexclass';
-import { SFDC_ApexTrigger } from 'src/api/data/orgcheck-api-data-apextrigger';
-import { SFDC_Application } from 'src/api/data/orgcheck-api-data-application';
-import { SFDC_AppPermission } from 'src/api/data/orgcheck-api-data-apppermission';
-import { SFDC_Browser } from 'src/api/data/orgcheck-api-data-browser';
-import { SFDC_CollaborationGroup } from 'src/api/data/orgcheck-api-data-collaborationgroup';
-import { SFDC_CustomLabel } from 'src/api/data/orgcheck-api-data-customlabel';
-import { SFDC_CustomTab } from 'src/api/data/orgcheck-api-data-customtab';
-import { SFDC_Dashboard } from 'src/api/data/orgcheck-api-data-dashboard';
-import { SFDC_Document } from 'src/api/data/orgcheck-api-data-document';
-import { SFDC_EmailTemplate } from 'src/api/data/orgcheck-api-data-emailtemplate';
-import { SFDC_Field } from 'src/api/data/orgcheck-api-data-field';
-import { SFDC_FieldPermission } from 'src/api/data/orgcheck-api-data-fieldpermission';
-import { SFDC_FieldSet } from 'src/api/data/orgcheck-api-data-fieldset';
-import { SFDC_Flow, SFDC_FlowVersion } from 'src/api/data/orgcheck-api-data-flow';
-import { SFDC_Group } from 'src/api/data/orgcheck-api-data-group';
-import { SFDC_HomePageComponent } from 'src/api/data/orgcheck-api-data-homepagecomponent';
-import { SFDC_KnowledgeArticle } from 'src/api/data/orgcheck-api-data-knowledgearticle';
-import { SFDC_LightningAuraComponent } from 'src/api/data/orgcheck-api-data-lightningauracomponent';
-import { SFDC_LightningPage } from 'src/api/data/orgcheck-api-data-lightningpage';
-import { SFDC_LightningWebComponent } from 'src/api/data/orgcheck-api-data-lightningwebcomponent';
-import { SFDC_Limit } from 'src/api/data/orgcheck-api-data-limit';
-import { SFDC_Object } from 'src/api/data/orgcheck-api-data-object';
-import { SFDC_ObjectPermission } from 'src/api/data/orgcheck-api-data-objectpermission';
-import { SFDC_ObjectRelationShip } from 'src/api/data/orgcheck-api-data-objectrelationship';
-import { SFDC_ObjectType } from 'src/api/data/orgcheck-api-data-objecttype';
-import { SFDC_Organization } from 'src/api/data/orgcheck-api-data-organization';
-import { SFDC_Package } from 'src/api/data/orgcheck-api-data-package';
-import { SFDC_PageLayout } from 'src/api/data/orgcheck-api-data-pagelayout';
-import { SFDC_PermissionSet } from 'src/api/data/orgcheck-api-data-permissionset';
-import { SFDC_PermissionSetLicense } from 'src/api/data/orgcheck-api-data-permissionsetlicense';
-import { SFDC_Profile } from 'src/api/data/orgcheck-api-data-profile';
-import { SFDC_ProfilePasswordPolicy } from 'src/api/data/orgcheck-api-data-profilepasswordpolicy';
-import { SFDC_ProfileIpRangeRestriction, SFDC_ProfileLoginHourRestriction, SFDC_ProfileRestrictions } from 'src/api/data/orgcheck-api-data-profilerestrictions';
-import { SFDC_RecordType } from 'src/api/data/orgcheck-api-data-recordtype';
-import { SFDC_Report } from 'src/api/data/orgcheck-api-data-report';
-import { SFDC_StaticResource } from 'src/api/data/orgcheck-api-data-staticresource';
-import { SFDC_User } from 'src/api/data/orgcheck-api-data-user';
-import { SFDC_UserRole } from 'src/api/data/orgcheck-api-data-userrole';
-import { SFDC_ValidationRule } from 'src/api/data/orgcheck-api-data-validationrule';
-import { SFDC_VisualForceComponent } from 'src/api/data/orgcheck-api-data-visualforcecomponent';
-import { SFDC_VisualForcePage } from 'src/api/data/orgcheck-api-data-visualforcepage';
-import { SFDC_WebLink } from 'src/api/data/orgcheck-api-data-weblink';
-import { SFDC_Workflow } from 'src/api/data/orgcheck-api-data-workflow';
+import { SfdcApexClass, SfdcApexTestMethodResult } from 'src/api/data/orgcheck-api-data-apexclass';
+import { SfdcApexTrigger } from 'src/api/data/orgcheck-api-data-apextrigger';
+import { SfdcApplication } from 'src/api/data/orgcheck-api-data-application';
+import { SfdcAppPermission } from 'src/api/data/orgcheck-api-data-apppermission';
+import { SfdcBrowser } from 'src/api/data/orgcheck-api-data-browser';
+import { SfdcCollaborationGroup } from 'src/api/data/orgcheck-api-data-collaborationgroup';
+import { SfdcCustomLabel } from 'src/api/data/orgcheck-api-data-customlabel';
+import { SfdcCustomTab } from 'src/api/data/orgcheck-api-data-customtab';
+import { SfdcDashboard } from 'src/api/data/orgcheck-api-data-dashboard';
+import { SfdcDocument } from 'src/api/data/orgcheck-api-data-document';
+import { SfdcEmailTemplate } from 'src/api/data/orgcheck-api-data-emailtemplate';
+import { SfdcField } from 'src/api/data/orgcheck-api-data-field';
+import { SfdcFieldPermission } from 'src/api/data/orgcheck-api-data-fieldpermission';
+import { SfdcFieldSet } from 'src/api/data/orgcheck-api-data-fieldset';
+import { SfdcFlow, SfdcFlowVersion } from 'src/api/data/orgcheck-api-data-flow';
+import { SfdcGroup } from 'src/api/data/orgcheck-api-data-group';
+import { SfdcHomePageComponent } from 'src/api/data/orgcheck-api-data-homepagecomponent';
+import { SfdcKnowledgeArticle } from 'src/api/data/orgcheck-api-data-knowledgearticle';
+import { SfdcLightningAuraComponent } from 'src/api/data/orgcheck-api-data-lightningauracomponent';
+import { SfdcLightningPage } from 'src/api/data/orgcheck-api-data-lightningpage';
+import { SfdcLightningWebComponent } from 'src/api/data/orgcheck-api-data-lightningwebcomponent';
+import { SfdcLimit } from 'src/api/data/orgcheck-api-data-limit';
+import { SfdcObject } from 'src/api/data/orgcheck-api-data-object';
+import { SfdcObjectPermission } from 'src/api/data/orgcheck-api-data-objectpermission';
+import { SfdcObjectRelationShip } from 'src/api/data/orgcheck-api-data-objectrelationship';
+import { SfdcObjectType } from 'src/api/data/orgcheck-api-data-objecttype';
+import { SfdcOrganization } from 'src/api/data/orgcheck-api-data-organization';
+import { SfdcPackage } from 'src/api/data/orgcheck-api-data-package';
+import { SfdcPageLayout } from 'src/api/data/orgcheck-api-data-pagelayout';
+import { SfdcPermissionSet } from 'src/api/data/orgcheck-api-data-permissionset';
+import { SfdcPermissionSetLicense } from 'src/api/data/orgcheck-api-data-permissionsetlicense';
+import { SfdcProfile } from 'src/api/data/orgcheck-api-data-profile';
+import { SfdcProfilePasswordPolicy } from 'src/api/data/orgcheck-api-data-profilepasswordpolicy';
+import { SfdcProfileIpRangeRestriction, SfdcProfileLoginHourRestriction, SfdcProfileRestrictions } from 'src/api/data/orgcheck-api-data-profilerestrictions';
+import { SfdcRecordType } from 'src/api/data/orgcheck-api-data-recordtype';
+import { SfdcReport } from 'src/api/data/orgcheck-api-data-report';
+import { SfdcStaticResource } from 'src/api/data/orgcheck-api-data-staticresource';
+import { SfdcUser } from 'src/api/data/orgcheck-api-data-user';
+import { SfdcUserRole } from 'src/api/data/orgcheck-api-data-userrole';
+import { SfdcValidationRule } from 'src/api/data/orgcheck-api-data-validationrule';
+import { SfdcVisualForceComponent } from 'src/api/data/orgcheck-api-data-visualforcecomponent';
+import { SfdcVisualForcePage } from 'src/api/data/orgcheck-api-data-visualforcepage';
+import { SfdcWebLink } from 'src/api/data/orgcheck-api-data-weblink';
+import { SfdcWorkflow } from 'src/api/data/orgcheck-api-data-workflow';
 import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
 import { DataDependenciesFactory } from 'src/api/core/orgcheck-api-data-dependencies-factory';
 import { DataFactoryIntf, DataFactoryInstanceIntf, ScoreRule, DataFactoryInstanceCreateSetup, DataFactoryInstanceCreateSetup_WithDependencies } from 'src/api/core/orgcheck-api-datafactory';
 import { SecretSauce } from 'src/api/core/orgcheck-api-secretsauce';
 
 const DATA_METADATA = new Map([
-   [ DataAliases.SFDC_ApexClass , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_ApexClass)}],
-   [ DataAliases.SFDC_ApexTestMethodResult , { hasScore: false, hasDependencies: false, caster: (p) => (p as SFDC_ApexTestMethodResult)}],
-   [ DataAliases.SFDC_ApexTrigger , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_ApexTrigger)}],
-   [ DataAliases.SFDC_Application , { hasScore: false, hasDependencies: false, caster: (p) => (p as SFDC_Application)}],
-   [ DataAliases.SFDC_AppPermission , { hasScore: false, hasDependencies: false, caster: (p) => (p as SFDC_AppPermission)}],
-   [ DataAliases.SFDC_Browser , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_Browser)}],
-   [ DataAliases.SFDC_CollaborationGroup , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_CollaborationGroup)}],
-   [ DataAliases.SFDC_CustomLabel , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_CustomLabel)}],
-   [ DataAliases.SFDC_CustomTab , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_CustomTab)}],
-   [ DataAliases.SFDC_Dashboard , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_Dashboard)}],
-   [ DataAliases.SFDC_Document , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_Document)}],
-   [ DataAliases.SFDC_EmailTemplate , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_EmailTemplate)}],
-   [ DataAliases.SFDC_Field , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_Field)}],
-   [ DataAliases.SFDC_FieldPermission , { hasScore: false, hasDependencies: false, caster: (p) => (p as SFDC_FieldPermission)}],
-   [ DataAliases.SFDC_FieldSet , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_FieldSet)}],
-   [ DataAliases.SFDC_Flow , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_Flow)}],
-   [ DataAliases.SFDC_FlowVersion , { hasScore: false, hasDependencies: false, caster: (p) => (p as SFDC_FlowVersion)}],
-   [ DataAliases.SFDC_Group , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_Group)}],
-   [ DataAliases.SFDC_HomePageComponent , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_HomePageComponent)}],
-   [ DataAliases.SFDC_KnowledgeArticle , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_KnowledgeArticle)}],
-   [ DataAliases.SFDC_LightningAuraComponent , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_LightningAuraComponent)}],
-   [ DataAliases.SFDC_LightningPage , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_LightningPage)}],
-   [ DataAliases.SFDC_LightningWebComponent , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_LightningWebComponent)}],
-   [ DataAliases.SFDC_Limit , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_Limit)}],
-   [ DataAliases.SFDC_Object , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_Object)}],
-   [ DataAliases.SFDC_ObjectPermission , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_ObjectPermission)}],
-   [ DataAliases.SFDC_ObjectRelationShip , { hasScore: false, hasDependencies: false, caster: (p) => (p as SFDC_ObjectRelationShip)}],
-   [ DataAliases.SFDC_ObjectType , { hasScore: false, hasDependencies: false, caster: (p) => (p as SFDC_ObjectType)}],
-   [ DataAliases.SFDC_Organization , { hasScore: false, hasDependencies: false, caster: (p) => (p as SFDC_Organization)}],
-   [ DataAliases.SFDC_Package , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_Package)}],
-   [ DataAliases.SFDC_PageLayout , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_PageLayout)}],
-   [ DataAliases.SFDC_PermissionSet , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_PermissionSet)}],
-   [ DataAliases.SFDC_PermissionSetLicense , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_PermissionSetLicense)}],
-   [ DataAliases.SFDC_Profile , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_Profile)}],
-   [ DataAliases.SFDC_ProfileIpRangeRestriction , { hasScore: false, hasDependencies: false, caster: (p) => (p as SFDC_ProfileIpRangeRestriction)}],
-   [ DataAliases.SFDC_ProfileLoginHourRestriction , { hasScore: false, hasDependencies: false, caster: (p) => (p as SFDC_ProfileLoginHourRestriction)}],
-   [ DataAliases.SFDC_ProfilePasswordPolicy , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_ProfilePasswordPolicy)}],
-   [ DataAliases.SFDC_ProfileRestrictions , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_ProfileRestrictions)}],
-   [ DataAliases.SFDC_RecordType , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_RecordType)}],
-   [ DataAliases.SFDC_Report , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_Report)}],
-   [ DataAliases.SFDC_StaticResource , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_StaticResource)}],
-   [ DataAliases.SFDC_User , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_User)}],
-   [ DataAliases.SFDC_UserRole , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_UserRole)}],
-   [ DataAliases.SFDC_ValidationRule , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_ValidationRule)}],
-   [ DataAliases.SFDC_VisualForceComponent , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_VisualForceComponent)}],
-   [ DataAliases.SFDC_VisualForcePage , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_VisualForcePage)}],
-   [ DataAliases.SFDC_WebLink , { hasScore: true, hasDependencies: true, caster: (p) => (p as SFDC_WebLink)}],
-   [ DataAliases.SFDC_Workflow , { hasScore: true, hasDependencies: false, caster: (p) => (p as SFDC_Workflow)}]
+   [ DataAliases.SfdcApexClass , { hasScore: true, hasDependencies: true, caster: (p) => (p as SfdcApexClass)}],
+   [ DataAliases.SfdcApexTestMethodResult , { hasScore: false, hasDependencies: false, caster: (p) => (p as SfdcApexTestMethodResult)}],
+   [ DataAliases.SfdcApexTrigger , { hasScore: true, hasDependencies: true, caster: (p) => (p as SfdcApexTrigger)}],
+   [ DataAliases.SfdcApplication , { hasScore: false, hasDependencies: false, caster: (p) => (p as SfdcApplication)}],
+   [ DataAliases.SfdcAppPermission , { hasScore: false, hasDependencies: false, caster: (p) => (p as SfdcAppPermission)}],
+   [ DataAliases.SfdcBrowser , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcBrowser)}],
+   [ DataAliases.SfdcCollaborationGroup , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcCollaborationGroup)}],
+   [ DataAliases.SfdcCustomLabel , { hasScore: true, hasDependencies: true, caster: (p) => (p as SfdcCustomLabel)}],
+   [ DataAliases.SfdcCustomTab , { hasScore: true, hasDependencies: true, caster: (p) => (p as SfdcCustomTab)}],
+   [ DataAliases.SfdcDashboard , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcDashboard)}],
+   [ DataAliases.SfdcDocument , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcDocument)}],
+   [ DataAliases.SfdcEmailTemplate , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcEmailTemplate)}],
+   [ DataAliases.SfdcField , { hasScore: true, hasDependencies: true, caster: (p) => (p as SfdcField)}],
+   [ DataAliases.SfdcFieldPermission , { hasScore: false, hasDependencies: false, caster: (p) => (p as SfdcFieldPermission)}],
+   [ DataAliases.SfdcFieldSet , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcFieldSet)}],
+   [ DataAliases.SfdcFlow , { hasScore: true, hasDependencies: true, caster: (p) => (p as SfdcFlow)}],
+   [ DataAliases.SfdcFlowVersion , { hasScore: false, hasDependencies: false, caster: (p) => (p as SfdcFlowVersion)}],
+   [ DataAliases.SfdcGroup , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcGroup)}],
+   [ DataAliases.SfdcHomePageComponent , { hasScore: true, hasDependencies: true, caster: (p) => (p as SfdcHomePageComponent)}],
+   [ DataAliases.SfdcKnowledgeArticle , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcKnowledgeArticle)}],
+   [ DataAliases.SfdcLightningAuraComponent , { hasScore: true, hasDependencies: true, caster: (p) => (p as SfdcLightningAuraComponent)}],
+   [ DataAliases.SfdcLightningPage , { hasScore: true, hasDependencies: true, caster: (p) => (p as SfdcLightningPage)}],
+   [ DataAliases.SfdcLightningWebComponent , { hasScore: true, hasDependencies: true, caster: (p) => (p as SfdcLightningWebComponent)}],
+   [ DataAliases.SfdcLimit , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcLimit)}],
+   [ DataAliases.SfdcObject , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcObject)}],
+   [ DataAliases.SfdcObjectPermission , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcObjectPermission)}],
+   [ DataAliases.SfdcObjectRelationShip , { hasScore: false, hasDependencies: false, caster: (p) => (p as SfdcObjectRelationShip)}],
+   [ DataAliases.SfdcObjectType , { hasScore: false, hasDependencies: false, caster: (p) => (p as SfdcObjectType)}],
+   [ DataAliases.SfdcOrganization , { hasScore: false, hasDependencies: false, caster: (p) => (p as SfdcOrganization)}],
+   [ DataAliases.SfdcPackage , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcPackage)}],
+   [ DataAliases.SfdcPageLayout , { hasScore: true, hasDependencies: true, caster: (p) => (p as SfdcPageLayout)}],
+   [ DataAliases.SfdcPermissionSet , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcPermissionSet)}],
+   [ DataAliases.SfdcPermissionSetLicense , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcPermissionSetLicense)}],
+   [ DataAliases.SfdcProfile , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcProfile)}],
+   [ DataAliases.SfdcProfileIpRangeRestriction , { hasScore: false, hasDependencies: false, caster: (p) => (p as SfdcProfileIpRangeRestriction)}],
+   [ DataAliases.SfdcProfileLoginHourRestriction , { hasScore: false, hasDependencies: false, caster: (p) => (p as SfdcProfileLoginHourRestriction)}],
+   [ DataAliases.SfdcProfilePasswordPolicy , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcProfilePasswordPolicy)}],
+   [ DataAliases.SfdcProfileRestrictions , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcProfileRestrictions)}],
+   [ DataAliases.SfdcRecordType , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcRecordType)}],
+   [ DataAliases.SfdcReport , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcReport)}],
+   [ DataAliases.SfdcStaticResource , { hasScore: true, hasDependencies: true, caster: (p) => (p as SfdcStaticResource)}],
+   [ DataAliases.SfdcUser , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcUser)}],
+   [ DataAliases.SfdcUserRole , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcUserRole)}],
+   [ DataAliases.SfdcValidationRule , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcValidationRule)}],
+   [ DataAliases.SfdcVisualForceComponent , { hasScore: true, hasDependencies: true, caster: (p) => (p as SfdcVisualForceComponent)}],
+   [ DataAliases.SfdcVisualForcePage , { hasScore: true, hasDependencies: true, caster: (p) => (p as SfdcVisualForcePage)}],
+   [ DataAliases.SfdcWebLink , { hasScore: true, hasDependencies: true, caster: (p) => (p as SfdcWebLink)}],
+   [ DataAliases.SfdcWorkflow , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcWorkflow)}]
 ]);
 
 /**
@@ -105,7 +105,7 @@ const DATA_METADATA = new Map([
 export class DataFactory implements DataFactoryIntf {
 
     /**
-     * @description Map of all factory instances given their "SFDC_*"" class
+     * @description Map of all factory instances given their "Sfdc*"" class
      * @type {Map<any, DataFactoryInstanceIntf>}
      * @private
      */

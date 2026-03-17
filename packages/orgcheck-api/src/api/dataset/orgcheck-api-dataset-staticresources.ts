@@ -1,4 +1,4 @@
-import { SFDC_StaticResource } from 'src/api/data/orgcheck-api-data-staticresource';
+import { SfdcStaticResource } from 'src/api/data/orgcheck-api-data-staticresource';
 import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from 'src/api/core/orgcheck-api-datafactory';
 import { Dataset } from 'src/api/core/orgcheck-api-dataset';
@@ -14,9 +14,9 @@ export class DatasetStaticResources implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_StaticResource>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcStaticResource>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_StaticResource>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcStaticResource>> {
 
         // SOQL query
         logger?.log(`Querying Rest API about StaticResource in the org...`);            
@@ -27,7 +27,7 @@ export class DatasetStaticResources implements Dataset {
         }], logger);
 
         // Init the factory and records and records
-        const staticResourceDataFactory = dataFactory.getInstance(DataAliases.SFDC_StaticResource);
+        const staticResourceDataFactory = dataFactory.getInstance(DataAliases.SfdcStaticResource);
         const staticResourceRecords = results[0];
 
         // Then retreive dependencies
@@ -38,15 +38,15 @@ export class DatasetStaticResources implements Dataset {
         );
 
         logger?.log(`Parsing ${staticResourceRecords?.length} static resources...`);
-        /** @type {Map<string, SFDC_StaticResource>} */
-        const staticResources: Map<string, SFDC_StaticResource> = new Map(await Processor.map(staticResourceRecords, async (/** @type {any} */ record: any) => {
+        /** @type {Map<string, SfdcStaticResource>} */
+        const staticResources: Map<string, SfdcStaticResource> = new Map(await Processor.map(staticResourceRecords, async (/** @type {any} */ record: any) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
             
             // Create the instance
-            /** @type {SFDC_StaticResource} */
-            const staticResource: SFDC_StaticResource = staticResourceDataFactory.createWithScore({
+            /** @type {SfdcStaticResource} */
+            const staticResource: SfdcStaticResource = staticResourceDataFactory.createWithScore({
                 properties: {
                     id: id,
                     name: record.Name,

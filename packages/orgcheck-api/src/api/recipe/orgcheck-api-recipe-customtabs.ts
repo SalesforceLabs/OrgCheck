@@ -4,7 +4,7 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
 import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
-import { SFDC_CustomTab }from 'src/api/data/orgcheck-api-data-customtab';
+import { SfdcCustomTab }from 'src/api/data/orgcheck-api-data-customtab';
 
 export class RecipeCustomTabs implements Recipe {
 
@@ -31,7 +31,7 @@ export class RecipeCustomTabs implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data
-        const /** @type {Map<string, SFDC_CustomTab>} */ pages: Map<string, SFDC_CustomTab> = data.get(DatasetAliases.CUSTOMTABS);
+        const /** @type {Map<string, SfdcCustomTab>} */ pages: Map<string, SfdcCustomTab> = data.get(DatasetAliases.CUSTOMTABS);
 
         // Checking data
         if (!pages) throw new Error(`RecipeCustomTabs: Data from dataset alias 'CUSTOMTABS' was undefined.`);

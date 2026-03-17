@@ -4,10 +4,10 @@ import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_WebLink }from 'src/api/data/orgcheck-api-data-weblink';
+import { SfdcWebLink }from 'src/api/data/orgcheck-api-data-weblink';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
-import { SFDC_Object }from 'src/api/data/orgcheck-api-data-object';
-import { SFDC_ObjectType }from 'src/api/data/orgcheck-api-data-objecttype';
+import { SfdcObject }from 'src/api/data/orgcheck-api-data-object';
+import { SfdcObjectType }from 'src/api/data/orgcheck-api-data-objecttype';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
 export class RecipeWebLinks implements Recipe {
@@ -38,9 +38,9 @@ export class RecipeWebLinks implements Recipe {
     async transform(data: Map<string, any>, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data and parameters
-        const /** @type {Map<string, SFDC_ObjectType>} */ types: Map<string, SFDC_ObjectType> = data.get(DatasetAliases.OBJECTTYPES);
-        const /** @type {Map<string, SFDC_Object>} */ objects: Map<string, SFDC_Object> = data.get(DatasetAliases.OBJECTS);
-        const /** @type {Map<string, SFDC_WebLink>} */ weblinks: Map<string, SFDC_WebLink> = data.get(DatasetAliases.WEBLINKS);
+        const /** @type {Map<string, SfdcObjectType>} */ types: Map<string, SfdcObjectType> = data.get(DatasetAliases.OBJECTTYPES);
+        const /** @type {Map<string, SfdcObject>} */ objects: Map<string, SfdcObject> = data.get(DatasetAliases.OBJECTS);
+        const /** @type {Map<string, SfdcWebLink>} */ weblinks: Map<string, SfdcWebLink> = data.get(DatasetAliases.WEBLINKS);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
         const objecttype = OrgCheckGlobalParameter.getSObjectTypeName(parameters);
         const object = OrgCheckGlobalParameter.getSObjectName(parameters);
@@ -51,9 +51,9 @@ export class RecipeWebLinks implements Recipe {
         if (!weblinks) throw new Error(`RecipeWebLinks: Data from dataset alias 'WEBLINKS' was undefined.`);
 
         // Augment and filter data
-        /** @type {Array<SFDC_WebLink>} */ 
-        const array: Array<SFDC_WebLink> = [];
-        await Processor.forEach(weblinks, async (/** @type {SFDC_WebLink} */weblink: SFDC_WebLink) => {
+        /** @type {Array<SfdcWebLink>} */ 
+        const array: Array<SfdcWebLink> = [];
+        await Processor.forEach(weblinks, async (/** @type {SfdcWebLink} */weblink: SfdcWebLink) => {
             // Augment data
             const objectRef = objects.get(weblink.objectId);
             if (objectRef) {

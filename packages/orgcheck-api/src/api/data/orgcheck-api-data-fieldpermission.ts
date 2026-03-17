@@ -1,19 +1,19 @@
 import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
 import { DataWithoutScore } from 'src/api/core/orgcheck-api-data';
-import { SFDC_PermissionSet } from 'src/api/data/orgcheck-api-data-permissionset';
-import { SFDC_Profile } from 'src/api/data/orgcheck-api-data-profile';
+import { SfdcPermissionSet } from 'src/api/data/orgcheck-api-data-permissionset';
+import { SfdcProfile } from 'src/api/data/orgcheck-api-data-profile';
 
 /**
  * @description Representation of a Field permission for a specific parent (profile or permission set) in Org Check
  */
-export interface SFDC_FieldPermission extends DataWithoutScore {
+export interface SfdcFieldPermission extends DataWithoutScore {
     
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_FieldPermission;
+    dataType: DataAliases.SfdcFieldPermission;
         
      /**
      * @description Salesforce Id of the related parent (profile or permission set)
@@ -24,10 +24,10 @@ export interface SFDC_FieldPermission extends DataWithoutScore {
     
     /**
      * @description Reference of the related parent
-     * @type {SFDC_Profile | SFDC_PermissionSet}
+     * @type {SfdcProfile | SfdcPermissionSet}
      * @public
      */
-    parentRef: SFDC_Profile | SFDC_PermissionSet;
+    parentRef: SfdcProfile | SfdcPermissionSet;
     
     /**
      * @description Api name Id of the field (along with the object)

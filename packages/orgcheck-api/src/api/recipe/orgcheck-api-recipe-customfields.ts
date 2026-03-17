@@ -4,9 +4,9 @@ import { Data } from 'src/api/core/orgcheck-api-data';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_Field }from 'src/api/data/orgcheck-api-data-field';
-import { SFDC_Object }from 'src/api/data/orgcheck-api-data-object';
-import { SFDC_ObjectType }from 'src/api/data/orgcheck-api-data-objecttype';
+import { SfdcField }from 'src/api/data/orgcheck-api-data-field';
+import { SfdcObject }from 'src/api/data/orgcheck-api-data-object';
+import { SfdcObjectType }from 'src/api/data/orgcheck-api-data-objecttype';
 import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
@@ -38,9 +38,9 @@ export class RecipeCustomFields implements Recipe {
     async transform(data: Map<string, any>, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data and parameters
-        const /** @type {Map<string, SFDC_ObjectType>} */ types: Map<string, SFDC_ObjectType> = data.get(DatasetAliases.OBJECTTYPES);
-        const /** @type {Map<string, SFDC_Object>} */ objects: Map<string, SFDC_Object> = data.get(DatasetAliases.OBJECTS);
-        const /** @type {Map<string, SFDC_Field>} */ customFields: Map<string, SFDC_Field> = data.get(DatasetAliases.CUSTOMFIELDS);
+        const /** @type {Map<string, SfdcObjectType>} */ types: Map<string, SfdcObjectType> = data.get(DatasetAliases.OBJECTTYPES);
+        const /** @type {Map<string, SfdcObject>} */ objects: Map<string, SfdcObject> = data.get(DatasetAliases.OBJECTS);
+        const /** @type {Map<string, SfdcField>} */ customFields: Map<string, SfdcField> = data.get(DatasetAliases.CUSTOMFIELDS);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
         const objecttype = OrgCheckGlobalParameter.getSObjectTypeName(parameters);
         const object = OrgCheckGlobalParameter.getSObjectName(parameters);
@@ -51,9 +51,9 @@ export class RecipeCustomFields implements Recipe {
         if (!customFields) throw new Error(`RecipeCustomFields: Data from dataset alias 'CUSTOMFIELDS' was undefined.`);
 
         // Augment and filter data
-        /** @type {Array<SFDC_Field>} */
-        const array: Array<SFDC_Field> = [];
-        await Processor.forEach(customFields, async (/** @type {SFDC_Field} */customField: SFDC_Field) => {
+        /** @type {Array<SfdcField>} */
+        const array: Array<SfdcField> = [];
+        await Processor.forEach(customFields, async (/** @type {SfdcField} */customField: SfdcField) => {
             // Augment data
             const objectRef = objects.get(customField.objectId);
             if (objectRef) {

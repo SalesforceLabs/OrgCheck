@@ -5,8 +5,8 @@ import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_UserRole }from 'src/api/data/orgcheck-api-data-userrole';
-import { SFDC_User }from 'src/api/data/orgcheck-api-data-user';
+import { SfdcUserRole }from 'src/api/data/orgcheck-api-data-userrole';
+import { SfdcUser }from 'src/api/data/orgcheck-api-data-user';
 
 export class RecipeUserRoles implements Recipe {
 
@@ -34,15 +34,15 @@ export class RecipeUserRoles implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data
-        const /** @type {Map<string, SFDC_UserRole>} */ userRoles: Map<string, SFDC_UserRole> = data.get(DatasetAliases.USERROLES);
-        const /** @type {Map<string, SFDC_User>} */ users: Map<string, SFDC_User> = data.get(DatasetAliases.INTERNALACTIVEUSERS);
+        const /** @type {Map<string, SfdcUserRole>} */ userRoles: Map<string, SfdcUserRole> = data.get(DatasetAliases.USERROLES);
+        const /** @type {Map<string, SfdcUser>} */ users: Map<string, SfdcUser> = data.get(DatasetAliases.INTERNALACTIVEUSERS);
 
         // Checking data
         if (!userRoles) throw new Error(`RecipeUserRoles: Data from dataset alias 'USERROLES' was undefined.`);
         if (!users) throw new Error(`RecipeUserRoles: Data from dataset alias 'USERS' was undefined.`);
 
         // Augment data
-        await Processor.forEach(userRoles, async (/** @type {SFDC_UserRole} */ userRole: SFDC_UserRole) => {
+        await Processor.forEach(userRoles, async (/** @type {SfdcUserRole} */ userRole: SfdcUserRole) => {
             // Augment data
             if (userRole.hasActiveMembers === true) {
                 userRole.activeMemberRefs = await Processor.map(userRole.activeMemberIds, (/** @type {string} */ id: string) => users.get(id));

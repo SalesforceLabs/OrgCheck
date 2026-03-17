@@ -5,9 +5,9 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
 import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
-import { SFDC_ValidationRule }from 'src/api/data/orgcheck-api-data-validationrule';
-import { SFDC_Object }from 'src/api/data/orgcheck-api-data-object';
-import { SFDC_ObjectType }from 'src/api/data/orgcheck-api-data-objecttype';
+import { SfdcValidationRule }from 'src/api/data/orgcheck-api-data-validationrule';
+import { SfdcObject }from 'src/api/data/orgcheck-api-data-object';
+import { SfdcObjectType }from 'src/api/data/orgcheck-api-data-objecttype';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
 export class RecipeValidationRules implements Recipe {
@@ -38,9 +38,9 @@ export class RecipeValidationRules implements Recipe {
     async transform(data: Map<string, any>, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data and parameters
-        const /** @type {Map<string, SFDC_ObjectType>} */ types: Map<string, SFDC_ObjectType> = data.get(DatasetAliases.OBJECTTYPES);
-        const /** @type {Map<string, SFDC_Object>} */ objects: Map<string, SFDC_Object> = data.get(DatasetAliases.OBJECTS);
-        const /** @type {Map<string, SFDC_ValidationRule>} */ validationRules: Map<string, SFDC_ValidationRule> = data.get(DatasetAliases.VALIDATIONRULES);
+        const /** @type {Map<string, SfdcObjectType>} */ types: Map<string, SfdcObjectType> = data.get(DatasetAliases.OBJECTTYPES);
+        const /** @type {Map<string, SfdcObject>} */ objects: Map<string, SfdcObject> = data.get(DatasetAliases.OBJECTS);
+        const /** @type {Map<string, SfdcValidationRule>} */ validationRules: Map<string, SfdcValidationRule> = data.get(DatasetAliases.VALIDATIONRULES);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
         const objecttype = OrgCheckGlobalParameter.getSObjectTypeName(parameters);
         const object = OrgCheckGlobalParameter.getSObjectName(parameters);
@@ -51,9 +51,9 @@ export class RecipeValidationRules implements Recipe {
         if (!validationRules) throw new Error(`RecipeValidationRules: Data from dataset alias 'VALIDATIONRULES' was undefined.`);
 
         // Augment and filter data
-        /** @type {Array<SFDC_ValidationRule>} */ 
-        const array: Array<SFDC_ValidationRule> = [];
-        await Processor.forEach(validationRules, async (/** @type {SFDC_ValidationRule} */ validationRule: SFDC_ValidationRule) => {
+        /** @type {Array<SfdcValidationRule>} */ 
+        const array: Array<SfdcValidationRule> = [];
+        await Processor.forEach(validationRules, async (/** @type {SfdcValidationRule} */ validationRule: SfdcValidationRule) => {
             // Augment
             const objectRef = objects.get(validationRule.objectId);
             if (objectRef) {

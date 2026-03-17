@@ -4,7 +4,7 @@ import { Dataset } from 'src/api/core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_Package } from 'src/api/data/orgcheck-api-data-package';
+import { SfdcPackage } from 'src/api/data/orgcheck-api-data-package';
 
 export class DatasetPackages implements Dataset {
 
@@ -13,9 +13,9 @@ export class DatasetPackages implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_Package>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcPackage>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_Package>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcPackage>> {
 
         // First SOQL queries
         logger?.log(`Querying Tooling API about InstalledSubscriberPackage and REST API about Organization in the org...`);            
@@ -28,19 +28,19 @@ export class DatasetPackages implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const packageDataFactory = dataFactory.getInstance(DataAliases.SFDC_Package);
+        const packageDataFactory = dataFactory.getInstance(DataAliases.SfdcPackage);
 
         // Create the map
         const packageRecords = results[0];
         logger?.log(`Parsing ${packageRecords?.length} installed packages...`);
-        const packages: Map<string, SFDC_Package> = new Map(await Processor.map(packageRecords, (/** @type {any} */ record: any) => {
+        const packages: Map<string, SfdcPackage> = new Map(await Processor.map(packageRecords, (/** @type {any} */ record: any) => {
 
             // Get the ID15 of this custom field
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            /** @type {SFDC_Package} */
-            const installedPackage: SFDC_Package = packageDataFactory.create({
+            /** @type {SfdcPackage} */
+            const installedPackage: SfdcPackage = packageDataFactory.create({
                 properties: {
                     id: id,
                     name: record.SubscriberPackage.Name,
@@ -65,7 +65,7 @@ export class DatasetPackages implements Dataset {
             logger?.log(`Adding your local package ${localPackage}...`);
             packages.set(
                 localPackage, 
-                /** @type {SFDC_Package} */
+                /** @type {SfdcPackage} */
                 packageDataFactory.create({
                     properties: {
                         id: localPackage, 

@@ -5,7 +5,7 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_Flow, SFDC_FlowVersion } from 'src/api/data/orgcheck-api-data-flow';
+import { SfdcFlow, SfdcFlowVersion } from 'src/api/data/orgcheck-api-data-flow';
 import { LFSScanner } from 'src/api/scanner/orgcheck-api-lfs-scanner';
 
 // Limited list of known types of Flow ProcessType
@@ -27,9 +27,9 @@ export class DatasetFlows implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_Flow>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcFlow>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_Flow>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcFlow>> {
 
         // First SOQL query
         logger?.log(`Querying Tooling API about FlowDefinition in the org...`);            
@@ -49,8 +49,8 @@ export class DatasetFlows implements Dataset {
         }], logger);
             
         // Init the factories
-        const flowDefinitionDataFactory = dataFactory.getInstance(DataAliases.SFDC_Flow);
-        const flowVersionDataFactory = dataFactory.getInstance(DataAliases.SFDC_FlowVersion);
+        const flowDefinitionDataFactory = dataFactory.getInstance(DataAliases.SfdcFlow);
+        const flowVersionDataFactory = dataFactory.getInstance(DataAliases.SfdcFlowVersion);
         const flowDefRecords = results[0];
         const flowVersionsByDefRecords = results[1];
         
@@ -72,7 +72,7 @@ export class DatasetFlows implements Dataset {
 
         // Create the map
         logger?.log(`Parsing ${flowDefRecords?.length} flow definitions...`);
-        const flowDefinitions: Map<string, SFDC_Flow> = new Map(await Processor.map(flowDefRecords, (/** @type {any} */ record: any) => {
+        const flowDefinitions: Map<string, SfdcFlow> = new Map(await Processor.map(flowDefRecords, (/** @type {any} */ record: any) => {
         
             // Get the ID15 of this flow definition and others
             const id = sfdcManager.caseSafeId(record.Id);
@@ -80,8 +80,8 @@ export class DatasetFlows implements Dataset {
             const latestVersionId = sfdcManager.caseSafeId(record.LatestVersionId);
 
             // Create the instance
-            /** @type {SFDC_Flow} */
-            const flowDefinition: SFDC_Flow = flowDefinitionDataFactory.create({
+            /** @type {SfdcFlow} */
+            const flowDefinition: SfdcFlow = flowDefinitionDataFactory.create({
                     properties: {
                     id: id,
                     name: record.DeveloperName,
@@ -114,7 +114,7 @@ export class DatasetFlows implements Dataset {
             const parentId = sfdcManager.caseSafeId(record.DefinitionId);
 
             // Get the parent Flow definition
-            const flowDefinition : SFDC_Flow | undefined = flowDefinitions.get(parentId);
+            const flowDefinition : SfdcFlow | undefined = flowDefinitions.get(parentId);
             if (flowDefinition) {
                 
                 // Add to the version counter to the definition
@@ -142,8 +142,8 @@ export class DatasetFlows implements Dataset {
             const violations = lfsViolations.get(id) ?? [];
 
             // Create the instance
-            /** @type {SFDC_FlowVersion} */
-            const activeFlowVersion: SFDC_FlowVersion = flowVersionDataFactory.create({
+            /** @type {SfdcFlowVersion} */
+            const activeFlowVersion: SfdcFlowVersion = flowVersionDataFactory.create({
                 properties: {
                     id: id,
                     name: record.FullName,
@@ -199,7 +199,7 @@ export class DatasetFlows implements Dataset {
         });
 
         // Compute the score of all definitions
-        await Processor.forEach(flowDefinitions, async (/** @type {SFDC_Flow} */ flowDefinition: SFDC_Flow) => flowDefinitionDataFactory.computeScore(flowDefinition));
+        await Processor.forEach(flowDefinitions, async (/** @type {SfdcFlow} */ flowDefinition: SfdcFlow) => flowDefinitionDataFactory.computeScore(flowDefinition));
 
         // Return data as map
         logger?.log(`Done`);

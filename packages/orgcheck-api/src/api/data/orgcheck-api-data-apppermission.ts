@@ -1,20 +1,20 @@
 import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
 import { DataWithoutScore } from 'src/api/core/orgcheck-api-data';
-import { SFDC_Application } from 'src/api/data/orgcheck-api-data-application';
-import { SFDC_PermissionSet } from 'src/api/data/orgcheck-api-data-permissionset';
-import { SFDC_Profile } from 'src/api/data/orgcheck-api-data-profile';
+import { SfdcApplication } from 'src/api/data/orgcheck-api-data-application';
+import { SfdcPermissionSet } from 'src/api/data/orgcheck-api-data-permissionset';
+import { SfdcProfile } from 'src/api/data/orgcheck-api-data-profile';
 
 /**
  * @description Representation of an Application permission for a specific parent (profile or permission set) in Org Check
  */
-export interface SFDC_AppPermission extends DataWithoutScore {
+export interface SfdcAppPermission extends DataWithoutScore {
 
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_AppPermission;
+    dataType: DataAliases.SfdcAppPermission;
     
      /**
      * @description Salesforce Id of the related parent (profile or permission set)
@@ -25,10 +25,10 @@ export interface SFDC_AppPermission extends DataWithoutScore {
     
     /**
      * @description Reference of the related parent
-     * @type {SFDC_Profile | SFDC_PermissionSet}
+     * @type {SfdcProfile | SfdcPermissionSet}
      * @public
      */
-    parentRef: SFDC_Profile | SFDC_PermissionSet;
+    parentRef: SfdcProfile | SfdcPermissionSet;
     
     /**
      * @description Salesforce Id of the application
@@ -39,10 +39,10 @@ export interface SFDC_AppPermission extends DataWithoutScore {
     
     /**
      * @description Reference of the related application
-     * @type {SFDC_Application}
+     * @type {SfdcApplication}
      * @public
      */
-    appRef: SFDC_Application;
+    appRef: SfdcApplication;
 
     /**
      * @description Permission for this related parent to access this app?

@@ -5,7 +5,7 @@ import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_Profile }from 'src/api/data/orgcheck-api-data-profile';
+import { SfdcProfile }from 'src/api/data/orgcheck-api-data-profile';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
 export class RecipeProfiles implements Recipe {
@@ -32,16 +32,16 @@ export class RecipeProfiles implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data and parameters
-        const /** @type {Map<string, SFDC_Profile>} */ profiles: Map<string, SFDC_Profile> = data.get(DatasetAliases.PROFILES);
+        const /** @type {Map<string, SfdcProfile>} */ profiles: Map<string, SfdcProfile> = data.get(DatasetAliases.PROFILES);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
         if (!profiles) throw new Error(`RecipeProfiles: Data from dataset alias 'PROFILES' was undefined.`);
 
         // Filter data
-        /** @type {Array<SFDC_Profile>} */ 
-        const array: Array<SFDC_Profile> = [];
-        await Processor.forEach(profiles, async (/** @type {SFDC_Profile} */ profile: SFDC_Profile) => {
+        /** @type {Array<SfdcProfile>} */ 
+        const array: Array<SfdcProfile> = [];
+        await Processor.forEach(profiles, async (/** @type {SfdcProfile} */ profile: SfdcProfile) => {
             if (namespace === OrgCheckGlobalParameter.ALL_VALUES || profile.package === namespace) {
                 array.push(profile);
             }

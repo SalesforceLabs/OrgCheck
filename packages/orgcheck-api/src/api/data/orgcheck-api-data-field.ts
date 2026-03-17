@@ -1,18 +1,18 @@
 import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
 import { DataWithScoreAndDependencies } from 'src/api/core/orgcheck-api-data';
-import { SFDC_Object } from 'src/api/data/orgcheck-api-data-object';
+import { SfdcObject } from 'src/api/data/orgcheck-api-data-object';
 
 /**
  * @description Representation of a Standard Field or a Custom Field in Org Check
  */
-export interface SFDC_Field extends DataWithScoreAndDependencies {
+export interface SfdcField extends DataWithScoreAndDependencies {
     
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_Field;
+    dataType: DataAliases.SfdcField;
 
     /**
      * @description Salesforce Id
@@ -79,10 +79,10 @@ export interface SFDC_Field extends DataWithScoreAndDependencies {
 
     /**
      * @description Reference of the object for this field
-     * @type {SFDC_Object}
+     * @type {SfdcObject}
      * @public
      */
-    objectRef: SFDC_Object;
+    objectRef: SfdcObject;
 
     /**
      * @description Is tgis field custom or standard

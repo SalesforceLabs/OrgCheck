@@ -4,14 +4,14 @@ import { DataWithScoreAndDependencies } from 'src/api/core/orgcheck-api-data';
 /**
  * @description Representation of a Custom Label in Org Check
  */
-export interface SFDC_CustomLabel extends DataWithScoreAndDependencies {
+export interface SfdcCustomLabel extends DataWithScoreAndDependencies {
 
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_CustomLabel;
+    dataType: DataAliases.SfdcCustomLabel;
     
      /**
      * @description Salesforce Id

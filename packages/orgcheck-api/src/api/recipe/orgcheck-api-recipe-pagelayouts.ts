@@ -4,10 +4,10 @@ import { Data } from 'src/api/core/orgcheck-api-data';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_Object }from 'src/api/data/orgcheck-api-data-object';
-import { SFDC_PageLayout }from 'src/api/data/orgcheck-api-data-pagelayout';
+import { SfdcObject }from 'src/api/data/orgcheck-api-data-object';
+import { SfdcPageLayout }from 'src/api/data/orgcheck-api-data-pagelayout';
 import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
-import { SFDC_ObjectType }from 'src/api/data/orgcheck-api-data-objecttype';
+import { SfdcObjectType }from 'src/api/data/orgcheck-api-data-objecttype';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
 export class RecipePageLayouts implements Recipe {
@@ -38,9 +38,9 @@ export class RecipePageLayouts implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data and parameters
-        const /** @type {Map<string, SFDC_PageLayout>} */ pageLayouts: Map<string, SFDC_PageLayout> = data.get(DatasetAliases.PAGELAYOUTS);
-        const /** @type {Map<string, SFDC_ObjectType>} */ types: Map<string, SFDC_ObjectType> = data.get(DatasetAliases.OBJECTTYPES);
-        const /** @type {Map<string, SFDC_Object>} */ objects: Map<string, SFDC_Object> = data.get(DatasetAliases.OBJECTS);
+        const /** @type {Map<string, SfdcPageLayout>} */ pageLayouts: Map<string, SfdcPageLayout> = data.get(DatasetAliases.PAGELAYOUTS);
+        const /** @type {Map<string, SfdcObjectType>} */ types: Map<string, SfdcObjectType> = data.get(DatasetAliases.OBJECTTYPES);
+        const /** @type {Map<string, SfdcObject>} */ objects: Map<string, SfdcObject> = data.get(DatasetAliases.OBJECTS);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
         const objecttype = OrgCheckGlobalParameter.getSObjectTypeName(parameters);
         const object = OrgCheckGlobalParameter.getSObjectName(parameters);
@@ -51,9 +51,9 @@ export class RecipePageLayouts implements Recipe {
         if (!pageLayouts) throw new Error(`RecipePageLayouts: Data from dataset alias 'PAGELAYOUTS' was undefined.`);
 
         // Augment and filter data
-        /** @type {Array<SFDC_PageLayout>} */
-        const array: Array<SFDC_PageLayout> = [];
-        await Processor.forEach(pageLayouts, async (/** @type {SFDC_PageLayout} */ pageLayout: SFDC_PageLayout) => {
+        /** @type {Array<SfdcPageLayout>} */
+        const array: Array<SfdcPageLayout> = [];
+        await Processor.forEach(pageLayouts, async (/** @type {SfdcPageLayout} */ pageLayout: SfdcPageLayout) => {
             // Augment data
             const objectRef = objects.get(pageLayout.objectId);
             if (objectRef) {

@@ -4,14 +4,14 @@ import { DataWithScoreAndDependencies, DataWithoutScore } from 'src/api/core/org
 /**
  * Represents a Flow Definition and its Flow Version children
  */
-export interface SFDC_Flow extends DataWithScoreAndDependencies {
+export interface SfdcFlow extends DataWithScoreAndDependencies {
     
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_Flow;
+    dataType: DataAliases.SfdcFlow;
 
     /**
      * @description Salesforce Id
@@ -50,10 +50,10 @@ export interface SFDC_Flow extends DataWithScoreAndDependencies {
     
     /**
      * @description Reference of the current flow version being used by this flow
-     * @type {SFDC_FlowVersion}
+     * @type {SfdcFlowVersion}
      * @public
      */
-    currentVersionRef: SFDC_FlowVersion;
+    currentVersionRef: SfdcFlowVersion;
     
     /**
      * @description Is the current flow version of this flow is the latest version of this flow?
@@ -122,14 +122,14 @@ export interface SFDC_Flow extends DataWithScoreAndDependencies {
 /**
  * Represents a Flow Version
  */
-export interface SFDC_FlowVersion extends DataWithoutScore {
+export interface SfdcFlowVersion extends DataWithoutScore {
     
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_FlowVersion;
+    dataType: DataAliases.SfdcFlowVersion;
 
     /**
      * @description Salesforce Id

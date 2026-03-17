@@ -1,18 +1,18 @@
 import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
 import { DataWithScoreAndDependencies } from 'src/api/core/orgcheck-api-data';
-import { SFDC_Object } from 'src/api/data/orgcheck-api-data-object';
+import { SfdcObject } from 'src/api/data/orgcheck-api-data-object';
 
 /**
  * @description Representation of a Lightning Page in Org Check
  */
-export interface SFDC_LightningPage extends DataWithScoreAndDependencies {
+export interface SfdcLightningPage extends DataWithScoreAndDependencies {
     
     /**
      * @description Identifier of what this interface represents
      * @type {DataAliases}
      * @public
      */
-    dataType: DataAliases.SFDC_LightningPage;
+    dataType: DataAliases.SfdcLightningPage;
         
      /**
      * @description Salesforce Id
@@ -65,10 +65,10 @@ export interface SFDC_LightningPage extends DataWithScoreAndDependencies {
     
     /**
      * @description Reference of the related object for this page (if any)
-     * @type {SFDC_Object}
+     * @type {SfdcObject}
      * @public
      */
-    objectRef: SFDC_Object;
+    objectRef: SfdcObject;
 
     /**
      * @description Full description of that item

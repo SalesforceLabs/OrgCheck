@@ -37,6 +37,6 @@ describe('check global-view', function () {
 
   it('runs global-view with --json', async () => {
     const output = await World.run(['--target-org', 'test@org.com', '--json']);
-    expect(output.result.length).to.be.greaterThan(0);
+    expect(output.results.length).to.be.greaterThan(0);
   });
 });

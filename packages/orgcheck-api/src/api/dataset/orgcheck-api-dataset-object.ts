@@ -1,14 +1,14 @@
 import { Dataset } from 'src/api/core/orgcheck-api-dataset';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
-import { SFDC_Object } from 'src/api/data/orgcheck-api-data-object';
-import { SFDC_Field } from 'src/api/data/orgcheck-api-data-field';
-import { SFDC_FieldSet } from 'src/api/data/orgcheck-api-data-fieldset';
-import { SFDC_PageLayout } from 'src/api/data/orgcheck-api-data-pagelayout';
-import { SFDC_Limit } from 'src/api/data/orgcheck-api-data-limit';
-import { SFDC_ValidationRule } from 'src/api/data/orgcheck-api-data-validationrule';
-import { SFDC_WebLink } from 'src/api/data/orgcheck-api-data-weblink';
-import { SFDC_RecordType } from 'src/api/data/orgcheck-api-data-recordtype';
-import { SFDC_ObjectRelationShip } from 'src/api/data/orgcheck-api-data-objectrelationship';
+import { SfdcObject } from 'src/api/data/orgcheck-api-data-object';
+import { SfdcField } from 'src/api/data/orgcheck-api-data-field';
+import { SfdcFieldSet } from 'src/api/data/orgcheck-api-data-fieldset';
+import { SfdcPageLayout } from 'src/api/data/orgcheck-api-data-pagelayout';
+import { SfdcLimit } from 'src/api/data/orgcheck-api-data-limit';
+import { SfdcValidationRule } from 'src/api/data/orgcheck-api-data-validationrule';
+import { SfdcWebLink } from 'src/api/data/orgcheck-api-data-weblink';
+import { SfdcRecordType } from 'src/api/data/orgcheck-api-data-recordtype';
+import { SfdcObjectRelationShip } from 'src/api/data/orgcheck-api-data-objectrelationship';
 import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
 import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
@@ -25,9 +25,9 @@ export class DatasetObject implements Dataset {
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
      * @param {Map<string, any>} parameters - The parameters
-     * @returns {Promise<SFDC_Object>} The result of the dataset
+     * @returns {Promise<SfdcObject>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<SFDC_Object> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<SfdcObject> {
 
         const fullObjectApiName = OrgCheckGlobalParameter.getSObjectName(parameters);
 
@@ -41,15 +41,15 @@ export class DatasetObject implements Dataset {
         const packageName = splittedApiName?.length === 3 ? splittedApiName[0] : '';
 
         // Init the factories
-        const fieldDataFactory = dataFactory.getInstance(DataAliases.SFDC_Field);
-        const fieldSetDataFactory = dataFactory.getInstance(DataAliases.SFDC_FieldSet);
-        const layoutDataFactory = dataFactory.getInstance(DataAliases.SFDC_PageLayout);
-        const limitDataFactory = dataFactory.getInstance(DataAliases.SFDC_Limit);
-        const validationRuleDataFactory = dataFactory.getInstance(DataAliases.SFDC_ValidationRule);
-        const webLinkDataFactory = dataFactory.getInstance(DataAliases.SFDC_WebLink);
-        const recordTypeDataFactory = dataFactory.getInstance(DataAliases.SFDC_RecordType);
-        const relationshipDataFactory = dataFactory.getInstance(DataAliases.SFDC_ObjectRelationShip);
-        const objectDataFactory = dataFactory.getInstance(DataAliases.SFDC_Object);
+        const fieldDataFactory = dataFactory.getInstance(DataAliases.SfdcField);
+        const fieldSetDataFactory = dataFactory.getInstance(DataAliases.SfdcFieldSet);
+        const layoutDataFactory = dataFactory.getInstance(DataAliases.SfdcPageLayout);
+        const limitDataFactory = dataFactory.getInstance(DataAliases.SfdcLimit);
+        const validationRuleDataFactory = dataFactory.getInstance(DataAliases.SfdcValidationRule);
+        const webLinkDataFactory = dataFactory.getInstance(DataAliases.SfdcWebLink);
+        const recordTypeDataFactory = dataFactory.getInstance(DataAliases.SfdcRecordType);
+        const relationshipDataFactory = dataFactory.getInstance(DataAliases.SfdcObjectRelationShip);
+        const objectDataFactory = dataFactory.getInstance(DataAliases.SfdcObject);
 
         const results = await Promise.all([
             sfdcManager.describe(fullObjectApiName, logger),
@@ -120,8 +120,8 @@ export class DatasetObject implements Dataset {
                 }
             }
         });
-        /** @type {Array<SFDC_Field>} */
-        const standardFields: Array<SFDC_Field> = await Processor.map(
+        /** @type {Array<SfdcField>} */
+        const standardFields: Array<SfdcField> = await Processor.map(
             sobjectDescribed.fields,
             (/** @type {any} */ field: any) => {
                 const fieldMapper = standardFieldsMapper.get(field.name);
@@ -163,8 +163,8 @@ export class DatasetObject implements Dataset {
         );
 
         // field sets
-        /** @type {Array<SFDC_FieldSet>} */
-        const fieldSets: Array<SFDC_FieldSet> = await Processor.map(
+        /** @type {Array<SfdcFieldSet>} */
+        const fieldSets: Array<SfdcFieldSet> = await Processor.map(
             entity.FieldSets?.records,
             (/** @type {any} */ t: any) => fieldSetDataFactory.createWithScore({ 
                 properties: {
@@ -177,8 +177,8 @@ export class DatasetObject implements Dataset {
         );
 
         // page layouts
-        /** @type {Array<SFDC_PageLayout>} */
-        const layouts: Array<SFDC_PageLayout> = await Processor.map(
+        /** @type {Array<SfdcPageLayout>} */
+        const layouts: Array<SfdcPageLayout> = await Processor.map(
             entity.Layouts?.records,
             (/** @type {any} */ t: any) => layoutDataFactory.createWithScore({ 
                 properties: {
@@ -192,8 +192,8 @@ export class DatasetObject implements Dataset {
         );
         
         // limits
-        /** @type {Array<SFDC_Limit>} */
-        const limits: Array<SFDC_Limit> = await Processor.map(
+        /** @type {Array<SfdcLimit>} */
+        const limits: Array<SfdcLimit> = await Processor.map(
             entity.Limits?.records,
             (/** @type {any} */ t: any) => limitDataFactory.createWithScore({ 
                 properties: {
@@ -209,8 +209,8 @@ export class DatasetObject implements Dataset {
         );
         
         // validation rules
-        /** @type {Array<SFDC_ValidationRule>} */
-        const validationRules: Array<SFDC_ValidationRule> = await Processor.map(
+        /** @type {Array<SfdcValidationRule>} */
+        const validationRules: Array<SfdcValidationRule> = await Processor.map(
             entity.ValidationRules?.records,
             (/** @type {any} */ t: any) => validationRuleDataFactory.createWithScore({ 
                 properties: {
@@ -229,8 +229,8 @@ export class DatasetObject implements Dataset {
         );
         
         // weblinks and actions
-        /** @type {Array<SFDC_WebLink>} */
-        const webLinks: Array<SFDC_WebLink> = await Processor.map(
+        /** @type {Array<SfdcWebLink>} */
+        const webLinks: Array<SfdcWebLink> = await Processor.map(
             entity.WebLinks?.records,
             (/** @type {any} */ t: any) => webLinkDataFactory.createWithScore({ 
                 properties: {
@@ -251,8 +251,8 @@ export class DatasetObject implements Dataset {
         );
         
         // record types
-        /** @type {Array<SFDC_RecordType>} */
-        const recordTypes: Array<SFDC_RecordType> = await Processor.map(
+        /** @type {Array<SfdcRecordType>} */
+        const recordTypes: Array<SfdcRecordType> = await Processor.map(
             sobjectDescribed.recordTypeInfos,
             (/** @type {any} */ t: any) => recordTypeDataFactory.createWithScore({ 
                 properties: {
@@ -269,8 +269,8 @@ export class DatasetObject implements Dataset {
         );
         
         // relationships
-        /** @type {Array<SFDC_ObjectRelationShip>} */
-        const relationships: Array<SFDC_ObjectRelationShip> = await Processor.map(
+        /** @type {Array<SfdcObjectRelationShip>} */
+        const relationships: Array<SfdcObjectRelationShip> = await Processor.map(
             sobjectDescribed.childRelationships,
             (/** @type {any} */ relationship: any) => relationshipDataFactory.createWithScore({ 
                 properties: {
@@ -285,8 +285,8 @@ export class DatasetObject implements Dataset {
         );
 
         // Create the object
-        /** @type {SFDC_Object} */
-        const object: SFDC_Object = objectDataFactory.createWithScore({
+        /** @type {SfdcObject} */
+        const object: SfdcObject = objectDataFactory.createWithScore({
             properties: {
                 id: entity.DurableId,
                 label: sobjectDescribed.label,

@@ -5,7 +5,7 @@ import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SFDC_User } from 'src/api/data/orgcheck-api-data-user';
+import { SfdcUser } from 'src/api/data/orgcheck-api-data-user';
 
 export class DatasetInternalActiveUsers implements Dataset {
 
@@ -14,9 +14,9 @@ export class DatasetInternalActiveUsers implements Dataset {
      * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
      * @param {DataFactoryIntf} dataFactory - The data factory to use
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, SFDC_User>>} The result of the dataset
+     * @returns {Promise<Map<string, SfdcUser>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SFDC_User>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcUser>> {
 
         // First SOQL queries
         logger?.log(`Querying REST API about internal active User in the org...`);            
@@ -55,7 +55,7 @@ export class DatasetInternalActiveUsers implements Dataset {
         }], logger);
 
         // Init the factory and records
-        const userDataFactory = dataFactory.getInstance(DataAliases.SFDC_User);
+        const userDataFactory = dataFactory.getInstance(DataAliases.SfdcUser);
 
         // Create the map
         const userRecords = results[0];
@@ -63,14 +63,14 @@ export class DatasetInternalActiveUsers implements Dataset {
         const loginRecords = results[2];
         const verifRecords = results[3];
         logger?.log(`Parsing ${userRecords?.length} users...`);
-        const users: Map<string, SFDC_User> = new Map(await Processor.map(userRecords, async (/** @type {any} */ record: any) => {
+        const users: Map<string, SfdcUser> = new Map(await Processor.map(userRecords, async (/** @type {any} */ record: any) => {
         
             // Get the ID15 of this user
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            /** @type {SFDC_User} */
-            const user: SFDC_User = userDataFactory.create({
+            /** @type {SfdcUser} */
+            const user: SfdcUser = userDataFactory.create({
                 properties: {
                     id: id,
                     name: record.Name,
@@ -160,7 +160,7 @@ export class DatasetInternalActiveUsers implements Dataset {
 
         // FINALLY!!!! Compute the score of all items
         logger?.log(`Computing scores for ${users.size} users...`);
-        await Processor.forEach(users, async (/** @type {SFDC_User} */ user: SFDC_User) => {
+        await Processor.forEach(users, async (/** @type {SfdcUser} */ user: SfdcUser) => {
             userDataFactory.computeScore(user);
         });
 

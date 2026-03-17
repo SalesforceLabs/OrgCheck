@@ -4,8 +4,8 @@ import { Data } from 'src/api/core/orgcheck-api-data';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SFDC_Object }from 'src/api/data/orgcheck-api-data-object';
-import { SFDC_ApexTrigger }from 'src/api/data/orgcheck-api-data-apextrigger';
+import { SfdcObject }from 'src/api/data/orgcheck-api-data-object';
+import { SfdcApexTrigger }from 'src/api/data/orgcheck-api-data-apextrigger';
 import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
@@ -36,8 +36,8 @@ export class RecipeApexTriggers implements Recipe {
     async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
 
         // Get data and parameters
-        const apexTriggers: Map<string, SFDC_ApexTrigger> = data.get(DatasetAliases.APEXTRIGGERS);
-        const objects: Map<string, SFDC_Object> = data.get(DatasetAliases.OBJECTS);
+        const apexTriggers: Map<string, SfdcApexTrigger> = data.get(DatasetAliases.APEXTRIGGERS);
+        const objects: Map<string, SfdcObject> = data.get(DatasetAliases.OBJECTS);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
@@ -45,8 +45,8 @@ export class RecipeApexTriggers implements Recipe {
         if (!objects) throw new Error(`RecipeApexTriggers: Data from dataset alias 'OBJECTS' was undefined.`);
 
         // Augment and filter data
-        const array: Array<SFDC_ApexTrigger> = [];
-        await Processor.forEach(apexTriggers, async (apexTrigger: SFDC_ApexTrigger) => {
+        const array: Array<SfdcApexTrigger> = [];
+        await Processor.forEach(apexTriggers, async (apexTrigger: SfdcApexTrigger) => {
             // Augment data
             const objectRef = objects.get(apexTrigger.objectId);
             if (objectRef) {
