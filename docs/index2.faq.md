@@ -38,6 +38,8 @@ permalink: /faq/
  - Did you install the package for a specific set of profiles and maybe you are not part of these ones? (remember we recommended to install the package for admins only...)
  - Assign your user to the included permission set called "**Org Check Users**"
  - You should see the application definitly!
+ - If not, try to enable the App visibility in Launcher (see Setup > App Menu > Visible in App Launcher)
+
 
 
 ## Question 4: I have the same error on EVERY tabs when the tool is accessing the API: INVALID_SESSION_ID: This session is not valid for use with the REST API 
