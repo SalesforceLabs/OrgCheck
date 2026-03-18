@@ -853,6 +853,15 @@ export default class OrgcheckApp extends LightningElement {
     }
 
     /**
+     * @description Method called when you want to remove the current cache
+     * @public
+     * @async
+     */
+    async handleRefreshCurrentData() {
+        await this._async_updateCurrentData(true);
+    }
+
+    /**
      * @description Method called when the user ask to log a specific cache item in the console
      * @param {Event | any} event - The event information
      * @public
