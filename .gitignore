@@ -35,4 +35,6 @@ $RECYCLE.BIN/
 #Others
 package-lock.json
 yarn.lock
-
+.cursor/
+.vscode/
+.wireit/
