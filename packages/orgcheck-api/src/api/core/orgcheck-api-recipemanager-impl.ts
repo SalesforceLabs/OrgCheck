@@ -53,7 +53,6 @@ import { RecipeVisualForceComponents } from 'src/api/recipe/orgcheck-api-recipe-
 import { RecipeVisualForcePages } from 'src/api/recipe/orgcheck-api-recipe-visualforcepages';
 import { RecipeWebLinks } from 'src/api/recipe/orgcheck-api-recipe-weblinks';
 import { RecipeWorkflows } from 'src/api/recipe/orgcheck-api-recipe-workflows';
-import { SecretSauce } from 'src/api/core/orgcheck-api-secretsauce';
 import { DataCollectionStatisticsIntf } from 'src/api/core/orgcheck-api-data-datacollectionstats';
 
 /**
@@ -322,12 +321,17 @@ export class RecipeManager implements RecipeManagerIntf {
         // STEP 3. Transform the recipe collection finally
         // -------------------
         this._logger.log(section, 'This recipe collection will now transform all this information...');
-        const listRuleIds = recipeCollection.filterByScoreRuleIds(this._logger.toSimpleLogger(section), parameters);
-        const isRuleFilterOn = listRuleIds?.length > 0 || false;
+        const listRules = recipeCollection.filterByScoreRules(this._logger.toSimpleLogger(section), parameters);
+        const listRulesByIds = new Map(listRules.map(rule => [ rule.id, rule ]));
+        const listRuleIds = Array.from(listRulesByIds.keys());
+        const isRuleFilterOn = listRules?.length > 0 || false;
         const finalData: Array<DataCollectionStatisticsIntf> = [];
         try {
             // Add the successful recipes and their stats in the final list
             await Processor.forEach(data, async ( records: Array<DataWithScore>, recipe: string) => {
+                // We get only the bad records (with score > 0)
+                // Potentially we can be asked to filter records on certain rules only (see `listRules`)
+                //   In this scenario, bad records are filtered and their badReasonIds as well
                 const onlyBadRecords = records?.filter((r) => {
                     if (r.score && r.score > 0) {
                         if (isRuleFilterOn === true) {
@@ -338,24 +342,38 @@ export class RecipeManager implements RecipeManagerIntf {
                     } else {
                         return false;
                     }
-                })?.sort((a, b) => a.score > b.score ? -1 : 1);
-                const series = new Map();
-                onlyBadRecords?.forEach((d) => { 
-                    d.badReasonIds.filter(id => { 
+                })?.sort((a, b) => { // sort by sore to have the biggest first
+                    return a.score > b.score ? -1 : 1; 
+                });
+                const countOfBadRecordsPerRuleId = new Map<number, number>();
+                const badValues = new Set<any>();
+                onlyBadRecords?.forEach((d) => {  // for each bad record...
+                    d.badReasonIds.filter(id => { // only for the badReason that are part of the rules we want
                         return isRuleFilterOn === true ? listRuleIds.includes(id) : true;
-                    }).forEach(id => {
-                        series.set(id, series.has(id) ? (series.get(id) + 1) : 1);
+                    }).forEach(id => { 
+                        // add the count of bad records per rule
+                        countOfBadRecordsPerRuleId.set(id, (countOfBadRecordsPerRuleId.get(id) ?? 0) + 1);
+                        // add the bad values in a set
+                        const rule = listRulesByIds.get(id);
+                        if (rule) {
+                            badValues.add(d[rule.badField] ?? '')
+                        }
                     });
                 });
                 finalData.push(new DataCollectionStatisticsOK(
                     recipe,
                     (records?.length ?? 0),
                     (onlyBadRecords?.length ?? 0),
-                    Array.from(series.keys()).map((id) => { return { 
-                        ruleId: id,
-                        ruleName: SecretSauce.GetScoreRuleDescription(id), 
-                        count: series.get(id)
-                    }}),
+                    listRules.map((rule) => {
+                        return {
+                            ruleId: rule.id,
+                            ruleName: rule.description,
+                            count: countOfBadRecordsPerRuleId.get(rule.id) ?? 0
+                        };
+                    })?.sort((a, b) => { // sort by count to have the biggest first
+                        return a.count > b.count ? -1 : 1; 
+                    }),
+                    Array.from(badValues),
                     onlyBadRecords
                 ));
             });

@@ -551,6 +551,12 @@ interface DataCollectionStatisticsIntf {
         count: number;
     }>;
     /**
+     * @description List of distinct values automatically computed based on the rule description
+     * @type {Array<any>}
+     * @public
+     */
+    distinctBadValues: Array<any>;
+    /**
      * @description List of all data items that are part of this collection
      * @type {Array<Data>}
      * @default []

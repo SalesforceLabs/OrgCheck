@@ -688,6 +688,7 @@ export default class OrgcheckApp extends LightningElement {
                 hadError: item?.hadError,
                 countAll: item?.countAll,
                 countBad: item?.countBad,
+                distinctBadValues: item?.distinctBadValues,
                 items: item?.data?.filter((d, i) => i < MAX_ITEMS_IN_HARDCODED_URLS_LIST).map(d => {
                     return {
                         url: d?.[firstUrlColumn.data.value],

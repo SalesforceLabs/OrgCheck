@@ -947,11 +947,11 @@ export class SecretSauce {
 
     /**
      * @description Returns an unmutable array of score rules only related to hardcoded urls.
-     * @returns {Array<number>} Score rues only related to hardcoded urls
+     * @returns {Array<ScoreRule>} Score rues only related to hardcoded urls
      * @static
      * @readonly
      */
-    static GetScoreRulesForHardCodedURLs(): Array<number> { return ALL_SCORE_RULES.filter(r => r.category === SCORE_RULE_CATEGORIES.HARDCODED_URL).map(r => r.id); }
+    static GetScoreRulesForHardCodedURLs(): Array<ScoreRule> { return ALL_SCORE_RULES.filter(r => r.category === SCORE_RULE_CATEGORIES.HARDCODED_URL); }
 
     /**
      * @description Returns an unmutable score rule given its id.

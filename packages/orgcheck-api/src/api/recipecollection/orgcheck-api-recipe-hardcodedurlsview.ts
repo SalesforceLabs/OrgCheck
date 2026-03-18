@@ -2,6 +2,7 @@ import { RecipeCollection } from 'src/api/core/orgcheck-api-recipecollection';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { RecipeAliases } from 'src/api/core/orgcheck-api-recipes-aliases';
 import { SecretSauce } from 'src/api/core/orgcheck-api-secretsauce';
+import { ScoreRule } from 'src/orgcheck';
 
 export class RecipeHardcodedURLsView implements RecipeCollection {
 
@@ -29,12 +30,11 @@ export class RecipeHardcodedURLsView implements RecipeCollection {
     }
 
     /**
-     * @description Filter the data items by score rule ids
-     * @param {SimpleLoggerIntf} _logger - Logger
-     * @returns {Array<number>} List of score rule ids to filter by. Empty array means no filtering
+     * @description Filter the data items by score rules
+     * @returns {Array<ScoreRule>} List of score rule to filter by. Empty array means no filtering
      * @public
      */ 
-    filterByScoreRuleIds(_logger: SimpleLoggerIntf): Array<number> {
+    filterByScoreRules(): Array<ScoreRule> {
         return SecretSauce.GetScoreRulesForHardCodedURLs();
     }
 }

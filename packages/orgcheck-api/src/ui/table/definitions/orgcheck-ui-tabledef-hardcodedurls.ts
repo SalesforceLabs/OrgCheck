@@ -14,6 +14,7 @@ export class HardCodedURLsTableDefinitions implements Table {
         { label: 'Had Issue',      type: ColumnType.CHK, data: { value: 'hadError' }},
         { label: 'Bad',            type: ColumnType.NUM, data: { value: 'countBad' }},
         { label: 'Total',          type: ColumnType.NUM, data: { value: 'countAll' }},
+        { label: 'Bad URLs',       type: ColumnType.TXTS, data: { values: 'distinctBadValues', value: '.' }},
         { label: 'First items...', type: ColumnType.URLS, data: { values: 'items', value: 'url', label: 'name' }}
     ];
 
