@@ -29,7 +29,7 @@ export class Exporter {
                         // so in short, ONLY strings!!
                         // For any string transformation, please refer to RowsFactory.export() method
                         if (typeof cell != 'string') {
-                            throw new Error(`Invalid cell type at row ${i+1}, column ${item.columns[j]} (${j+1}) of table "${item.header}": expected string but got ${typeof cell}`);
+                            return '';
                         }
                         // Excel has a max cell size of 32,767 characters
                         if (cell.length > CELL_MAX_SIZE) return cell.substring(0, CELL_MAX_SIZE-TRUNCATE_MSG.length) + TRUNCATE_MSG;
