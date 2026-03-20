@@ -2,10 +2,10 @@ import { Spinner } from '@salesforce/sf-plugins-core';
 import orgcheck from '@orgcheck/api';
 import { Logger } from '@salesforce/core';
 
-export class LoggerSetup implements orgcheck.LoggerSetup {
+export class OrgCheckSfPluginLoggerSetup implements orgcheck.LoggerSetup {
 
   private nbSuccesses: number;
-  private nbFailures: number;
+  private failures: Array<Error | string>;
   private sections: Set<string>;
   private logger: Logger | undefined;
   
@@ -16,7 +16,7 @@ export class LoggerSetup implements orgcheck.LoggerSetup {
     }
     this.sections = new Set();
     this.nbSuccesses = 0;
-    this.nbFailures = 0;
+    this.failures = [];
   }
 
   public started(section: string): void {
@@ -44,7 +44,7 @@ export class LoggerSetup implements orgcheck.LoggerSetup {
     if (this.logger) {
       this.logger.info(`[${section}] FAILURE error: <${JSON.stringify(error ?? {})}>`);
     }
-    this.nbFailures++;
+    this.failures.push(error ?? 'Empty error');
     this.spinner.status = `[${section}] ${message}`;
   }
   
@@ -62,7 +62,7 @@ export class LoggerSetup implements orgcheck.LoggerSetup {
     }
     this.sections.delete(section);
     if (this.sections.size === 0) {
-      this.spinner.stop(`Done! ✅ ${this.nbSuccesses} successful recipes and ❌ ${this.nbFailures} failed recipes.`);
+      this.spinner.stop(`Done! ✅ ${this.nbSuccesses} successful recipes and ❌ ${this.failures.length} failed recipes.`);
     }
   }
 }

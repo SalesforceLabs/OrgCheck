@@ -21,8 +21,17 @@ export default [
     'eslint-config-prettier'
   ),
   {
+    files: ['**/*.ts'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.json', './test/tsconfig.json'],
+        sourceType: 'module',
+        warnOnUnsupportedTypeScriptVersion: false,
+      },
+    },
     rules: {
       header: 'off',
+      '@typescript-eslint/no-unused-expressions': 'off',
     },
   },
   {
@@ -39,8 +48,11 @@ export default [
     },
     rules: {
       'no-unused-expressions': 'off',
+      'prefer-arrow-callback': 'off',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/no-empty-function': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
       '@typescript-eslint/require-await': 'off',
       header: 'off',
     },

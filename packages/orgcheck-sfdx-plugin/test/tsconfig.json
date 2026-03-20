@@ -3,6 +3,7 @@
   "include": ["./**/*.ts"],
   "compilerOptions": {
     "skipLibCheck": true,
-    "types": ["node", "mocha"]
+    "isolatedModules": true,
+    "types": ["node", "jest"]
   }
 }

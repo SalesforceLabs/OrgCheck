@@ -1,6 +1,6 @@
 import orgcheck from '@orgcheck/api';
 
-export class StorageSetup implements orgcheck.StorageSetup {
+export class OrgCheckSfPluginStorageSetup implements orgcheck.StorageSetup {
   
   private map: Map<string, string>;
   

@@ -16,9 +16,10 @@ lib
 
 # test artifacts
 *xunit.xml
+stdout*.txt
+stderr*.txt
 *checkstyle.xml
 *unitcoverage
-.nyc_output
 coverage
 test_session*
 

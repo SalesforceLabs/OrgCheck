@@ -25,7 +25,7 @@ import { DatasetKnowledgeArticles } from 'src/api/dataset/orgcheck-api-dataset-k
 import { DatasetLightningAuraComponents } from 'src/api/dataset/orgcheck-api-dataset-lightningauracomponents';
 import { DatasetLightningPages } from 'src/api/dataset/orgcheck-api-dataset-lightningpages';
 import { DatasetLightningWebComponents } from 'src/api/dataset/orgcheck-api-dataset-lightningwebcomponents';
-import { DatasetManagerIntf } from 'src/api/core/orgcheck-api-datasetmanager';
+import { DatasetManagerIntf, DatasetManagerError } from 'src/api/core/orgcheck-api-datasetmanager';
 import { DatasetObject } from 'src/api/dataset/orgcheck-api-dataset-object';
 import { DatasetObjectPermissions } from 'src/api/dataset/orgcheck-api-dataset-objectpermissions';
 import { DatasetObjects } from 'src/api/dataset/orgcheck-api-dataset-objects';
@@ -163,21 +163,24 @@ export class DatasetManager implements DatasetManagerIntf {
      * @description Run the given list of datasets and return them as a result
      * @param {Array<string | DatasetRunInformation>} datasets - The list of datasets to run
      * @returns {Promise<Map<string, any>>} Returns the result 
+     * @throws {DatasetManagerError}
      * @public
      * @async
      */
     public async run(datasets: Array<string | DatasetRunInformation>): Promise<Map<string, any>> {
-        if (datasets instanceof Array === false) {
-            throw new TypeError('The given datasets is not an instance of Array.');
+        if (datasets === undefined || datasets === null) {
+            throw new DatasetManagerError('', `The given datasets is not defined.`);
         }
-        /** @type {Array<any>} */
-        const data: Array<any> = await Promise.all(datasets.map((dataset) => {
+        if (datasets instanceof Array === false) {
+            throw new DatasetManagerError('', `The given datasets is not an instance of Array (typeof= ${typeof datasets}).`);
+        }
+        const data: Array<any> = await Promise.all(datasets.map(async (dataset) => {
             const alias      = (typeof dataset === 'string' ? dataset : dataset.alias);
             const cacheKey   = (typeof dataset === 'string' ? dataset : dataset.cacheKey);
             const parameters = (typeof dataset === 'string' ? undefined : dataset.parameters);
             const section = `Run dataset "${alias}"`;
             if (this._datasetPromisesCache.has(cacheKey) === false) {
-                this._datasetPromisesCache.set(cacheKey, new Promise((resolve, reject) => {
+                this._datasetPromisesCache.set(cacheKey, Promise.resolve().then(async () => {
                     try {
                         this._logger.log(section, `Checking the data cache for key=${cacheKey}...`);
                         // Get data cache if any
@@ -186,36 +189,30 @@ export class DatasetManager implements DatasetManagerIntf {
                             // Set the results from data cache
                             this._logger.finalLog(section, 'There was data in data cache, we use it!');
                             // Return the key/alias and value from the data cache
-                            resolve([ alias, dataFromCache ]); // when data comes from cache instanceof won't work! (keep that in mind)
+                            return [ alias, dataFromCache ]; // when data comes from cache instanceof won't work! (keep that in mind)
                         } else {
                             this._logger.log(section, `There was no data in data cache. Let's retrieve data.`);
                             // Calling the retriever
-                            this._datasets.get(alias)?.run(
+                            const data = await this._datasets.get(alias)?.run(
                                 this._sfdcManager, // sfdc manager
                                 this._dataFactory, // data factory
                                 this._logger?.toSimpleLogger(section), // local logger
                                 parameters // Send any parameters if needed
-                            ).then((data) => {
-                                // Cache the data (if possible and not too big)
-                                this._dataCache.set(cacheKey, data); 
-                                // Some logs
-                                this._logger.finalLog(section, `Data retrieved and saved in cache with key=${cacheKey}`);
-                                // Return the key/alias and value from the cache
-                                resolve([ alias, data ]);
-                            }).catch((/** @type {Error} */ error: Error) => {
-                                // Reject with this error
-                                this._logger.fatal(section, error);
-                                reject({ dataset: alias, cause: error });
-                            });
+                            );
+                            // Cache the data (if possible and not too big)
+                            this._dataCache.set(cacheKey, data); 
+                            // Some logs
+                            this._logger.finalLog(section, `Data retrieved and saved in cache with key=${cacheKey}`);
+                            // Return the key/alias and value from the cache
+                            return [ alias, data ];
                         }
                     } catch (error) {
-                        // Reject with this error
                         this._logger.fatal(section, error);
-                        reject({ dataset: alias, cause: error });
+                        throw new DatasetManagerError(alias, `There was an error while retrieving the data for this dataset (either cache issue or dataset.run issue).`, error);
                     }
                 }));
             }
-            return this._datasetPromisesCache.get(cacheKey);
+            return await this._datasetPromisesCache.get(cacheKey);
         }));
         return new Map(data);
     }
@@ -223,16 +220,24 @@ export class DatasetManager implements DatasetManagerIntf {
     /**
      * @description Clean the given list of datasets from cache (if present)
      * @param {Array<string | DatasetRunInformation>} datasets - The list of datasets to clean
+     * @throws {DatasetManagerError}
      * @public
      */
     public clean(datasets: Array<string | DatasetRunInformation>) {
+        if (datasets === undefined || datasets === null) {
+            throw new DatasetManagerError('', `The given datasets is not defined.`);
+        }
         if (datasets instanceof Array === false) {
-            throw new TypeError('The given datasets is not an instance of Array.');
+            throw new DatasetManagerError('', `The given datasets is not an instance of Array (typeof= ${typeof datasets}).`);
         }
         datasets.forEach((dataset) => {
-            const cacheKey = (typeof dataset === 'string' ? dataset : dataset.cacheKey);
-            this._dataCache.remove(cacheKey);
-            this._datasetPromisesCache.delete(cacheKey);
+            try {
+                const cacheKey = (typeof dataset === 'string' ? dataset : dataset.cacheKey);
+                this._dataCache.remove(cacheKey);
+                this._datasetPromisesCache.delete(cacheKey);
+            } catch (error) {
+                throw new DatasetManagerError(JSON.stringify(dataset), `There was an error while cleaning the dataset`, error);
+            }
         });
     }
 }

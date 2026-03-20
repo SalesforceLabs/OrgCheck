@@ -1,9 +1,0 @@
-{
-  "watch-extensions": "ts",
-  "recursive": true,
-  "reporter": "spec",
-  "timeout": 3000,
-  "exit": true,
-  "node-option": ["loader=ts-node/esm", "no-warnings=ExperimentalWarning"],
-  "spec": "test/**/*.test.ts"
-}

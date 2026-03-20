@@ -1,28 +1,33 @@
-import { ApiIntf } from "@orgcheck/api";
-import { Org } from "@salesforce/core";
+import { ApiIntf, SfdcOrganization } from "@orgcheck/api";
 
-export type OrgCheckResult<T> = {
+export type OrgCheckSfPluginResult<T> = {
   length: number;
   items: T;
 }
 
-export type OrgCheckOutput<T> = {
-  orgCheckVersion: string;
-  orgId: string;
-  requestAPIUsage: string;
+export type OrgCheckSfPluginOutput<T> = {
+  orgCheck: { version: string };
+  salesforceOrganization: { id: string, name: string, type: string, requestAPIUsage: string };
   dateCheck: string;
   action: string;
-  results: OrgCheckResult<T>;
+  results: OrgCheckSfPluginResult<T>;
 };
 
-export function OrgCheckGenerateOutput<T>(actionName: string, flags: { 'target-org': Org }, orgcheckApi: ApiIntf,  items: T): OrgCheckOutput<T> {
+export async function OrgCheckSfPluginGenerateOutput<T>(actionName: string, orgcheckApi: ApiIntf,  items: T): Promise<OrgCheckSfPluginOutput<T>> {
   let length = 1;
   if (items instanceof Map) length = items.size;
   if (Array.isArray(items) === true) length = items.length;
+  const org: SfdcOrganization = (await orgcheckApi.getOrganizationInformation());
   return {
-    orgCheckVersion: orgcheckApi.version,
-    orgId: flags['target-org'].getOrgId(),
-    requestAPIUsage: `${orgcheckApi.dailyApiRequestLimitInformation?.currentUsagePercentage ?? 0} %`,
+    orgCheck: {
+      version: orgcheckApi.version
+    },
+    salesforceOrganization: {
+      id: org.id,
+      name: org.name,
+      type: org.type,
+      requestAPIUsage: `${orgcheckApi.dailyApiRequestLimitInformation?.currentUsagePercentage ?? 0} %`
+    },
     dateCheck: new Date().toISOString(),
     action: actionName,
     results: { length, items }

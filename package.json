@@ -11,6 +11,7 @@
         "packages/*"
     ],
     "devDependencies": {
+        "eslint-config-prettier": "^9.1.0",
         "lerna": "^9.0.5"
     }
 }

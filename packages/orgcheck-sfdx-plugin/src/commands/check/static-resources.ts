@@ -1,33 +1,42 @@
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
+import { Connection } from '@salesforce/core';
 import { SfdcStaticResource } from '@orgcheck/api';
-import { OrgCheckCreateAPI } from '../../orgcheck-sfplugin/orgcheck-sfplugin-create-api.js';
-import { OrgCheckOutput, OrgCheckGenerateOutput } from '../../orgcheck-sfplugin/orgcheck-sfplugin-check-output.js';
-import { OrgCheckMessages } from '../../orgcheck-sfplugin/orgcheck-sfplugin-messages.js';
-import { OrgCheckLoadThirdParties } from '../../orgcheck-sfplugin/orgcheck-sfplugin-thirdparties.js';
+import orgcheck from '@orgcheck/api';
+import { OrgCheckSfPluginOutput, OrgCheckSfPluginGenerateOutput } from '../../orgcheck-sfplugin/orgcheck-sfplugin-check-output.js';
+import { OrgCheckSfPluginMessages } from '../../orgcheck-sfplugin/orgcheck-sfplugin-messages.js';
+import { OrgCheckSfPluginLoadThirdParties } from '../../orgcheck-sfplugin/orgcheck-sfplugin-thirdparties.js';
+import { OrgCheckSfPluginLoggerSetup } from '../../orgcheck-sfplugin/orgcheck-sfplugin-logger-setup.js';
+import { OrgCheckSfPluginStorageSetup } from '../../orgcheck-sfplugin/orgcheck-sfplugin-storage-setup.js';
 
-OrgCheckLoadThirdParties();
+OrgCheckSfPluginLoadThirdParties();
 
-export default class CheckStaticResources extends SfCommand<OrgCheckOutput<SfdcStaticResource[]>> {
+export default class CheckStaticResources extends SfCommand<OrgCheckSfPluginOutput<SfdcStaticResource[]>> {
   
-  public static readonly summary = OrgCheckMessages.getMessage('check.static-resources.summary');
-  public static readonly description = OrgCheckMessages.getMessage('check.static-resources.description');
-  public static readonly examples = OrgCheckMessages.getMessages('check.static-resources.examples');
+  public static readonly summary = OrgCheckSfPluginMessages.getMessage('check.static-resources.summary');
+  public static readonly description = OrgCheckSfPluginMessages.getMessage('check.static-resources.description');
+  public static readonly examples = OrgCheckSfPluginMessages.getMessages('check.static-resources.examples');
   
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
     'verbose': Flags.boolean(),
     'package': Flags.string({ 
       char: 'p',
-      summary: OrgCheckMessages.getMessage('flags.package.summary')
+      summary: OrgCheckSfPluginMessages.getMessage('flags.package.summary')
     })
   }
 
-  public async run(): Promise<OrgCheckOutput<SfdcStaticResource[]>> {
+  public async run(): Promise<OrgCheckSfPluginOutput<SfdcStaticResource[]>> {
   
     const { flags } = await this.parse(CheckStaticResources);
-    const orgcheckApi = OrgCheckCreateAPI(flags, this.spinner);
+    const connection: Connection = flags['target-org'].getConnection(undefined);
+    const storageSetup: OrgCheckSfPluginStorageSetup = new OrgCheckSfPluginStorageSetup();
+    const loggerSetup: OrgCheckSfPluginLoggerSetup = new OrgCheckSfPluginLoggerSetup(this.spinner, flags['verbose'])
+    const orgcheckApi = orgcheck.ApiFactory.create({ 
+      salesforce: { connection }, 
+      storage: storageSetup, 
+      logSettings: loggerSetup 
+    });
     const results = (await orgcheckApi.getStaticResources(flags.package)) ?? [];
-
-    return OrgCheckGenerateOutput('static-resources', flags, orgcheckApi, results);
+    return OrgCheckSfPluginGenerateOutput('static-resources', orgcheckApi, results);
   }
 }

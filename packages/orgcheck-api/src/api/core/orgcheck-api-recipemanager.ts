@@ -3,6 +3,17 @@ import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { DataCollectionStatisticsIntf } from './orgcheck-api-data-datacollectionstats';
 
 /**
+ * @description Recipe manager error class
+ */
+export class RecipeManagerError extends Error {
+
+    constructor(public readonly recipe: string, message: string, public readonly cause?: Error) {
+        super(message);
+    }
+}
+
+
+/**
  * @description Recipe Manager interface
  */ 
 export interface RecipeManagerIntf {
@@ -15,6 +26,7 @@ export interface RecipeManagerIntf {
      * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map<string, any>} [parameters] - List of values to pass to the recipe
      * @returns {Promise<Array<Data | DataCollectionStatisticsIntf> | DataMatrixIntf | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @throws {RecipeManagerError}
      * @async
      * @public
      */
@@ -26,6 +38,7 @@ export interface RecipeManagerIntf {
      *    - Step 2. Clean the given datasets
      * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map<string, any>} [parameters] - List of values to pass to the recipe
+     * @throws {RecipeManagerError}
      * @public
      */
     clean(alias: string, parameters?: Map<string, any>): void;
