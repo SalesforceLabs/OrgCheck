@@ -19,7 +19,7 @@
     "@oclif/plugin-command-snapshot": "^5.2.3",
     "@salesforce/cli-plugins-testkit": "^5.3.20",
     "@salesforce/dev-scripts": "^11",
-    "eslint": "^8.57.0",
+    "eslint": "^10.1.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-sf-plugin": "^1.18.8",
     "eslint-plugin-unicorn": "50.0.1",
