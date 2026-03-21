@@ -26,7 +26,11 @@ export class DatasetInternalActiveUsers implements Dataset {
                     'FROM User ' +
                     'WHERE IsActive = true ' + // we only want active users
                     'AND ContactId = NULL ' + // only internal users
-                    'AND Profile.Id != NULL ' // we do not want the Automated Process users!
+                    'AND Profile.Id != NULL ' + // we do not want the Automated Process users!
+                    `AND Profile.UserLicense.LicenseDefinitionKey IN ('SFDC','AUL','AUL1','AUL_LIGHT',` +
+                        `'FDC_ONE','FDC_SUB','PID_FDC_FREE','PID_CHATTER','PID_CONTENT','PID_KNOWLEDGE',`+
+                        `'PID_IDEAS','PID_Identity_User') `
+                    // see https://developer.salesforce.com/docs/atlas.en-us.260.0.object_reference.meta/object_reference/sforce_api_objects_userlicense.htm
         }, {
             string: 'SELECT Id, AssigneeId, PermissionSetId, PermissionSet.IsOwnedByProfile, ' +
                         'PermissionSet.PermissionsModifyAllData, ' +
