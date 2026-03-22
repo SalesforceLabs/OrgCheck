@@ -1,8 +1,25 @@
 const jsforce: any = jest.mock('jsforce');
 
-let nbRecordsSoFarForCustomQueryMore = 0;
+let orgcheck_nbRecordsSoFarForCustomQueryMore = 0;
+let orgcheck_isProduction = true;
 
 const __queryMock = jest.fn(async function (soql: string) {
+
+  // Simulate that we are in an org which has information in this table
+  if (soql.includes(' FROM Organization LIMIT 1')) {
+    return {
+      records: [{
+        Id: '00D00000000TEST', 
+        Name: 'Test', 
+        IsSandbox: false, 
+        OrganizationType: orgcheck_isProduction === true ? 'Production' : 'Sandbox',
+        TrialExpirationDate: null, 
+        NamespacePrefix: 'test'
+      }],
+      totalSize: 1,
+      totalFetched: 1
+    };
+  }
 
   // If the Query contains a wait instruction, we wait the specified time before returning the result. This is useful to test the timeout of the API calls.
   const matchWait: any = soql.match("#Wait=(?<wait>[0-9]*)#");
@@ -33,12 +50,12 @@ const __queryMock = jest.fn(async function (soql: string) {
         throw new Error('This entity does not support query more');
     }
     let realSize: number;
-    if (nbRecordsSoFarForCustomQueryMore + maxNbRecords > nbTotalRecords) {
-      realSize = nbTotalRecords - nbRecordsSoFarForCustomQueryMore;
-      nbRecordsSoFarForCustomQueryMore = 0;
+    if (orgcheck_nbRecordsSoFarForCustomQueryMore + maxNbRecords > nbTotalRecords) {
+      realSize = nbTotalRecords - orgcheck_nbRecordsSoFarForCustomQueryMore;
+      orgcheck_nbRecordsSoFarForCustomQueryMore = 0;
     } else {
       realSize = maxNbRecords;
-      nbRecordsSoFarForCustomQueryMore += maxNbRecords;
+      orgcheck_nbRecordsSoFarForCustomQueryMore += maxNbRecords;
     }
     const records: any[] = [];
     for (let i = 0; i < realSize; i++) {
@@ -146,20 +163,21 @@ const __metadata_readMock = jest.fn(function (type: string, members: string[]) {
 
 jsforce.Connection = jest.fn().mockImplementation(() => {
   return {
+    setOrgType: (isProduction: boolean) => { orgcheck_isProduction = isProduction},
+    query: __queryMock,
+    queryMore: __queryMoreMock,
+    request: __requestMock,
+    describeGlobal: __describeGlobalMock,
+    describeMock: __describeMock,
+    metadata: {
+      list: __metadata_listMock,
+      read: __metadata_readMock
+    },
+    tooling: {
       query: __queryMock,
       queryMore: __queryMoreMock,
-      request: __requestMock,
-      describeGlobal: __describeGlobalMock,
-      describeMock: __describeMock,
-      metadata: {
-        list: __metadata_listMock,
-        read: __metadata_readMock
-      },
-      tooling: {
-        query: __queryMock,
-        queryMore: __queryMoreMock,
-        request: __requestMock
-      }
+      request: __requestMock
+    }
   };
 });
 

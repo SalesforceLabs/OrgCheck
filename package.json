@@ -1,5 +1,10 @@
 {
     "name": "orgcheck",
+    "resolutions": {
+        "@typescript-eslint/parser": "^8.56.0",
+        "@typescript-eslint/scope-manager": "^8.56.0",
+        "@typescript-eslint/eslint-plugin": "^8.56.0"
+    },
     "description": "Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt.",
     "version": "8.0.0",
     "author": "VinceFINET",

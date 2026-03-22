@@ -18,7 +18,11 @@ export default class CheckPackages extends SfCommand<OrgCheckSfPluginOutput<Sfdc
   
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
-    'verbose': Flags.boolean()
+    'verbose': Flags.boolean(),
+    'accept-the-terms': Flags.boolean({ 
+      char: 'y',
+      summary: OrgCheckSfPluginMessages.getMessage('flags.accept-the-terms.summary')
+    }),
   }
 
   public async run(): Promise<OrgCheckSfPluginOutput<SfdcPackage[]>> {
@@ -32,6 +36,13 @@ export default class CheckPackages extends SfCommand<OrgCheckSfPluginOutput<Sfdc
       storage: storageSetup, 
       logSettings: loggerSetup 
     });
+    if (await orgcheckApi.checkUsageTerms() === false) {
+      if (flags['accept-the-terms'] === true) {
+        orgcheckApi.acceptUsageTermsManually();
+      } else {
+        throw new Error('Ooppps');
+      }
+    }
     const results = (await orgcheckApi.getPackages()) ?? [];
     return OrgCheckSfPluginGenerateOutput('packages', orgcheckApi, results);
   }

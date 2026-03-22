@@ -257,6 +257,7 @@ export class API implements ApiIntf {
      * @public
      */
     public async getOrganizationInformation(): Promise<SfdcOrganization> {
+        // DO NOT CALL _throwExceptionIfUsageTermsNotAccepted
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.ORGANIZATION));
     }
@@ -274,6 +275,16 @@ export class API implements ApiIntf {
             return false;
         }
         return true;
+    }
+
+    /**
+     * @description Internal method to check the acceptance of the terms before actually run any recipies
+     * @throws Error if usage is not accepted
+     */
+    private async _throwExceptionIfUsageTermsNotAccepted() {
+        if (await this.checkUsageTerms() === false) {
+            throw new Error(`You must accept the usage terms before using Org CHeck in this environment.`);
+        }
     }
 
     /**
@@ -301,6 +312,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async checkCurrentUserPermissions(): Promise<boolean> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         const /** @type {Map} */ perms: Map = (await this._recipeManager.run(RecipeAliases.CURRENT_USER_PERMISSIONS, new Map([
             [OrgCheckGlobalParameter.SYSTEM_PERMISSIONS_LIST, [ 'ModifyAllData', 'AuthorApex', 'ApiEnabled', 'InstallPackaging' ]]
@@ -325,6 +338,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getPackages(): Promise<Array<SfdcPackage>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PACKAGES));
     }
@@ -348,6 +363,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getPageLayouts(namespace: string, sobjectType: string, sobject: string): Promise<Array<SfdcPageLayout>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PAGE_LAYOUTS, new Map([
             [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
@@ -372,6 +389,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getObjectTypes(): Promise<Array<SfdcObjectType>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.OBJECT_TYPES));
     }
@@ -386,6 +405,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getObjects(namespace: string, sobjectType: string): Promise<Array<SfdcObject>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.OBJECTS, new Map([
             [OrgCheckGlobalParameter.PACKAGE_NAME, namespace],
@@ -410,6 +431,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getObject(sobject: string): Promise<SfdcObject> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.OBJECT, new Map([
             [OrgCheckGlobalParameter.SOBJECT_NAME, sobject]
@@ -434,6 +457,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getObjectPermissionsPerParent(namespace: string): Promise<DataMatrixIntf> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.OBJECT_PERMISSIONS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -457,6 +482,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getApplicationPermissionsPerParent(namespace: string): Promise<DataMatrixIntf> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.APP_PERMISSIONS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -479,6 +506,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getKnowledgeArticles(): Promise<Array<SfdcKnowledgeArticle>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.KNOWLEDGE_ARTICLES));
     }
@@ -499,6 +528,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getChatterGroups(): Promise<Array<SfdcCollaborationGroup>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.COLLABORATION_GROUPS));
     }
@@ -522,6 +553,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getCustomFields(namespace: string, sobjectType: string, sobject: string): Promise<Array<SfdcField>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.CUSTOM_FIELDS, new Map([
             [OrgCheckGlobalParameter.PACKAGE_NAME, namespace], 
@@ -547,6 +580,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getPermissionSets(namespace: string): Promise<Array<SfdcPermissionSet>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PERMISSION_SETS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -569,6 +604,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getPermissionSetLicenses(): Promise<Array<SfdcPermissionSetLicense>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PERMISSION_SET_LICENSES));
     }
@@ -590,6 +627,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getProfiles(namespace?: string): Promise<Array<SfdcProfile>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PROFILES, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -613,6 +652,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getProfileRestrictions(namespace: string): Promise<Array<SfdcProfileRestrictions>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PROFILE_RESTRICTIONS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -635,6 +676,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getProfilePasswordPolicies(): Promise<Array<SfdcProfilePasswordPolicy>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PROFILE_PWD_POLICIES));
     }
@@ -655,6 +698,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getActiveUsers(): Promise<Array<SfdcUser>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.INTERNAL_ACTIVE_USERS));
     }
@@ -675,6 +720,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getBrowsers(): Promise<Array<SfdcBrowser>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.BROWSERS));
     }
@@ -696,6 +743,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getCustomLabels(namespace: string): Promise<Array<SfdcCustomLabel>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.CUSTOM_LABELS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -719,6 +768,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getCustomTabs(namespace: string): Promise<Array<SfdcCustomTab>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.CUSTOM_TABS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -742,6 +793,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getDocuments(namespace: string): Promise<Array<SfdcDocument>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.DOCUMENTS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -765,6 +818,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getLightningWebComponents(namespace: string): Promise<Array<SfdcLightningWebComponent>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.LIGHTNING_WEB_COMPONENTS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -788,6 +843,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getLightningAuraComponents(namespace: string): Promise<Array<SfdcLightningAuraComponent>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.LIGHTNING_AURA_COMPONENTS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -811,6 +868,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getLightningPages(namespace: string): Promise<Array<SfdcLightningPage>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.LIGHTNING_PAGES, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -834,6 +893,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getVisualForceComponents(namespace: string): Promise<Array<SfdcVisualForceComponent>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.VISUALFORCE_COMPONENTS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -857,6 +918,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getVisualForcePages(namespace: string): Promise<Array<SfdcVisualForcePage>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.VISUALFORCE_PAGES, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -879,6 +942,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getPublicGroups(): Promise<Array<SfdcGroup>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PUBLIC_GROUPS));
     }
@@ -899,6 +964,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getQueues(): Promise<Array<SfdcGroup>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.QUEUES));
     }
@@ -920,6 +987,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getApexClasses(namespace: string): Promise<Array<SfdcApexClass>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.APEX_CLASSES, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -943,6 +1012,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getApexTests(namespace: string): Promise<Array<SfdcApexClass>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.APEX_TESTS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -966,6 +1037,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getApexUncompiled(namespace: string): Promise<Array<SfdcApexClass>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.APEX_UNCOMPILED, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -989,6 +1062,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getApexTriggers(namespace: string): Promise<Array<SfdcApexTrigger>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.APEX_TRIGGERS, new Map([
             [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
@@ -1011,6 +1086,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getRoles(): Promise<Array<SfdcUserRole>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.USER_ROLES));
     }
@@ -1076,6 +1153,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getStaticResources(namespace: string): Promise<Array<SfdcStaticResource>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.STATIC_RESOURCES, new Map([
             [OrgCheckGlobalParameter.PACKAGE_NAME, namespace]
@@ -1101,6 +1180,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getWeblinks(namespace?: string, sobjectType?: string, sobject?: string): Promise<Array<SfdcWebLink>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.WEBLINKS, new Map([
             [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
@@ -1125,6 +1206,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getWorkflows(): Promise<Array<SfdcWorkflow>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.WORKFLOWS));
     }
@@ -1197,6 +1280,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getFlows(): Promise<Array<SfdcFlow>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.FLOWS));
     }
@@ -1218,6 +1303,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getEmailTemplates(namespace: string): Promise<Array<SfdcEmailTemplate>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.EMAIL_TEMPLATES, new Map([
             [OrgCheckGlobalParameter.PACKAGE_NAME, namespace]
@@ -1240,6 +1327,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getHomePageComponents(): Promise<Array<SfdcHomePageComponent>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.HOME_PAGE_COMPONENTS));
     }
@@ -1260,6 +1349,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getProcessBuilders(): Promise<Array<SfdcFlow>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PROCESS_BUILDERS));
     }
@@ -1283,6 +1374,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getValidationRules(namespace: string, sobjectType: string, sobject: string): Promise<Array<SfdcValidationRule>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.VALIDATION_RULES, new Map([
             [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
@@ -1307,6 +1400,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getDashboards(): Promise<Array<SfdcDashboard>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.DASHBOARDS));
     }
@@ -1327,6 +1422,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getReports(): Promise<Array<SfdcReport>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.REPORTS));
     }
@@ -1347,6 +1444,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getGlobalView(): Promise<Array<DataCollectionStatisticsIntf>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.GLOBAL_VIEW));
     }
@@ -1367,6 +1466,8 @@ export class API implements ApiIntf {
      * @public
      */
     public async getHardcodedURLsView(): Promise<Array<DataCollectionStatisticsIntf>> {
+        // Check if usage terms were accepted
+        await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.HARDCODED_URLS_VIEW));
     }

@@ -19,6 +19,10 @@ export default class CheckCustomTabs extends SfCommand<OrgCheckSfPluginOutput<Sf
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
     'verbose': Flags.boolean(),
+    'accept-the-terms': Flags.boolean({ 
+      char: 'y',
+      summary: OrgCheckSfPluginMessages.getMessage('flags.accept-the-terms.summary')
+    }),
     'package': Flags.string({ 
       char: 'p',
       summary: OrgCheckSfPluginMessages.getMessage('flags.package.summary')
@@ -36,6 +40,13 @@ export default class CheckCustomTabs extends SfCommand<OrgCheckSfPluginOutput<Sf
       storage: storageSetup, 
       logSettings: loggerSetup 
     });
+    if (await orgcheckApi.checkUsageTerms() === false) {
+      if (flags['accept-the-terms'] === true) {
+        orgcheckApi.acceptUsageTermsManually();
+      } else {
+        throw new Error('Ooppps');
+      }
+    }
     const results = (await orgcheckApi.getCustomTabs(flags.package)) ?? [];
     return OrgCheckSfPluginGenerateOutput('custom-tabs', orgcheckApi, results);
   }

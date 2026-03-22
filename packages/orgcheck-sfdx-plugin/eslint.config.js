@@ -17,7 +17,7 @@ export default [
   },
   ...compat.extends(
     'eslint-config-salesforce-typescript',
-    'plugin:sf-plugin/recommended',
+    // 'plugin:sf-plugin/recommended' - incompatible with ESLint 10
     'eslint-config-prettier'
   ),
   {

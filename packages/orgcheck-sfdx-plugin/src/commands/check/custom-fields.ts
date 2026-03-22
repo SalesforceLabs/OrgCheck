@@ -19,6 +19,10 @@ export default class CheckCustomFields extends SfCommand<OrgCheckSfPluginOutput<
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
     'verbose': Flags.boolean(),
+    'accept-the-terms': Flags.boolean({ 
+      char: 'y',
+      summary: OrgCheckSfPluginMessages.getMessage('flags.accept-the-terms.summary')
+    }),
     'package': Flags.string({ 
       char: 'p',
       summary: OrgCheckSfPluginMessages.getMessage('flags.package.summary')
@@ -44,6 +48,13 @@ export default class CheckCustomFields extends SfCommand<OrgCheckSfPluginOutput<
       storage: storageSetup, 
       logSettings: loggerSetup 
     });
+    if (await orgcheckApi.checkUsageTerms() === false) {
+      if (flags['accept-the-terms'] === true) {
+        orgcheckApi.acceptUsageTermsManually();
+      } else {
+        throw new Error('Ooppps');
+      }
+    }
     const results = (await orgcheckApi.getCustomFields(flags.package, flags['sobject-type'], flags.sobject)) ?? [];
     return OrgCheckSfPluginGenerateOutput('custom-fields', orgcheckApi, results);
   }

@@ -18,7 +18,11 @@ export default class CheckCollaborationGroups extends SfCommand<OrgCheckSfPlugin
   
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
-    'verbose': Flags.boolean()
+    'verbose': Flags.boolean(),
+    'accept-the-terms': Flags.boolean({ 
+      char: 'y',
+      summary: OrgCheckSfPluginMessages.getMessage('flags.accept-the-terms.summary')
+    }),
   }
 
   public async run(): Promise<OrgCheckSfPluginOutput<SfdcCollaborationGroup[]>> {
@@ -32,6 +36,13 @@ export default class CheckCollaborationGroups extends SfCommand<OrgCheckSfPlugin
       storage: storageSetup, 
       logSettings: loggerSetup 
     });
+    if (await orgcheckApi.checkUsageTerms() === false) {
+      if (flags['accept-the-terms'] === true) {
+        orgcheckApi.acceptUsageTermsManually();
+      } else {
+        throw new Error('Ooppps');
+      }
+    }
     const results = (await orgcheckApi.getChatterGroups()) ?? [];
     return OrgCheckSfPluginGenerateOutput('collaboration-groups', orgcheckApi, results);
   }

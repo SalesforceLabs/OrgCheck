@@ -8,12 +8,17 @@ describe('tests.api.API', () => {
     globalThis.jsforce = jsforce;
     globalThis.fflate = fflate;
 
-    it('should be instantiable and usable', async () => {
+    it('should be instantiable and usable in production', async () => {
       let hadError = false;
       let err;
       try {
         const api = createAPIforUnitTests();
         expect(api).not.toBeNull();
+        // by default the jest jsforce is a production org
+        expect(await api.checkUsageTerms()).toBeFalsy(); // so terms should be not initially accepted
+        api.acceptUsageTermsManually(); // accept them manually
+        expect(await api.checkUsageTerms()).toBeTruthy(); // now it should be good
+        // let's try this getters!.....
         await api.getActiveUsers();
         api.getAllScoreRulesAsDataMatrix();
         await api.getApexClasses();
@@ -81,6 +86,19 @@ describe('tests.api.API', () => {
 
       // We don't really care but this should be logically false
       expect(api.wereUsageTermsAcceptedManually()).toBeFalsy();
+
+      // Trying to call a getter and it should not fail
+      let hadError = false;
+      let err;
+      try {
+        await api.getActiveUsers();
+      } catch(error) {
+        hadError = true;
+        err = error;
+        console.error(error);
+      }
+      expect(hadError).toBe(false);
+      expect(err).not.toBeDefined();
     });
 
     it('should set the terms to not accepted because org is a production', async () => {
@@ -97,6 +115,21 @@ describe('tests.api.API', () => {
       // We did not manually approved yet the terms, so should be false
       expect(api.wereUsageTermsAcceptedManually()).toBeFalsy(); 
 
+
+      // Trying to call a getter at this point and it SHOULD fail
+      let hadError = false;
+      let err;
+      try {
+        await api.getActiveUsers();
+      } catch(error) {
+        hadError = true;
+        err = error;
+        console.error(error);
+      }
+      expect(hadError).toBe(true);
+      expect(err).toBeDefined();
+      expect(err.message).toBe('You must accept the usage terms before using Org CHeck in this environment.');
+
       // We then accept the terms explicitely
       api.acceptUsageTermsManually();
 
@@ -106,6 +139,18 @@ describe('tests.api.API', () => {
       // Finally checking back the terms, should be true
       expect(await api.checkUsageTerms()).toBeTruthy();
 
+      // Trying to call a getter and it should not fail
+      hadError = false;
+      err = undefined;
+      try {
+        await api.getActiveUsers();
+      } catch(error) {
+        hadError = true;
+        err = error;
+        console.error(error);
+      }
+      expect(hadError).toBe(false);
+      expect(err).not.toBeDefined();
     });
   });
 });

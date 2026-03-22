@@ -14,6 +14,11 @@ describe('tests.orgcheck.bundled', () => {
       try {
         const api = createAPIforBundeledTests();
         expect(api).not.toBeNull();
+        // by default the jest jsforce is a production org
+        expect(await api.checkUsageTerms()).toBeFalsy(); // so terms should be not initially accepted
+        api.acceptUsageTermsManually(); // accept them manually
+        expect(await api.checkUsageTerms()).toBeTruthy(); // now it should be good
+        // let's try this getters!.....
         await api.getActiveUsers();
         api.getAllScoreRulesAsDataMatrix();
         await api.getApexClasses();

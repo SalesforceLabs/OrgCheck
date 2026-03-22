@@ -1,3 +1,6 @@
+# flags.accept-the-terms.summary
+In production orgs, you need to explicitelly accept the terms before using Org Check in this environment.
+
 # flags.sobject.summary
 Filter by SObject API name
 
