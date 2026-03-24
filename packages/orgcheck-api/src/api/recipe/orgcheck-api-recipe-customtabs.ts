@@ -1,12 +1,10 @@
 import { Recipe } from 'src/api/core/orgcheck-api-recipe';
-import { Data } from 'src/api/core/orgcheck-api-data';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { SfdcCustomTab }from 'src/api/data/orgcheck-api-data-customtab';
 
-export class RecipeCustomTabs implements Recipe {
+export class RecipeCustomTabs implements Recipe<SfdcCustomTab[]> {
 
     /**
      * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
@@ -24,14 +22,14 @@ export class RecipeCustomTabs implements Recipe {
      * @description transform the data from the datasets and return the final result as a Map
      * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} _logger - Logger
-     * @returns {Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<SfdcCustomTab[]>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
+    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<SfdcCustomTab[]> {
 
         // Get data
-        const /** @type {Map<string, SfdcCustomTab>} */ pages: Map<string, SfdcCustomTab> = data.get(DatasetAliases.CUSTOMTABS);
+        const pages: Map<string, SfdcCustomTab> = data.get(DatasetAliases.CUSTOMTABS);
 
         // Checking data
         if (!pages) throw new Error(`RecipeCustomTabs: Data from dataset alias 'CUSTOMTABS' was undefined.`);

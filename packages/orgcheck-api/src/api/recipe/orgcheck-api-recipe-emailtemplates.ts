@@ -1,14 +1,12 @@
 import { Recipe } from 'src/api/core/orgcheck-api-recipe';
-import { Data } from 'src/api/core/orgcheck-api-data';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { SfdcEmailTemplate }from 'src/api/data/orgcheck-api-data-emailtemplate';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
-export class RecipeEmailTemplates implements Recipe {
+export class RecipeEmailTemplates implements Recipe<SfdcEmailTemplate[]> {
 
     /**
      * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
@@ -25,23 +23,22 @@ export class RecipeEmailTemplates implements Recipe {
      * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} _logger - Logger
      * @param {Map<string, any>} [parameters] - List of optional argument to pass
-     * @returns {Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<SfdcEmailTemplate[]>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
+    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<SfdcEmailTemplate[]> {
 
         // Get data and parameters
-        const /** @type {Map<string, SfdcEmailTemplate>} */ emailTemplates: Map<string, SfdcEmailTemplate> = data.get(DatasetAliases.EMAILTEMPLATES);
+        const emailTemplates: Map<string, SfdcEmailTemplate> = data.get(DatasetAliases.EMAILTEMPLATES);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
         if (!emailTemplates) throw new Error(`RecipeDocuments: Data from dataset alias 'EMAILTEMPLATES' was undefined.`);
 
         // Filter data
-        /** @type {Array<SfdcEmailTemplate>} */
         const array: Array<SfdcEmailTemplate> = [];
-        await Processor.forEach(emailTemplates, async (/** @type {SfdcEmailTemplate} */ emailTemplate: SfdcEmailTemplate) => {
+        await Processor.forEach(emailTemplates, async (emailTemplate: SfdcEmailTemplate) => {
             if (namespace === OrgCheckGlobalParameter.ALL_VALUES || emailTemplate.package === namespace) {
                 array.push(emailTemplate);
             }

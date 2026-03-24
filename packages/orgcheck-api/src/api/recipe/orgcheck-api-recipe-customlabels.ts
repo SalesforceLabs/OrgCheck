@@ -1,14 +1,12 @@
 import { Recipe } from 'src/api/core/orgcheck-api-recipe';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
-import { Data } from 'src/api/core/orgcheck-api-data';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
 import { SfdcCustomLabel }from 'src/api/data/orgcheck-api-data-customlabel';
-import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
-export class RecipeCustomLabels implements Recipe {
+export class RecipeCustomLabels implements Recipe<SfdcCustomLabel[]> {
 
     /**
      * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
@@ -25,23 +23,22 @@ export class RecipeCustomLabels implements Recipe {
      * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} _logger - Logger
      * @param {Map<string, any>} [parameters] - List of optional argument to pass
-     * @returns {Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<SfdcCustomLabel[]>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
+    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<SfdcCustomLabel[]> {
 
         // Get data and parameters
-        const /** @type {Map<string, SfdcCustomLabel>} */ customLabels: Map<string, SfdcCustomLabel> = data.get(DatasetAliases.CUSTOMLABELS);
+        const customLabels: Map<string, SfdcCustomLabel> = data.get(DatasetAliases.CUSTOMLABELS);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
         if (!customLabels) throw new Error(`RecipeCustomLabels: Data from dataset alias 'CUSTOMLABELS' was undefined.`);
 
         // Filter data
-        /** @type {Array<SfdcCustomLabel>} */
         const array: Array<SfdcCustomLabel> = [];
-        await Processor.forEach(customLabels, async (/** @type {SfdcCustomLabel} */ customLabel: SfdcCustomLabel) => {
+        await Processor.forEach(customLabels, async (customLabel: SfdcCustomLabel) => {
             if (namespace === OrgCheckGlobalParameter.ALL_VALUES || customLabel.package === namespace) {
                 array.push(customLabel);
             }

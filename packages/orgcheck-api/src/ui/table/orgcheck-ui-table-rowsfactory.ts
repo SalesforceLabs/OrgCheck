@@ -46,13 +46,13 @@ export class RowsFactory {
 
     /**
      * @description Sort table
-     * @param {Table} tableDefintion - Definition of the table
+     * @param {Table} tableDefinition - Definition of the table
      * @param {Array<Row>} rows - List of rows
      * @param {number} columnIndex - Index of the column to sort
      * @param {SortOrder} order - Sort order, can be ASC or DESC
      */ 
-    static sort(tableDefintion: Table, rows: Array<Row>,  columnIndex: number, order: SortOrder) {
-        const column = tableDefintion.columns[columnIndex];
+    static sort(tableDefinition: Table, rows: Array<Row>,  columnIndex: number, order: SortOrder) {
+        const column = tableDefinition.columns[columnIndex];
         if (! column) return;
         const iOrder = order === SortOrder.ASC ? 1 : -1;
         const isIterative = column.type == ColumnType.OBJS || column.type == ColumnType.TXTS || column.type == ColumnType.URLS;
@@ -106,18 +106,18 @@ export class RowsFactory {
 
     /**
      * @description Export table
-     * @param {Table} tableDefintion - Definition of the table
+     * @param {Table} tableDefinition - Definition of the table
      * @param {Array<Row>} rows - List of rows
      * @param {string} title - Title of the exported table
      * @returns {ExportedTable} Exported table
      */ 
-    static export(tableDefintion: Table, rows: Array<Row>, title: string): ExportedTable {
+    static export(tableDefinition: Table, rows: Array<Row>, title: string): ExportedTable {
 
         /** @type {ExportedTable} */
         const exportedRows: ExportedTable = { header: title, columns: [], rows: [] };
 
         // Parsing columns
-        tableDefintion.columns.forEach((column) => {
+        tableDefinition.columns.forEach((column) => {
             switch(column.type) {
                 //---
                 // In case we have a score column, then we want two things (instead of only one)
@@ -189,15 +189,15 @@ export class RowsFactory {
 
     /**
      * @description Export table
-     * @param {Table} tableDefintion - Definition of the table
+     * @param {Table} tableDefinition - Definition of the table
      * @param {Array<any>} records - List of records
      * @param {string} title - Title of the exported table
      * @returns {ExportedTable} Exported table
      */ 
-    static createAndExport(tableDefintion: Table, records: Array<any>, title: string): ExportedTable {
+    static createAndExport(tableDefinition: Table, records: Array<any>, title: string): ExportedTable {
         const donothing = () => {};
-        const rows = RowsFactory.create(tableDefintion, records, donothing, donothing);
-        return RowsFactory.export(tableDefintion, rows, title);
+        const rows = RowsFactory.create(tableDefinition, records, donothing, donothing);
+        return RowsFactory.export(tableDefinition, rows, title);
     }
 }
 

@@ -1,7 +1,5 @@
 import { Recipe } from 'src/api/core/orgcheck-api-recipe';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
-import { Data } from 'src/api/core/orgcheck-api-data';
-import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
@@ -9,7 +7,7 @@ import { SfdcProfile }from 'src/api/data/orgcheck-api-data-profile';
 import { SfdcProfileRestrictions }from 'src/api/data/orgcheck-api-data-profilerestrictions';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
-export class RecipeProfileRestrictions implements Recipe {
+export class RecipeProfileRestrictions implements Recipe<SfdcProfileRestrictions[]> {
 
     /**
      * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
@@ -29,15 +27,15 @@ export class RecipeProfileRestrictions implements Recipe {
      * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} _logger - Logger
      * @param {Map<string, any>} [parameters] - List of optional argument to pass
-     * @returns {Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<SfdcProfileRestrictions[]>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
+    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<SfdcProfileRestrictions[]> {
 
         // Get data and parameters
-        const /** @type {Map<string, SfdcProfile>} */ profiles: Map<string, SfdcProfile> = data.get(DatasetAliases.PROFILES);
-        const /** @type {Map<string, SfdcProfileRestrictions>} */ profileRestrictions: Map<string, SfdcProfileRestrictions> = data.get(DatasetAliases.PROFILERESTRICTIONS);
+        const profiles: Map<string, SfdcProfile> = data.get(DatasetAliases.PROFILES);
+        const profileRestrictions: Map<string, SfdcProfileRestrictions> = data.get(DatasetAliases.PROFILERESTRICTIONS);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
@@ -45,9 +43,8 @@ export class RecipeProfileRestrictions implements Recipe {
         if (!profileRestrictions) throw new Error(`RecipeProfileRestrictions: Data from dataset alias 'PROFILERESTRICTIONS' was undefined.`);
 
         // Augment and Filter data
-        /** @type {Array<SfdcProfileRestrictions>} */
         const array: Array<SfdcProfileRestrictions> = [];
-        await Processor.forEach(profileRestrictions, async (/** @type {SfdcProfileRestrictions} */ restriction: SfdcProfileRestrictions) => {
+        await Processor.forEach(profileRestrictions, async (restriction: SfdcProfileRestrictions) => {
             // Augment data
             const profileRef = profiles.get(restriction.profileId);
             if (profileRef) {

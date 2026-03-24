@@ -1,14 +1,12 @@
 import { Recipe } from 'src/api/core/orgcheck-api-recipe';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
-import { Data } from 'src/api/core/orgcheck-api-data';
-import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
 import { SfdcVisualForceComponent }from 'src/api/data/orgcheck-api-data-visualforcecomponent';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
-export class RecipeVisualForceComponents implements Recipe {
+export class RecipeVisualForceComponents implements Recipe<SfdcVisualForceComponent[]> {
 
     /**
      * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
@@ -25,23 +23,23 @@ export class RecipeVisualForceComponents implements Recipe {
      * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} _logger - Logger
      * @param {Map<string, any>} [parameters] - List of optional argument to pass
-     * @returns {Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<SfdcVisualForceComponent[]>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
+    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<SfdcVisualForceComponent[]> {
 
         // Get data and parameters
-        const /** @type {Map<string, SfdcVisualForceComponent>} */ components: Map<string, SfdcVisualForceComponent> = data.get(DatasetAliases.VISUALFORCECOMPONENTS);
+        const components: Map<string, SfdcVisualForceComponent> = data.get(DatasetAliases.VISUALFORCECOMPONENTS);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
         if (!components) throw new Error(`RecipeVisualForceComponents: Data from dataset alias 'VISUALFORCECOMPONENTS' was undefined.`);
 
         // Filter data
-        /** @type {Array<SfdcVisualForceComponent>} */ 
+        
         const array: Array<SfdcVisualForceComponent> = [];
-        await Processor.forEach(components, async (/** @type {SfdcVisualForceComponent} */ component: SfdcVisualForceComponent) => {
+        await Processor.forEach(components, async (component: SfdcVisualForceComponent) => {
             if (namespace === OrgCheckGlobalParameter.ALL_VALUES || component.package === namespace) {
                 array.push(component);
             }

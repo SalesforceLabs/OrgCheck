@@ -4,7 +4,6 @@ import { DatasetManagerIntf } from 'src/api/core/orgcheck-api-datasetmanager';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { LoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
-import { Recipe } from 'src/api/core/orgcheck-api-recipe';
 import { RecipeAliases } from 'src/api/core/orgcheck-api-recipes-aliases';
 import { RecipeApexClasses, RecipeApexTests, RecipeApexUncompiled } from 'src/api/recipe/orgcheck-api-recipe-apexclasses';
 import { RecipeApexTriggers } from 'src/api/recipe/orgcheck-api-recipe-apextriggers';
@@ -29,7 +28,7 @@ import { RecipeKnowledgeArticles } from 'src/api/recipe/orgcheck-api-recipe-know
 import { RecipeLightningAuraComponents } from 'src/api/recipe/orgcheck-api-recipe-lightningauracomponents';
 import { RecipeLightningPages } from 'src/api/recipe/orgcheck-api-recipe-lightningpages';
 import { RecipeLightningWebComponents } from 'src/api/recipe/orgcheck-api-recipe-lightningwebcomponents';
-import { RecipeManagerError, RecipeManagerIntf } from 'src/api/core/orgcheck-api-recipemanager';
+import { AnyRecipe, AnyRecipeCollectionData, AnyRecipeData, RecipeManagerError, RecipeManagerIntf } from 'src/api/core/orgcheck-api-recipemanager';
 import { RecipeObject } from 'src/api/recipe/orgcheck-api-recipe-object';
 import { RecipeObjectPermissions } from 'src/api/recipe/orgcheck-api-recipe-objectpermissions';
 import { RecipeObjects } from 'src/api/recipe/orgcheck-api-recipe-objects';
@@ -69,10 +68,10 @@ export class RecipeManager implements RecipeManagerIntf {
 
     /**
      * @description Map of recipes given their alias.
-     * @type {Map<string, Recipe>}
+     * @type {Map<string, AnyRecipe>}
      * @private
      */
-    private _recipes: Map<string, Recipe>;
+    private _recipes: Map<string, AnyRecipe>;
 
     /**
      * @description Map of recipe collections given their alias.
@@ -97,7 +96,7 @@ export class RecipeManager implements RecipeManagerIntf {
 
         this._datasetManager = datasetManager;
         this._logger = logger;
-        this._recipes = new Map<string, Recipe>();
+        this._recipes = new Map<string, AnyRecipe>();
         this._recipeCollections = new Map<string, RecipeCollection>();
 
         // Recipes
@@ -157,12 +156,12 @@ export class RecipeManager implements RecipeManagerIntf {
      * @description Runs a designated recipe (by its alias)
      * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map<string, any>} [parameters] List of values to pass to the recipe
-     * @returns {Promise<Array<Data | DataCollectionStatisticsIntf> | DataMatrixIntf | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<AnyRecipeData | AnyRecipeCollectionData>} Returns as it is the value returned by the transform method recipe.
      * @throws {RecipeManagerError}
      * @async
      * @public
      */
-    public async run(alias: string, parameters: Map<string, any>): Promise<Array<Data | DataCollectionStatisticsIntf> | DataMatrixIntf | Data | Map<string, any>> {
+    public async run(alias: string, parameters: Map<string, any>): Promise<AnyRecipeData | AnyRecipeCollectionData> {
 
         if (this._recipes.has(alias)) {
             return await this._runRecipe(alias, parameters);
@@ -197,11 +196,11 @@ export class RecipeManager implements RecipeManagerIntf {
      *   - Step 3. Transform the retrieved data and return the final result as a Map
      * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map<string, any>} [parameters] List of values to pass to the recipe
-     * @returns {Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>>} Returns the value from the recipe or undefined if something bad happens
+     * @returns {Promise<AnyRecipeData>} Returns the value from the recipe or undefined if something bad happens
      * @throws {RecipeManagerError}
      * @async
      */
-    private async _runRecipe(alias: string, parameters: Map<string, any>): Promise<Array<Data > | DataMatrixIntf | Data | Map<string, any>> {
+    private async _runRecipe(alias: string, parameters: Map<string, any>): Promise<AnyRecipeData> {
 
         const section = `Run recipe "${alias}"`;
         const recipe = this._recipes.get(alias);
@@ -252,11 +251,11 @@ export class RecipeManager implements RecipeManagerIntf {
     /**
      * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map<string, any>} [parameters] - List of values to pass to the recipe
-     * @returns {Promise<Array<DataCollectionStatisticsIntf>>} Returns the value from the recipe collection or undefined if something bad happens.
+     * @returns {Promise<AnyRecipeCollectionData>} Returns the value from the recipe collection or undefined if something bad happens.
      * @throws {RecipeManagerError}
      * @async
      */
-    private async _runRecipeCollection(alias: string, parameters: Map<string, any>): Promise<Array<DataCollectionStatisticsIntf>> {
+    private async _runRecipeCollection(alias: string, parameters: Map<string, any>): Promise<AnyRecipeCollectionData> {
 
         const section = `Run recipe collection "${alias}"`;
         const recipeCollection = this._recipeCollections.get(alias);

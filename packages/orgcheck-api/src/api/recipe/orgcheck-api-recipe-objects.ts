@@ -1,7 +1,5 @@
 import { Recipe } from 'src/api/core/orgcheck-api-recipe';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
-import { Data } from 'src/api/core/orgcheck-api-data';
-import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
@@ -9,7 +7,7 @@ import { SfdcObject }from 'src/api/data/orgcheck-api-data-object';
 import { SfdcObjectType }from 'src/api/data/orgcheck-api-data-objecttype';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
-export class RecipeObjects implements Recipe {
+export class RecipeObjects implements Recipe<SfdcObject[]> {
 
     /**
      * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
@@ -26,15 +24,15 @@ export class RecipeObjects implements Recipe {
      * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} _logger - Logger
      * @param {Map<string, any>} [parameters] - List of optional argument to pass
-     * @returns {Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<SfdcObject[]>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
+    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<SfdcObject[]> {
 
         // Get data and parameters
-        const /** @type {Map<string, SfdcObjectType>} */ types: Map<string, SfdcObjectType> = data.get(DatasetAliases.OBJECTTYPES);
-        const /** @type {Map<string, SfdcObject>} */ objects: Map<string, SfdcObject> = data.get(DatasetAliases.OBJECTS);
+        const types: Map<string, SfdcObjectType> = data.get(DatasetAliases.OBJECTTYPES);
+        const objects: Map<string, SfdcObject> = data.get(DatasetAliases.OBJECTS);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
         const type = OrgCheckGlobalParameter.getSObjectTypeName(parameters);
 
@@ -43,9 +41,9 @@ export class RecipeObjects implements Recipe {
         if (!objects) throw new Error(`RecipeObjects: Data from dataset alias 'OBJECTS' was undefined.`);
 
         // Augment and Filter data
-        /** @type {Array<SfdcObject>} */ 
+        
         const array: Array<SfdcObject> = [];
-        await Processor.forEach(objects, async (/** @type {SfdcObject} */ object: SfdcObject) => {
+        await Processor.forEach(objects, async (object: SfdcObject) => {
             // Augment data
             const typeRef = types.get(object.typeId);
             if (typeRef) {

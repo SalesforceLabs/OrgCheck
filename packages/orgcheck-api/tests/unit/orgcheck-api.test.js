@@ -128,7 +128,7 @@ describe('tests.api.API', () => {
       }
       expect(hadError).toBe(true);
       expect(err).toBeDefined();
-      expect(err.message).toBe('You must accept the usage terms before using Org CHeck in this environment.');
+      expect(err.message).toBe('You must accept the usage terms before using Org Check in this environment.');
 
       // We then accept the terms explicitely
       api.acceptUsageTermsManually();

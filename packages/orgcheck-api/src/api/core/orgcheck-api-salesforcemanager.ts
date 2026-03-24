@@ -99,12 +99,19 @@ export class SalesforceError extends Error {
  */
 export interface SalesforceManagerIntf {
 
+    /** 
+     * @description Salesforce ID of the organization
+     * @type {string}
+     * @public
+     */
+    orgId: string;
+
     /**
      * @description Numerical representation of the Salesforce API used by the manager
      * @returns {number} API Version as a number
      * @public
      */
-    get apiVersion(): number;
+    apiVersion: number;
 
     /**
      * @description Make sure the given Salesforce Id is an ID15
@@ -139,7 +146,7 @@ export interface SalesforceManagerIntf {
      * @returns {SalesforceUsageInformationIntf} Information of the current usage of the Daily Request API
      * @public
      */
-    get dailyApiRequestLimitInformation(): SalesforceUsageInformationIntf;
+    dailyApiRequestLimitInformation: SalesforceUsageInformationIntf;
 
     /**
      * @description Method to call a list of SOQL queries (tooling or not)

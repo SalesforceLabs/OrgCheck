@@ -1,16 +1,14 @@
 import { Recipe } from 'src/api/core/orgcheck-api-recipe';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
-import { Data } from 'src/api/core/orgcheck-api-data';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { SfdcRecordType }from 'src/api/data/orgcheck-api-data-recordtype';
 import { SfdcObject }from 'src/api/data/orgcheck-api-data-object';
 import { SfdcObjectType }from 'src/api/data/orgcheck-api-data-objecttype';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
-export class RecipeRecordType implements Recipe {
+export class RecipeRecordType implements Recipe<SfdcRecordType[]> {
 
     /**
      * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
@@ -30,16 +28,16 @@ export class RecipeRecordType implements Recipe {
      * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} logger - Logger
      * @param {Map<string, any>} [parameters] - List of optional argument to pass
-     * @returns {Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<SfdcRecordType[]>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
+    async transform(data: Map<string, any>, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<SfdcRecordType[]> {
 
         // Get data and parameters
-        const /** @type {Map<string, SfdcRecordType>} */ recordTypes: Map<string, SfdcRecordType> = data.get(DatasetAliases.RECORDTYPES);
-        const /** @type {Map<string, SfdcObjectType>} */ types: Map<string, SfdcObjectType> = data.get(DatasetAliases.OBJECTTYPES);
-        const /** @type {Map<string, SfdcObject>} */ objects: Map<string, SfdcObject> = data.get(DatasetAliases.OBJECTS);
+        const recordTypes: Map<string, SfdcRecordType> = data.get(DatasetAliases.RECORDTYPES);
+        const types: Map<string, SfdcObjectType> = data.get(DatasetAliases.OBJECTTYPES);
+        const objects: Map<string, SfdcObject> = data.get(DatasetAliases.OBJECTS);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
         const objecttype = OrgCheckGlobalParameter.getSObjectTypeName(parameters);
         const object = OrgCheckGlobalParameter.getSObjectName(parameters);
@@ -51,9 +49,9 @@ export class RecipeRecordType implements Recipe {
         
 
         // Augment and filter data
-        /** @type {Array<SfdcRecordType>} */ 
+        
         const array: Array<SfdcRecordType> = [];
-        await Processor.forEach(recordTypes, async (/** @type {SfdcRecordType} */ recordType: SfdcRecordType) => {
+        await Processor.forEach(recordTypes, async (recordType: SfdcRecordType) => {
             // Augment data
             const objectRef = objects.get(recordType.objectId);
             if (objectRef) {

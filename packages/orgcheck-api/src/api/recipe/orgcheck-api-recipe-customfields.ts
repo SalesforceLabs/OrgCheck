@@ -1,16 +1,14 @@
 import { Recipe } from 'src/api/core/orgcheck-api-recipe';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
-import { Data } from 'src/api/core/orgcheck-api-data';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
 import { SfdcField }from 'src/api/data/orgcheck-api-data-field';
 import { SfdcObject }from 'src/api/data/orgcheck-api-data-object';
 import { SfdcObjectType }from 'src/api/data/orgcheck-api-data-objecttype';
-import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
-export class RecipeCustomFields implements Recipe {
+export class RecipeCustomFields implements Recipe<SfdcField[]> {
 
     /**
      * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
@@ -31,16 +29,16 @@ export class RecipeCustomFields implements Recipe {
      * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} logger - Logger
      * @param {Map<string, any>} [parameters] - List of optional argument to pass
-     * @returns {Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<SfdcField[]>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
+    async transform(data: Map<string, any>, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<SfdcField[]> {
 
         // Get data and parameters
-        const /** @type {Map<string, SfdcObjectType>} */ types: Map<string, SfdcObjectType> = data.get(DatasetAliases.OBJECTTYPES);
-        const /** @type {Map<string, SfdcObject>} */ objects: Map<string, SfdcObject> = data.get(DatasetAliases.OBJECTS);
-        const /** @type {Map<string, SfdcField>} */ customFields: Map<string, SfdcField> = data.get(DatasetAliases.CUSTOMFIELDS);
+        const types: Map<string, SfdcObjectType> = data.get(DatasetAliases.OBJECTTYPES);
+        const objects: Map<string, SfdcObject> = data.get(DatasetAliases.OBJECTS);
+        const customFields: Map<string, SfdcField> = data.get(DatasetAliases.CUSTOMFIELDS);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
         const objecttype = OrgCheckGlobalParameter.getSObjectTypeName(parameters);
         const object = OrgCheckGlobalParameter.getSObjectName(parameters);
@@ -51,9 +49,8 @@ export class RecipeCustomFields implements Recipe {
         if (!customFields) throw new Error(`RecipeCustomFields: Data from dataset alias 'CUSTOMFIELDS' was undefined.`);
 
         // Augment and filter data
-        /** @type {Array<SfdcField>} */
         const array: Array<SfdcField> = [];
-        await Processor.forEach(customFields, async (/** @type {SfdcField} */customField: SfdcField) => {
+        await Processor.forEach(customFields, async (customField: SfdcField) => {
             // Augment data
             const objectRef = objects.get(customField.objectId);
             if (objectRef) {

@@ -1,12 +1,10 @@
 import { Recipe } from 'src/api/core/orgcheck-api-recipe';
-import { Data } from 'src/api/core/orgcheck-api-data';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
 import { SfdcBrowser }from 'src/api/data/orgcheck-api-data-browser';
-import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 
-export class RecipeBrowsers implements Recipe {
+export class RecipeBrowsers implements Recipe<SfdcBrowser[]> {
 
     /**
      * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
@@ -22,14 +20,14 @@ export class RecipeBrowsers implements Recipe {
      * @description transform the data from the datasets and return the final result as a Map
      * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} _logger - Logger
-     * @returns {Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<SfdcBrowser[]>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
+    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<SfdcBrowser[]> {
 
         // Get data and parameters
-        const /** @type {Map<string, SfdcBrowser>} */ browsers: Map<string, SfdcBrowser> = data.get(DatasetAliases.BROWSERS);
+        const browsers: Map<string, SfdcBrowser> = data.get(DatasetAliases.BROWSERS);
 
         // Checking data
         if (!browsers) throw new Error(`RecipeBrowsers: Data from dataset alias 'BROWSERS' was undefined.`);

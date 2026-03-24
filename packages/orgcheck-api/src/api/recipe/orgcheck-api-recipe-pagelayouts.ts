@@ -1,16 +1,14 @@
 import { Recipe } from 'src/api/core/orgcheck-api-recipe';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
-import { Data } from 'src/api/core/orgcheck-api-data';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
 import { SfdcObject }from 'src/api/data/orgcheck-api-data-object';
 import { SfdcPageLayout }from 'src/api/data/orgcheck-api-data-pagelayout';
-import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { SfdcObjectType }from 'src/api/data/orgcheck-api-data-objecttype';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
-export class RecipePageLayouts implements Recipe {
+export class RecipePageLayouts implements Recipe<SfdcPageLayout[]> {
 
     /**
      * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
@@ -31,16 +29,16 @@ export class RecipePageLayouts implements Recipe {
      * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} _logger - Logger
      * @param {Map<string, any>} [parameters] - List of optional argument to pass
-     * @returns {Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<SfdcPageLayout[]>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
+    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<SfdcPageLayout[]> {
 
         // Get data and parameters
-        const /** @type {Map<string, SfdcPageLayout>} */ pageLayouts: Map<string, SfdcPageLayout> = data.get(DatasetAliases.PAGELAYOUTS);
-        const /** @type {Map<string, SfdcObjectType>} */ types: Map<string, SfdcObjectType> = data.get(DatasetAliases.OBJECTTYPES);
-        const /** @type {Map<string, SfdcObject>} */ objects: Map<string, SfdcObject> = data.get(DatasetAliases.OBJECTS);
+        const pageLayouts: Map<string, SfdcPageLayout> = data.get(DatasetAliases.PAGELAYOUTS);
+        const types: Map<string, SfdcObjectType> = data.get(DatasetAliases.OBJECTTYPES);
+        const objects: Map<string, SfdcObject> = data.get(DatasetAliases.OBJECTS);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
         const objecttype = OrgCheckGlobalParameter.getSObjectTypeName(parameters);
         const object = OrgCheckGlobalParameter.getSObjectName(parameters);
@@ -51,9 +49,8 @@ export class RecipePageLayouts implements Recipe {
         if (!pageLayouts) throw new Error(`RecipePageLayouts: Data from dataset alias 'PAGELAYOUTS' was undefined.`);
 
         // Augment and filter data
-        /** @type {Array<SfdcPageLayout>} */
         const array: Array<SfdcPageLayout> = [];
-        await Processor.forEach(pageLayouts, async (/** @type {SfdcPageLayout} */ pageLayout: SfdcPageLayout) => {
+        await Processor.forEach(pageLayouts, async (pageLayout: SfdcPageLayout) => {
             // Augment data
             const objectRef = objects.get(pageLayout.objectId);
             if (objectRef) {

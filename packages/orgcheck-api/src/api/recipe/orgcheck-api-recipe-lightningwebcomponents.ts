@@ -1,14 +1,12 @@
 import { Recipe } from 'src/api/core/orgcheck-api-recipe';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
-import { Data } from 'src/api/core/orgcheck-api-data';
-import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
 import { SfdcLightningWebComponent }from 'src/api/data/orgcheck-api-data-lightningwebcomponent';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
-export class RecipeLightningWebComponents implements Recipe {
+export class RecipeLightningWebComponents implements Recipe<SfdcLightningWebComponent[]> {
 
     /**
      * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
@@ -25,23 +23,23 @@ export class RecipeLightningWebComponents implements Recipe {
      * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} _logger - Logger
      * @param {Map<string, any>} [parameters] - List of optional argument to pass
-     * @returns {Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<SfdcLightningWebComponent[]>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
+    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<SfdcLightningWebComponent[]> {
 
         // Get data and parameters
-        const  /** @type {Map<string, SfdcLightningWebComponent>} */ components: Map<string, SfdcLightningWebComponent> = data.get(DatasetAliases.LIGHTNINGWEBCOMPONENTS);
+        const  components: Map<string, SfdcLightningWebComponent> = data.get(DatasetAliases.LIGHTNINGWEBCOMPONENTS);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
         if (!components) throw new Error(`RecipeLightningWebComponents: Data from dataset alias 'LIGHTNINGWEBCOMPONENTS' was undefined.`);
 
         // Filter data
-        /** @type {Array<SfdcLightningWebComponent>} */ 
+        
         const array: Array<SfdcLightningWebComponent> = [];
-        await Processor.forEach(components, async (/** @type {SfdcLightningWebComponent} */ component: SfdcLightningWebComponent) => {
+        await Processor.forEach(components, async (component: SfdcLightningWebComponent) => {
             if (namespace === OrgCheckGlobalParameter.ALL_VALUES || component.package === namespace) {
                 array.push(component);
             }

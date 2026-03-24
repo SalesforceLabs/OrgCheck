@@ -1,12 +1,10 @@
 import { Recipe } from 'src/api/core/orgcheck-api-recipe';
-import { Data } from 'src/api/core/orgcheck-api-data';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { SfdcCollaborationGroup }from 'src/api/data/orgcheck-api-data-collaborationgroup';
 
-export class RecipeCollaborationGroups implements Recipe {
+export class RecipeCollaborationGroups implements Recipe<SfdcCollaborationGroup[]> {
 
     /**
      * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
@@ -24,14 +22,14 @@ export class RecipeCollaborationGroups implements Recipe {
      * @description transform the data from the datasets and return the final result as a Map
      * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} _logger - Logger
-     * @returns {Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<SfdcCollaborationGroup[]>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
+    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<SfdcCollaborationGroup[]> {
 
         // Get data
-        const /** @type {Map<string, SfdcCollaborationGroup>} */ groups: Map<string, SfdcCollaborationGroup> = data.get(DatasetAliases.COLLABORATIONGROUPS);
+        const groups: Map<string, SfdcCollaborationGroup> = data.get(DatasetAliases.COLLABORATIONGROUPS);
 
         // Checking data
         if (!groups) throw new Error(`RecipeCollaborationGroups: Data from dataset alias 'COLLABORATIONGROUPS' was undefined.`);

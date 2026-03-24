@@ -1,7 +1,5 @@
 import { Recipe } from 'src/api/core/orgcheck-api-recipe';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
-import { Data } from 'src/api/core/orgcheck-api-data';
-import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
@@ -13,7 +11,7 @@ import { SfdcLightningPage }from 'src/api/data/orgcheck-api-data-lightningpage';
 import { SfdcWorkflow }from 'src/api/data/orgcheck-api-data-workflow';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
-export class RecipeObject implements Recipe {
+export class RecipeObject implements Recipe<SfdcObject> {
 
     /**
      * @description List all dataset aliases (or datasetRunInfo) that this recipe is using
@@ -45,19 +43,19 @@ export class RecipeObject implements Recipe {
      * @description transform the data from the datasets and return the final result as an Array
      * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} _logger - Logger
-     * @returns {Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<SfdcObject>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
+    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<SfdcObject> {
 
         // Get data
-        const /** @type {Map<string, SfdcObjectType>} */ types: Map<string, SfdcObjectType> = data.get(DatasetAliases.OBJECTTYPES);
-        const /** @type {SfdcObject} */ object: SfdcObject = data.get(DatasetAliases.OBJECT);
-        const /** @type {Map<string, SfdcApexTrigger>} */ apexTriggers: Map<string, SfdcApexTrigger> = data.get(DatasetAliases.APEXTRIGGERS);
-        const /** @type {Map<string, SfdcWorkflow>} */ workflowRules: Map<string, SfdcWorkflow> = data.get(DatasetAliases.WORKFLOWS);
-        const /** @type {Map<string, SfdcLightningPage>} */ pages: Map<string, SfdcLightningPage> = data.get(DatasetAliases.LIGHTNINGPAGES);
-        const /** @type {Map<string, SfdcField>} */ customFields: Map<string, SfdcField> = data.get(DatasetAliases.CUSTOMFIELDS);
+        const types: Map<string, SfdcObjectType> = data.get(DatasetAliases.OBJECTTYPES);
+        const object: SfdcObject = data.get(DatasetAliases.OBJECT);
+        const apexTriggers: Map<string, SfdcApexTrigger> = data.get(DatasetAliases.APEXTRIGGERS);
+        const workflowRules: Map<string, SfdcWorkflow> = data.get(DatasetAliases.WORKFLOWS);
+        const pages: Map<string, SfdcLightningPage> = data.get(DatasetAliases.LIGHTNINGPAGES);
+        const customFields: Map<string, SfdcField> = data.get(DatasetAliases.CUSTOMFIELDS);
 
         // Checking data
         if (!types) throw new Error(`RecipeObject: Data from dataset alias 'OBJECTTYPES' was undefined.`);
@@ -92,7 +90,7 @@ export class RecipeObject implements Recipe {
                 (id: string) => workflowRules.get(id),
                 (id: string) => workflowRules.has(id)
             ),
-            Processor.forEach(pages, async (/** @type {SfdcLightningPage} */ page: SfdcLightningPage) => {
+            Processor.forEach(pages, async (page: SfdcLightningPage) => {
                 if (page.objectId === object.id) {
                     object.flexiPages.push(page);
                 }

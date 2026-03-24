@@ -67,6 +67,13 @@ export class SalesforceManager implements SalesforceManagerIntf {
      */
     public readonly apiVersion: number = SecretSauce.CurrentApiVersion;
 
+    /** 
+     * @description Salesforce ID of the organization
+     * @type {string}
+     * @public
+     */
+    public readonly orgId: string;
+
     /**
      * @description WatchDog to monitor the API Usage
      * @type {SalesforceWatchDog}
@@ -165,6 +172,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
 
         // Link the connection to the manager
         this._connection = connection;
+        this.orgId = connection?.userInfo?.organizationId;
     }
 
     /**

@@ -1,12 +1,10 @@
 import { Recipe } from 'src/api/core/orgcheck-api-recipe';
-import { Data } from 'src/api/core/orgcheck-api-data';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { SfdcHomePageComponent }from 'src/api/data/orgcheck-api-data-homepagecomponent';
 
-export class RecipeHomePageComponents implements Recipe {
+export class RecipeHomePageComponents implements Recipe<SfdcHomePageComponent[]> {
 
     /**
      * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
@@ -24,14 +22,14 @@ export class RecipeHomePageComponents implements Recipe {
      * @description transform the data from the datasets and return the final result as a Map
      * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} _logger - Logger
-     * @returns {Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<SfdcHomePageComponent[]>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
+    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<SfdcHomePageComponent[]> {
 
         // Get data
-        const /** @type {Map<string, SfdcHomePageComponent>} */ pages: Map<string, SfdcHomePageComponent> = data.get(DatasetAliases.HOMEPAGECOMPONENTS);
+        const pages: Map<string, SfdcHomePageComponent> = data.get(DatasetAliases.HOMEPAGECOMPONENTS);
 
         // Checking data
         if (!pages) throw new Error(`RecipeHomePageComponents: Data from dataset alias 'HOMEPAGECOMPONENTS' was undefined.`);

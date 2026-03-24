@@ -83,6 +83,13 @@ export interface ApiIntf {
      */
     salesforceApiVersion: number;
 
+    /** 
+     * @description Salesforce ID of the organization
+     * @type {string}
+     * @public
+     */
+    orgId: string;
+
     /**
      * @description Remove all cache from dataset manager
      * @public
@@ -91,10 +98,10 @@ export interface ApiIntf {
 
     /**
      * @description Get cache information from dataset manager
-     * @returns {Array<DataCacheItemIntf>} list of cache information 
+     * @returns {DataCacheItemIntf[]} list of cache information 
      * @public
      */
-    getCacheInformation(): Array<DataCacheItemIntf>;
+    getCacheInformation(): DataCacheItemIntf[];
 
     /**
      * @description Get cache data from dataset manager
@@ -129,12 +136,12 @@ export interface ApiIntf {
 
     /**
      * @description Compile the given list of Apex Classes and return the status of the compilation
-     * @param {Array<string>} apexClassIds - the list of Apex Class Ids to compile
-     * @returns {Promise<Map<string, { isSuccess: boolean, reasons?: Array<string>}>>} List of results by Apex Class ID
+     * @param {string[]} apexClassIds - the list of Apex Class Ids to compile
+     * @returns {Promise<Map<string, { isSuccess: boolean, reasons?: string[]}>>} List of results by Apex Class ID
      * @async
      * @public
      */
-    compileClasses(apexClassIds: Array<string>): Promise<Map<string, { isSuccess: boolean; reasons?: Array<string>; }>>;
+    compileClasses(apexClassIds: string[]): Promise<Map<string, { isSuccess: boolean; reasons?: string[]; }>>;
 
     /**
      * @description Get information about the organization
@@ -178,12 +185,12 @@ export interface ApiIntf {
 
     /**
      * @description Get information about the packages
-     * @returns {Promise<Array<SfdcPackage>>} List of items to return
+     * @returns {Promise<SfdcPackage[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getPackages(): Promise<Array<SfdcPackage>>;
+    getPackages(): Promise<SfdcPackage[]>;
 
     /**
      * @description Remove all the cached information about packages
@@ -196,12 +203,12 @@ export interface ApiIntf {
      * @param {string} [namespace] - the namespace of the package to filter the page layouts
      * @param {string} [sobjectType] - the sobject type to filter the page layouts
      * @param {string} [sobject] - the sobject to filter the page layouts
-     * @returns {Promise<Array<SfdcPageLayout>>} List of items to return
+     * @returns {Promise<SfdcPageLayout[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getPageLayouts(namespace?: string, sobjectType?: string, sobject?: string): Promise<Array<SfdcPageLayout>>;
+    getPageLayouts(namespace?: string, sobjectType?: string, sobject?: string): Promise<SfdcPageLayout[]>;
 
     /**
      * @description Remove all the cached information about page layouts
@@ -211,23 +218,23 @@ export interface ApiIntf {
 
     /**
      * @description Get information about the object types
-     * @returns {Promise<Array<SfdcObjectType>>} List of items to return
+     * @returns {Promise<SfdcObjectType[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getObjectTypes(): Promise<Array<SfdcObjectType>>;
+    getObjectTypes(): Promise<SfdcObjectType[]>;
 
     /**
      * @description Get information about the objects 
      * @param {string} [namespace] - the namespace of the package to filter the objects
      * @param {string} [sobjectType] - the sobject type to filter the objects
-     * @returns {Promise<Array<SfdcObject>>} List of items to return
+     * @returns {Promise<SfdcObject[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getObjects(namespace?: string, sobjectType?: string): Promise<Array<SfdcObject>>;
+    getObjects(namespace?: string, sobjectType?: string): Promise<SfdcObject[]>;
 
     /**
      * @description Remove all the cached information about objects
@@ -286,12 +293,12 @@ export interface ApiIntf {
 
     /**
      * @description Get information about knowledge articles
-     * @returns {Promise<Array<SfdcKnowledgeArticle>>} List of items to return
+     * @returns {Promise<SfdcKnowledgeArticle[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getKnowledgeArticles(): Promise<Array<SfdcKnowledgeArticle>>;
+    getKnowledgeArticles(): Promise<SfdcKnowledgeArticle[]>;
 
     /**
      * @description Remove all the cached information about knowledge articles
@@ -301,12 +308,12 @@ export interface ApiIntf {
 
     /**
      * @description Get information about Chatter groups
-     * @returns {Promise<Array<SfdcCollaborationGroup>>} List of items to return
+     * @returns {Promise<SfdcCollaborationGroup[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getChatterGroups(): Promise<Array<SfdcCollaborationGroup>>;
+    getChatterGroups(): Promise<SfdcCollaborationGroup[]>;
 
     /**
      * @description Remove all the cached information about Chatter groups
@@ -319,12 +326,12 @@ export interface ApiIntf {
      * @param {string} [namespace] - the namespace of the package to filter the custom fields
      * @param {string} [sobjectType] - the sobject type to filter the custom fields
      * @param {string} [sobject] - the sobject to filter the custom fields
-     * @returns {Promise<Array<SfdcField>>} List of items to return
+     * @returns {Promise<SfdcField[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getCustomFields(namespace?: string, sobjectType?: string, sobject?: string): Promise<Array<SfdcField>>;
+    getCustomFields(namespace?: string, sobjectType?: string, sobject?: string): Promise<SfdcField[]>;
 
     /**
      * @description Remove all the cached information about custom fields
@@ -335,12 +342,12 @@ export interface ApiIntf {
     /**
      * @description Get information about permission sets (filtered out by namespace/pakage)
      * @param {string} [namespace] - the namespace of the package to filter the permission sets
-     * @returns {Promise<Array<SfdcPermissionSet>>} List of items to return
+     * @returns {Promise<SfdcPermissionSet[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getPermissionSets(namespace?: string): Promise<Array<SfdcPermissionSet>> ;
+    getPermissionSets(namespace?: string): Promise<SfdcPermissionSet[]> ;
     
     /**
      * @description Remove all the cached information about permission sets
@@ -350,12 +357,12 @@ export interface ApiIntf {
 
     /**
      * @description Get information about permission set licenses
-     * @returns {Promise<Array<SfdcPermissionSetLicense>>} List of items to return
+     * @returns {Promise<SfdcPermissionSetLicense[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getPermissionSetLicenses(): Promise<Array<SfdcPermissionSetLicense>>;
+    getPermissionSetLicenses(): Promise<SfdcPermissionSetLicense[]>;
     
     /**
      * @description Remove all the cached information about permission set licenses
@@ -366,12 +373,12 @@ export interface ApiIntf {
     /**
      * @description Get information about profiles (filtered out by namespace/pakage)
      * @param {string} [namespace] - the namespace of the package to filter the profiles
-     * @returns {Promise<Array<SfdcProfile>>} List of items to return
+     * @returns {Promise<SfdcProfile[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getProfiles(namespace?: string): Promise<Array<SfdcProfile>>;
+    getProfiles(namespace?: string): Promise<SfdcProfile[]>;
 
     /**
      * @description Remove all the cached information about profiles
@@ -382,12 +389,12 @@ export interface ApiIntf {
     /**
      * @description Get information about profile restrictions (filtered out by namespace/pakage)
      * @param {string} [namespace] - the namespace of the package to filter the profile restrictions
-     * @returns {Promise<Array<SfdcProfileRestrictions>>} List of items to return
+     * @returns {Promise<SfdcProfileRestrictions[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getProfileRestrictions(namespace?: string): Promise<Array<SfdcProfileRestrictions>>;
+    getProfileRestrictions(namespace?: string): Promise<SfdcProfileRestrictions[]>;
 
     /**
      * @description Remove all the cached information about profile restrictions
@@ -397,12 +404,12 @@ export interface ApiIntf {
 
     /**
      * @description Get information about profile password policies
-     * @returns {Promise<Array<SfdcProfilePasswordPolicy>>} List of items to return
+     * @returns {Promise<SfdcProfilePasswordPolicy[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getProfilePasswordPolicies(): Promise<Array<SfdcProfilePasswordPolicy>>;
+    getProfilePasswordPolicies(): Promise<SfdcProfilePasswordPolicy[]>;
 
     /**
      * @description Remove all the cached information about profile password policies
@@ -412,12 +419,12 @@ export interface ApiIntf {
 
     /**
      * @description Get information about active users
-     * @returns {Promise<Array<SfdcUser>>} List of items to return
+     * @returns {Promise<SfdcUser[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getActiveUsers(): Promise<Array<SfdcUser>>;
+    getActiveUsers(): Promise<SfdcUser[]>;
 
     /**
      * @description Remove all the cached information about active users
@@ -427,12 +434,12 @@ export interface ApiIntf {
 
     /**
      * @description Get information about browsers
-     * @returns {Promise<Array<SfdcBrowser>>} List of items to return
+     * @returns {Promise<SfdcBrowser[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getBrowsers(): Promise<Array<SfdcBrowser>>;
+    getBrowsers(): Promise<SfdcBrowser[]>;
 
     /**
      * @description Remove all the cached information about browsers
@@ -443,12 +450,12 @@ export interface ApiIntf {
     /**
      * @description Get information about custom labels (filtered out by namespace/pakage)
      * @param {string} [namespace] - the namespace of the package to filter the custom labels
-     * @returns {Promise<Array<SfdcCustomLabel>>} List of items to return
+     * @returns {Promise<SfdcCustomLabel[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getCustomLabels(namespace?: string): Promise<Array<SfdcCustomLabel>>;
+    getCustomLabels(namespace?: string): Promise<SfdcCustomLabel[]>;
 
     /**
      * @description Remove all the cached information about custom labels
@@ -459,12 +466,12 @@ export interface ApiIntf {
     /**
      * @description Get information about custom tabs (filtered out by namespace/pakage)
      * @param {string} [namespace] - the namespace of the package to filter the custom tabs
-     * @returns {Promise<Array<SfdcCustomTab>>} List of items to return
+     * @returns {Promise<SfdcCustomTab[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getCustomTabs(namespace?: string): Promise<Array<SfdcCustomTab>>;
+    getCustomTabs(namespace?: string): Promise<SfdcCustomTab[]>;
 
     /**
      * @description Remove all the cached information about custom tabs
@@ -475,12 +482,12 @@ export interface ApiIntf {
     /**
      * @description Get information about documents (filtered out by namespace/pakage)
      * @param {string} [namespace] - the namespace of the package to filter the documents
-     * @returns {Promise<Array<SfdcDocument>>} List of items to return
+     * @returns {Promise<SfdcDocument[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getDocuments(namespace?: string): Promise<Array<SfdcDocument>>;
+    getDocuments(namespace?: string): Promise<SfdcDocument[]>;
 
     /**
      * @description Remove all the cached information about documents
@@ -491,12 +498,12 @@ export interface ApiIntf {
     /**
      * @description Get information about LWCs (filtered out by namespace/pakage)
      * @param {string} [namespace] - the namespace of the package to filter the lightning web components
-     * @returns {Promise<Array<SfdcLightningWebComponent>>} List of items to return
+     * @returns {Promise<SfdcLightningWebComponent[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getLightningWebComponents(namespace?: string): Promise<Array<SfdcLightningWebComponent>>;
+    getLightningWebComponents(namespace?: string): Promise<SfdcLightningWebComponent[]>;
     
     /**
      * @description Remove all the cached information about lightning web components
@@ -507,12 +514,12 @@ export interface ApiIntf {
     /**
      * @description Get information about Aura Components (filtered out by namespace/pakage)
      * @param {string} [namespace] - the namespace of the package to filter the lightning aura components
-     * @returns {Promise<Array<SfdcLightningAuraComponent>>} List of items to return
+     * @returns {Promise<SfdcLightningAuraComponent[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getLightningAuraComponents(namespace?: string): Promise<Array<SfdcLightningAuraComponent>>;
+    getLightningAuraComponents(namespace?: string): Promise<SfdcLightningAuraComponent[]>;
 
     /**
      * @description Remove all the cached information about lightning aura components
@@ -523,12 +530,12 @@ export interface ApiIntf {
     /**
      * @description Get information about flexipages (filtered out by namespace/pakage)
      * @param {string} [namespace] - the namespace of the package to filter the lightning pages
-     * @returns {Promise<Array<SfdcLightningPage>>} List of items to return
+     * @returns {Promise<SfdcLightningPage[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getLightningPages(namespace?: string): Promise<Array<SfdcLightningPage>>;
+    getLightningPages(namespace?: string): Promise<SfdcLightningPage[]>;
 
     /**
      * @description Remove all the cached information about lightning pages
@@ -539,12 +546,12 @@ export interface ApiIntf {
     /**
      * @description Get information about VFCs (filtered out by namespace/pakage)
      * @param {string} [namespace] - the namespace of the package to filter the visualforce components
-     * @returns {Promise<Array<SfdcVisualForceComponent>>} List of items to return
+     * @returns {Promise<SfdcVisualForceComponent[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getVisualForceComponents(namespace?: string): Promise<Array<SfdcVisualForceComponent>>;
+    getVisualForceComponents(namespace?: string): Promise<SfdcVisualForceComponent[]>;
     
     /**
      * @description Remove all the cached information about Visualforce Components
@@ -555,12 +562,12 @@ export interface ApiIntf {
     /**
      * @description Get information about VFPs (filtered out by namespace/pakage)
      * @param {string} [namespace] - the namespace of the package to filter the visualforce pages
-     * @returns {Promise<Array<SfdcVisualForcePage>>} List of items to return
+     * @returns {Promise<SfdcVisualForcePage[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getVisualForcePages(namespace?: string): Promise<Array<SfdcVisualForcePage>>;
+    getVisualForcePages(namespace?: string): Promise<SfdcVisualForcePage[]>;
 
     /**
      * @description Remove all the cached information about Visualforce Pages
@@ -570,12 +577,12 @@ export interface ApiIntf {
     
     /**
      * @description Get information about Public Groups
-     * @returns {Promise<Array<SfdcGroup>>} List of items to return
+     * @returns {Promise<SfdcGroup[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getPublicGroups(): Promise<Array<SfdcGroup>>;
+    getPublicGroups(): Promise<SfdcGroup[]>;
 
     /**
      * @description Remove all the cached information about public groups
@@ -585,12 +592,12 @@ export interface ApiIntf {
 
     /**
      * @description Get information about Queues
-     * @returns {Promise<Array<SfdcGroup>>} List of items to return
+     * @returns {Promise<SfdcGroup[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getQueues(): Promise<Array<SfdcGroup>>;
+    getQueues(): Promise<SfdcGroup[]>;
 
     /**
      * @description Remove all the cached information about queues
@@ -601,12 +608,12 @@ export interface ApiIntf {
     /**
      * @description Get information about Apex Classes (filtered out by namespace/pakage)
      * @param {string} [namespace] - the namespace of the package to filter the apex classes
-     * @returns {Promise<Array<SfdcApexClass>>} List of items to return
+     * @returns {Promise<SfdcApexClass[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getApexClasses(namespace?: string): Promise<Array<SfdcApexClass>>;
+    getApexClasses(namespace?: string): Promise<SfdcApexClass[]>;
 
     /**
      * @description Remove all the cached information about apex classes
@@ -617,12 +624,12 @@ export interface ApiIntf {
     /**
      * @description Get information about Apex Tests (filtered out by namespace/pakage)
      * @param {string} [namespace] - the namespace of the package to filter the apex tests
-     * @returns {Promise<Array<SfdcApexClass>>} List of items to return
+     * @returns {Promise<SfdcApexClass[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getApexTests(namespace?: string): Promise<Array<SfdcApexClass>>;
+    getApexTests(namespace?: string): Promise<SfdcApexClass[]>;
 
     /**
      * @description Remove all the cached information about apex tests
@@ -633,12 +640,12 @@ export interface ApiIntf {
     /**
      * @description Get information about Apex Uncompiled Classes (filtered out by namespace/pakage)
      * @param {string} [namespace] - the namespace of the package to filter the apex uncompiled classes
-     * @returns {Promise<Array<SfdcApexClass>>} List of items to return
+     * @returns {Promise<SfdcApexClass[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getApexUncompiled(namespace?: string): Promise<Array<SfdcApexClass>>;
+    getApexUncompiled(namespace?: string): Promise<SfdcApexClass[]>;
 
     /**
      * @description Remove all the cached information about apex uncompiled classes
@@ -649,12 +656,12 @@ export interface ApiIntf {
     /**
      * @description Get information about Apex triggers (filtered out by namespace/pakage)
      * @param {string} [namespace] - the namespace of the package to filter the apex triggers
-     * @returns {Promise<Array<SfdcApexTrigger>>} List of items to return
+     * @returns {Promise<SfdcApexTrigger[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getApexTriggers(namespace?: string): Promise<Array<SfdcApexTrigger>>;
+    getApexTriggers(namespace?: string): Promise<SfdcApexTrigger[]>;
 
     /**
      * @description Remove all the cached information about apex triggers
@@ -664,12 +671,12 @@ export interface ApiIntf {
 
     /**
      * @description Get information about User roles in a tabular view
-     * @returns {Promise<Array<SfdcUserRole>>} List of items to return
+     * @returns {Promise<SfdcUserRole[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getRoles(): Promise<Array<SfdcUserRole>>;
+    getRoles(): Promise<SfdcUserRole[]>;
 
     /**
      * @description Remove all the cached information about roles
@@ -689,12 +696,12 @@ export interface ApiIntf {
     /**
      * @description Get information about Static Resources
      * @param {string} [namespace] - the namespace of the package to filter the weblinks
-     * @returns {Promise<Array<SfdcStaticResource>>} List of items to return
+     * @returns {Promise<SfdcStaticResource[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getStaticResources(namespace?: string): Promise<Array<SfdcStaticResource>>;
+    getStaticResources(namespace?: string): Promise<SfdcStaticResource[]>;
 
     /**
      * @description Remove all the cached information about Static Resources
@@ -707,12 +714,12 @@ export interface ApiIntf {
      * @param {string} [namespace] - the namespace of the package to filter the weblinks
      * @param {string} [sobjectType] - the sobject type to filter the weblinks
      * @param {string} [sobject] - the sobject to filter the weblinks
-     * @returns {Promise<Array<SfdcWebLink>>} List of items to return
+     * @returns {Promise<SfdcWebLink[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getWeblinks(namespace?: string, sobjectType?: string, sobject?: string): Promise<Array<SfdcWebLink>>;
+    getWeblinks(namespace?: string, sobjectType?: string, sobject?: string): Promise<SfdcWebLink[]>;
 
     /**
      * @description Remove all the cached information about WebLinks
@@ -722,12 +729,12 @@ export interface ApiIntf {
 
     /**
      * @description Get information about Workflows
-     * @returns {Promise<Array<SfdcWorkflow>>} List of items to return
+     * @returns {Promise<SfdcWorkflow[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getWorkflows(): Promise<Array<SfdcWorkflow>>;
+    getWorkflows(): Promise<SfdcWorkflow[]>;
 
     /**
      * @description Remove all the cached information about workflows
@@ -740,12 +747,12 @@ export interface ApiIntf {
      * @param {string} [namespace] - the namespace of the package to filter the record types
      * @param {string} [sobjectType] - the sobject type to filter the record types
      * @param {string} [sobject] - the sobject to filter the record types
-     * @returns {Promise<Array<SfdcRecordType>>} List of items to return
+     * @returns {Promise<SfdcRecordType[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getRecordTypes(namespace?: string, sobjectType?: string, sobject?: string): Promise<Array<SfdcRecordType>>;
+    getRecordTypes(namespace?: string, sobjectType?: string, sobject?: string): Promise<SfdcRecordType[]>;
 
     /**
      * @description Remove all the cached information about record types
@@ -772,12 +779,12 @@ export interface ApiIntf {
 
     /**
      * @description Get information about Flows
-     * @returns {Promise<Array<SfdcFlow>>} List of items to return
+     * @returns {Promise<SfdcFlow[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getFlows(): Promise<Array<SfdcFlow>>;
+    getFlows(): Promise<SfdcFlow[]>;
 
     /**
      * @description Remove all the cached information about flows
@@ -788,12 +795,12 @@ export interface ApiIntf {
     /**
      * @description Get information about EmailTemplate
      * @param {string} [namespace] - the namespace of the package to filter the email templates
-     * @returns {Promise<Array<SfdcEmailTemplate>>} List of items to return
+     * @returns {Promise<SfdcEmailTemplate[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getEmailTemplates(namespace?: string): Promise<Array<SfdcEmailTemplate>>;
+    getEmailTemplates(namespace?: string): Promise<SfdcEmailTemplate[]>;
 
     /**
      * @description Remove all the cached information about email template
@@ -803,12 +810,12 @@ export interface ApiIntf {
 
     /**
      * @description Get information about home page components
-     * @returns {Promise<Array<SfdcHomePageComponent>>} List of items to return
+     * @returns {Promise<SfdcHomePageComponent[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getHomePageComponents(): Promise<Array<SfdcHomePageComponent>>;
+    getHomePageComponents(): Promise<SfdcHomePageComponent[]>;
 
     /**
      * @description Remove all the cached information about home page components
@@ -818,12 +825,12 @@ export interface ApiIntf {
 
     /**
      * @description Get information about Process Builders
-     * @returns {Promise<Array<SfdcFlow>>} List of items to return
+     * @returns {Promise<SfdcFlow[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getProcessBuilders(): Promise<Array<SfdcFlow>>;
+    getProcessBuilders(): Promise<SfdcFlow[]>;
 
     /**
      * @description Remove all the cached information about process builders
@@ -836,12 +843,12 @@ export interface ApiIntf {
      * @param {string} [namespace] - the namespace of the package to filter the validation rules
      * @param {string} [sobjectType] - the sobject type to filter the validation rules
      * @param {string} [sobject] - the sobject to filter the validation rules
-     * @returns {Promise<Array<SfdcValidationRule>>} List of items to return
+     * @returns {Promise<SfdcValidationRule[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getValidationRules(namespace?: string, sobjectType?: string, sobject?: string): Promise<Array<SfdcValidationRule>>;
+    getValidationRules(namespace?: string, sobjectType?: string, sobject?: string): Promise<SfdcValidationRule[]>;
     
     /**
      * @description Remove all the cached information about validation rules
@@ -851,12 +858,12 @@ export interface ApiIntf {
 
     /**
      * @description Get information about dashboards
-     * @returns {Promise<Array<SfdcDashboard>>} List of items to return
+     * @returns {Promise<SfdcDashboard[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getDashboards(): Promise<Array<SfdcDashboard>>;
+    getDashboards(): Promise<SfdcDashboard[]>;
     
     /**
      * @description Remove all the cached information about dashboards
@@ -866,12 +873,12 @@ export interface ApiIntf {
 
     /**
      * @description Get information about reports
-     * @returns {Promise<Array<SfdcReport>>} List of items to return
+     * @returns {Promise<SfdcReport[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getReports(): Promise<Array<SfdcReport>>;
+    getReports(): Promise<SfdcReport[]>;
     
     /**
      * @description Remove all the cached information about reports
@@ -881,12 +888,12 @@ export interface ApiIntf {
 
     /**
      * @description Get global view of the org
-     * @returns {Promise<Array<DataCollectionStatisticsIntf>>} List of items to return
+     * @returns {Promise<DataCollectionStatisticsIntf[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getGlobalView(): Promise<Array<DataCollectionStatisticsIntf>>;
+    getGlobalView(): Promise<DataCollectionStatisticsIntf[]>;
 
     /**
      * @description Remove all the cached information about global view
@@ -896,12 +903,12 @@ export interface ApiIntf {
 
     /**
      * @description Get hardcoded URLs view of the org
-     * @returns {Promise<Array<DataCollectionStatisticsIntf>>} List of items to return
+     * @returns {Promise<DataCollectionStatisticsIntf[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    getHardcodedURLsView(): Promise<Array<DataCollectionStatisticsIntf>>;
+    getHardcodedURLsView(): Promise<DataCollectionStatisticsIntf[]>;
 
     /**
      * @description Remove all the cached information about hardcoded URLs view

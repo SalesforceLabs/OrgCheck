@@ -1,16 +1,14 @@
 import { Recipe } from 'src/api/core/orgcheck-api-recipe';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
-import { Data } from 'src/api/core/orgcheck-api-data';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { SfdcValidationRule }from 'src/api/data/orgcheck-api-data-validationrule';
 import { SfdcObject }from 'src/api/data/orgcheck-api-data-object';
 import { SfdcObjectType }from 'src/api/data/orgcheck-api-data-objecttype';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
-export class RecipeValidationRules implements Recipe {
+export class RecipeValidationRules implements Recipe<SfdcValidationRule[]> {
 
     /**
      * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
@@ -31,16 +29,16 @@ export class RecipeValidationRules implements Recipe {
      * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} logger - Logger
      * @param {Map<string, any>} [parameters] - List of optional argument to pass
-     * @returns {Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<SfdcValidationRule[]>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
+    async transform(data: Map<string, any>, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<SfdcValidationRule[]> {
 
         // Get data and parameters
-        const /** @type {Map<string, SfdcObjectType>} */ types: Map<string, SfdcObjectType> = data.get(DatasetAliases.OBJECTTYPES);
-        const /** @type {Map<string, SfdcObject>} */ objects: Map<string, SfdcObject> = data.get(DatasetAliases.OBJECTS);
-        const /** @type {Map<string, SfdcValidationRule>} */ validationRules: Map<string, SfdcValidationRule> = data.get(DatasetAliases.VALIDATIONRULES);
+        const types: Map<string, SfdcObjectType> = data.get(DatasetAliases.OBJECTTYPES);
+        const objects: Map<string, SfdcObject> = data.get(DatasetAliases.OBJECTS);
+        const validationRules: Map<string, SfdcValidationRule> = data.get(DatasetAliases.VALIDATIONRULES);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
         const objecttype = OrgCheckGlobalParameter.getSObjectTypeName(parameters);
         const object = OrgCheckGlobalParameter.getSObjectName(parameters);
@@ -51,9 +49,9 @@ export class RecipeValidationRules implements Recipe {
         if (!validationRules) throw new Error(`RecipeValidationRules: Data from dataset alias 'VALIDATIONRULES' was undefined.`);
 
         // Augment and filter data
-        /** @type {Array<SfdcValidationRule>} */ 
+        
         const array: Array<SfdcValidationRule> = [];
-        await Processor.forEach(validationRules, async (/** @type {SfdcValidationRule} */ validationRule: SfdcValidationRule) => {
+        await Processor.forEach(validationRules, async (validationRule: SfdcValidationRule) => {
             // Augment
             const objectRef = objects.get(validationRule.objectId);
             if (objectRef) {

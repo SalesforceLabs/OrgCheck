@@ -24,7 +24,6 @@ import { GlobalViewItemsTableDefinitions } from 'src/ui//table/definitions/orgch
 import { HardCodedURLsTableDefinitions } from 'src/ui/table/definitions/orgcheck-ui-tabledef-hardcodedurls';
 import { HomePageComponentsTableDefinitions } from 'src/ui/table/definitions/orgcheck-ui-tabledef-homepagecomponents';
 import { KnowledgeArticlesTableDefinitions } from 'src/ui/table/definitions/orgcheck-ui-tabledef-knowledgearticles';
-import { LayoutsTableDefinitions } from 'src/ui/table/definitions/orgcheck-ui-tabledef-layouts';
 import { LightningWebComponentsTableDefinitions } from 'src/ui/table/definitions/orgcheck-ui-tabledef-lightningwebcomponents';
 import { LimitsTableDefinitions } from 'src/ui/table/definitions/orgcheck-ui-tabledef-limits';
 import { ObjectPermissionsTableDefinitions } from 'src/ui/table/definitions/orgcheck-ui-tabledef-apppermissions';
@@ -54,8 +53,12 @@ import { UsersTableDefinitions } from 'src/ui/table/definitions/orgcheck-ui-tabl
 import { ValidationRulesInObjectTableDefinitions, ValidationRulesTableDefinitions } from 'src/ui/table/definitions/orgcheck-ui-tabledef-validationrules';
 import { VisualForceComponentsTableDefinitions } from 'src/ui/table/definitions/orgcheck-ui-tabledef-visualforcecomponents';
 import { VisualForcePagesTableDefinitions } from 'src/ui/table/definitions/orgcheck-ui-tabledef-visualforcepages';
-import { WebLinksTableDefinitions } from 'src/ui/table/definitions/orgcheck-ui-tabledef-weblinks';
+import { WebLinksInObjectTableDefinitions, WebLinksTableDefinitions } from 'src/ui/table/definitions/orgcheck-ui-tabledef-weblinks';
 import { WorkflowsTableDefinitions } from 'src/ui/table/definitions/orgcheck-ui-tabledef-workflows';
+import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
+import { RecipeAliases } from 'src/api/core/orgcheck-api-recipes-aliases';
+import { Data } from 'src/api/core/orgcheck-api-data';
+import { DataCollectionStatisticsIntf } from 'src/api/core/orgcheck-api-data-datacollectionstats';
 
 export type { ApexClassesTableDefinitions } from 'src/ui/table/definitions/orgcheck-ui-tabledef-apexclasses';
 export type { ApexTestsTableDefinitions } from 'src/ui/table/definitions/orgcheck-ui-tabledef-apextests';
@@ -103,6 +106,7 @@ export type { RelationshipsTableDefinitions } from 'src/ui/table/definitions/org
 export type { ReportsTableDefinitions } from 'src/ui/table/definitions/orgcheck-ui-tabledef-reports';
 export type { RolesTableDefinitions } from 'src/ui/table/definitions/orgcheck-ui-tabledef-roles';
 export type { Row } from 'src/ui/table/orgcheck-ui-table-row';
+export type { Data } from 'src/api/core/orgcheck-api-data';
 export type { SalesforceAuthenticationOptions } from 'src/api/core/orgcheck-api-setup-salesforcemanager';
 export type { SalesforceManagerSetup } from 'src/api/core/orgcheck-api-setup-salesforcemanager';
 export type { SalesforceUsageInformationIntf } from 'src/api/core/orgcheck-api-limit-usageinformation';
@@ -156,9 +160,105 @@ export type { VisualForcePagesTableDefinitions } from 'src/ui/table/definitions/
 export type { WebLinksTableDefinitions } from 'src/ui/table/definitions/orgcheck-ui-tabledef-weblinks';
 export type { WorkflowsTableDefinitions } from 'src/ui/table/definitions/orgcheck-ui-tabledef-workflows';
 
+export type ActionParameter = { namespace: string, type: string, sobject: string };
+
+const cacheStamp_Package = (p: ActionParameter) => (`${p.namespace}`)
+const cacheStamp_All = (p: ActionParameter) => (`${p.namespace}-${p.type}-${p.sobject}`)
+const cacheStamp_PackageSObject = (p: ActionParameter) => (`${p.namespace}-${p.sobject}`)
+const cacheStamp_PackageType = (p: ActionParameter) => (`${p.namespace}-${p.type}`)
+const cacheStamp_SObject = (p: ActionParameter) => (`${p.sobject}`)
+const cacheStamp_None = () => ('-');
+
+const actions = Object.seal({
+    '-welcome-':                 { title: '👋 Welcome!' },
+    '-cache-':                   { title: '🛠️ Metadata Cache',                                                                        getter: (api: ApiIntf) => (api.getCacheInformation()),                                                       cacheStamp: cacheStamp_None,            remover: (api: ApiIntf) => (api.removeAllFromCache()) },
+    '-score-rules-':             { title: '⁉️ Score explanation',                                                                     getter: (api: ApiIntf) => (api.getAllScoreRulesAsDataMatrix()),                                              cacheStamp: cacheStamp_None,                                                                                                      tables: (dataMatrix: DataMatrixIntf) => ({ main: new ScoreRulesTableDefinitions(dataMatrix) }) },
+    'apex-classes':              { title: '❤️‍🔥 Apex Classes',                         recipe: RecipeAliases.APEX_CLASSES,              getter: (api: ApiIntf, p: ActionParameter) => (api.getApexClasses(p.namespace)),                             cacheStamp: cacheStamp_Package,         remover: (api: ApiIntf) => (api.removeAllApexClassesFromCache()),                         tables: () => ({ main: new ApexClassesTableDefinitions() }) },
+    'apex-tests':                { title: '🚒 Apex Unit Tests',                      recipe: RecipeAliases.APEX_TESTS,                getter: (api: ApiIntf, p: ActionParameter) => (api.getApexTests(p.namespace)),                               cacheStamp: cacheStamp_Package,         remover: (api: ApiIntf) => (api.removeAllApexTestsFromCache()),                           tables: () => ({ main: new ApexTestsTableDefinitions() }) },
+    'apex-triggers':             { title: '🧨 Apex Triggers',                        recipe: RecipeAliases.APEX_TRIGGERS,             getter: (api: ApiIntf, p: ActionParameter) => (api.getApexTriggers(p.namespace)),                            cacheStamp: cacheStamp_Package,         remover: (api: ApiIntf) => (api.removeAllApexTriggersFromCache()),                        tables: () => ({ main: new ApexTriggersTableDefinitions() }) },
+    'apex-uncompiled':           { title: '🌋 Apex Classes That Need Recompilation', recipe: RecipeAliases.APEX_UNCOMPILED,           getter: (api: ApiIntf, p: ActionParameter) => (api.getApexUncompiled(p.namespace)),                          cacheStamp: cacheStamp_Package,         remover: (api: ApiIntf) => (api.removeAllApexUncompiledFromCache()),                      tables: () => ({ main: new ApexUncompiledTableDefinitions() }) },
+    'app-permissions':           { title: '⛕ Application Permissions',               recipe: RecipeAliases.APP_PERMISSIONS,           getter: (api: ApiIntf, p: ActionParameter) => (api.getApplicationPermissionsPerParent(p.namespace)),         cacheStamp: cacheStamp_Package,         remover: (api: ApiIntf) => (api.removeAllAppPermissionsFromCache()),                     tables: (dataMatrix: DataMatrixIntf) => ({ main: new AppPermissionsTableDefinitions(dataMatrix) }) },
+    'browsers':                  { title: '🌐 Browsers',                             recipe: RecipeAliases.BROWSERS,                  getter: (api: ApiIntf) => (api.getBrowsers()),                                                               cacheStamp: cacheStamp_None,            remover: (api: ApiIntf) => (api.removeAllBrowsersFromCache()),                            tables: () => ({ main: new BrowsersTableDefinitions() }) },
+    'collaboration-groups':      { title: '🦙 Chatter Groups',                       recipe: RecipeAliases.COLLABORATION_GROUPS,      getter: (api: ApiIntf) => (api.getChatterGroups()),                                                          cacheStamp: cacheStamp_None,            remover: (api: ApiIntf) => (api.removeAllChatterGroupsFromCache()),                       tables: () => ({ main: new ChatterGroupsTableDefinitions() }) },
+    'custom-fields':             { title: '🏈 Custom Fields',                        recipe: RecipeAliases.CUSTOM_FIELDS,             getter: (api: ApiIntf, p: ActionParameter) => (api.getCustomFields(p.namespace, p.type, p.sobject)),         cacheStamp: cacheStamp_All,             remover: (api: ApiIntf) => (api.removeAllCustomFieldsFromCache()),                        tables: () => ({ main: new CustomFieldsTableDefinitions() }) },
+    'custom-labels':             { title: '🏷️ Custom Labels',                        recipe: RecipeAliases.CUSTOM_LABELS,             getter: (api: ApiIntf, p: ActionParameter) => (api.getCustomLabels(p.namespace)),                            cacheStamp: cacheStamp_Package,         remover: (api: ApiIntf) => (api.removeAllCustomLabelsFromCache()),                        tables: () => ({ main: new CustomLabelsTableDefinitions() }) },
+    'custom-tabs':               { title: '🥠 Custom Tabs',                          recipe: RecipeAliases.CUSTOM_TABS,               getter: (api: ApiIntf, p: ActionParameter) => (api.getCustomTabs(p.namespace)),                              cacheStamp: cacheStamp_Package,         remover: (api: ApiIntf) => (api.removeAllCustomTabsFromCache()),                          tables: () => ({ main: new CustomTabsTableDefinitions() }) },
+    'dashboards':                { title: '🌲 Dashboards',                           recipe: RecipeAliases.DASHBOARDS,                getter: (api: ApiIntf) => (api.getDashboards()),                                                             cacheStamp: cacheStamp_None,            remover: (api: ApiIntf) => (api.removeAllDashboardsFromCache()),                          tables: () => ({ main: new DashboardsTableDefinitions() }) },
+    'documents':                 { title: '🍱 Documents',                            recipe: RecipeAliases.DOCUMENTS,                 getter: (api: ApiIntf, p: ActionParameter) => (api.getDocuments(p.namespace)),                               cacheStamp: cacheStamp_Package,         remover: (api: ApiIntf) => (api.removeAllDocumentsFromCache()),                           tables: () => ({ main: new DocumentsTableDefinitions() }) },
+    'email-templates':           { title: '🌇 Email Templates',                      recipe: RecipeAliases.EMAIL_TEMPLATES,           getter: (api: ApiIntf, p: ActionParameter) => (api.getEmailTemplates(p.namespace)),                          cacheStamp: cacheStamp_Package,         remover: (api: ApiIntf) => (api.removeAllEmailTemplatesFromCache()),                      tables: () => ({ main: new EmailTemplatesTableDefinitions() }) },
+    'field-permissions':         { title: '🚧 Field Level Securities',               recipe: RecipeAliases.FIELD_PERMISSIONS,         getter: (api: ApiIntf, p: ActionParameter) => (api.getFieldPermissionsPerParent(p.sobject, p.namespace)),    cacheStamp: cacheStamp_PackageSObject,  remover: (api: ApiIntf) => (api.removeAllFieldPermissionsFromCache()),                    tables: (dataMatrix: DataMatrixIntf) => ({ main: new FieldPermissionsTableDefinitions(dataMatrix) }) },
+    'flows':                     { title: '🏎️ Flows',                                recipe: RecipeAliases.FLOWS,                     getter: (api: ApiIntf) => (api.getFlows()),                                                                  cacheStamp: cacheStamp_None,            remover: (api: ApiIntf) => (api.removeAllFlowsFromCache()),                               tables: () => ({ main: new FlowsTableDefinitions() }) },
+    'global-view':               { title: '🏞️ Overview',                             recipe: RecipeAliases.GLOBAL_VIEW,               getter: (api: ApiIntf) => (api.getGlobalView()),                                                             cacheStamp: cacheStamp_None,            remover: (api: ApiIntf) => (api.removeGlobalViewFromCache()),                             tables: () => ({ main: new GlobalViewItemsTableDefinitions() }) },
+    'hardcoded-urls':            { title: '🏖️ Hard coded URLs',                      recipe: RecipeAliases.HARDCODED_URLS_VIEW,       getter: (api: ApiIntf) => (api.getHardcodedURLsView()),                                                      cacheStamp: cacheStamp_None,            remover: (api: ApiIntf) => (api.removeHardcodedURLsFromCache()),                          tables: () => ({ main: new HardCodedURLsTableDefinitions() }) },
+    'homepages':                 { title: '🍩 Home Page Components',                 recipe: RecipeAliases.HOME_PAGE_COMPONENTS,      getter: (api: ApiIntf) => (api.getHomePageComponents()),                                                     cacheStamp: cacheStamp_None,            remover: (api: ApiIntf) => (api.removeAllHomePageComponentsFromCache()),                  tables: () => ({ main: new HomePageComponentsTableDefinitions() }) },
+    'internal-active-users':     { title: '👥 Active Internal Users',                recipe: RecipeAliases.INTERNAL_ACTIVE_USERS,     getter: (api: ApiIntf) => (api.getActiveUsers()),                                                            cacheStamp: cacheStamp_None,            remover: (api: ApiIntf) => (api.removeAllActiveUsersFromCache()),                         tables: () => ({ main: new UsersTableDefinitions() }) },
+    'knowledge-articles':        { title: '📚 Knowledge Articles',                   recipe: RecipeAliases.KNOWLEDGE_ARTICLES,        getter: (api: ApiIntf) => (api.getKnowledgeArticles()),                                                      cacheStamp: cacheStamp_None,            remover: (api: ApiIntf) => (api.removeAllKnowledgeArticlesFromCache()),                   tables: () => ({ main: new KnowledgeArticlesTableDefinitions() }) },
+    'lightning-aura-components': { title: '🧁 Lightning Aura Components',            recipe: RecipeAliases.LIGHTNING_AURA_COMPONENTS, getter: (api: ApiIntf, p: ActionParameter) => (api.getLightningAuraComponents(p.namespace)),                 cacheStamp: cacheStamp_Package,         remover: (api: ApiIntf) => (api.removeAllLightningAuraComponentsFromCache()),             tables: () => ({ main: new AuraComponentsTableDefinitions() }) },
+    'lightning-pages':           { title: '🎂 Lightning Pages',                      recipe: RecipeAliases.LIGHTNING_PAGES,           getter: (api: ApiIntf, p: ActionParameter) => (api.getLightningPages(p.namespace)),                          cacheStamp: cacheStamp_Package,         remover: (api: ApiIntf) => (api.removeAllLightningPagesFromCache()),                      tables: () => ({ main: new FlexiPagesTableDefinitions() }) },
+    'lightning-web-components':  { title: '🍰 Lightning Web Components',             recipe: RecipeAliases.LIGHTNING_WEB_COMPONENTS,  getter: (api: ApiIntf, p: ActionParameter) => (api.getLightningWebComponents(p.namespace)),                  cacheStamp: cacheStamp_Package,         remover: (api: ApiIntf) => (api.removeAllLightningWebComponentsFromCache()),              tables: () => ({ main: new LightningWebComponentsTableDefinitions() }) },
+    'object':                    { title: '🎳 Object Documentation',                 recipe: RecipeAliases.OBJECT,                    getter: (api: ApiIntf, p: ActionParameter) => (api.getObject(p.sobject)),                                    cacheStamp: cacheStamp_SObject,         remover: (api: ApiIntf, p: ActionParameter) => (api.removeObjectFromCache(p.sobject)),    tables: () => ({ 'triggers': new ApexTriggersInObjectTableDefinitions(), 
+                                                                                                                                                                                                                                                                                                                                                                          'custom-fields': new CustomFieldsInObjectTableDefinitions(), 
+                                                                                                                                                                                                                                                                                                                                                                          'field-sets': new FieldSetsTableDefinitions(), 
+                                                                                                                                                                                                                                                                                                                                                                          'lightning-pages': new FlexiPagesInObjectTableDefinitions(), 
+                                                                                                                                                                                                                                                                                                                                                                          'page-layouts': new PageLayoutsTableDefinitions(), 
+                                                                                                                                                                                                                                                                                                                                                                          'limits': new LimitsTableDefinitions(), 
+                                                                                                                                                                                                                                                                                                                                                                          'record-types': new RecordTypesInObjectTableDefinitions(),  
+                                                                                                                                                                                                                                                                                                                                                                          'relationships': new RelationshipsTableDefinitions(), 
+                                                                                                                                                                                                                                                                                                                                                                          'standard-fields': new StandardFieldsTableDefinitions(), 
+                                                                                                                                                                                                                                                                                                                                                                          'validation-rules': new ValidationRulesInObjectTableDefinitions(), 
+                                                                                                                                                                                                                                                                                                                                                                          'web-links': new WebLinksInObjectTableDefinitions(), 
+                                                                                                                                                                                                                                                                                                                                                                          'workflows': new WorkflowsTableDefinitions() }) },
+    'objects':                   { title: '🏉 Objects',                              recipe: RecipeAliases.OBJECTS,                   getter: (api: ApiIntf, p: ActionParameter) => (api.getObjects(p.namespace, p.type)),                         cacheStamp: cacheStamp_PackageType,  remover: (api: ApiIntf) => (api.removeAllObjectsFromCache()),                             tables: () => ({ main: new ObjectsTableDefinitions() }) },
+    'object-permissions':        { title: '🚦 Object Permissions',                   recipe: RecipeAliases.OBJECT_PERMISSIONS,        getter: (api: ApiIntf, p: ActionParameter) => (api.getObjectPermissionsPerParent(p.namespace)),              cacheStamp: cacheStamp_Package,      remover: (api: ApiIntf) => (api.removeAllObjectPermissionsFromCache()),                   tables: (dataMatrix: DataMatrixIntf) => ({ main: new ObjectPermissionsTableDefinitions(dataMatrix) }) },
+    'page-layouts':              { title: '🏓 Page Layouts',                         recipe: RecipeAliases.PAGE_LAYOUTS,              getter: (api: ApiIntf) => (api.getPageLayouts()),                                                            cacheStamp: cacheStamp_None,         remover: (api: ApiIntf) => (api.removeAllPageLayoutsFromCache()),                         tables: () => ({ main: new PageLayoutsTableDefinitions() }) },
+    'permission-set-licenses':   { title: '🚔 Permission Set Licenses',              recipe: RecipeAliases.PERMISSION_SET_LICENSES,   getter: (api: ApiIntf) => (api.getPermissionSetLicenses()),                                                  cacheStamp: cacheStamp_None,         remover: (api: ApiIntf) => (api.removeAllPermSetLicensesFromCache()),                     tables: () => ({ main: new PermissionSetLicensesTableDefinitions() }) },
+    'permission-sets':           { title: '🚔 Permission Sets',                      recipe: RecipeAliases.PERMISSION_SETS,           getter: (api: ApiIntf, p: ActionParameter) => (api.getPermissionSets(p.namespace)),                          cacheStamp: cacheStamp_Package,      remover: (api: ApiIntf) => (api.removeAllPermSetsFromCache()),                            tables: () => ({ main: new PermissionSetsTableDefinitions() }) },
+    'process-builders':          { title: '🛺 Process Builders',                     recipe: RecipeAliases.PROCESS_BUILDERS,          getter: (api: ApiIntf) => (api.getProcessBuilders()),                                                        cacheStamp: cacheStamp_None,         remover: (api: ApiIntf) => (api.removeAllProcessBuildersFromCache()),                     tables: () => ({ main: new ProcessBuildersTableDefinitions() }) },
+    'profile-password-policies': { title: '⛖ Profile Password Policies',            recipe: RecipeAliases.PROFILE_PWD_POLICIES,      getter: (api: ApiIntf) => (api.getProfilePasswordPolicies()),                                                cacheStamp: cacheStamp_None,         remover: (api: ApiIntf) => (api.removeAllProfilePasswordPoliciesFromCache()),             tables: () => ({ main: new ProfilePasswordPoliciesTableDefinitions() }) },
+    'profile-restrictions':      { title: '🚸 Profile Restrictions',                 recipe: RecipeAliases.PROFILE_RESTRICTIONS,      getter: (api: ApiIntf, p: ActionParameter) => (api.getProfileRestrictions(p.namespace)),                     cacheStamp: cacheStamp_Package,      remover: (api: ApiIntf) => (api.removeAllProfileRestrictionsFromCache()),                 tables: () => ({ main: new ProfileRestrictionsTableDefinitions() }) },
+    'profiles':                  { title: '🚓 Profiles',                             recipe: RecipeAliases.PROFILES,                  getter: (api: ApiIntf, p: ActionParameter) => (api.getProfiles(p.namespace)),                                cacheStamp: cacheStamp_Package,      remover: (api: ApiIntf) => (api.removeAllProfilesFromCache()),                            tables: () => ({ main: new ProfilesTableDefinitions() }) },
+    'public-groups':             { title: '🐘 Public Groups',                        recipe: RecipeAliases.PUBLIC_GROUPS,             getter: (api: ApiIntf) => (api.getPublicGroups()),                                                           cacheStamp: cacheStamp_None,         remover: (api: ApiIntf) => (api.removeAllPublicGroupsFromCache()),                        tables: () => ({ main: new PublicGroupsTableDefinitions() }) },
+    'queues':                    { title: '🦒 Queues',                               recipe: RecipeAliases.QUEUES,                    getter: (api: ApiIntf) => (api.getQueues()),                                                                 cacheStamp: cacheStamp_None,         remover: (api: ApiIntf) => (api.removeAllQueuesFromCache()),                              tables: () => ({ main: new QueuesTableDefinitions() }) },
+    'record-types':              { title: '🏏 Record Types',                         recipe: RecipeAliases.RECORD_TYPES,              getter: (api: ApiIntf, p: ActionParameter) => (api.getRecordTypes(p.namespace, p.type, p.sobject)),          cacheStamp: cacheStamp_All,          remover: (api: ApiIntf) => (api.removeAllRecordTypesFromCache()),                         tables: () => ({ main: new RecordTypesTableDefinitions() }) },
+    'reports':                   { title: '🌳 Reports',                              recipe: RecipeAliases.REPORTS,                   getter: (api: ApiIntf) => (api.getReports()),                                                                cacheStamp: cacheStamp_None,         remover: (api: ApiIntf) => (api.removeAllReportsFromCache()),                             tables: () => ({ main: new ReportsTableDefinitions() }) },
+    'static-resources':          { title: '🗿 Static Resources',                     recipe: RecipeAliases.STATIC_RESOURCES,          getter: (api: ApiIntf, p: ActionParameter) => (api.getStaticResources(p.namespace)),                         cacheStamp: cacheStamp_Package,      remover: (api: ApiIntf) => (api.removeAllStaticResourcesFromCache()),                     tables: () => ({ main: new StaticResourcesTableDefinitions() }) },
+    'user-roles-tree':           { title: '🐙 Internal Role Explorer',               recipe: RecipeAliases.USER_ROLES,                getter: (api: ApiIntf) => (api.getRolesTree()),                                                              cacheStamp: cacheStamp_None,         remover: (api: ApiIntf) => (api.removeAllRolesFromCache()) },
+    'user-roles':                { title: '🦓 Internal Role Listing',                recipe: RecipeAliases.USER_ROLES,                getter: (api: ApiIntf) => (api.getRoles()),                                                                  cacheStamp: cacheStamp_None,         remover: (api: ApiIntf) => (api.removeAllRolesFromCache()),                               tables: () => ({ main: new RolesTableDefinitions() }) },
+    'validation-rules':          { title: '🎾 Validation Rules',                     recipe: RecipeAliases.VALIDATION_RULES,          getter: (api: ApiIntf, p: ActionParameter) => (api.getValidationRules(p.namespace, p.type, p.sobject)),      cacheStamp: cacheStamp_All,          remover: (api: ApiIntf) => (api.removeAllValidationRulesFromCache()),                     tables: () => ({ main: new ValidationRulesTableDefinitions() }) },
+    'visualforce-components':    { title: '🍞 Visualforce Components',               recipe: RecipeAliases.VISUALFORCE_COMPONENTS,    getter: (api: ApiIntf, p: ActionParameter) => (api.getVisualForceComponents(p.namespace)),                   cacheStamp: cacheStamp_Package,      remover: (api: ApiIntf) => (api.removeAllVisualForceComponentsFromCache()),               tables: () => ({ main: new VisualForceComponentsTableDefinitions() }) },
+    'visualforce-pages':         { title: '🥖 Visualforce Pages',                    recipe: RecipeAliases.VISUALFORCE_PAGES,         getter: (api: ApiIntf, p: ActionParameter) => (api.getVisualForcePages(p.namespace)),                        cacheStamp: cacheStamp_Package,      remover: (api: ApiIntf) => (api.removeAllVisualForcePagesFromCache()),                    tables: () => ({ main: new VisualForcePagesTableDefinitions() }) },
+    'web-links':                 { title: '🏑 Web Links',                            recipe: RecipeAliases.WEBLINKS,                  getter: (api: ApiIntf, p: ActionParameter) => (api.getWeblinks(p.namespace, p.type, p.sobject)),             cacheStamp: cacheStamp_All,          remover: (api: ApiIntf) => (api.removeAllWeblinksFromCache()),                            tables: () => ({ main: new WebLinksTableDefinitions() }) },
+    'workflows':                 { title: '🚗 Workflows',                            recipe: RecipeAliases.WORKFLOWS,                 getter: (api: ApiIntf) => (api.getWorkflows()),                                                              cacheStamp: cacheStamp_None,         remover: (api: ApiIntf) => (api.removeAllWorkflowsFromCache()),                           tables: () => ({ main: new WorkflowsTableDefinitions() }) },
+});
+
 export class ApiFactory {
     public static create(setup: ApiSetup): ApiIntf {
         return new API(setup);
+    }
+    public static getActionTitle(actionName: string): string {
+        return actions[actionName]?.title;
+    }
+    public static cacheStamp(actionName: string, parameters: ActionParameter): string {
+        const method = actions[actionName]?.cacheStamp;
+        if (method) return actions[actionName]?.cacheStamp(parameters);
+        return '-';
+    }
+    public static async callGetter(api: ApiIntf, actionName: string, parameters: ActionParameter): Promise<Data | DataMatrixIntf | Data[] | DataCollectionStatisticsIntf[] | undefined> {
+        const method = actions[actionName]?.getter
+        if (method) return await method(api, parameters);
+        return undefined;
+    }
+    public static callRemover(api: ApiIntf, actionName: string, parameters: ActionParameter): void {
+        const method = actions[actionName]?.remover;
+        if (method) method(api, parameters);
+    }
+    public static getTables(actionName: string, data?: DataMatrixIntf): Map<string, Table> {
+        const method = actions[actionName]?.tables;
+        if (method) {
+            const tables = method(data);
+            return new Map<string, Table>(Object.keys(tables).map((key: string) => ([ key === 'main' ? actionName : key, tables[key]])));
+        }
+        return new Map();
     }
 }
 
@@ -169,80 +269,22 @@ export class Rules {
 }
 
 export class TableFactory {
-    public static createRows(tableDefintion: Table, rows: Array<any>, eachRow: Function, eachCell: Function): Array<Row> { 
-        return RowsFactory.create(tableDefintion, rows, eachRow, eachCell); 
+    public static createRows(tableDefinition: Table, rows: Array<any>, eachRow: Function, eachCell: Function): Array<Row> { 
+        return RowsFactory.create(tableDefinition, rows, eachRow, eachCell); 
     };
-    public static createAndExport(tableDefintion: Table, records: Array<any>, title: string): ExportedTable {
-        return RowsFactory.createAndExport(tableDefintion, records, title); 
+    public static createAndExport(tableDefinition: Table, records: Array<any>, title: string): ExportedTable {
+        return RowsFactory.createAndExport(tableDefinition, records, title); 
     };
     public static filterRows(rows: Array<Row>, searchInput: string) {
         RowsFactory.filter(rows, searchInput); 
     };
-    public static sortRows(tableDefintion: Table, rows: Array<Row>,  columnIndex: number, order: SortOrder) {
-        RowsFactory.sort(tableDefintion, rows,  columnIndex, order); 
+    public static sortRows(tableDefinition: Table, rows: Array<Row>,  columnIndex: number, order: SortOrder) {
+        RowsFactory.sort(tableDefinition, rows,  columnIndex, order); 
     };
     public static asXlsx(source: Array<ExportedTable> | ExportedTable): ArrayBuffer {
         return Exporter.exportAsXls(source);    
     }
-    public static asRaw(tableDefintion: Table, rows: Array<Row>, title: string): ExportedTable {
-        return RowsFactory.export(tableDefintion, rows, title);
+    public static asRaw(tableDefinition: Table, rows: Array<Row>, title: string): ExportedTable {
+        return RowsFactory.export(tableDefinition, rows, title);
     }
-}
-
-export class TableDefinitions {
-    static ApexClasses: typeof ApexClassesTableDefinitions = ApexClassesTableDefinitions;
-    static ApexTests: typeof ApexTestsTableDefinitions = ApexTestsTableDefinitions;
-    static ApexTriggers: typeof ApexTriggersTableDefinitions = ApexTriggersTableDefinitions;
-    static ApexTriggersInObject: typeof ApexTriggersInObjectTableDefinitions = ApexTriggersInObjectTableDefinitions;
-    static ApexUncompiled: typeof ApexUncompiledTableDefinitions = ApexUncompiledTableDefinitions;
-    static AppPermissions: typeof AppPermissionsTableDefinitions = AppPermissionsTableDefinitions;
-    static AuraComponents: typeof AuraComponentsTableDefinitions = AuraComponentsTableDefinitions;
-    static Browsers: typeof BrowsersTableDefinitions = BrowsersTableDefinitions;
-    static ChatterGroups: typeof ChatterGroupsTableDefinitions = ChatterGroupsTableDefinitions;
-    static CustomFields: typeof CustomFieldsTableDefinitions = CustomFieldsTableDefinitions;
-    static CustomFieldsInObject: typeof CustomFieldsInObjectTableDefinitions = CustomFieldsInObjectTableDefinitions;
-    static CustomLabels: typeof CustomLabelsTableDefinitions = CustomLabelsTableDefinitions;
-    static CustomTabs: typeof CustomTabsTableDefinitions = CustomTabsTableDefinitions;
-    static Dashboards: typeof DashboardsTableDefinitions = DashboardsTableDefinitions;
-    static Documents: typeof DocumentsTableDefinitions = DocumentsTableDefinitions;
-    static EmailTemplates: typeof EmailTemplatesTableDefinitions = EmailTemplatesTableDefinitions;
-    static FieldPermissions: typeof FieldPermissionsTableDefinitions = FieldPermissionsTableDefinitions;
-    static FieldSets: typeof FieldSetsTableDefinitions = FieldSetsTableDefinitions;
-    static FlexiPages: typeof FlexiPagesTableDefinitions = FlexiPagesTableDefinitions;
-    static FlexiPagesInObject: typeof FlexiPagesInObjectTableDefinitions = FlexiPagesInObjectTableDefinitions;
-    static Flows: typeof FlowsTableDefinitions = FlowsTableDefinitions;
-    static GlobalView: typeof GlobalViewItemsTableDefinitions = GlobalViewItemsTableDefinitions;
-    static HardCodedURLs: typeof HardCodedURLsTableDefinitions = HardCodedURLsTableDefinitions;
-    static HomePageComponents: typeof HomePageComponentsTableDefinitions = HomePageComponentsTableDefinitions;
-    static KnowledgeArticles: typeof KnowledgeArticlesTableDefinitions = KnowledgeArticlesTableDefinitions;
-    static Layouts: typeof LayoutsTableDefinitions = LayoutsTableDefinitions;
-    static LightningWebComponents: typeof LightningWebComponentsTableDefinitions = LightningWebComponentsTableDefinitions;
-    static Limits: typeof LimitsTableDefinitions = LimitsTableDefinitions;
-    static ObjectPermissions: typeof ObjectPermissionsTableDefinitions = ObjectPermissionsTableDefinitions;
-    static Objects: typeof ObjectsTableDefinitions = ObjectsTableDefinitions;
-    static PageLayouts: typeof PageLayoutsTableDefinitions = PageLayoutsTableDefinitions;
-    static PermissionSetLicenses: typeof PermissionSetLicensesTableDefinitions = PermissionSetLicensesTableDefinitions;
-    static PermissionSets: typeof PermissionSetsTableDefinitions = PermissionSetsTableDefinitions;
-    static ProcessBuilders: typeof ProcessBuildersTableDefinitions = ProcessBuildersTableDefinitions;
-    static ProfilePasswordPolicies: typeof ProfilePasswordPoliciesTableDefinitions = ProfilePasswordPoliciesTableDefinitions;
-    static ProfileRestrictions: typeof ProfileRestrictionsTableDefinitions = ProfileRestrictionsTableDefinitions;
-    static Profiles: typeof ProfilesTableDefinitions = ProfilesTableDefinitions;
-    static PublicGroups: typeof PublicGroupsTableDefinitions = PublicGroupsTableDefinitions;
-    static Queues: typeof QueuesTableDefinitions = QueuesTableDefinitions;
-    static RecordTypes: typeof RecordTypesTableDefinitions = RecordTypesTableDefinitions;
-    static RecordTypesInObject: typeof RecordTypesInObjectTableDefinitions = RecordTypesInObjectTableDefinitions;
-    static Relationships: typeof RelationshipsTableDefinitions = RelationshipsTableDefinitions;
-    static Reports: typeof ReportsTableDefinitions = ReportsTableDefinitions;
-    static Roles: typeof RolesTableDefinitions = RolesTableDefinitions;
-    static ScoreRules: typeof ScoreRulesTableDefinitions = ScoreRulesTableDefinitions;
-    static StandardFields: typeof StandardFieldsTableDefinitions = StandardFieldsTableDefinitions;
-    static StaticResources: typeof StaticResourcesTableDefinitions = StaticResourcesTableDefinitions;
-    static Users: typeof UsersTableDefinitions = UsersTableDefinitions;
-    static ValidationRules: typeof ValidationRulesTableDefinitions = ValidationRulesTableDefinitions;
-    static ValidationRulesInObject: typeof ValidationRulesInObjectTableDefinitions = ValidationRulesInObjectTableDefinitions;
-    static VisualForceComponents: typeof VisualForceComponentsTableDefinitions = VisualForceComponentsTableDefinitions;
-    static VisualForcePages: typeof VisualForcePagesTableDefinitions = VisualForcePagesTableDefinitions;
-    static WebLinks: typeof WebLinksTableDefinitions = WebLinksTableDefinitions;
-    static WebLinksInObject: typeof WebLinksTableDefinitions = WebLinksTableDefinitions;
-    static Workflows: typeof WorkflowsTableDefinitions = WorkflowsTableDefinitions;
 }

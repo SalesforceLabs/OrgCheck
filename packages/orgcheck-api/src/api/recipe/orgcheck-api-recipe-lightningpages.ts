@@ -1,7 +1,5 @@
 import { Recipe } from 'src/api/core/orgcheck-api-recipe';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
-import { Data } from 'src/api/core/orgcheck-api-data';
-import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
@@ -9,7 +7,7 @@ import { SfdcLightningPage }from 'src/api/data/orgcheck-api-data-lightningpage';
 import { SfdcObject }from 'src/api/data/orgcheck-api-data-object';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
-export class RecipeLightningPages implements Recipe {
+export class RecipeLightningPages implements Recipe<SfdcLightningPage[]> {
 
     /**
      * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
@@ -29,15 +27,15 @@ export class RecipeLightningPages implements Recipe {
      * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} _logger - Logger
      * @param {Map<string, any>} [parameters] - List of optional argument to pass
-     * @returns {Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<SfdcLightningPage[]>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
+    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<SfdcLightningPage[]> {
 
         // Get data and parameters
-        const /** @type {Map<string, SfdcLightningPage>} */ pages: Map<string, SfdcLightningPage> = data.get(DatasetAliases.LIGHTNINGPAGES);
-        const /** @type {Map<string, SfdcObject>} */ objects: Map<string, SfdcObject> = data.get(DatasetAliases.OBJECTS);
+        const pages: Map<string, SfdcLightningPage> = data.get(DatasetAliases.LIGHTNINGPAGES);
+        const objects: Map<string, SfdcObject> = data.get(DatasetAliases.OBJECTS);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
@@ -45,9 +43,9 @@ export class RecipeLightningPages implements Recipe {
         if (!objects) throw new Error(`RecipeLightningPages: Data from dataset alias 'OBJECTS' was undefined.`);
 
         // Augment and filter data
-        /** @type {Array<SfdcLightningPage>} */ 
+        
         const array: Array<SfdcLightningPage> = [];
-        await Processor.forEach(pages, async (/** @type {SfdcLightningPage} */ page: SfdcLightningPage) => {
+        await Processor.forEach(pages, async (page: SfdcLightningPage) => {
             // Augment data
             if (page.objectId) {
                 // if objectId was specified in the page, get the reference of the object

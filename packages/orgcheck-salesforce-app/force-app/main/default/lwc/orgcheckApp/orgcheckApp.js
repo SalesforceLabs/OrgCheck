@@ -112,7 +112,7 @@ export default class OrgcheckApp extends LightningElement {
      * @type {Array<{ label: string, name: string, expanded: boolean, items: Array<{ label: string, name: string, metatext: string }> }>}
      * @public
      */
-    navigationMenuItems = APPLICATION_NAVIGATION_MENU_ITEMS_FOR_TREE;
+    navigationMenuItems;
 
     /**
      * @description Selected item in the navigation tree
@@ -136,6 +136,7 @@ export default class OrgcheckApp extends LightningElement {
      * @property {any} spinner - Spinner component
      * @property {any} modal - Modal component
      * @property {any} filters - Global filter component
+     * @property {any} initialNavigationMenuItems - Initial navigation menu items
      */
     _private_properties = {
         api: undefined,
@@ -143,7 +144,9 @@ export default class OrgcheckApp extends LightningElement {
         childrenReady: false,
         spinner: undefined,
         modal: undefined,
-        filters: undefined
+        filters: undefined,
+        initialNavigationMenuItems: undefined,
+        actionsByNavKey: undefined
     };
 
     /**
@@ -199,7 +202,7 @@ export default class OrgcheckApp extends LightningElement {
             // Create an Org Check API
             this._private_properties.spinner?.sectionLog(SECTION_03, `Start initiating...`);
             try {
-                this._private_properties.api = instantiateOrgCheckAPI({
+                this._private_properties.api = __orgcheck__CreateAPI({
                     salesforce: {
                         authenticationOptions: {
                             accessToken: this.accessToken
@@ -237,6 +240,10 @@ export default class OrgcheckApp extends LightningElement {
                 // Get the Salesforce API version we are using because we want to display it in the headers
                 this._private_properties.spinner?.sectionLog(SECTION_04, `Get the Salesforce API version used that Org Check is using...`);
                 this.salesforceApiVersion = this._private_properties.api?.salesforceApiVersion;
+                // Create the initial navigation tree
+                const appNavigationParsed = parseApplicationNavigation();
+                this.navigationMenuItems = this._private_properties.initialNavigationMenuItems = appNavigationParsed.menuItems;
+                this._private_properties.actionsByNavKey = appNavigationParsed.actionsByNavKey;
                 // Load basic information if the user has already accepted the terms
                 this._spinner?.sectionLog(SECTION_04, `Load basic information if the user has already accepted the terms...`);
                 await this._async_loadBasicInformationIfAccepted();
@@ -330,7 +337,7 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */
     async _async_goToPage(keyPage) {
-        if (NAVIGATION_ITEMS_BY_KEY.has(keyPage)) {
+        if (this._private_properties.actionsByNavKey.has(keyPage)) {
             try {
                 this.isLoading = true;
                 if (this.useOrgCheck.accepted === false) {
@@ -362,8 +369,7 @@ export default class OrgcheckApp extends LightningElement {
                 const key = contentPanel.getAttribute('data-key');
                 if (key === this.navigationMenuSelected) {
                     panelFound = true;
-                    const subItem = NAVIGATION_ITEMS_BY_KEY.get(this.navigationMenuSelected); 
-                    this.currentContentTitle = subItem?.title;
+                    this.currentContentTitle = this._private_properties.actionsByNavKey.get(this.navigationMenuSelected)?.title ?? '<unknown';
                     contentPanel.classList.remove('slds-hide');
                 } else {
                     contentPanel.classList.add('slds-hide');
@@ -385,121 +391,48 @@ export default class OrgcheckApp extends LightningElement {
      */ 
     async _async_updateCurrentData(forceRefresh) {
 
-        const navigationItem = NAVIGATION_ITEMS_BY_KEY.get(this.navigationMenuSelected); 
-        if (navigationItem && this._private_properties.api) {
+        const action = this._private_properties.actionsByNavKey.get(this.navigationMenuSelected); 
+        if (action && this._private_properties.api) {
+
             // --------------------------------------------------------------------------------
             // Potentially we need to refresh the data 
             // --------------------------------------------------------------------------------
-            // if forceRefresh = true and the navigationItem has a 'clear' property, we want to refresh the data from the API 
-            if (forceRefresh === true && navigationItem.clear) {
-                // get the reference of the corresponding 'clear' method in the API
-                const clearMethod = this._private_properties.api[navigationItem.clear];
-                // check if the method exists in the API
-                if (clearMethod) {
-                    // call the method from the API that will clear the cache for this data
-                    this._private_properties.api[navigationItem.clear]();
-                } else {
-                    // Just in case...
-                    console.warn(`Trying to clear cache for key ${key} but method ${navigationItem.clear} does not exist in the API`);
-                }
+            // if forceRefresh = true, we want to refresh the data from the API 
+            if (forceRefresh === true) {
+                __orgcheck__CallRemover(this._private_properties.api, action.name);
             }
+            
             // --------------------------------------------------------------------------------
             // Alias is useful to check if the data has potentially changed
             // Each data may have a dependency with global filters, so if one of the filter 
-            // changed and the value has dependecy with it, ot's more likely that the data 
+            // changed and the value has dependency with it, it's more likely that the data 
             // needs top be updated
             // --------------------------------------------------------------------------------
             // get the current alias depending on the dependency with global filter values
-            let alias;
-            switch (navigationItem.alias) {
-                case ALIASES.PACKAGE:         alias = `${this.namespace}`; break;
-                case ALIASES.ALL:             alias = `${this.namespace}-${this.objectType}-${this.object}`; break;
-                case ALIASES.OBJ_PCK:         alias = `${this.object}-${this.namespace}`; break;
-                case ALIASES.PCK_TYP:         alias = `${this.namespace}-${this.objectType}`; break;
-                case ALIASES.OBJECT:          alias = `${this.object}`; break;
-                case ALIASES.NONE: default:   alias = '-'; forceRefresh = true; break;
-            }
-            if (navigationItem.get && (forceRefresh === true || navigationItem.lastAlias !== alias)) {
+            let alias = __orgcheck__CacheStamp(this.namespace, this.objectType, this.object);
+            if (alias === '-') forceRefresh = true;
+
+            if (forceRefresh === true || action.lastAlias !== alias) {
                 // update the last alias value with this alias
-                navigationItem.lastAlias = alias;
-                // shall we proceed getting the data for this item? It depends if there is a getOnlyIf condition or not, and if yes if it is validated or not
-                if (navigationItem.getOnlyIf ? navigationItem.getOnlyIf(this) === true : true) {
-                    // get the reference of the corresponding 'get' method in the API
-                    const getMethod = this._private_properties.api[navigationItem.get];
-                    // check if the method exists in the API
-                    if (getMethod) {
-                        // Wee need potentially to pass some parameters to the get method, depending on the definition of the item
-                        // Important: keep the order of the parameters as defined
-                        const parameters = navigationItem.getParameters ? navigationItem.getParameters.map((p) => {
-                            switch (p) {
-                                case PARAMETERS.NAMESPACE: return this.namespace;
-                                case PARAMETERS.OBJECT: return this.object;
-                                case PARAMETERS.TYPE: return this.objectType;
-                            }
-                        }) : [];
-                        // call the method from the API that will get the data
-                        let data = await this._private_properties.api[navigationItem.get](...parameters);
-                        // if you need to post process
-                        if (navigationItem.postProcess) {
-                            data = navigationItem.postProcess(this, data);
-                        }
-                        // If the data is a DataMatrix, the data needs to be extract in a special property
-                        // Else just a data then save it
-                        this._setData(navigationItem.data, navigationItem.isDataMatrix ? (data?.rows ?? []) : data);
-                        // Optional parameters for the tableDefinition(s) (if any)
-                        if (navigationItem.tableDefinitions || navigationItem.tableDefinition) {
-                            // if dataMatrix we pass the entire data
-                            // if object we pass false because we don't want to have object-related columns
-                            // else we pass undefined because there is no specific parameter to pass
-                            const param = navigationItem.isDataMatrix ? data : undefined;
-                            (navigationItem.tableDefinitions ?? [ navigationItem.tableDefinition ]).forEach((tableDef) => {
-                                this._setTableDefinition(tableDef, param);
-                            });
-                        }
-                    } else {
-                        // Just in case...
-                        console.warn(`Trying to get data for key ${key} but method ${navigationItem.get} does not exist in the API`);
+                action.lastAlias = alias;
+                // shall we proceed getting the data for this item? It depends if there is a onlyIf condition or not, and if yes if it is validated or not
+                if (action.onlyIf ? action.onlyIf(this) === true : true) {
+                    // If yes we call the getter
+                    let data = await __orgcheck__CallGetter(this._private_properties.api, action.name, this.namespace, this.objectType, this.object);
+                    if (data) {
+                        // Key in template can't have '-'
+                        const transform = (s) => (s.replaceAll('-', ''));
+                        // we set the data
+                        this.data[transform(action.name)] = data.rows ?? data;
+                        // we set the table definition(s)
+                        const tables = __orgcheck__GetTables(action.name, data);
+                        tables.forEach((table, key) => {
+                            this.tableDefinitions[transform(key)] = table;
+                        })
                     }
                 }                
             }
         }
-    }
-
-    /**
-     * @description Set a specific data in the global object called 'data'
-     * @param {string} name
-     * @param {any} data 
-     */
-    _setData(name, data) {
-        const dataName = lowercaseFirstLetter(name);
-        this.data[dataName] = data;
-    }
-
-    /**
-     * @description Set a specific table definition in the global object called 'tableDefinitions'
-     * @param {string} name
-     * @param {any} data 
-     */
-    _setTableDefinition(name, data) {
-        const tableDefName = lowercaseFirstLetter(name);
-        this.tableDefinitions[tableDefName] = instantiateOrgCheckTableDefinition(name, data);;
-    }
-
-    /**
-     * @description Get a specific table definition from the global object called 'tableDefinitions'
-     * @param {string} name
-     */
-    _getTableDefinition(name, data) {
-        const tableDefName = lowercaseFirstLetter(name);
-        const tableDefinition = this.tableDefinitions[tableDefName];
-        // if it exists
-        if (tableDefinition) {
-            return tableDefinition;
-        }
-        // if not yet, let's set it...
-        this._setTableDefinition(name, data);
-        // and we return it!
-        return this.tableDefinitions[tableDefName];
     }
 
     /**
@@ -760,7 +693,7 @@ export default class OrgcheckApp extends LightningElement {
         try {
             const searchTerm = event?.target?.value?.toLowerCase() || '';
             if (searchTerm) {
-                this.navigationMenuItems = APPLICATION_NAVIGATION_MENU_ITEMS_FOR_TREE.map((section) => {
+                this.navigationMenuItems = this._private_properties.initialNavigationMenuItems.map((section) => {
                     const itemsMatching = section.items.filter((item) => item.label.toLowerCase().includes(searchTerm));
                     const isItemsMatching = itemsMatching.length > 0;
                     const isItemMatching = section.label.toLowerCase().includes(searchTerm);
@@ -772,7 +705,7 @@ export default class OrgcheckApp extends LightningElement {
                     }
                 }).filter((section) => section.items.length > 0);
             } else {
-                this.navigationMenuItems = APPLICATION_NAVIGATION_MENU_ITEMS_FOR_TREE;
+                this.navigationMenuItems = this._private_properties.initialNavigationMenuItems;
             }
         } catch (error) {
             this._showError('handleNavigationMenuSearch', error);
@@ -1125,19 +1058,24 @@ const getOrgCheck = () => {
     return (typeof window !== 'undefined' ? window?.orgcheck : globalThis?.orgcheck ?? null)
 }
 
-const instantiateOrgCheckAPI = (setup) => {
-    const creatorMethod = getOrgCheck()?.ApiFactory?.create;
-    if (creatorMethod) return creatorMethod(setup);
-    return undefined;
+const __orgcheck__CreateAPI = (setup) => {
+    return getOrgCheck()?.ApiFactory?.create(setup);
 }
 
-const instantiateOrgCheckTableDefinition = (name, data) => {
-    const tableDefinitions = getOrgCheck()?.TableDefinitions;
-    if (tableDefinitions) {
-        const tableDefConstructor = tableDefinitions[name];
-        if (tableDefConstructor) return new tableDefConstructor(data);
-    }
-    return undefined;
+const __orgcheck__CallRemover = (api, actionName, parameters) => {
+    return getOrgCheck()?.ApiFactory?.callRemover(api, actionName, parameters);
+}
+
+const __orgcheck__CacheStamp = (namespace, objecttype, object) => {
+    return getOrgCheck()?.ApiFactory?.cacheStamp({ namespace: namespace, type: objecttype, sobject: object});
+}
+
+const __orgcheck__CallGetter = (api, actionName, namespace, objecttype, object) => {
+    return getOrgCheck()?.ApiFactory?.callGetter(api, actionName, { namespace: namespace, type: objecttype, sobject: object});
+}
+
+const __orgcheck__GetTables = (actionName, data) => {
+    return getOrgCheck()?.ApiFactory?.getTables(actionName, data);
 }
 
 const createAndExport = (... argv) => {
@@ -1152,172 +1090,138 @@ const getRuleById = (id) => {
     return undefined;
 }
 
-const ALIASES = {
-    NONE: 'none',
-    ALL: 'all',
-    PACKAGE: 'namespace',
-    OBJECT: 'object',
-    OBJ_PCK: 'object-namespace',
-    PCK_TYP: 'namespace-type'
+const parseApplicationNavigation = () => {
+    const getActionTitleMethod = getOrgCheck()?.ApiFactory?.getActionTitle;
+    const actionsByNavKey = new Map();
+    const menuItems = Object.keys(APPLICATION_NAVIGATION).map((sectionKey) => { 
+        const section = APPLICATION_NAVIGATION[sectionKey];
+        return {
+            label: section.title,
+            name: section.key,
+            expanded: false,
+            items: Object.keys(section.items).map((itemKey) => {
+                const item = section.items[itemKey];
+                const title = getActionTitleMethod(item.actionName);
+                actionsByNavKey.set(item.key, { name: item.actionName, title, lastAlias: '', onlyIf: item.onlyIf });
+                return { label: title, name: item.key }
+            })
+        }
+    });
+    return { menuItems, actionsByNavKey };
 }
 
-const PARAMETERS = {
-    OBJECT: 'object',
-    NAMESPACE: 'namespace',
-    TYPE: 'objectType'
-}
-
-const ANY = '*';
-const EMPTY = '';
-
-const lowercaseFirstLetter = (string) => {
-  return string.charAt(0).toLowerCase() + string.slice(1)
-}
-
-/**
- * @description Application navigation in two levels
- * @constant
- */
 const APPLICATION_NAVIGATION = {
     HOME: { 
-        key:   'A', 
+        key: 'A', 
         title: 'Home',
-        disabledIfTermsNotYetAccepted: false,
         items: { 
-            WELCOME:       { key: '01', title: '👋 Welcome!' },
-            CACHE:         { key: '02', title: '🛠️ Metadata Cache',    data: 'cacheItems', alias: ALIASES.NONE, get: 'getCacheInformation' },
-            HELP:          { key: '03', title: '⁉️ Score explanation', data: 'scoreRules', alias: ALIASES.NONE, get: 'getAllScoreRulesAsDataMatrix', tableDefinition: 'ScoreRules', isDataMatrix: true }
+            WELCOME:       { key: '01', actionName: '-welcome-' },
+            CACHE:         { key: '02', actionName: '-cache-' },
+            HELP:          { key: '03', actionName: '-score-rules-' }
         }
     },
     ORG: { 
-        key:   'B', 
+        key: 'B', 
         title: '🗺️ Salesforce Organization',
-        disabledIfTermsNotYetAccepted: true,
         items: { 
-            GLOBAL_VIEW:   { key: '04', title: '🏞️ Overview',        recipe: 'global-view',    data: 'globalView',    clear: 'removeGlobalViewFromCache',    alias: ALIASES.NONE, get: 'getGlobalView',        postProcess: (that, data) => { return that._globalViewPostProcess(data); },    tableDefinition: 'GlobalView' },
-            URL_VIEW:      { key: '05', title: '🏖️ Hard coded URLs', recipe: 'hardcoded-urls', data: 'hardCodedURLs', clear: 'removeHardcodedURLsFromCache', alias: ALIASES.NONE, get: 'getHardcodedURLsView', postProcess: (that, data) => { return that._hardCodedURLsPostProcess(data); }, tableDefinition: 'HardCodedURLs' },
+            GLOBAL_VIEW:   { key: '04', actionName: 'global-view' },
+            URL_VIEW:      { key: '05', actionName: 'hardcoded-urls' },
         }
     },
     DATAMODEL: { 
-        key:   'C', 
+        key: 'C', 
         title: '⚽ Data model',
-        disabledIfTermsNotYetAccepted: true,
         items: { 
-            SOBJ_DESC:     { key: '06', title: '🎳 Object Documentation', recipe: 'object',           data: 'objectData',      clear: 'removeObjectFromCache',             alias: ALIASES.OBJECT,    get: 'getObject',          getOnlyIf: (that) => (that.isObjectSpecified), tableDefinitions: [ 'ApexTriggersInObject', 'CustomFieldsInObject', 'FieldSets', 'FlexiPagesInObject', 
-                                                                                                                                                                                                                                                                                     'PageLayouts', 'Limits', 'RecordTypesInObject', 'Relationships', 'StandardFields', 
-                                                                                                                                                                                                                                                                                     'ValidationRulesInObject', 'WebLinksInObject', 'Workflows' ], getParameters: [ PARAMETERS.OBJECT ] },
-            SOBJECTS:      { key: '07', title: '🏉 Objects',              recipe: 'objects',          data: 'objects',         clear: 'removeAllObjectsFromCache',         alias: ALIASES.PCK_TYP,   get: 'getObjects',         tableDefinition: 'Objects',                    getParameters: [ PARAMETERS.NAMESPACE, PARAMETERS.TYPE ] },
-            CUSTOM_FIELDS: { key: '08', title: '🏈 Custom Fields',        recipe: 'custom-fields',    data: 'customFields',    clear: 'removeAllCustomFieldsFromCache',    alias: ALIASES.ALL,       get: 'getCustomFields',    tableDefinition: 'CustomFields',               getParameters: [ PARAMETERS.NAMESPACE, PARAMETERS.TYPE, PARAMETERS.OBJECT ] },
-            LAYOUTS:       { key: '09', title: '🏓 Page Layouts',         recipe: 'page-layouts',     data: 'pageLayouts',     clear: 'removeAllPageLayoutsFromCache',     alias: ALIASES.ALL,       get: 'getPageLayouts',     tableDefinition: 'PageLayouts',                getParameters: [ PARAMETERS.NAMESPACE, PARAMETERS.TYPE, PARAMETERS.OBJECT ] },
-            VRS:           { key: '0A', title: '🎾 Validation Rules',     recipe: 'validation-rules', data: 'validationRules', clear: 'removeAllValidationRulesFromCache', alias: ALIASES.ALL,       get: 'getValidationRules', tableDefinition: 'ValidationRules',            getParameters: [ PARAMETERS.NAMESPACE, PARAMETERS.TYPE, PARAMETERS.OBJECT ] },
-            RTS:           { key: '0B', title: '🏏 Record Types',         recipe: 'record-types',     data: 'recordTypes',     clear: 'removeAllRecordTypesFromCache',     alias: ALIASES.ALL,       get: 'getRecordTypes',     tableDefinition: 'RecordTypes',                getParameters: [ PARAMETERS.NAMESPACE, PARAMETERS.TYPE, PARAMETERS.OBJECT ] },
-            WEB_LINKS:     { key: '0C', title: '🏑 Web Links',            recipe: 'web-links',        data: 'webLinks',        clear: 'removeAllWeblinksFromCache',        alias: ALIASES.ALL,       get: 'getWeblinks',        tableDefinition: 'WebLinks',                   getParameters: [ PARAMETERS.NAMESPACE, PARAMETERS.TYPE, PARAMETERS.OBJECT ] },
+            SOBJ_DESC:     { key: '06', actionName: 'object', /* get the data only if the object is specified */ onlyIf: (that) => (that.isObjectSpecified)  },
+            SOBJECTS:      { key: '07', actionName: 'objects' },
+            CUSTOM_FIELDS: { key: '08', actionName: 'custom-fields' },
+            LAYOUTS:       { key: '09', actionName: 'page-layouts' },
+            VRS:           { key: '0A', actionName: 'validation-rules' },
+            RTS:           { key: '0B', actionName: 'record-types' },
+            WEB_LINKS:     { key: '0C', actionName: 'web-links' },
         }
     },
     SECURITY: { 
-        key:   'D', 
+        key: 'D', 
         title: '👮 Security and Access',
-        disabledIfTermsNotYetAccepted: true,
         items: { 
-            USERS:         { key: '0D', title: '👥 Active Internal Users',     recipe: 'internal-active-users',    data: 'users',                    clear: 'removeAllActiveUsersFromCache',            alias: ALIASES.NONE,     get: 'getActiveUsers',                     tableDefinition: 'Users' },
-            PROFILES:      { key: '0E', title: '🚓 Profiles',                  recipe: 'profiles',                 data: 'profiles',                 clear: 'removeAllProfilesFromCache',               alias: ALIASES.PACKAGE,  get: 'getProfiles',                        tableDefinition: 'Profiles',                getParameters: [ PARAMETERS.NAMESPACE ] },
-            PSETS:         { key: '0F', title: '🚔 Permission Sets',           recipe: 'permission-sets',          data: 'permissionSets',           clear: 'removeAllPermSetsFromCache',               alias: ALIASES.PACKAGE,  get: 'getPermissionSets',                  tableDefinition: 'PermissionSets',          getParameters: [ PARAMETERS.NAMESPACE ] },
-            PSLS:          { key: '10', title: '🚔 Permission Set Licenses',   recipe: 'permission-set-licenses',  data: 'permissionSetLicenses',    clear: 'removeAllPermSetLicensesFromCache',        alias: ALIASES.PACKAGE,  get: 'getPermissionSetLicenses',           tableDefinition: 'PermissionSetLicenses',   getParameters: [ PARAMETERS.NAMESPACE ] },
-            PROFILE_RSTRS: { key: '11', title: '🚸 Profile Restrictions',      recipe: 'profile-restrictions',     data: 'profileRestrictions',      clear: 'removeAllProfileRestrictionsFromCache',    alias: ALIASES.PACKAGE,  get: 'getProfileRestrictions',             tableDefinition: 'ProfileRestrictions',     getParameters: [ PARAMETERS.NAMESPACE ] },
-            PROFILE_PWDS:  { key: '12', title: '⛖ Profile Password Policies', recipe: 'profile-password-policies', data: 'profilePasswordPolicies', clear: 'removeAllProfilePasswordPoliciesFromCache', alias: ALIASES.NONE,     get: 'getProfilePasswordPolicies',         tableDefinition: 'ProfilePasswordPolicies' },
-            CRUDS:         { key: '13', title: '🚦 Object Permissions',        recipe: 'object-permissions',       data: 'objectPermissions',       clear: 'removeAllObjectPermissionsFromCache',       alias: ALIASES.PACKAGE,  get: 'getObjectPermissionsPerParent',      tableDefinition: 'ObjectPermissions',       getParameters: [ PARAMETERS.NAMESPACE ],                    isDataMatrix: true },
-            FLSS:          { key: '14', title: '🚧 Field Level Securities',    recipe: 'field-permissions',        data: 'fieldPermissions',        clear: 'removeAllFieldPermissionsFromCache',        alias: ALIASES.OBJ_PCK,  get: 'getFieldPermissionsPerParent',       tableDefinition: 'FieldPermissions',        getParameters: [ PARAMETERS.OBJECT, PARAMETERS.NAMESPACE ], isDataMatrix: true },
-            APP_PERMS:     { key: '15', title: '⛕ Application Permissions',   recipe: 'app-permissions',          data: 'appPermissions',           clear: 'removeAllAppPermissionsFromCache',          alias: ALIASES.PACKAGE,  get: 'getApplicationPermissionsPerParent', tableDefinition: 'AppPermissions',          getParameters: [ PARAMETERS.NAMESPACE ],                    isDataMatrix: true },
-            BROWSERS:      { key: '16', title: '🌐 Browsers',                  recipe: 'browsers',                 data: 'browsers',                 clear: 'removeAllBrowsersFromCache',               alias: ALIASES.NONE,     get: 'getBrowsers',                         tableDefinition: 'Browsers' },
+            USERS:         { key: '0D', actionName: 'internal-active-users' },
+            PROFILES:      { key: '0E', actionName: 'profiles' },
+            PSETS:         { key: '0F', actionName: 'permission-sets' },
+            PSLS:          { key: '10', actionName: 'permission-set-licenses' },
+            PROFILE_RSTRS: { key: '11', actionName: 'profile-restrictions' },
+            PROFILE_PWDS:  { key: '12', actionName: 'profile-password-policies' },
+            CRUDS:         { key: '13', actionName: 'object-permissions' },
+            FLSS:          { key: '14', actionName: 'field-permissions', /* get the data only if the object is specified */ onlyIf: (that) => (that.isObjectSpecified) },
+            APP_PERMS:     { key: '15', actionName: 'app-permissions' },
+            BROWSERS:      { key: '16', actionName: 'browsers' },
         }
     },
     BOXES: { 
-        key:   'E', 
+        key: 'E', 
         title: '🐇 Boxes',
-        disabledIfTermsNotYetAccepted: true,
         items: { 
-            ROLES_GRAPH:   { key: '17', title: '🐙 Internal Role Explorer', recipe: 'user-roles',           data: 'rolesTree',     clear: 'removeAllRolesFromCache',         alias: ALIASES.NONE, get: 'getRolesTree' },
-            ROLES:         { key: '18', title: '🦓 Internal Role Listing',  recipe: 'user-roles',           data: 'roles',         clear: 'removeAllRolesFromCache',         alias: ALIASES.NONE, get: 'getRoles',         tableDefinition: 'Roles' },
-            PGS:           { key: '19', title: '🐘 Public Groups',          recipe: 'public-groups',        data: 'publicGroups',  clear: 'removeAllPublicGroupsFromCache',  alias: ALIASES.NONE, get: 'getPublicGroups',  tableDefinition: 'PublicGroups' },
-            QUEUES:        { key: '1A', title: '🦒 Queues',                 recipe: 'queues',               data: 'queues',        clear: 'removeAllQueuesFromCache',        alias: ALIASES.NONE, get: 'getQueues',        tableDefinition: 'Queues' },
-            CHT_GROUPS:    { key: '1B', title: '🦙 Chatter Groups',         recipe: 'collaboration-groups', data: 'chatterGroups', clear: 'removeAllChatterGroupsFromCache', alias: ALIASES.NONE, get: 'getChatterGroups', tableDefinition: 'ChatterGroups' },
+            ROLES_GRAPH:   { key: '17', actionName: 'user-roles-tree' },
+            ROLES:         { key: '18', actionName: 'user-roles' },
+            PGS:           { key: '19', actionName: 'public-groups' },
+            QUEUES:        { key: '1A', actionName: 'queues' },
+            CHT_GROUPS:    { key: '1B', actionName: 'collaboration-groups' },
         }
     },
     AUTOMATION: { 
-        key:   'F', 
+        key: 'F', 
         title: '🤖 Automations',
-        disabledIfTermsNotYetAccepted: true,
         items: { 
-            FLOWS:         { key: '1C', title: '🏎️ Flows',            recipe: 'flows',            data: 'flows',           clear: 'removeAllFlowsFromCache',           alias: ALIASES.NONE, get: 'getFlows',           tableDefinition: 'Flows' },
-            PBS:           { key: '1D', title: '🛺 Process Builders', recipe: 'process-builders', data: 'processBuilders', clear: 'removeAllProcessBuildersFromCache', alias: ALIASES.NONE, get: 'getProcessBuilders', tableDefinition: 'ProcessBuilders' },
-            WORKFLOWS:     { key: '1E', title: '🚗 Workflows',        recipe: 'workflows',        data: 'workflows',       clear: 'removeAllWorkflowsFromCache',       alias: ALIASES.NONE, get: 'getWorkflows',       tableDefinition: 'Workflows' },
+            FLOWS:         { key: '1C', actionName: 'flows' },
+            PBS:           { key: '1D', actionName: 'process-builders' },
+            WORKFLOWS:     { key: '1E', actionName: 'workflows' },
         }
     },
     SETTING: { 
-        key:   'G', 
+        key: 'G', 
         title: '🎁 Setting',
-        disabledIfTermsNotYetAccepted: true,
         items: {
-            LABELS:        { key: '1F', title: '🏷️ Custom Labels',      recipe: 'custom-labels',      data: 'customLabels',      clear: 'removeAllCustomLabelsFromCache',      alias: ALIASES.PACKAGE, get: 'getCustomLabels',      tableDefinition: 'CustomLabels',     getParameters: [ PARAMETERS.NAMESPACE ] },
-            DOCUMENTS:     { key: '20', title: '🍱 Documents',          recipe: 'documents',          data: 'documents',         clear: 'removeAllDocumentsFromCache',         alias: ALIASES.PACKAGE, get: 'getDocuments',         tableDefinition: 'Documents',        getParameters: [ PARAMETERS.NAMESPACE ] },
-            EMAIL_TPLS:    { key: '21', title: '🌇 Email Templates',    recipe: 'email-templates',    data: 'emailTemplates',    clear: 'removeAllEmailTemplatesFromCache',    alias: ALIASES.PACKAGE, get: 'getEmailTemplates',    tableDefinition: 'EmailTemplates',   getParameters: [ PARAMETERS.NAMESPACE ] },
-            ARTICLES:      { key: '22', title: '📚 Knowledge Articles', recipe: 'knowledge-articles', data: 'knowledgeArticles', clear: 'removeAllKnowledgeArticlesFromCache', alias: ALIASES.NONE,    get: 'getKnowledgeArticles', tableDefinition: 'KnowledgeArticles' },
-            SRS:           { key: '23', title: '🗿 Static Resources',   recipe: 'static-resources',   data: 'staticResources',   clear: 'removeAllStaticResourcesFromCache',   alias: ALIASES.PACKAGE, get: 'getStaticResources',   tableDefinition: 'StaticResources',  getParameters: [ PARAMETERS.NAMESPACE ] },
+            LABELS:        { key: '1F', actionName: 'custom-labels' },
+            DOCUMENTS:     { key: '20', actionName: 'documents' },
+            EMAIL_TPLS:    { key: '21', actionName: 'email-templates' },
+            ARTICLES:      { key: '22', actionName: 'knowledge-articles' },
+            SRS:           { key: '23', actionName: 'static-resources' },
         }
     },
     VISUAL: { 
-        key:   'H', 
+        key: 'H', 
         title: '🥐 User Interface',
-        disabledIfTermsNotYetAccepted: true,
         items: {
-            VFPS:          { key: '24', title: '🥖 Visualforce Pages',         recipe: 'visualforce-pages',         data: 'visualForcePages',       clear: 'removeAllVisualForcePagesFromCache',        alias: ALIASES.PACKAGE, get: 'getVisualForcePages',        tableDefinition: 'VisualForcePages',       getParameters: [ PARAMETERS.NAMESPACE ]},
-            VFCS:          { key: '25', title: '🍞 Visualforce Components',    recipe: 'visualforce-components',    data: 'visualForceComponents',  clear: 'removeAllVisualForceComponentsFromCache',   alias: ALIASES.PACKAGE, get: 'getVisualForceComponents',   tableDefinition: 'VisualForceComponents',  getParameters: [ PARAMETERS.NAMESPACE ] },
-            LG_PAGES:      { key: '26', title: '🎂 Lightning Pages',           recipe: 'lightning-pages',           data: 'flexiPages',             clear: 'removeAllLightningPagesFromCache',          alias: ALIASES.PACKAGE, get: 'getLightningPages',          tableDefinition: 'FlexiPages',             getParameters: [ PARAMETERS.NAMESPACE ] },
-            AURAS:         { key: '27', title: '🧁 Lightning Aura Components', recipe: 'lightning-aura-components', data: 'auraComponents',         clear: 'removeAllLightningAuraComponentsFromCache', alias: ALIASES.PACKAGE, get: 'getLightningAuraComponents', tableDefinition: 'AuraComponents',         getParameters: [ PARAMETERS.NAMESPACE ] },
-            LWCS:          { key: '28', title: '🍰 Lightning Web Components',  recipe: 'lightning-web-components',  data: 'lightningWebComponents', clear: 'removeAllLightningWebComponentsFromCache',  alias: ALIASES.PACKAGE, get: 'getLightningWebComponents',  tableDefinition: 'LightningWebComponents', getParameters: [ PARAMETERS.NAMESPACE ] },
-            HOME_PAGES:    { key: '29', title: '🍩 Home Page Components',      recipe: 'home-page-components',      data: 'homePageComponents',     clear: 'removeAllHomePageComponentsFromCache',      alias: ALIASES.NONE,    get: 'getHomePageComponents',      tableDefinition: 'HomePageComponents' },
-            TABS:          { key: '2A', title: '🥠 Custom Tabs',               recipe: 'custom-tabs',               data: 'customTabs',             clear: 'removeAllCustomTabsFromCache',              alias: ALIASES.PACKAGE, get: 'getCustomTabs',              tableDefinition: 'CustomTabs',             getParameters: [ PARAMETERS.NAMESPACE ] },
+            VFPS:          { key: '24', actionName: 'visualforce-pages' },
+            VFCS:          { key: '25', actionName: 'visualforce-components' },
+            LG_PAGES:      { key: '26', actionName: 'lightning-pages' },
+            AURAS:         { key: '27', actionName: 'lightning-aura-components' },
+            LWCS:          { key: '28', actionName: 'lightning-web-components' },
+            HOME_PAGES:    { key: '29', actionName: 'homepages' },
+            TABS:          { key: '2A', actionName: 'custom-tabs' },
         }
     },
     CODE: { 
-        key:   'I', 
+        key: 'I', 
         title: '🔥 Programmatic',
-        disabledIfTermsNotYetAccepted: true,
         items: {
-            CLASSES:       { key: '2B', title: '❤️‍🔥 Apex Classes',                         recipe: 'apex-classes',    data: 'apexClasses',    clear: 'removeAllApexClassesFromCache',    alias: ALIASES.PACKAGE, get: 'getApexClasses',    tableDefinition: 'ApexClasses',    getParameters: [ PARAMETERS.NAMESPACE ] },
-            UNCOMPILEDS:   { key: '2C', title: '🌋 Apex Classes That Need Recompilation', recipe: 'apex-uncompiled', data: 'apexUncompiled', clear: 'removeAllApexUncompiledFromCache', alias: ALIASES.PACKAGE, get: 'getApexUncompiled', tableDefinition: 'ApexUncompiled', getParameters: [ PARAMETERS.NAMESPACE ] },
-            TRIGGERS:      { key: '2D', title: '🧨 Apex Triggers',                        recipe: 'apex-triggers',   data: 'apexTriggers',   clear: 'removeAllApexTriggersFromCache',   alias: ALIASES.PACKAGE, get: 'getApexTriggers',   tableDefinition: 'ApexTriggers',   getParameters: [ PARAMETERS.NAMESPACE ] },
-            TESTS:         { key: '2E', title: '🚒 Apex Unit Tests',                      recipe: 'apex-tests',      data: 'apexTests',      clear: 'removeAllApexTestsFromCache',      alias: ALIASES.PACKAGE, get: 'getApexTests',      tableDefinition: 'ApexTests',      getParameters: [ PARAMETERS.NAMESPACE ] },
+            CLASSES:       { key: '2B', actionName: 'apex-classes' },
+            UNCOMPILEDS:   { key: '2C', actionName: 'apex-uncompiled' },
+            TRIGGERS:      { key: '2D', actionName: 'apex-triggers' },
+            TESTS:         { key: '2E', actionName: 'apex-tests' },
         }
     },
     ANALYTICS: { 
-        key:   'J', 
+        key: 'J', 
         title: '⛰️ Analytics',
-        disabledIfTermsNotYetAccepted: true,
         items: {
-            REPORTS:       { key: '2F', title: '🌳 Reports',    recipe: 'reports',    data: 'reports',    clear: 'removeAllReportsFromCache',    alias: ALIASES.NONE, get: 'getReports',    tableDefinition: 'Reports' },
-            DASHBOARDS:    { key: '30', title: '🌲 Dashboards', recipe: 'dashboards', data: 'dashboards', clear: 'removeAllDashboardsFromCache', alias: ALIASES.NONE, get: 'getDashboards', tableDefinition: 'Dashboards' },
+            REPORTS:       { key: '2F', actionName: 'reports' },
+            DASHBOARDS:    { key: '30', actionName: 'dashboards' },
         }
-    },
-};
-
-const NAVIGATION_ITEMS_BY_KEY = new Map();
-const NAVIGATION_ITEMS_BY_RECIPE = new Map();
-const NAVIGATION_SECTIONKEYS_BY_ITEMKEY = new Map();
-const APPLICATION_NAVIGATION_MENU_ITEMS_FOR_TREE = Object.keys(APPLICATION_NAVIGATION).map((sectionKey) => { 
-    const section = APPLICATION_NAVIGATION[sectionKey];
-    return {
-        label: section.title,
-        name: section.key,
-        expanded: false,
-        items: Object.keys(section.items).map((itemKey) => {
-            const item = section.items[itemKey];
-            NAVIGATION_ITEMS_BY_KEY.set(item.key, item);
-            NAVIGATION_SECTIONKEYS_BY_ITEMKEY.set(item.key, section.key);
-            if (item.recipe) {
-                NAVIGATION_ITEMS_BY_RECIPE.set(item.recipe,  item);
-            }
-            return { label: item.title, name: item.key }
-        })
     }
-});
+}
+
+const NAVIGATION_ITEMS_BY_RECIPE = new Map();
+
+const ANY = '*';
+const EMPTY = '';

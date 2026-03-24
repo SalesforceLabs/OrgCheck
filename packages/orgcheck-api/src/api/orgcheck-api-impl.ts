@@ -76,6 +76,13 @@ export class API implements ApiIntf {
      */
     public readonly salesforceApiVersion: number;
     
+    /** 
+     * @description Salesforce ID of the organization
+     * @type {string}
+     * @public
+     */
+    public readonly orgId: string;
+
     /**
      * @description Private Recipe Manager property used to run a recipe given its alias
      * @type {RecipeManagerIntf} 
@@ -140,6 +147,7 @@ export class API implements ApiIntf {
         }
         this._sfdcManager = new SalesforceManager(setup?.salesforce);
         this.salesforceApiVersion = this._sfdcManager.apiVersion;
+        this.orgId = this._sfdcManager.orgId;
 
         // --------------------
         // Cache Manager
@@ -167,10 +175,10 @@ export class API implements ApiIntf {
 
     /**
      * @description Get cache information from dataset manager
-     * @returns {Array<DataCacheItemIntf>} list of cache information 
+     * @returns {DataCacheItemIntf[]} list of cache information 
      * @public
      */
-    public getCacheInformation(): Array<DataCacheItemIntf> {
+    public getCacheInformation(): DataCacheItemIntf[] {
         return this._cacheManager.details();
     }
 
@@ -233,12 +241,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Compile the given list of Apex Classes and return the status of the compilation
-     * @param {Array<string>} apexClassIds - the list of Apex Class Ids to compile
-     * @returns {Promise<Map<string, { isSuccess: boolean, reasons?: Array<string>}>>} List of results by Apex Class ID
+     * @param {string[]} apexClassIds - the list of Apex Class Ids to compile
+     * @returns {Promise<Map<string, { isSuccess: boolean, reasons?: string[]}>>} List of results by Apex Class ID
      * @async
      * @public
      */
-    public async compileClasses(apexClassIds: Array<string>): Promise<Map<string, { isSuccess: boolean; reasons?: Array<string>; }>> {
+    public async compileClasses(apexClassIds: string[]): Promise<Map<string, { isSuccess: boolean; reasons?: string[]; }>> {
         if (this._logger === undefined) {
             throw new Error(`The logger was not defined in method compileClasses`);
         }
@@ -283,7 +291,7 @@ export class API implements ApiIntf {
      */
     private async _throwExceptionIfUsageTermsNotAccepted() {
         if (await this.checkUsageTerms() === false) {
-            throw new Error(`You must accept the usage terms before using Org CHeck in this environment.`);
+            throw new Error(`You must accept the usage terms before using Org Check in this environment.`);
         }
     }
 
@@ -332,12 +340,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about the packages
-     * @returns {Promise<Array<SfdcPackage>>} List of items to return
+     * @returns {Promise<SfdcPackage[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getPackages(): Promise<Array<SfdcPackage>> {
+    public async getPackages(): Promise<SfdcPackage[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -357,12 +365,12 @@ export class API implements ApiIntf {
      * @param {string} namespace - the namespace of the package to filter the page layouts
      * @param {string} sobjectType - the sobject type to filter the page layouts
      * @param {string} sobject - the sobject to filter the page layouts
-     * @returns {Promise<Array<SfdcPageLayout>>} List of items to return
+     * @returns {Promise<SfdcPageLayout[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getPageLayouts(namespace: string, sobjectType: string, sobject: string): Promise<Array<SfdcPageLayout>> {
+    public async getPageLayouts(namespace: string, sobjectType: string, sobject: string): Promise<SfdcPageLayout[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -383,12 +391,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about the object types
-     * @returns {Promise<Array<SfdcObjectType>>} List of items to return
+     * @returns {Promise<SfdcObjectType[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getObjectTypes(): Promise<Array<SfdcObjectType>> {
+    public async getObjectTypes(): Promise<SfdcObjectType[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -399,12 +407,12 @@ export class API implements ApiIntf {
      * @description Get information about the objects 
      * @param {string} namespace - the namespace of the package to filter the objects
      * @param {string} sobjectType - the sobject type to filter the objects
-     * @returns {Promise<Array<SfdcObject>>} List of items to return
+     * @returns {Promise<SfdcObject[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getObjects(namespace: string, sobjectType: string): Promise<Array<SfdcObject>> {
+    public async getObjects(namespace: string, sobjectType: string): Promise<SfdcObject[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -500,12 +508,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about knowledge articles
-     * @returns {Promise<Array<SfdcKnowledgeArticle>>} List of items to return
+     * @returns {Promise<SfdcKnowledgeArticle[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getKnowledgeArticles(): Promise<Array<SfdcKnowledgeArticle>> {
+    public async getKnowledgeArticles(): Promise<SfdcKnowledgeArticle[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -522,12 +530,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about Chatter groups
-     * @returns {Promise<Array<SfdcCollaborationGroup>>} List of items to return
+     * @returns {Promise<SfdcCollaborationGroup[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getChatterGroups(): Promise<Array<SfdcCollaborationGroup>> {
+    public async getChatterGroups(): Promise<SfdcCollaborationGroup[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -547,12 +555,12 @@ export class API implements ApiIntf {
      * @param {string} namespace - the namespace of the package to filter the custom fields
      * @param {string} sobjectType - the sobject type to filter the custom fields
      * @param {string} sobject - the sobject to filter the custom fields
-     * @returns {Promise<Array<SfdcField>>} List of items to return
+     * @returns {Promise<SfdcField[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getCustomFields(namespace: string, sobjectType: string, sobject: string): Promise<Array<SfdcField>> {
+    public async getCustomFields(namespace: string, sobjectType: string, sobject: string): Promise<SfdcField[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -574,12 +582,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about permission sets (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the permission sets
-     * @returns {Promise<Array<SfdcPermissionSet>>} List of items to return
+     * @returns {Promise<SfdcPermissionSet[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getPermissionSets(namespace: string): Promise<Array<SfdcPermissionSet>> {
+    public async getPermissionSets(namespace: string): Promise<SfdcPermissionSet[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -598,12 +606,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about permission set licenses
-     * @returns {Promise<Array<SfdcPermissionSetLicense>>} List of items to return
+     * @returns {Promise<SfdcPermissionSetLicense[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getPermissionSetLicenses(): Promise<Array<SfdcPermissionSetLicense>> {
+    public async getPermissionSetLicenses(): Promise<SfdcPermissionSetLicense[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -621,12 +629,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about profiles (filtered out by namespace/pakage)
      * @param {string} [namespace] - the namespace of the package to filter the profiles
-     * @returns {Promise<Array<SfdcProfile>>} List of items to return
+     * @returns {Promise<SfdcProfile[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getProfiles(namespace?: string): Promise<Array<SfdcProfile>> {
+    public async getProfiles(namespace?: string): Promise<SfdcProfile[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -646,12 +654,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about profile restrictions (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the profile restrictions
-     * @returns {Promise<Array<SfdcProfileRestrictions>>} List of items to return
+     * @returns {Promise<SfdcProfileRestrictions[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getProfileRestrictions(namespace: string): Promise<Array<SfdcProfileRestrictions>> {
+    public async getProfileRestrictions(namespace: string): Promise<SfdcProfileRestrictions[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -670,12 +678,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about profile password policies
-     * @returns {Promise<Array<SfdcProfilePasswordPolicy>>} List of items to return
+     * @returns {Promise<SfdcProfilePasswordPolicy[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getProfilePasswordPolicies(): Promise<Array<SfdcProfilePasswordPolicy>> {
+    public async getProfilePasswordPolicies(): Promise<SfdcProfilePasswordPolicy[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -692,12 +700,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about active users
-     * @returns {Promise<Array<SfdcUser>>} List of items to return
+     * @returns {Promise<SfdcUser[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getActiveUsers(): Promise<Array<SfdcUser>> {
+    public async getActiveUsers(): Promise<SfdcUser[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -714,12 +722,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about browsers
-     * @returns {Promise<Array<SfdcBrowser>>} List of items to return
+     * @returns {Promise<SfdcBrowser[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getBrowsers(): Promise<Array<SfdcBrowser>> {
+    public async getBrowsers(): Promise<SfdcBrowser[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -737,12 +745,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about custom labels (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the custom labels
-     * @returns {Promise<Array<SfdcCustomLabel>>} List of items to return
+     * @returns {Promise<SfdcCustomLabel[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getCustomLabels(namespace: string): Promise<Array<SfdcCustomLabel>> {
+    public async getCustomLabels(namespace: string): Promise<SfdcCustomLabel[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -762,12 +770,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about custom tabs (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the custom tabs
-     * @returns {Promise<Array<SfdcCustomTab>>} List of items to return
+     * @returns {Promise<SfdcCustomTab[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getCustomTabs(namespace: string): Promise<Array<SfdcCustomTab>> {
+    public async getCustomTabs(namespace: string): Promise<SfdcCustomTab[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -787,12 +795,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about documents (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the documents
-     * @returns {Promise<Array<SfdcDocument>>} List of items to return
+     * @returns {Promise<SfdcDocument[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getDocuments(namespace: string): Promise<Array<SfdcDocument>> {
+    public async getDocuments(namespace: string): Promise<SfdcDocument[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -812,12 +820,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about LWCs (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the lightning web components
-     * @returns {Promise<Array<SfdcLightningWebComponent>>} List of items to return
+     * @returns {Promise<SfdcLightningWebComponent[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getLightningWebComponents(namespace: string): Promise<Array<SfdcLightningWebComponent>> {
+    public async getLightningWebComponents(namespace: string): Promise<SfdcLightningWebComponent[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -837,12 +845,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about Aura Components (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the lightning aura components
-     * @returns {Promise<Array<SfdcLightningAuraComponent>>} List of items to return
+     * @returns {Promise<SfdcLightningAuraComponent[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getLightningAuraComponents(namespace: string): Promise<Array<SfdcLightningAuraComponent>> {
+    public async getLightningAuraComponents(namespace: string): Promise<SfdcLightningAuraComponent[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -862,12 +870,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about flexipages (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the lightning pages
-     * @returns {Promise<Array<SfdcLightningPage>>} List of items to return
+     * @returns {Promise<SfdcLightningPage[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getLightningPages(namespace: string): Promise<Array<SfdcLightningPage>> {
+    public async getLightningPages(namespace: string): Promise<SfdcLightningPage[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -887,12 +895,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about VFCs (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the visualforce components
-     * @returns {Promise<Array<SfdcVisualForceComponent>>} List of items to return
+     * @returns {Promise<SfdcVisualForceComponent[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getVisualForceComponents(namespace: string): Promise<Array<SfdcVisualForceComponent>> {
+    public async getVisualForceComponents(namespace: string): Promise<SfdcVisualForceComponent[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -912,12 +920,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about VFPs (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the visualforce pages
-     * @returns {Promise<Array<SfdcVisualForcePage>>} List of items to return
+     * @returns {Promise<SfdcVisualForcePage[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getVisualForcePages(namespace: string): Promise<Array<SfdcVisualForcePage>> {
+    public async getVisualForcePages(namespace: string): Promise<SfdcVisualForcePage[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -936,12 +944,12 @@ export class API implements ApiIntf {
     
     /**
      * @description Get information about Public Groups
-     * @returns {Promise<Array<SfdcGroup>>} List of items to return
+     * @returns {Promise<SfdcGroup[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getPublicGroups(): Promise<Array<SfdcGroup>> {
+    public async getPublicGroups(): Promise<SfdcGroup[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -958,12 +966,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about Queues
-     * @returns {Promise<Array<SfdcGroup>>} List of items to return
+     * @returns {Promise<SfdcGroup[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getQueues(): Promise<Array<SfdcGroup>> {
+    public async getQueues(): Promise<SfdcGroup[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -981,12 +989,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about Apex Classes (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the apex classes
-     * @returns {Promise<Array<SfdcApexClass>>} List of items to return
+     * @returns {Promise<SfdcApexClass[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getApexClasses(namespace: string): Promise<Array<SfdcApexClass>> {
+    public async getApexClasses(namespace: string): Promise<SfdcApexClass[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -1006,12 +1014,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about Apex Tests (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the apex tests
-     * @returns {Promise<Array<SfdcApexClass>>} List of items to return
+     * @returns {Promise<SfdcApexClass[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getApexTests(namespace: string): Promise<Array<SfdcApexClass>> {
+    public async getApexTests(namespace: string): Promise<SfdcApexClass[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -1031,12 +1039,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about Apex Uncompiled Classes (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the apex uncompiled classes
-     * @returns {Promise<Array<SfdcApexClass>>} List of items to return
+     * @returns {Promise<SfdcApexClass[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getApexUncompiled(namespace: string): Promise<Array<SfdcApexClass>> {
+    public async getApexUncompiled(namespace: string): Promise<SfdcApexClass[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -1056,12 +1064,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about Apex triggers (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the apex triggers
-     * @returns {Promise<Array<SfdcApexTrigger>>} List of items to return
+     * @returns {Promise<SfdcApexTrigger[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getApexTriggers(namespace: string): Promise<Array<SfdcApexTrigger>> {
+    public async getApexTriggers(namespace: string): Promise<SfdcApexTrigger[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -1080,12 +1088,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about User roles in a tabular view
-     * @returns {Promise<Array<SfdcUserRole>>} List of items to return
+     * @returns {Promise<SfdcUserRole[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getRoles(): Promise<Array<SfdcUserRole>> {
+    public async getRoles(): Promise<SfdcUserRole[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -1147,12 +1155,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about Static Resources
      * @param {string} namespace - the namespace of the package to filter the weblinks
-     * @returns {Promise<Array<SfdcStaticResource>>} List of items to return
+     * @returns {Promise<SfdcStaticResource[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getStaticResources(namespace: string): Promise<Array<SfdcStaticResource>> {
+    public async getStaticResources(namespace: string): Promise<SfdcStaticResource[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -1174,12 +1182,12 @@ export class API implements ApiIntf {
      * @param {string} [namespace] - the namespace of the package to filter the weblinks
      * @param {string} [sobjectType] - the sobject type to filter the weblinks
      * @param {string} [sobject] - the sobject to filter the weblinks
-     * @returns {Promise<Array<SfdcWebLink>>} List of items to return
+     * @returns {Promise<SfdcWebLink[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getWeblinks(namespace?: string, sobjectType?: string, sobject?: string): Promise<Array<SfdcWebLink>> {
+    public async getWeblinks(namespace?: string, sobjectType?: string, sobject?: string): Promise<SfdcWebLink[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -1200,12 +1208,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about Workflows
-     * @returns {Promise<Array<SfdcWorkflow>>} List of items to return
+     * @returns {Promise<SfdcWorkflow[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getWorkflows(): Promise<Array<SfdcWorkflow>> {
+    public async getWorkflows(): Promise<SfdcWorkflow[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -1225,12 +1233,12 @@ export class API implements ApiIntf {
      * @param {string} namespace - the namespace of the package to filter the record types
      * @param {string} sobjectType - the sobject type to filter the record types
      * @param {string} sobject - the sobject to filter the record types
-     * @returns {Promise<Array<SfdcRecordType>>} List of items to return
+     * @returns {Promise<SfdcRecordType[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getRecordTypes(namespace: string, sobjectType: string, sobject: string): Promise<Array<SfdcRecordType>> {
+    public async getRecordTypes(namespace: string, sobjectType: string, sobject: string): Promise<SfdcRecordType[]> {
         // @ts-ignore    
         return (await this._recipeManager.run(RecipeAliases.RECORD_TYPES, new Map([
             [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
@@ -1274,12 +1282,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about Flows
-     * @returns {Promise<Array<SfdcFlow>>} List of items to return
+     * @returns {Promise<SfdcFlow[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getFlows(): Promise<Array<SfdcFlow>> {
+    public async getFlows(): Promise<SfdcFlow[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -1297,12 +1305,12 @@ export class API implements ApiIntf {
     /**
      * @description Get information about EmailTemplate
      * @param {string} namespace - the namespace of the package to filter the email templates
-     * @returns {Promise<Array<SfdcEmailTemplate>>} List of items to return
+     * @returns {Promise<SfdcEmailTemplate[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getEmailTemplates(namespace: string): Promise<Array<SfdcEmailTemplate>> {
+    public async getEmailTemplates(namespace: string): Promise<SfdcEmailTemplate[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -1321,12 +1329,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about home page components
-     * @returns {Promise<Array<SfdcHomePageComponent>>} List of items to return
+     * @returns {Promise<SfdcHomePageComponent[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getHomePageComponents(): Promise<Array<SfdcHomePageComponent>> {
+    public async getHomePageComponents(): Promise<SfdcHomePageComponent[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -1343,12 +1351,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about Process Builders
-     * @returns {Promise<Array<SfdcFlow>>} List of items to return
+     * @returns {Promise<SfdcFlow[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getProcessBuilders(): Promise<Array<SfdcFlow>> {
+    public async getProcessBuilders(): Promise<SfdcFlow[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -1368,12 +1376,12 @@ export class API implements ApiIntf {
      * @param {string} namespace - the namespace of the package to filter the validation rules
      * @param {string} sobjectType - the sobject type to filter the validation rules
      * @param {string} sobject - the sobject to filter the validation rules
-     * @returns {Promise<Array<SfdcValidationRule>>} List of items to return
+     * @returns {Promise<SfdcValidationRule[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getValidationRules(namespace: string, sobjectType: string, sobject: string): Promise<Array<SfdcValidationRule>> {
+    public async getValidationRules(namespace: string, sobjectType: string, sobject: string): Promise<SfdcValidationRule[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -1394,12 +1402,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about dashboards
-     * @returns {Promise<Array<SfdcDashboard>>} List of items to return
+     * @returns {Promise<SfdcDashboard[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getDashboards(): Promise<Array<SfdcDashboard>> {
+    public async getDashboards(): Promise<SfdcDashboard[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -1416,12 +1424,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get information about reports
-     * @returns {Promise<Array<SfdcReport>>} List of items to return
+     * @returns {Promise<SfdcReport[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getReports(): Promise<Array<SfdcReport>> {
+    public async getReports(): Promise<SfdcReport[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -1438,12 +1446,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get global view of the org
-     * @returns {Promise<Array<DataCollectionStatisticsIntf>>} List of items to return
+     * @returns {Promise<DataCollectionStatisticsIntf[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getGlobalView(): Promise<Array<DataCollectionStatisticsIntf>> {
+    public async getGlobalView(): Promise<DataCollectionStatisticsIntf[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore
@@ -1460,12 +1468,12 @@ export class API implements ApiIntf {
 
     /**
      * @description Get hardcoded URLs view of the org
-     * @returns {Promise<Array<DataCollectionStatisticsIntf>>} List of items to return
+     * @returns {Promise<DataCollectionStatisticsIntf[]>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async getHardcodedURLsView(): Promise<Array<DataCollectionStatisticsIntf>> {
+    public async getHardcodedURLsView(): Promise<DataCollectionStatisticsIntf[]> {
         // Check if usage terms were accepted
         await this._throwExceptionIfUsageTermsNotAccepted();
         // @ts-ignore

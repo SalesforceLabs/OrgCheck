@@ -1,15 +1,13 @@
 import { Recipe } from 'src/api/core/orgcheck-api-recipe';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
-import { Data } from 'src/api/core/orgcheck-api-data';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
 import { SfdcUser }from 'src/api/data/orgcheck-api-data-user';
 import { SfdcPermissionSet }from 'src/api/data/orgcheck-api-data-permissionset';
 import { SfdcProfile }from 'src/api/data/orgcheck-api-data-profile';
-import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 
-export class RecipeInternalActiveUsers implements Recipe {
+export class RecipeInternalActiveUsers implements Recipe<SfdcUser[]> {
 
     /**
      * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
@@ -29,16 +27,16 @@ export class RecipeInternalActiveUsers implements Recipe {
      * @description transform the data from the datasets and return the final result as a Map
      * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} _logger - Logger
-     * @returns {Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<SfdcUser[]>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Array<Data> | DataMatrixIntf | Data | Map<string, any>> {
+    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<SfdcUser[]> {
 
         // Get data
-        const /** @type {Map<string, SfdcUser>} */ users: Map<string, SfdcUser> = data.get(DatasetAliases.INTERNALACTIVEUSERS);
-        const /** @type {Map<string, SfdcProfile>} */ profiles: Map<string, SfdcProfile> = data.get(DatasetAliases.PROFILES);
-        const /** @type {Map<string, SfdcPermissionSet>} */ permissionSets: Map<string, SfdcPermissionSet> = data.get(DatasetAliases.PERMISSIONSETS);
+        const users: Map<string, SfdcUser> = data.get(DatasetAliases.INTERNALACTIVEUSERS);
+        const profiles: Map<string, SfdcProfile> = data.get(DatasetAliases.PROFILES);
+        const permissionSets: Map<string, SfdcPermissionSet> = data.get(DatasetAliases.PERMISSIONSETS);
 
         // Checking data
         if (!users) throw new Error(`RecipeActiveUsers: Data from dataset alias 'INTERNALACTIVEUSERS' was undefined.`);
@@ -46,15 +44,15 @@ export class RecipeInternalActiveUsers implements Recipe {
         if (!permissionSets) throw new Error(`RecipeActiveUsers: Data from dataset alias 'PERMISSIONSETS' was undefined.`);
 
         // Augment data
-        await Processor.forEach(users, async (/** @type {SfdcUser} */ user: SfdcUser) => {
+        await Processor.forEach(users, async (user: SfdcUser) => {
             const profileRef = profiles.get(user.profileId);
             if (profileRef) {
                 user.profileRef = profileRef;
             }
             user.permissionSetRefs = await Processor.map(
                 user.permissionSetIds,
-                (/** @type {string} */ id: string) => permissionSets.get(id),
-                (/** @type {string} */ id: string) => permissionSets.has(id)
+                (id: string) => permissionSets.get(id),
+                (id: string) => permissionSets.has(id)
             );
             user.importantPermissionsGrantedBy = {
                 apiEnabled: [],
@@ -69,7 +67,7 @@ export class RecipeInternalActiveUsers implements Recipe {
                     .filter((permName) => user.profileRef.importantPermissions[permName] === true)
                     .forEach((permName) => user.importantPermissionsGrantedBy[permName].push(user.profileRef));
             }
-            await Processor.forEach(user.permissionSetRefs, async (/** @type {SfdcPermissionSet} */ permissionSet: SfdcPermissionSet) => {
+            await Processor.forEach(user.permissionSetRefs, async (permissionSet: SfdcPermissionSet) => {
                 Object.keys(permissionSet.importantPermissions)
                     .filter((permName) => permissionSet.importantPermissions[permName] === true)
                     .forEach((permName) => user.importantPermissionsGrantedBy[permName].push(permissionSet));
