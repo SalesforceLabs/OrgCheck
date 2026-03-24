@@ -19,7 +19,7 @@
     "@salesforce/cli-plugins-testkit": "^5.3.20",
     "@salesforce/dev-scripts": "^11",
     "eslint": "^10.1.0",
-    "eslint-config-prettier": "^9.1.0",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-sf-plugin": "^1.18.8",
     "eslint-plugin-unicorn": "^63.0.0",
     "jest": "^30.3.0",
