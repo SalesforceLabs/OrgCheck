@@ -39,7 +39,7 @@
   },
   "homepage": "https://sfdc.co/OrgCheck",
   "devDependencies": {
-    "@lwc/eslint-plugin-lwc": "^3.4.0",
+    "@lwc/eslint-plugin-lwc": "^3.5.0",
     "@rollup/plugin-terser": "^1.0.0",
     "@sa11y/jest": "^8.0.27",
     "@salesforce/eslint-config-lwc": "^4.1.2",

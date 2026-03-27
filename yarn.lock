@@ -1291,10 +1291,10 @@
   resolved "https://registry.npmjs.org/@lwc/errors/-/errors-8.20.4.tgz"
   integrity sha512-grJRr12M4U0PJ9yuU0MRJ9H07kijef2QIfdMod4S3NTAf1EBCMQX6wY2aadmVEyQCqDS67NQkQp1iL+0QFdN4w==
 
-"@lwc/eslint-plugin-lwc@^3.4.0":
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/@lwc/eslint-plugin-lwc/-/eslint-plugin-lwc-3.4.0.tgz#9f84a872b48dbaeb546b9961b5a014c76673b4f6"
-  integrity sha512-LDiXgx2pifz3kcaXZkavme1uBWsVjqCbYaPBiTvQyaGZlLsmlBFvQ/0DbT5sf1uHHqlvrT2J0IVEXDS5W1cIHA==
+"@lwc/eslint-plugin-lwc@^3.5.0":
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/@lwc/eslint-plugin-lwc/-/eslint-plugin-lwc-3.5.0.tgz#a0bb3b732c19ef0faa190dec0572b5aacdfe705a"
+  integrity sha512-Xq4i0ZWhBp1ZbGXqv8KEUqAOzo07BCD3yFD/EdOPafMjpXkeH5RpCFn09+sXVe1vdqtm47JwX+OUDXOMWfIsQg==
   dependencies:
     fast-xml-parser "^5.3.6"
     globals "~15.14.0"
