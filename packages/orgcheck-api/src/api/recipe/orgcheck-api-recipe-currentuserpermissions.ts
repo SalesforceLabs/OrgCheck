@@ -6,13 +6,20 @@ import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
 export class RecipeCurrentUserPermissions implements Recipe<Map<string, boolean>> {
 
     /**
-     * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
-     * @param {SimpleLoggerIntf} _logger - Logger
-     * @param {Map<string, any>} [parameters] - List of optional argument to pass
-     * @returns {Array<string | DatasetRunInformation>} The datasets aliases that this recipe is using
+     * @description Title of this recipe
+     * @type {string}
      * @public
      */
-    extract(_logger: SimpleLoggerIntf, parameters: Map<string, any>): Array<string | DatasetRunInformation> {
+    public readonly title: string = 'Current User Permissions';
+
+    /**
+     * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
+     * @param {SimpleLoggerIntf} _logger - Logger
+     * @param {Map<string, any>} [parameters] - List of optional argument to pass
+     * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
+     * @public
+     */
+    public ingredients(_logger: SimpleLoggerIntf, parameters: Map<string, any>): Array<string | DatasetRunInformation> {
         return [
             new DatasetRunInformation(
                 DatasetAliases.CURRENTUSERPERMISSIONS,
@@ -21,19 +28,28 @@ export class RecipeCurrentUserPermissions implements Recipe<Map<string, boolean>
             )
         ];
     }
+    
+    /**
+     * @description List the parameters that this mix dependes on
+     * @returns {string[]} List of parameters that this mix dependes on
+     * @public
+     */
+    public mixDependencies(): string[] {
+        return [];
+    }
 
     /**
-     * @description transform the data from the datasets and return the final result as a Map
-     * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
+     * @description mix the ingredients all together and return the result
+     * @param {Map<string, any>} ingredients - Records or information grouped by their alias in a Map
      * @param {SimpleLoggerIntf} _logger - Logger
-     * @returns {Promise<Map<string, boolean>>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<Map<string, boolean>>} Returns the mixture
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Map<string, boolean>> {
+    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Map<string, boolean>> {
 
         // Get data
-        const currentUserPermissions: Map<string, boolean> = data.get(DatasetAliases.CURRENTUSERPERMISSIONS);
+        const currentUserPermissions: Map<string, boolean> = ingredients.get(DatasetAliases.CURRENTUSERPERMISSIONS);
         
         // Checking data
         if (!currentUserPermissions) throw new Error(`RecipeCurrentUserPermissions: Data from dataset alias 'CURRENTUSERPERMISSIONS' was undefined.`);

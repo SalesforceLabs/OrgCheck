@@ -1,10 +1,10 @@
-import { ColumnType } from "src/ui/table/orgcheck-ui-table-columntype";
-import { Table } from "src/ui/table/orgcheck-ui-table";
+import { ColumnType } from "src/ui/table/column/orgcheck-ui-table-columntype";
+import { TableDefinition } from "src/ui/table/orgcheck-ui-table-definition";
 import { SortOrder } from "src/ui/table/orgcheck-ui-table-sortorder";
-import { TableColumn } from "src/ui/table/orgcheck-ui-table-column";
+import { TableColumn } from "src/ui/table/column/orgcheck-ui-table-column";
 import { SalesforceMetadataTypes } from "src/api/core/orgcheck-api-salesforce-metadatatypes";
 
-class AbstractWebLinksTableDefinitions implements Table {
+class AbstractWebLinksTableDefinition implements TableDefinition {
     
     /**
      * @description Constructor to specify if this table is in a context of an object. 
@@ -55,13 +55,13 @@ class AbstractWebLinksTableDefinitions implements Table {
     orderSort: SortOrder = SortOrder.DESC;
 }
 
-export class WebLinksTableDefinitions extends AbstractWebLinksTableDefinitions {
+export class WebLinksTableDefinition extends AbstractWebLinksTableDefinition {
     constructor() {
         super(true);
     }
 }
 
-export class WebLinksInObjectTableDefinitions extends AbstractWebLinksTableDefinitions {
+export class WebLinksInObjectTableDefinition extends AbstractWebLinksTableDefinition {
     constructor() {
         super(false);
     }

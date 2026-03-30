@@ -302,7 +302,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
         
         // Parse the rows
         this.nbBadRows = 0;
-        this._allRows = getOrgCheckTableFactory()?.createRows(
+        this._allRows = __orgcheck__GenerateRows(
             this.tableDefinition, 
             rows, 
             (row, isBad, rowIndex) => { 
@@ -340,7 +340,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      */ 
     get exportedRows() {
         if (this._private_properties.tableDefinition && this._private_properties.tableDefinition.columns && this._allRows) {
-            return getOrgCheckTableFactory().asRaw(this._private_properties.tableDefinition, this._allRows, this.exportBasename);
+            return __orgcheck__ExportAsRaw(this._private_properties.tableDefinition, this._allRows, this.exportBasename);
         }
         return undefined;
     }
@@ -461,7 +461,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @private
      */
     _filterAllRows() {
-        getOrgCheckTableFactory()?.filterRows(this._allRows, this._private_properties.filteringSearchInput);
+        __orgcheck__FilterRows(this._allRows, this._private_properties.filteringSearchInput);
     }
 
     /**
@@ -469,7 +469,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @private
      */
     _sortAllRows() {
-        getOrgCheckTableFactory()?.sortRows(this._private_properties.tableDefinition, this._allRows, this._private_properties.sortingIndex, this._private_properties.sortingOrder);
+        __orgcheck__SortRows(this._private_properties.tableDefinition, this._allRows, this._private_properties.sortingIndex, this._private_properties.sortingOrder);
     }
 
     /**
@@ -492,10 +492,30 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     }
 }
 
-const getOrgCheck = () => {
+const __orgcheck__Get = () => {
     return (typeof window !== 'undefined' ? window?.orgcheck : globalThis?.orgcheck ?? null)
 }
 
-const getOrgCheckTableFactory = () => {
-    return getOrgCheck()?.TableFactory ?? undefined;
+const __orgcheck__GenerateRows = (tableDefinition, rows, eachRow, eachCell) => {
+    const method = __orgcheck__Get()?.TableFactory?.createRows;
+    if (method) return method(tableDefinition, rows, eachRow, eachCell);
+    return undefined;
+}
+
+const __orgcheck__ExportAsRaw = (tableDefinition, rows, title) => {
+    const method = __orgcheck__Get()?.TableFactory?.asRaw;
+    if (method) return method(tableDefinition, rows, title);
+    return undefined;
+}
+
+const __orgcheck__FilterRows = (rows, searchInput) => {
+    const method = __orgcheck__Get()?.TableFactory?.filterRows;
+    if (method) return method(rows, searchInput);
+    return undefined;
+}
+
+const __orgcheck__SortRows = (tableDefinition, rows, columnIndex, order) => {
+    const method = __orgcheck__Get()?.TableFactory?.sortRows;
+    if (method) return method(tableDefinition, rows, columnIndex, order);
+    return undefined;
 }

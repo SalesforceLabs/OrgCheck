@@ -43,6 +43,7 @@ export enum RecipeAliases {
     QUEUES = 'queues',
     RECORD_TYPES = 'record-types',
     REPORTS = 'reports',
+    SCORE_RULES = 'score-rules',
     STATIC_RESOURCES = 'static-resources',
     USER_ROLES = 'user-roles',
     VALIDATION_RULES = 'validation-rules',

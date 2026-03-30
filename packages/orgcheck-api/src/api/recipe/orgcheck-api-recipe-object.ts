@@ -1,4 +1,6 @@
-import { Recipe } from 'src/api/core/orgcheck-api-recipe';
+import { ServedRecipe } from 'src/api/core/orgcheck-api-recipe';
+import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
+import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
@@ -10,17 +12,64 @@ import { SfdcObjectType }from 'src/api/data/orgcheck-api-data-objecttype';
 import { SfdcLightningPage }from 'src/api/data/orgcheck-api-data-lightningpage';
 import { SfdcWorkflow }from 'src/api/data/orgcheck-api-data-workflow';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
+import { StandardFieldsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-standardfields';
+import { CustomFieldsInObjectTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-customfields';
+import { WebLinksInObjectTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-weblinks';
+import { ApexTriggersInObjectTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-apextriggers';
+import { FieldSetsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-fieldsets';
+import { PageLayoutsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-pagelayouts';
+import { FlexiPagesInObjectTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-flexipages';
+import { LimitsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-limits';
+import { ValidationRulesInObjectTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-validationrules';
+import { RecordTypesInObjectTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-recordtypes';
+import { RelationshipsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-relationships';
+import { WorkflowsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-workflows';
 
-export class RecipeObject implements Recipe<SfdcObject> {
+export interface SfdcObjectAsTable {
+    apiname: string;
+    package: string;
+    label: string;
+    labelPlural: string;
+    description : string;
+    keyPrefix: string;
+    recordCount: number;
+    isCustom: boolean;
+    isFeedEnabled: boolean;
+    isMostRecentEnabled: boolean;
+    isSearchable: boolean;
+    internalSharingModel: string;
+    externalSharingModel: string;
+    standardFields: Table,
+    customFields: Table,
+    apexTriggers: Table,
+    fieldSets: Table,
+    layouts: Table,
+    flexiPages: Table,
+    limits: Table,
+    validationRules: Table,
+    webLinks: Table,
+    recordTypes: Table,
+    relationships: Table,
+    workflowRules: Table
+}
+
+export class RecipeObject implements ServedRecipe<SfdcObject, SfdcObjectAsTable> {
 
     /**
-     * @description List all dataset aliases (or datasetRunInfo) that this recipe is using
-     * @param {SimpleLoggerIntf} _logger - Logger
-     * @param {Map<string, any>} [parameters] - List of optional argument to pass
-     * @returns {Array<string | DatasetRunInformation>} The datasets aliases that this recipe is using
+     * @description Title of this recipe
+     * @type {string}
      * @public
      */
-    extract(_logger: SimpleLoggerIntf, parameters: Map<string, any>): Array<string | DatasetRunInformation> {
+    public readonly title: string = '🎳 Object Documentation';
+
+    /**
+     * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
+     * @param {SimpleLoggerIntf} _logger - Logger
+     * @param {Map<string, any>} [parameters] - List of optional argument to pass
+     * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
+     * @public
+     */
+    public ingredients(_logger: SimpleLoggerIntf, parameters: Map<string, any>): Array<string | DatasetRunInformation> {
         return [ 
             new DatasetRunInformation(
                 DatasetAliases.OBJECT,
@@ -40,22 +89,31 @@ export class RecipeObject implements Recipe<SfdcObject> {
     }
 
     /**
-     * @description transform the data from the datasets and return the final result as an Array
-     * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
+     * @description List the parameters that this mix dependes on
+     * @returns {string[]} List of parameters that this mix dependes on
+     * @public
+     */
+    public mixDependencies(): string[] {
+        return [OrgCheckGlobalParameter.SOBJECT_NAME];
+    }
+
+    /**
+     * @description mix the ingredients all together and return the result
+     * @param {Map<string, any>} ingredients - Records or information grouped by their alias in a Map
      * @param {SimpleLoggerIntf} _logger - Logger
-     * @returns {Promise<SfdcObject>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<SfdcObject>} Returns the mixture
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<SfdcObject> {
+    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf): Promise<SfdcObject> {
 
         // Get data
-        const types: Map<string, SfdcObjectType> = data.get(DatasetAliases.OBJECTTYPES);
-        const object: SfdcObject = data.get(DatasetAliases.OBJECT);
-        const apexTriggers: Map<string, SfdcApexTrigger> = data.get(DatasetAliases.APEXTRIGGERS);
-        const workflowRules: Map<string, SfdcWorkflow> = data.get(DatasetAliases.WORKFLOWS);
-        const pages: Map<string, SfdcLightningPage> = data.get(DatasetAliases.LIGHTNINGPAGES);
-        const customFields: Map<string, SfdcField> = data.get(DatasetAliases.CUSTOMFIELDS);
+        const types: Map<string, SfdcObjectType> = ingredients.get(DatasetAliases.OBJECTTYPES);
+        const object: SfdcObject = ingredients.get(DatasetAliases.OBJECT);
+        const apexTriggers: Map<string, SfdcApexTrigger> = ingredients.get(DatasetAliases.APEXTRIGGERS);
+        const workflowRules: Map<string, SfdcWorkflow> = ingredients.get(DatasetAliases.WORKFLOWS);
+        const pages: Map<string, SfdcLightningPage> = ingredients.get(DatasetAliases.LIGHTNINGPAGES);
+        const customFields: Map<string, SfdcField> = ingredients.get(DatasetAliases.CUSTOMFIELDS);
 
         // Checking data
         if (!types) throw new Error(`RecipeObject: Data from dataset alias 'OBJECTTYPES' was undefined.`);
@@ -115,5 +173,86 @@ export class RecipeObject implements Recipe<SfdcObject> {
 
         // Return data
         return object;
+    }
+
+    /**
+     * @description Process the mixed data into a table format
+     * @param {SfdcObject} mixture - Mixed data to be served to a table
+     * @returns {Promise<SfdcObjectAsTable>} The processed view
+     * @async
+     * @public
+     */
+    public async serveToTable(mixture: SfdcObject): Promise<SfdcObjectAsTable> {
+        return {
+            apiname: mixture.apiname,
+            package: mixture.package,
+            label: mixture.label,
+            labelPlural: mixture.labelPlural,
+            description : mixture.description,
+            keyPrefix: mixture.keyPrefix,
+            recordCount: mixture.recordCount,
+            isCustom: mixture.isCustom,
+            isFeedEnabled: mixture.isFeedEnabled,
+            isMostRecentEnabled: mixture.isMostRecentEnabled,
+            isSearchable: mixture.isSearchable,
+            internalSharingModel: mixture.internalSharingModel,
+            externalSharingModel: mixture.externalSharingModel,
+            standardFields: TableFactory.create('Standard Fields', new StandardFieldsTableDefinition(), mixture.standardFields),
+            customFields: TableFactory.create('Custom Fields', new CustomFieldsInObjectTableDefinition(), mixture.customFieldRefs),
+            apexTriggers: TableFactory.create('Apex Triggers', new ApexTriggersInObjectTableDefinition(), mixture.apexTriggerRefs),
+            fieldSets: TableFactory.create('Field Sets', new FieldSetsTableDefinition(), mixture.fieldSets),
+            layouts: TableFactory.create('Page Layouts', new PageLayoutsTableDefinition(), mixture.layouts),
+            flexiPages: TableFactory.create('Lightning Pages', new FlexiPagesInObjectTableDefinition(), mixture.flexiPages),
+            limits: TableFactory.create('Limits', new LimitsTableDefinition(), mixture.limits),
+            validationRules: TableFactory.create('Validation Rules', new ValidationRulesInObjectTableDefinition(), mixture.validationRules),
+            webLinks: TableFactory.create('Web Links', new WebLinksInObjectTableDefinition(), mixture.webLinks),
+            recordTypes: TableFactory.create('Record Types', new RecordTypesInObjectTableDefinition(), mixture.recordTypes),
+            relationships: TableFactory.create('Relationships', new RelationshipsTableDefinition(), mixture.relationships),
+            workflowRules: TableFactory.create('Workflows', new WorkflowsTableDefinition(), mixture.workflowRuleRefs)
+        };
+    }
+
+
+    /**
+     * @description We put your plate in a doggy bag
+     * @param {SfdcObjectAsTable} plate - Plate which was on the table
+     * @returns {Promise<ExportedTable[]>} Meal in a doggy bag, ready to take back home!
+     * @async
+     * @public
+     */
+    public async serveToGo(plate: SfdcObjectAsTable): Promise<ExportedTable[]> {
+        return [
+            { 
+                label: 'General information',
+                columns: [ 'Label', 'Value' ],
+                rows: [
+                    [ 'API Name', `${plate.apiname ?? ''}` ],
+                    [ 'Package', `${plate.package ?? ''}` ],
+                    [ 'Singular Label', `${plate.label ?? ''}` ],
+                    [ 'Plural Label', `${plate.labelPlural ?? ''}` ],
+                    [ 'Description', `${plate.description ?? ''}` ],
+                    [ 'Key Prefix', `${plate.keyPrefix ?? ''}` ],
+                    [ 'Record Count (including deleted ones)', `${plate.recordCount}` ],
+                    [ 'Is Custom?', `${plate.isCustom?'true':'false'}` ],
+                    [ 'Feed Enable?', `${plate.isFeedEnabled?'true':'false'}` ],
+                    [ 'Most Recent Enabled?', `${plate.isMostRecentEnabled?'true':'false'}` ],
+                    [ 'Global Search Enabled?', `${plate.isSearchable?'true':'false'}` ],
+                    [ 'Internal Sharing', `${plate.internalSharingModel ?? ''}` ],
+                    [ 'External Sharing', `${plate.externalSharingModel ?? ''}` ]
+                ]
+            },
+            TableFactory.export(plate.standardFields),
+            TableFactory.export(plate.customFields),
+            TableFactory.export(plate.apexTriggers),
+            TableFactory.export(plate.fieldSets),
+            TableFactory.export(plate.layouts),
+            TableFactory.export(plate.flexiPages),
+            TableFactory.export(plate.limits),
+            TableFactory.export(plate.validationRules),
+            TableFactory.export(plate.webLinks),
+            TableFactory.export(plate.recordTypes),
+            TableFactory.export(plate.relationships),
+            TableFactory.export(plate.workflowRules)
+        ];
     }
 }

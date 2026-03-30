@@ -1,25 +1,76 @@
-import { TableColumn } from 'src/ui/table/orgcheck-ui-table-column';
+import { Row } from 'src/ui/table/row/orgcheck-ui-table-row';
+import { TableDefinition } from 'src/ui/table/orgcheck-ui-table-definition';
 import { SortOrder } from 'src/ui/table/orgcheck-ui-table-sortorder';
 
 export interface Table {
 
     /**
-     * @description List of columns in a table
-     * @type {Array<TableColumn>}
+     * @description Name of the exported table (like a title)
+     * @type {string}
+     * @public
      */
-    columns: Array<TableColumn>;
+    name: string;
 
     /**
-     * @description Which index column is used for ordering?
+     * @description Definition of the table with columns and ordering information
+     * @type {TableDefinition}
+     * @public
+     */
+    definition: TableDefinition;
+
+    /**
+     * @description Which index column is used for current ordering?
      * @type {number}
      */
     orderIndex: number;
-
+    
     /**
-     * @description What is the sort order: ASC or DESC?
+     * @description What is the current sort order: ascending or descending?
      * @type {SortOrder}
      */
     orderSort: SortOrder;
+
+    /**
+     * @description List of rows in a table
+     * @type {Row[]}
+     * @public
+     */
+    rows: Row[];
+
+    /**
+     * @description Number of all rows (before filtering)
+     * @type {number}
+     * @public
+     */
+    nbAllRows: number;
+
+    /**
+     * @description Number of rows after filtering (if no filter is applied, then nbFilteredRows should be equal to nbAllRows)
+     * @type {number}
+     * @public
+     */
+    nbFilteredRows: number;
+
+    /**
+     * @description Number of bad rows in the table
+     * @type {number}
+     * @public
+     */
+    nbBadRows: number;
+
+    /**
+     * @description Indicates if filtering is active
+     * @type {boolean}
+     * @public
+     */
+    isFilterOn: boolean;
+
+    /**
+     * @description Indicates if the filtered data is empty
+     * @type {boolean}
+     * @public
+     */
+    isFilteredDataEmpty: boolean;
 }
 
 export interface ExportedTable {
@@ -28,17 +79,17 @@ export interface ExportedTable {
      * @description Name of the exported table (like a title)
      * @type {string}
      */
-    header: string;
+    label: string;
 
     /**
      * @description List of column labels
-     * @type {Array<string>}
+     * @type {string[]}
      */
-    columns: Array<string>;
+    columns: string[];
 
     /**
      * @description List of rows with cells
-     * @type {Array<Array<string>>}
+     * @type {string[][]}
      */
-    rows: Array<Array<string>>;
+    rows: string[][];
 }

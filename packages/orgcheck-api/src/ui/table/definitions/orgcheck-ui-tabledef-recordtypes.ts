@@ -1,9 +1,9 @@
-import { ColumnType } from "src/ui/table/orgcheck-ui-table-columntype";
-import { Table } from "src/ui/table/orgcheck-ui-table";
+import { ColumnType } from "src/ui/table/column/orgcheck-ui-table-columntype";
+import { TableDefinition } from "src/ui/table/orgcheck-ui-table-definition";
 import { SortOrder } from "src/ui/table/orgcheck-ui-table-sortorder";
-import { TableColumn } from "src/ui/table/orgcheck-ui-table-column";
+import { TableColumn } from "src/ui/table/column/orgcheck-ui-table-column";
 
-class AbstractRecordTypesTableDefinitions implements Table {
+class AbstractRecordTypesTableDefinition implements TableDefinition {
     
     /**
      * @description Constructor to specify if this table is in a context of an object. 
@@ -48,13 +48,13 @@ class AbstractRecordTypesTableDefinitions implements Table {
     orderSort: SortOrder = SortOrder.DESC;
 }
 
-export class RecordTypesTableDefinitions extends AbstractRecordTypesTableDefinitions {
+export class RecordTypesTableDefinition extends AbstractRecordTypesTableDefinition {
     constructor() {
         super(true);
     }
 }
 
-export class RecordTypesInObjectTableDefinitions extends AbstractRecordTypesTableDefinitions {
+export class RecordTypesInObjectTableDefinition extends AbstractRecordTypesTableDefinition {
     constructor() {
         super(false);
     }

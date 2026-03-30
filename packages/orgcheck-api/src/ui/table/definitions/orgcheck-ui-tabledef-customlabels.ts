@@ -1,10 +1,10 @@
-import { ColumnType } from "src/ui/table/orgcheck-ui-table-columntype";
-import { Table } from "src/ui/table/orgcheck-ui-table";
+import { ColumnType } from "src/ui/table/column/orgcheck-ui-table-columntype";
+import { TableDefinition } from "src/ui/table/orgcheck-ui-table-definition";
 import { SortOrder } from "src/ui/table/orgcheck-ui-table-sortorder";
-import { TableColumn } from "src/ui/table/orgcheck-ui-table-column";
+import { TableColumn } from "src/ui/table/column/orgcheck-ui-table-column";
 import { SalesforceMetadataTypes } from "src/api/core/orgcheck-api-salesforce-metadatatypes";
 
-export class CustomLabelsTableDefinitions implements Table {
+export class CustomLabelsTableDefinition implements TableDefinition {
     
     /**
      * @description List of columns in a table

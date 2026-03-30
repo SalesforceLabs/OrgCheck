@@ -50,6 +50,7 @@ import { DatasetWeblinks } from 'src/api/dataset/orgcheck-api-dataset-weblinks';
 import { DatasetWorkflows } from 'src/api/dataset/orgcheck-api-dataset-workflows';
 import { LoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
+import { DatasetScoreRules } from 'src/api/dataset/orgcheck-api-dataset-scorerules';
 
 /**
  * @description Dataset manager
@@ -71,27 +72,6 @@ export class DatasetManager implements DatasetManagerIntf {
     private _datasetPromisesCache: Map<string, Promise<Array<any>>>;
 
     /**
-     * @description Data cache manager
-     * @type {DataCacheManagerIntf}
-     * @private
-     */
-    private _dataCache: DataCacheManagerIntf;
-
-    /**
-     * @description Salesforce manager
-     * @type {SalesforceManagerIntf}
-     * @private
-     */
-    private _sfdcManager: SalesforceManagerIntf;
-
-    /**
-     * @description Logger
-     * @type {LoggerIntf}
-     * @private
-     */
-    private _logger: LoggerIntf;
-
-    /**
      * @description Data factory
      * @type {DataFactoryIntf}}
      * @private
@@ -105,11 +85,8 @@ export class DatasetManager implements DatasetManagerIntf {
      * @param {LoggerIntf} logger - The instance of the logger
      * @public
      */
-    constructor(sfdcManager: SalesforceManagerIntf, cacheManager: DataCacheManagerIntf, logger: LoggerIntf) {
+    constructor(private readonly sfdcManager: SalesforceManagerIntf, private readonly cacheManager: DataCacheManagerIntf, private readonly logger: LoggerIntf) {
          
-        this._sfdcManager = sfdcManager;
-        this._logger = logger;
-        this._dataCache = cacheManager;
         this._datasets = new Map();
         this._datasetPromisesCache = new Map();
         this._dataFactory = new DataFactory();
@@ -149,6 +126,7 @@ export class DatasetManager implements DatasetManagerIntf {
         this._datasets.set(DatasetAliases.PROFILES, new DatasetProfiles());
         this._datasets.set(DatasetAliases.RECORDTYPES, new DatasetRecordTypes());
         this._datasets.set(DatasetAliases.REPORTS, new DatasetReports());
+        this._datasets.set(DatasetAliases.SCORERULES, new DatasetScoreRules());
         this._datasets.set(DatasetAliases.STATICRESOURCES, new DatasetStaticResources());
         this._datasets.set(DatasetAliases.USERROLES, new DatasetUserRoles());
         this._datasets.set(DatasetAliases.INTERNALACTIVEUSERS, new DatasetInternalActiveUsers());
@@ -182,32 +160,32 @@ export class DatasetManager implements DatasetManagerIntf {
             if (this._datasetPromisesCache.has(cacheKey) === false) {
                 this._datasetPromisesCache.set(cacheKey, Promise.resolve().then(async () => {
                     try {
-                        this._logger.log(section, `Checking the data cache for key=${cacheKey}...`);
+                        this.logger.log(section, `Checking the data cache for key=${cacheKey}...`);
                         // Get data cache if any
-                        const dataFromCache = this._dataCache.get(cacheKey);
+                        const dataFromCache = this.cacheManager.get(cacheKey);
                         if (dataFromCache) {
                             // Set the results from data cache
-                            this._logger.finalLog(section, 'There was data in data cache, we use it!');
+                            this.logger.finalLog(section, 'There was data in data cache, we use it!');
                             // Return the key/alias and value from the data cache
                             return [ alias, dataFromCache ]; // when data comes from cache instanceof won't work! (keep that in mind)
                         } else {
-                            this._logger.log(section, `There was no data in data cache. Let's retrieve data.`);
+                            this.logger.log(section, `There was no data in data cache. Let's retrieve data.`);
                             // Calling the retriever
                             const data = await this._datasets.get(alias)?.run(
-                                this._sfdcManager, // sfdc manager
+                                this.sfdcManager, // sfdc manager
                                 this._dataFactory, // data factory
-                                this._logger?.toSimpleLogger(section), // local logger
+                                this.logger?.toSimpleLogger(section), // local logger
                                 parameters // Send any parameters if needed
                             );
                             // Cache the data (if possible and not too big)
-                            this._dataCache.set(cacheKey, data); 
+                            this.cacheManager.set(cacheKey, data); 
                             // Some logs
-                            this._logger.finalLog(section, `Data retrieved and saved in cache with key=${cacheKey}`);
+                            this.logger.finalLog(section, `Data retrieved and saved in cache with key=${cacheKey}`);
                             // Return the key/alias and value from the cache
                             return [ alias, data ];
                         }
                     } catch (error) {
-                        this._logger.fatal(section, error);
+                        this.logger.fatal(section, error);
                         throw new DatasetManagerError(alias, `There was an error while retrieving the data for this dataset (either cache issue or dataset.run issue).`, error);
                     }
                 }));
@@ -233,7 +211,7 @@ export class DatasetManager implements DatasetManagerIntf {
         datasets.forEach((dataset) => {
             try {
                 const cacheKey = (typeof dataset === 'string' ? dataset : dataset.cacheKey);
-                this._dataCache.remove(cacheKey);
+                this.cacheManager.remove(cacheKey);
                 this._datasetPromisesCache.delete(cacheKey);
             } catch (error) {
                 throw new DatasetManagerError(JSON.stringify(dataset), `There was an error while cleaning the dataset`, error);

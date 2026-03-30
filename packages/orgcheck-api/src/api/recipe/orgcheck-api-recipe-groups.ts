@@ -1,67 +1,56 @@
-import { Recipe } from 'src/api/core/orgcheck-api-recipe';
+import { ServedRecipe } from 'src/api/core/orgcheck-api-recipe';
+import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
+import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
 import { SfdcUser }from 'src/api/data/orgcheck-api-data-user';
 import { SfdcGroup }from 'src/api/data/orgcheck-api-data-group';
+import { PublicGroupsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-publicgroups';
+import { QueuesTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-queues';
 
-const QUEUE_FILTER = (g: SfdcGroup) => g.isQueue === true; 
-const PUBLICGROUP_FILTER = (g: SfdcGroup) => g.isPublicGroup === true;
-
-const QUEUE_TYPE = 'queue';
-const PUBLICGROUP_TYPE = 'publicgroup';
-
-class AbstractRecipeGroups implements Recipe<SfdcGroup[]> {
-
-    /**
-     * @description Function to filter the apex classes
-     * @type {Function}
-     * @private
-     */ 
-    private _filterFunction: Function;
+abstract class AbstractRecipeGroups implements ServedRecipe<SfdcGroup[], Table> {
 
     /**
      * @description Constructor letting us choose the type of apex classes to check
-     * @param {string} type - Type of apex classes to check
-     * @public
+     * @param title title of this recipe
+     * @param filterFunction private function that will filter the groups
      */ 
-    constructor(type: string) {
-        switch (type) {
-            case QUEUE_TYPE: {
-                this._filterFunction = QUEUE_FILTER; 
-                break;
-            }
-            case PUBLICGROUP_TYPE: 
-            default: {
-                this._filterFunction = PUBLICGROUP_FILTER; 
-            }
-        }
-    }
+    constructor(public readonly title: string, private readonly filterFunction: {(g: SfdcGroup): boolean}, ) {}
     
     /**
-     * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
+     * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
      * @param {SimpleLoggerIntf} _logger - Logger
-     * @returns {Array<string | DatasetRunInformation>} The datasets aliases that this recipe is using
+     * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public extract(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
         return [DatasetAliases.INTERNALACTIVEUSERS, DatasetAliases.PUBLICGROUPSANDQUEUES];
     }
 
     /**
-     * @description transform the data from the datasets and return the final result as an Array
-     * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
+     * @description List the parameters that this mix dependes on
+     * @returns {string[]} List of parameters that this mix dependes on
+     * @public
+     */
+    public mixDependencies(): string[] {
+        return [];
+    }
+
+    /**
+     * @description mix the ingredients all together and return the result
+     * @param {Map<string, any>} ingredients - Records or information grouped by their alias in a Map
      * @param {SimpleLoggerIntf} _logger - Logger
-     * @returns {Promise<SfdcGroup[]>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<SfdcGroup[]>} Returns the mixture
      * @async
      * @public
      */
-    public async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<SfdcGroup[]> {
+    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf): Promise<SfdcGroup[]> {
 
         // Get data and parameters
-        const groups: Map<string, SfdcGroup> = data.get(DatasetAliases.PUBLICGROUPSANDQUEUES);
-        const users: Map<string, SfdcUser> = data.get(DatasetAliases.INTERNALACTIVEUSERS);
+        const groups: Map<string, SfdcGroup> = ingredients.get(DatasetAliases.PUBLICGROUPSANDQUEUES);
+        const users: Map<string, SfdcUser> = ingredients.get(DatasetAliases.INTERNALACTIVEUSERS);
 
         // Checking data
         if (!groups) throw new Error(`RecipePublicGroups: Data from dataset alias 'PUBLICGROUPSANDQUEUES' was undefined.`);
@@ -83,7 +72,7 @@ class AbstractRecipeGroups implements Recipe<SfdcGroup[]> {
                 (id: string) => groups.has(id)
             );
             // Filter data
-            if (this._filterFunction(group) === true) {
+            if (this.filterFunction(group) === true) {
                 array.push(group);
             }
         });
@@ -91,16 +80,88 @@ class AbstractRecipeGroups implements Recipe<SfdcGroup[]> {
         // Return data
         return array;
     }
+
+    /**
+     * @description Process the mixed data into a table format
+     * @param {SfdcGroup[]} mixture - Mixed data to be served to a table
+     * @returns {Promise<Table>} The processed view
+     * @async
+     * @public
+     */
+    public abstract serveToTable(mixture: SfdcGroup[]): Promise<Table>;
+
+    /**
+     * @description We put your plate in a doggy bag
+     * @param {Table} plate - Plate which was on the table
+     * @returns {Promise<ExportedTable | ExportedTable[]>} Meal in a doggy bag, ready to take back home!
+     * @async
+     * @public
+     */
+    public abstract serveToGo(plate: Table): Promise<ExportedTable | ExportedTable[]>;
 }
 
 export class RecipeQueues extends AbstractRecipeGroups {
+
+    /**
+     * @description Constructor
+     * @public
+     */ 
     constructor() {
-        super(QUEUE_TYPE);
+        super('🦒 Queues', (g: SfdcGroup) => g.isQueue === true);
+    }
+
+    /**
+     * @description Process the mixed data into a table format
+     * @param {SfdcGroup[]} mixture - Mixed data to be served to a table
+     * @returns {Promise<Table>} The processed view
+     * @async
+     * @public
+     */
+    public async serveToTable(mixture: SfdcGroup[]): Promise<Table> {
+        return TableFactory.create(this.title, new PublicGroupsTableDefinition(), mixture);
+    }
+
+    /**
+     * @description We put your plate in a doggy bag
+     * @param {Table} plate - Plate which was on the table
+     * @returns {Promise<ExportedTable>} Meal in a doggy bag, ready to take back home!
+     * @async
+     * @public
+     */
+    public async serveToGo(plate: Table): Promise<ExportedTable> {
+        return TableFactory.export(plate);
     }
 }
 
 export class RecipePublicGroups extends AbstractRecipeGroups {
+
+    /**
+     * @description Constructor
+     * @public
+     */ 
     constructor() {
-        super(PUBLICGROUP_TYPE);
+        super('🐘 Public Groups', (g: SfdcGroup) => g.isPublicGroup === true);
+    }
+
+    /**
+     * @description Process the mixed data into a table format
+     * @param {SfdcGroup[]} mixture - Mixed data to be served to a table
+     * @returns {Promise<Table>} The processed view
+     * @async
+     * @public
+     */
+    public async serveToTable(mixture: SfdcGroup[]): Promise<Table> {
+        return TableFactory.create(this.title, new QueuesTableDefinition(), mixture);
+    }
+
+    /**
+     * @description We put your plate in a doggy bag
+     * @param {Table} plate - Plate which was on the table
+     * @returns {Promise<ExportedTable>} Meal in a doggy bag, ready to take back home!
+     * @async
+     * @public
+     */
+    public async serveToGo(plate: Table): Promise<ExportedTable> {
+        return TableFactory.export(plate);
     }
 }

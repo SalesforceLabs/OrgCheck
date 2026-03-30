@@ -1,7 +1,8 @@
 import { Data } from 'src/api/core/orgcheck-api-data';
 import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
-import { DataCollectionStatisticsIntf } from './orgcheck-api-data-datacollectionstats';
-import { Recipe } from 'src/api/core/orgcheck-api-recipe';
+import { DataCollectionStatisticsIntf } from 'src/api/core/orgcheck-api-data-datacollectionstats';
+import { SfdcObjectAsTable } from 'src/api/recipe/orgcheck-api-recipe-object';
+import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 
 /**
  * @description Recipe manager error class
@@ -14,38 +15,56 @@ export class RecipeManagerError extends Error {
 }
 
 /**
- * @description Shortcut for any type of data returned by recipes stored by this manager
- */
-export type AnyRecipeData = Data | Data[] | DataMatrixIntf | Map<string, boolean>;
-
-/**
- * @description Shortcut for any type of data returned by recipe collections stored by this manager
- */
-export type AnyRecipeCollectionData = DataCollectionStatisticsIntf[];
-
-/**
- * @description Shortcut for any type of recipes that the manager can handle at this time
- */
-export type AnyRecipe = Recipe<AnyRecipeData>;
-
-/**
  * @description Recipe Manager interface
  */ 
 export interface RecipeManagerIntf {
 
     /**
-     * @description Runs a designated recipe (by its alias)
+     * @description Prepare a designated recipe (by its alias)
      *   - Step 1. Extract the list of datasets to run that this recipe uses
      *   - Step 2. Run the given datasets and gather the global data retrieved
-     *   - Step 3. Transform the retrieved data and return the final result as a Map
+     *   - Step 3. Combine/mix all the data together
+     *   - Step 4. Return the mixture
      * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map<string, any>} [parameters] - List of values to pass to the recipe
-     * @returns {Promise<AnyRecipeData | AnyRecipeCollectionData>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean>| DataCollectionStatisticsIntf[]>} Returns the mixture
      * @throws {RecipeManagerError}
      * @async
      * @public
      */
-    run(alias: string, parameters: Map<string, any>): Promise<AnyRecipeData | AnyRecipeCollectionData>;
+    prepare(alias: string, parameters: Map<string, any>): Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]>;
+
+    /**
+     * @description Serve the mixture from a designated recipe to a table
+     * @param {string} alias - String representation of a recipe
+     * @param {Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]} [mixture] - The mixture
+     * @returns {Promise<Table | SfdcObjectAsTable>} Returns the mixture as a table
+     * @throws {RecipeManagerError}
+     * @async
+     * @public
+     */
+    serveToTable(alias: string, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<Table | SfdcObjectAsTable>;
+
+    /**
+     * @description Serve the mixture from a designated recipe to go
+     * @param {string} alias - String representation of a recipe
+     * @param {Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]} [mixture] - The mixture
+     * @returns {Promise<ExportedTable | ExportedTable[]>} Returns the mixture as to go
+     * @throws {RecipeManagerError}
+     * @async
+     * @public
+     */
+    serveToGo(alias: string, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<ExportedTable | ExportedTable[]>;
+
+    /**
+     * @description Returns the cache stamp for a designated recipe (by its alias)
+     * @param {string} alias - String representation of a recipe
+     * @param {Map<string, any>} [parameters] - List of values to pass to the recipe
+     * @returns {Promise<string>} Returns the cache stamp
+     * @public
+     */
+    cachestamp(alias: string, parameters: Map<string, any>): string;
+
 
     /**
      * @description Cleans a designated recipe (by its alias) and the corresponding datasets.

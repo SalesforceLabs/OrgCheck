@@ -1,3 +1,3 @@
-import { PublicGroupsTableDefinitions } from "src/ui/table/definitions/orgcheck-ui-tabledef-publicgroups";
+import { PublicGroupsTableDefinition } from "src/ui/table/definitions/orgcheck-ui-tabledef-publicgroups";
 
-export class QueuesTableDefinitions extends PublicGroupsTableDefinitions {}
+export class QueuesTableDefinition extends PublicGroupsTableDefinition {}

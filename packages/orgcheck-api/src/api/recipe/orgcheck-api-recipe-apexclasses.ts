@@ -1,75 +1,59 @@
-import { Recipe } from 'src/api/core/orgcheck-api-recipe';
+import { ServedRecipe } from 'src/api/core/orgcheck-api-recipe';
+import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
+import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
-import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
 import { SfdcApexClass }from 'src/api/data/orgcheck-api-data-apexclass';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
+import { ApexClassesTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-apexclasses';
+import { ApexTestsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-apextests';
+import { ApexUncompiledTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-apexuncompiled';
+import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 
-const REGULAR_FILTER = (ac: SfdcApexClass) => ac.isTest === false && ac.needsRecompilation === false;
-const TEST_FILTER = (ac: SfdcApexClass) => ac.isTest === true && ac.needsRecompilation === false;
-const UNCOMPILED_FILTER = (ac: SfdcApexClass) => ac.needsRecompilation === true;
-
-const TESTS_TYPE = 'tests';
-const UNCOMPILED_TYPE = 'uncompiled';
-const REGULAR_TYPE = 'regular';
-
-class AbstractRecipeApexClasses implements Recipe<SfdcApexClass[]> {
-
-    /**
-     * @description Function to filter the apex classes
-     * @type {Function}
-     * @private
-     */ 
-    private _filterFunction: Function;
+abstract class AbstractRecipeApexClasses implements ServedRecipe<SfdcApexClass[], Table> {
 
     /**
      * @description Constructor letting us choose the type of apex classes to check
-     * @param {string} type - Type of apex classes to check
-     * @public
+     * @param title title of this recipe
+     * @param filterFunction private function that will filter the apex classes
      */ 
-    constructor(type: string) {
-        switch (type) {
-            case TESTS_TYPE: {
-                this._filterFunction = TEST_FILTER; 
-                break;
-            }
-            case UNCOMPILED_TYPE: {
-                this._filterFunction = UNCOMPILED_FILTER; 
-                break;
-            }
-            case REGULAR_TYPE: 
-            default: {
-                this._filterFunction = REGULAR_FILTER; 
-            }
-        }
-    }
+    constructor(public readonly title: string, private readonly filterFunction: {(ac: SfdcApexClass): boolean}, ) {}
 
     /**
-     * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
+     * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
      * @param {SimpleLoggerIntf} _logger - Logger
-     * @returns {Array<string | DatasetRunInformation>} The datasets aliases that this recipe is using
+     * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public extract(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
         return [
             DatasetAliases.APEXCLASSES
         ];
     }
 
     /**
-     * @description transform the data from the datasets and return the final result as a Map
-     * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
+     * @description List the parameters that this mix dependes on
+     * @returns {string[]} List of parameters that this mix dependes on
+     * @public
+     */
+    public mixDependencies(): string[] {
+        return [OrgCheckGlobalParameter.PACKAGE_NAME];
+    }
+
+    /**
+     * @description mix the ingredients all together and return the result
+     * @param {Map<string, any>} ingredients - Records or information grouped by their alias in a Map
      * @param {SimpleLoggerIntf} _logger - Logger
      * @param {Map<string, any>} [parameters] - List of optional argument to pass
-     * @returns {Promise<SfdcApexClass[]>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<SfdcApexClass[]>} Returns the mixture
      * @async
      * @public
      */
-    public async transform(data: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<SfdcApexClass[]> {
+    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<SfdcApexClass[]> {
 
         // Get data and parameters
-        const apexClasses: Map<string, SfdcApexClass> = data.get(DatasetAliases.APEXCLASSES);
+        const apexClasses: Map<string, SfdcApexClass> = ingredients.get(DatasetAliases.APEXCLASSES);
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
@@ -86,7 +70,7 @@ class AbstractRecipeApexClasses implements Recipe<SfdcApexClass[]> {
             apexClass.relatedTestClassRefs = results[0];
             apexClass.relatedClassRefs = results[1];
             // Filter data
-            if ((namespace === OrgCheckGlobalParameter.ALL_VALUES || apexClass.package === namespace) && this._filterFunction(apexClass)) {
+            if ((namespace === OrgCheckGlobalParameter.ALL_VALUES || apexClass.package === namespace) && this.filterFunction(apexClass)) {
                 array.push(apexClass);
             }
         });
@@ -94,22 +78,121 @@ class AbstractRecipeApexClasses implements Recipe<SfdcApexClass[]> {
         // Return data
         return array;
     }
+
+    /**
+     * @description Process the mixed data into a table format
+     * @param {SfdcApexClass[]} mixture - Mixed data to be served to a table
+     * @returns {Promise<Table>} The processed view
+     * @async
+     * @public
+     */
+    public abstract serveToTable(mixture: SfdcApexClass[]): Promise<Table>;
+
+    /**
+     * @description We put your plate in a doggy bag
+     * @param {Table} plate - Plate which was on the table
+     * @returns {Promise<ExportedTable | ExportedTable[]>} Meal in a doggy bag, ready to take back home!
+     * @async
+     * @public
+     */
+    public abstract serveToGo(plate: Table): Promise<ExportedTable | ExportedTable[]>;
 }
 
 export class RecipeApexClasses extends AbstractRecipeApexClasses {
-    constructor() {
-        super(REGULAR_TYPE);
+
+    /**
+     * @description Constructor
+     * @public
+     */ 
+    public constructor() {
+        super('❤️‍🔥 Apex Classes', (ac: SfdcApexClass) => ac.isTest === false && ac.needsRecompilation === false);
+    }
+
+    /**
+     * @description Process the mixed data into a table format
+     * @param {SfdcApexClass[]} mixture - Mixed data to be served to a table
+     * @returns {Promise<Table>} The processed table
+     * @async
+     * @public
+     */
+    public async serveToTable(mixture: SfdcApexClass[]): Promise<Table> {
+        return TableFactory.create(this.title, new ApexClassesTableDefinition(), mixture);
+    }
+
+    /**
+     * @description We put your plate in a doggy bag
+     * @param {Table} plate - Plate which was on the table
+     * @returns {Promise<ExportedTable | ExportedTable[]>} Meal in a doggy bag, ready to take back home!
+     * @async
+     * @public
+     */
+    public async serveToGo(plate: Table): Promise<ExportedTable | ExportedTable[]> {
+        return TableFactory.export(plate);
     }
 }
 
 export class RecipeApexTests extends AbstractRecipeApexClasses {
-    constructor() {
-        super(TESTS_TYPE);
+
+    /**
+     * @description Constructor
+     * @public
+     */ 
+    public constructor() {
+        super('🚒 Apex Unit Tests', (ac: SfdcApexClass) => ac.isTest === true && ac.needsRecompilation === false);
+    }
+
+    /**
+     * @description Process the mixed data into a table format
+     * @param {SfdcApexClass[]} mixture - Mixed data to be served to a table
+     * @returns {Promise<Table>} The processed table
+     * @async
+     * @public
+     */
+    public async serveToTable(mixture: SfdcApexClass[]): Promise<Table> {
+        return TableFactory.create(this.title, new ApexTestsTableDefinition(), mixture);
+    }
+
+    /**
+     * @description We put your plate in a doggy bag
+     * @param {Table} plate - Plate which was on the table
+     * @returns {Promise<ExportedTable | ExportedTable[]>} Meal in a doggy bag, ready to take back home!
+     * @async
+     * @public
+     */
+    public async serveToGo(plate: Table): Promise<ExportedTable | ExportedTable[]> {
+        return TableFactory.export(plate);
     }
 }
 
 export class RecipeApexUncompiled extends AbstractRecipeApexClasses {
-    constructor() {
-        super(UNCOMPILED_TYPE);
+
+    /**
+     * @description Constructor
+     * @public
+     */ 
+    public constructor() {
+        super('🌋 Apex Classes That Need Recompilation', (ac: SfdcApexClass) => ac.needsRecompilation === true);
+    }
+
+    /**
+     * @description Process the mixed data into a table format
+     * @param {SfdcApexClass[]} mixture - Mixed data to be served to a table
+     * @returns {Promise<Table>} The processed table
+     * @async
+     * @public
+     */
+    public async serveToTable(mixture: SfdcApexClass[]): Promise<Table> {
+        return TableFactory.create(this.title, new ApexUncompiledTableDefinition(), mixture);
+    }
+
+    /**
+     * @description We put your plate in a doggy bag
+     * @param {Table} plate - Plate which was on the table
+     * @returns {Promise<ExportedTable | ExportedTable[]>} Meal in a doggy bag, ready to take back home!
+     * @async
+     * @public
+     */
+    public async serveToGo(plate: Table): Promise<ExportedTable | ExportedTable[]> {
+        return TableFactory.export(plate);
     }
 }

@@ -1,65 +1,60 @@
-import { Table, ExportedTable } from 'src/ui/table/orgcheck-ui-table';
-import { CellFactory } from 'src/ui/table/orgcheck-ui-table-cellfactory';
-import { Row } from 'src/ui/table/orgcheck-ui-table-row';
-import { ColumnType } from 'src/ui/table/orgcheck-ui-table-columntype';
-import { SortOrder } from 'src/ui/table/orgcheck-ui-table-sortorder';
-import { SecretSauce } from 'src/api/core/orgcheck-api-secretsauce';
+import { ExportedTable, Table } from "src/ui/table/orgcheck-ui-table";
+import { ColumnType } from "src/ui/table/column/orgcheck-ui-table-columntype";
+import { SortOrder } from "src/ui/table/orgcheck-ui-table-sortorder";
+import { TableDefinition } from "src/ui/table/orgcheck-ui-table-definition";
+import { RowsFactory } from "src/ui/table/row/orgcheck-ui-table-rowsfactory";
+import { SecretSauce } from "src/api/core/orgcheck-api-secretsauce";
 
-export class RowsFactory {
+export class TableFactory {
 
     /**
-     * @description Create the rows of a table
-     * @param {Table} tableDefinition - Definition of the table
-     * @param {Array<any>} records - List of records
-     * @param {Function} onEachRowCallback - Callback to be called for each row
-     * @param {Function} onEachCellCallback - Callback to be called for each cell
-     * @returns {Array<Row>} List of rows
+     * @description Creates a new table instance
+     * @param {string} title - The title of the table
+     * @param {TableDefinition} tableDefinition - The definition of the table
+     * @param {any[]} records - The list of records to display in the table
+     * @returns {Table} The created table instance
+     * @static
+     * @public
      */
-    static create(tableDefinition: Table, records: Array<any>, onEachRowCallback: Function, onEachCellCallback: Function): Array<Row> {
-        return records?.map((record, rIndex) => {
-            const row = {
-                index: rIndex+1, // 1-based index of the current row (should be recalculated after sorting)
-                score: record.score, // score is a global KPI at the row level (not at a cell i mean)
-                name : record.name ?? record.label, // try to get the "name" of that record
-                badFields: record.badFields, // needed to see the score explaination in a modal
-                badReasonIds: record.badReasonIds, // needed to see the score explaination in a modal
-                cells: tableDefinition.columns.map((column: any, cIndex: number) => {
-                    const cell = CellFactory.create(column, record);
-                    // Potentially alter the cell
-                    onEachCellCallback(
-                        cell, 
-                        (column['data'] && record.badFields) ? ( record.badFields.includes(column['data'].value) || record.badFields.includes(column['data'].values)) : false,
-                        rIndex,
-                        cIndex
-                    );
-                    // Finally return the cell
-                    return cell;
-                }),
-                isVisible: true
-            }
-            // Potentially alter the row
-            if (onEachRowCallback) onEachRowCallback(row, record.score > 0, rIndex);
-            // Finally return the row
-            return row;
-        }) ?? [];
+    public static create(title: string, tableDefinition: TableDefinition, records: any[]): Table {
+        let nbBadRows = 0;
+        const rows = RowsFactory.create(
+            tableDefinition, 
+            records, 
+            (_row: any[], isRowBad: boolean) => { if (isRowBad) nbBadRows++ }, 
+            () => {}
+        );
+        return {
+            name: title,
+            definition: tableDefinition,
+            orderIndex: tableDefinition.orderIndex,
+            orderSort: tableDefinition.orderSort,
+            rows: rows ?? [],
+            nbAllRows: rows?.length ?? 0,
+            nbFilteredRows: 0,
+            nbBadRows: nbBadRows,
+            isFilterOn: false,
+            isFilteredDataEmpty: false
+        };
     }
 
     /**
-     * @description Sort table
-     * @param {Table} tableDefinition - Definition of the table
-     * @param {Array<Row>} rows - List of rows
-     * @param {number} columnIndex - Index of the column to sort
-     * @param {SortOrder} order - Sort order, can be ASC or DESC
-     */ 
-    static sort(tableDefinition: Table, rows: Array<Row>,  columnIndex: number, order: SortOrder) {
-        const column = tableDefinition.columns[columnIndex];
+     * @description Sorts the table by the specified column and order
+     * @param {Table} table - The table to export
+     * @param {number} columnIndex - The index of the column to sort by
+     * @param {SortOrder} order - The sort order (ASC or DESC)
+     * @static
+     * @public
+     */
+    public static sort(table: Table, columnIndex: number, order: SortOrder): void {
+        const column = table.definition.columns[columnIndex];
         if (! column) return;
         const iOrder = order === SortOrder.ASC ? 1 : -1;
         const isIterative = column.type == ColumnType.OBJS || column.type == ColumnType.TXTS || column.type == ColumnType.URLS;
         const property = column.type == ColumnType.URL ? 'label' : 'value';
         let index = 0;
-        let value1, value2;
-        rows.sort((row1, row2) => {
+        let value1: any, value2: any;
+        table.rows.sort((row1, row2) => {
             if (isIterative === true) {
                 value1 = row1.cells[columnIndex].data?.values?.length || 0;
                 value2 = row2.cells[columnIndex].data?.values?.length || 0;
@@ -80,15 +75,17 @@ export class RowsFactory {
     }
 
     /**
-     * @description Filter table
-     * @param {Array<Row>} rows - List of rows
-     * @param {string} searchInput - Search input
-     */ 
-    static filter(rows: Array<Row>, searchInput: string) {
+     * @description Filters the table by the specified string
+     * @param {Table} table - The table to export
+     * @param {string} searchInput - The string to filter by
+     * @static
+     * @public
+     */
+    public static filter(table: Table, searchInput: string): void {
         if (searchInput?.length > 2) {
             const s = searchInput.toUpperCase();
             let index = 0;                   
-            rows.forEach((row) => {
+            table.rows.forEach((row) => {
                 if (ARRAY_MATCHER(row.cells, s) === true) {
                     row.isVisible = true;
                     row.index = ++index;
@@ -97,7 +94,7 @@ export class RowsFactory {
                 }
             });
         } else {
-            rows.forEach((row, index) => { 
+            table.rows.forEach((row, index) => { 
                 row.isVisible = true;
                 row.index = index+1;
             });
@@ -105,19 +102,17 @@ export class RowsFactory {
     }
 
     /**
-     * @description Export table
-     * @param {Table} tableDefinition - Definition of the table
-     * @param {Array<Row>} rows - List of rows
-     * @param {string} title - Title of the exported table
-     * @returns {ExportedTable} Exported table
-     */ 
-    static export(tableDefinition: Table, rows: Array<Row>, title: string): ExportedTable {
-
-        /** @type {ExportedTable} */
-        const exportedRows: ExportedTable = { header: title, columns: [], rows: [] };
+     * @description Exports the table data
+     * @param {Table} table - The table to export
+     * @returns {ExportedTable} The exported table data
+     * @static
+     * @public
+     */
+    public static export(table: Table): ExportedTable {
+        const exportedRows: ExportedTable = { label: table.name, columns: [], rows: [] };
 
         // Parsing columns
-        tableDefinition.columns.forEach((column) => {
+        table.definition.columns.forEach((column) => {
             switch(column.type) {
                 //---
                 // In case we have a score column, then we want two things (instead of only one)
@@ -151,15 +146,13 @@ export class RowsFactory {
         });
 
         // Parsing rows and cells
-        rows.forEach((row) => {
-
+        table.rows.forEach((row) => {
             // Add the row in the first table
-            /** @type {Array<string>} */
             const exportRow: Array<string> = [];
             row.cells?.forEach((cell) => {
                 if (cell?.typeofindex === true) { // for INDEX typed cell, we set the row's index
                     exportRow.push(`${row?.index}`);
-                } else if (cell?.typeofscore === true) { // for SCORE typed cell, we set the row's score and we add a JSON representation of the list of bad reason Ids
+                } else if (cell?.typeofscore === true) { // for SCORE typed cell, we set the row's score and we add a JSON representation of the rule descriptions
                     exportRow.push(`${row?.score}`, ARRAY_TO_STRING(row?.badReasonIds?.map((id) => SecretSauce.GetScoreRuleDescription(Number.parseInt(id)))));
                 } else if (cell?.typeofid === true) { // for URL typed cell, we set the label and then the URL
                     exportRow.push(`${cell?.data?.label}`, `${cell.data?.value}`);
@@ -186,26 +179,14 @@ export class RowsFactory {
 
         return exportedRows;
     }
-
-    /**
-     * @description Export table
-     * @param {Table} tableDefinition - Definition of the table
-     * @param {Array<any>} records - List of records
-     * @param {string} title - Title of the exported table
-     * @returns {ExportedTable} Exported table
-     */ 
-    static createAndExport(tableDefinition: Table, records: Array<any>, title: string): ExportedTable {
-        const donothing = () => {};
-        const rows = RowsFactory.create(tableDefinition, records, donothing, donothing);
-        return RowsFactory.export(tableDefinition, rows, title);
-    }
 }
 
-const STRING_MATCHER = (value, searchingValue) => {
-    return String(value).toUpperCase().indexOf(searchingValue) >= 0;
+
+const STRING_MATCHER = (value: any, searchingValue: string) => {
+    return `${value}`.toUpperCase().indexOf(searchingValue) >= 0;
 }
 
-const ARRAY_MATCHER = (array, s) => {
+const ARRAY_MATCHER = (array: any[], s: string) => {
     return array.findIndex((item) => {
         return Object.values(item.data).findIndex((property) => {
             if (Array.isArray(property)) {
@@ -216,6 +197,6 @@ const ARRAY_MATCHER = (array, s) => {
     }) >= 0
 }
 
-const ARRAY_TO_STRING = (array) => {
+const ARRAY_TO_STRING = (array: any[] | undefined) => {
     return array ? JSON.stringify(array) : '';
 };

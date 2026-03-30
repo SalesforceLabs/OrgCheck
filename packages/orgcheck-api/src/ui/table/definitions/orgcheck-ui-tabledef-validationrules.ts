@@ -1,9 +1,9 @@
-import { ColumnType } from "src/ui/table/orgcheck-ui-table-columntype";
-import { Table } from "src/ui/table/orgcheck-ui-table";
+import { ColumnType } from "src/ui/table/column/orgcheck-ui-table-columntype";
+import { TableDefinition } from "src/ui/table/orgcheck-ui-table-definition";
 import { SortOrder } from "src/ui/table/orgcheck-ui-table-sortorder";
-import { TableColumn } from "src/ui/table/orgcheck-ui-table-column";
+import { TableColumn } from "src/ui/table/column/orgcheck-ui-table-column";
 
-class AbstractValidationRulesTableDefinitions implements Table {
+class AbstractValidationRulesTableDefinition implements TableDefinition {
     
     /**
      * @description Constructor to specify if this table is in a context of an object. 
@@ -50,13 +50,13 @@ class AbstractValidationRulesTableDefinitions implements Table {
     orderSort: SortOrder = SortOrder.DESC;
 }
 
-export class ValidationRulesTableDefinitions extends AbstractValidationRulesTableDefinitions {
+export class ValidationRulesTableDefinition extends AbstractValidationRulesTableDefinition {
     constructor() {
         super(true);
     }
 }
 
-export class ValidationRulesInObjectTableDefinitions extends AbstractValidationRulesTableDefinitions {
+export class ValidationRulesInObjectTableDefinition extends AbstractValidationRulesTableDefinition {
     constructor() {
         super(false);
     }

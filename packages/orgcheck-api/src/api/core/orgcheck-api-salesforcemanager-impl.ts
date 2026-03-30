@@ -173,6 +173,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
         // Link the connection to the manager
         this._connection = connection;
         this.orgId = connection?.userInfo?.organizationId;
+
     }
 
     /**

@@ -1,10 +1,10 @@
-import { TableColumn } from 'src/ui/table/orgcheck-ui-table-column';
-import { ColumnType } from 'src/ui/table/orgcheck-ui-table-columntype';
+import { TableColumn } from 'src/ui/table/column/orgcheck-ui-table-column';
+import { ColumnType } from 'src/ui/table/column/orgcheck-ui-table-columntype';
 
 export class CellFactory {
 
     /**
-     * @description Create an instance of WhereToGetData like objects from a type and a set of properties
+     * @description Create a cell based on the column definition and the input row
      * @param {TableColumn } column - Column header information
      * @param {any} row - Input data
      * @returns {any} Output data
@@ -16,16 +16,16 @@ export class CellFactory {
         const columnData = column['data'] ?? {};
         switch (column.type) {
             case ColumnType.TXTS: {
-                cell.data.values = RESOLVE(row, columnData['values'])?.map((item) => DECORATE({ data: item }, modifier));
+                cell.data.values = RESOLVE(row, columnData['values'])?.map((item: any) => DECORATE({ data: item }, modifier));
                 break;
             }
             case ColumnType.OBJS: {
                 const template = columnData['template'] ?? (() => '');
-                cell.data.values = RESOLVE(row, columnData['values'])?.map((item) => DECORATE({ data: template(item) }, modifier));
+                cell.data.values = RESOLVE(row, columnData['values'])?.map((item: any) => DECORATE({ data: template(item) }, modifier));
                 break;
             }
             case ColumnType.URLS: {
-                cell.data.values = RESOLVE(row, columnData['values'])?.map((item) => {
+                cell.data.values = RESOLVE(row, columnData['values'])?.map((item: any) => {
                     const value = { data: {}};
                     Object.keys(columnData).filter((p) => p !== 'values').forEach((property) => {
                         value.data[property] = RESOLVE(item, columnData[property]);

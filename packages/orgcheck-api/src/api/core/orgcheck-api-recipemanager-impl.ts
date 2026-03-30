@@ -28,8 +28,8 @@ import { RecipeKnowledgeArticles } from 'src/api/recipe/orgcheck-api-recipe-know
 import { RecipeLightningAuraComponents } from 'src/api/recipe/orgcheck-api-recipe-lightningauracomponents';
 import { RecipeLightningPages } from 'src/api/recipe/orgcheck-api-recipe-lightningpages';
 import { RecipeLightningWebComponents } from 'src/api/recipe/orgcheck-api-recipe-lightningwebcomponents';
-import { AnyRecipe, AnyRecipeCollectionData, AnyRecipeData, RecipeManagerError, RecipeManagerIntf } from 'src/api/core/orgcheck-api-recipemanager';
-import { RecipeObject } from 'src/api/recipe/orgcheck-api-recipe-object';
+import { RecipeManagerError, RecipeManagerIntf } from 'src/api/core/orgcheck-api-recipemanager';
+import { RecipeObject, SfdcObjectAsTable } from 'src/api/recipe/orgcheck-api-recipe-object';
 import { RecipeObjectPermissions } from 'src/api/recipe/orgcheck-api-recipe-objectpermissions';
 import { RecipeObjects } from 'src/api/recipe/orgcheck-api-recipe-objects';
 import { RecipeObjectTypes } from 'src/api/recipe/orgcheck-api-recipe-objecttypes';
@@ -53,6 +53,9 @@ import { RecipeVisualForcePages } from 'src/api/recipe/orgcheck-api-recipe-visua
 import { RecipeWebLinks } from 'src/api/recipe/orgcheck-api-recipe-weblinks';
 import { RecipeWorkflows } from 'src/api/recipe/orgcheck-api-recipe-workflows';
 import { DataCollectionStatisticsIntf } from 'src/api/core/orgcheck-api-data-datacollectionstats';
+import { RecipeScoreRules } from 'src/api/recipe/orgcheck-api-recipe-scorerules';
+import { Recipe, ServedRecipe } from 'src/api/core/orgcheck-api-recipe';
+import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 
 /**
  * @description Recipe Manager
@@ -67,11 +70,11 @@ export class RecipeManager implements RecipeManagerIntf {
     private _logger: LoggerIntf;
 
     /**
-     * @description Map of recipes given their alias.
-     * @type {Map<string, AnyRecipe>}
+     * @description Map of recipes given their alias
+     * @type {Map<string, Recipe<any> | ServedRecipe<any, any>>}
      * @private
      */
-    private _recipes: Map<string, AnyRecipe>;
+    private _recipes: Map<string, Recipe<any> | ServedRecipe<any, any>>;
 
     /**
      * @description Map of recipe collections given their alias.
@@ -96,7 +99,7 @@ export class RecipeManager implements RecipeManagerIntf {
 
         this._datasetManager = datasetManager;
         this._logger = logger;
-        this._recipes = new Map<string, AnyRecipe>();
+        this._recipes = new Map<string, Recipe<Data | Data[] | DataMatrixIntf | Map<string, boolean>>>();
         this._recipeCollections = new Map<string, RecipeCollection>();
 
         // Recipes
@@ -139,6 +142,7 @@ export class RecipeManager implements RecipeManagerIntf {
         this._recipes.set(RecipeAliases.QUEUES, new RecipeQueues());
         this._recipes.set(RecipeAliases.RECORD_TYPES, new RecipeRecordType());
         this._recipes.set(RecipeAliases.REPORTS, new RecipeReports());
+        this._recipes.set(RecipeAliases.SCORE_RULES, new RecipeScoreRules());
         this._recipes.set(RecipeAliases.STATIC_RESOURCES, new RecipeStaticResources());
         this._recipes.set(RecipeAliases.USER_ROLES, new RecipeUserRoles());
         this._recipes.set(RecipeAliases.VALIDATION_RULES, new RecipeValidationRules());
@@ -153,20 +157,69 @@ export class RecipeManager implements RecipeManagerIntf {
     }
 
     /**
-     * @description Runs a designated recipe (by its alias)
+     * @description Prepare a designated recipe (by its alias)
+     *   - Step 1. Extract the list of datasets to run that this recipe uses
+     *   - Step 2. Run the given datasets and gather the global data retrieved
+     *   - Step 3. Combine/mix all the data together
+     *   - Step 4. Return the mixture
      * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
-     * @param {Map<string, any>} [parameters] List of values to pass to the recipe
-     * @returns {Promise<AnyRecipeData | AnyRecipeCollectionData>} Returns as it is the value returned by the transform method recipe.
+     * @param {Map<string, any>} [parameters] - List of values to pass to the recipe
+     * @returns {Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]>} Returns the mixture
      * @throws {RecipeManagerError}
      * @async
      * @public
      */
-    public async run(alias: string, parameters: Map<string, any>): Promise<AnyRecipeData | AnyRecipeCollectionData> {
-
+    public async prepare(alias: string, parameters: Map<string, any>): Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]> {
         if (this._recipes.has(alias)) {
-            return await this._runRecipe(alias, parameters);
+            return await this._prepareRecipe(alias, parameters);
         } else if (this._recipeCollections.has(alias)) {
-            return await this._runRecipeCollection(alias, parameters);
+            return await this._prepareRecipeCollection(alias, parameters);
+        } else {
+            throw new RecipeManagerError(alias, `The given alias (${alias}) does not correspond to a registered recipe.`);
+        }
+    }
+
+    /**
+     * @description Serve the mixture from a designated recipe to a table
+     * @param {string} alias - String representation of a recipe
+     * @param {Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]} [mixture] - The mixture
+     * @returns {Promise<Table | SfdcObjectAsTable>} Returns the mixture as a table
+     * @throws {RecipeManagerError}
+     * @async
+     * @public
+     */
+    public async serveToTable(alias: string, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<Table | SfdcObjectAsTable> {
+        let recipe = this._recipes.get(alias) ?? this._recipeCollections.get(alias);
+        if (recipe) {
+            try {
+                // @ts-ignore
+                return await recipe.serveToTable(mixture);
+            } catch (error) {
+                throw new RecipeManagerError(alias, `The given alias (${alias}) does not correspond to a registered recipe that can be served.`, error);
+            }
+        } else {
+            throw new RecipeManagerError(alias, `The given alias (${alias}) does not correspond to a registered recipe.`);
+        }
+    }
+
+    /**
+     * @description Serve the mixture from a designated recipe to go
+     * @param {string} alias - String representation of a recipe
+     * @param {Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]} [mixture] - The mixture
+     * @returns {Promise<ExportedTable | ExportedTable[]>} Returns the mixture as to go
+     * @throws {RecipeManagerError}
+     * @async
+     * @public
+     */
+    public async serveToGo(alias: string, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<ExportedTable | ExportedTable[]> {
+        let recipe = this._recipes.get(alias) ?? this._recipeCollections.get(alias);
+        if (recipe) {
+            try {
+                // @ts-ignore
+                return await recipe.serveToGo(mixture);
+            } catch (error) {
+                throw new RecipeManagerError(alias, `The given alias (${alias}) does not correspond to a registered recipe that can be served.`, error);
+            }
         } else {
             throw new RecipeManagerError(alias, `The given alias (${alias}) does not correspond to a registered recipe.`);
         }
@@ -190,17 +243,44 @@ export class RecipeManager implements RecipeManagerIntf {
     }
 
     /**
+     * @description Returns the cache stamp for a designated recipe (by its alias)
+     * @param {string} alias - String representation of a recipe
+     * @param {Map<string, any>} [parameters] - List of values to pass to the recipe
+     * @returns {Promise<string>} Returns the cache stamp
+     * @public
+     */
+    public cachestamp(alias: string, parameters: Map<string, any>): string {
+        if (this._recipes.has(alias)) {
+            const recipe = this._recipes.get(alias);
+            let cachestamp = '';
+            recipe?.mixDependencies().forEach((p) => {
+                cachestamp += `${p}:${JSON.stringify(parameters.get(p)) ?? '-'},`;
+            });
+            return cachestamp;
+        } else if (this._recipeCollections.has(alias)) {
+            const recipeCollection = this._recipeCollections.get(alias);
+            let cachestamp = '';
+            recipeCollection?.ingredientsDependencies().forEach((p) => {
+                cachestamp += `${p}:${JSON.stringify(parameters.get(p)) ?? '-'},`;
+            });
+            return cachestamp;
+        } else {
+            throw new RecipeManagerError(alias, `The given alias (${alias}) does not correspond to a registered recipe.`);
+        }
+    }
+
+    /**
      * @description Runs a designated recipe (by its alias)
      *   - Step 1. Extract the list of datasets to run that this recipe uses
      *   - Step 2. Run the given datasets and gather the global data retrieved
      *   - Step 3. Transform the retrieved data and return the final result as a Map
      * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map<string, any>} [parameters] List of values to pass to the recipe
-     * @returns {Promise<AnyRecipeData>} Returns the value from the recipe or undefined if something bad happens
+     * @returns {Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean>>} Returns the value from the recipe or undefined if something bad happens
      * @throws {RecipeManagerError}
      * @async
      */
-    private async _runRecipe(alias: string, parameters: Map<string, any>): Promise<AnyRecipeData> {
+    private async _prepareRecipe(alias: string, parameters: Map<string, any>): Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean>> {
 
         const section = `Run recipe "${alias}"`;
         const recipe = this._recipes.get(alias);
@@ -214,7 +294,7 @@ export class RecipeManager implements RecipeManagerIntf {
         this._logger.log(section, 'How many datasets this recipe has?');
         let datasets: Array<string | DatasetRunInformation>;
         try {
-            datasets = recipe.extract(this._logger.toSimpleLogger(section), parameters);
+            datasets = recipe.ingredients(this._logger.toSimpleLogger(section), parameters);
         } catch (error) {
             throw new RecipeManagerError(alias, `An error occurred while extracting the datasets (message: ${error.message}).`, error);
         }
@@ -235,10 +315,9 @@ export class RecipeManager implements RecipeManagerIntf {
         // STEP 3. Transform
         // -------------------
         this._logger.log(section, 'This recipe will now transform all this information...');
-        /** @type {Array<Data> | DataMatrixIntf | Data | Map<string, any>} */
         let finalData: Array<Data> | DataMatrixIntf | Data | Map<string, any>;
         try {
-            finalData = await recipe.transform(data, this._logger.toSimpleLogger(section), parameters);
+            finalData = await recipe.mix(data, this._logger.toSimpleLogger(section), parameters);
         } catch(error) {
             throw new RecipeManagerError(alias, `An error occurred while transforming the data (message: ${error.message}).`, error);
         }
@@ -251,11 +330,11 @@ export class RecipeManager implements RecipeManagerIntf {
     /**
      * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map<string, any>} [parameters] - List of values to pass to the recipe
-     * @returns {Promise<AnyRecipeCollectionData>} Returns the value from the recipe collection or undefined if something bad happens.
+     * @returns {Promise<DataCollectionStatisticsIntf[]>} Returns the value from the recipe collection or undefined if something bad happens.
      * @throws {RecipeManagerError}
      * @async
      */
-    private async _runRecipeCollection(alias: string, parameters: Map<string, any>): Promise<AnyRecipeCollectionData> {
+    private async _prepareRecipeCollection(alias: string, parameters: Map<string, any>): Promise<DataCollectionStatisticsIntf[]> {
 
         const section = `Run recipe collection "${alias}"`;
         const recipeCollection = this._recipeCollections.get(alias);
@@ -270,7 +349,7 @@ export class RecipeManager implements RecipeManagerIntf {
         /** @type {Array<string>}} */
         let recipes: Array<string>;
         try {
-            recipes = recipeCollection.extract(this._logger.toSimpleLogger(section), parameters);
+            recipes = recipeCollection.ingredients(this._logger.toSimpleLogger(section), parameters);
         } catch(error) {
             throw new RecipeManagerError(alias, `An error occurred while extracting the recipes (message: ${error.message}).`)
         }
@@ -287,7 +366,7 @@ export class RecipeManager implements RecipeManagerIntf {
             this._logger.optimisticByPass = true;
             await Processor.forEach(recipes, async (recipe: string) => {
                 try {
-                    const recipeData = await this._runRecipe(recipe, parameters);
+                    const recipeData = await this._prepareRecipe(recipe, parameters);
                     if (recipeData && Array.isArray(recipeData)) {
                         data.set(recipe, recipeData);
                     } else if (recipeData) {
@@ -420,7 +499,7 @@ export class RecipeManager implements RecipeManagerIntf {
         this._logger.log(section, 'How many datasets this recipe has?');
         let datasets: Array<string | DatasetRunInformation>;
         try {
-            datasets = recipe.extract(this._logger.toSimpleLogger(section), parameters);
+            datasets = recipe.ingredients(this._logger.toSimpleLogger(section), parameters);
         } catch(error) {
             throw new RecipeManagerError(alias, `An error occurred while extracting the datasets (message: ${error.message}).`, error);
         }
@@ -459,7 +538,7 @@ export class RecipeManager implements RecipeManagerIntf {
         /** @type {Array<string>}} */
         let recipes: Array<string>;
         try {
-            recipes = recipeCollection.extract(this._logger.toSimpleLogger(section), parameters);
+            recipes = recipeCollection.ingredients(this._logger.toSimpleLogger(section), parameters);
         } catch(error) {
             throw new RecipeManagerError(alias, `An error occurred while extracting the recipes (message: ${error.message}).`, error);
         }

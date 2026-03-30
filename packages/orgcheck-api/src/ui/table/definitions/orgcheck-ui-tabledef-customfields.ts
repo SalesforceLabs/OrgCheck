@@ -1,10 +1,10 @@
-import { ColumnType } from "src/ui/table/orgcheck-ui-table-columntype";
-import { Table } from "src/ui/table/orgcheck-ui-table";
+import { ColumnType } from "src/ui/table/column/orgcheck-ui-table-columntype";
+import { TableDefinition } from "src/ui/table/orgcheck-ui-table-definition";
 import { SortOrder } from "src/ui/table/orgcheck-ui-table-sortorder";
-import { TableColumn } from "src/ui/table/orgcheck-ui-table-column";
+import { TableColumn } from "src/ui/table/column/orgcheck-ui-table-column";
 import { SalesforceMetadataTypes } from "src/api/core/orgcheck-api-salesforce-metadatatypes";
 
-class AbstractCustomFieldsTableDefinitions implements Table {
+class AbstractCustomFieldsTableDefinition implements TableDefinition {
     
     /**
      * @description Constructor to specify if this table is in a context of an object. 
@@ -67,13 +67,13 @@ class AbstractCustomFieldsTableDefinitions implements Table {
     orderSort: SortOrder = SortOrder.DESC;
 }
 
-export class CustomFieldsTableDefinitions extends AbstractCustomFieldsTableDefinitions {
+export class CustomFieldsTableDefinition extends AbstractCustomFieldsTableDefinition {
     constructor() {
         super(true);
     }
 }
 
-export class CustomFieldsInObjectTableDefinitions extends AbstractCustomFieldsTableDefinitions {
+export class CustomFieldsInObjectTableDefinition extends AbstractCustomFieldsTableDefinition {
     constructor() {
         super(false);
     }

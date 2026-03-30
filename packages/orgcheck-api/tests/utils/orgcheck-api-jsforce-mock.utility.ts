@@ -168,7 +168,7 @@ jsforce.Connection = jest.fn().mockImplementation(() => {
     queryMore: __queryMoreMock,
     request: __requestMock,
     describeGlobal: __describeGlobalMock,
-    describeMock: __describeMock,
+    describe: __describeMock,
     metadata: {
       list: __metadata_listMock,
       read: __metadata_readMock

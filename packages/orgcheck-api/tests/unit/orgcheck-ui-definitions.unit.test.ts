@@ -1,9 +1,9 @@
-import { ApexTriggersInObjectTableDefinitions, ApexTriggersTableDefinitions } from "src/ui/table/definitions/orgcheck-ui-tabledef-apextriggers";
-import { CustomFieldsTableDefinitions, CustomFieldsInObjectTableDefinitions } from "src/ui/table/definitions/orgcheck-ui-tabledef-customfields";
-import { FlexiPagesTableDefinitions, FlexiPagesInObjectTableDefinitions } from "src/ui/table/definitions/orgcheck-ui-tabledef-flexipages";
-import { RecordTypesTableDefinitions, RecordTypesInObjectTableDefinitions } from "src/ui/table/definitions/orgcheck-ui-tabledef-recordtypes";
-import { ValidationRulesTableDefinitions, ValidationRulesInObjectTableDefinitions } from "src/ui/table/definitions/orgcheck-ui-tabledef-validationrules";
-import { WebLinksTableDefinitions, WebLinksInObjectTableDefinitions } from "src/ui/table/definitions/orgcheck-ui-tabledef-weblinks";
+import { ApexTriggersInObjectTableDefinition, ApexTriggersTableDefinition } from "src/ui/table/definitions/orgcheck-ui-tabledef-apextriggers";
+import { CustomFieldsTableDefinition, CustomFieldsInObjectTableDefinition } from "src/ui/table/definitions/orgcheck-ui-tabledef-customfields";
+import { FlexiPagesTableDefinition, FlexiPagesInObjectTableDefinition } from "src/ui/table/definitions/orgcheck-ui-tabledef-flexipages";
+import { RecordTypesTableDefinition, RecordTypesInObjectTableDefinition } from "src/ui/table/definitions/orgcheck-ui-tabledef-recordtypes";
+import { ValidationRulesTableDefinition, ValidationRulesInObjectTableDefinition } from "src/ui/table/definitions/orgcheck-ui-tabledef-validationrules";
+import { WebLinksTableDefinition, WebLinksInObjectTableDefinition } from "src/ui/table/definitions/orgcheck-ui-tabledef-weblinks";
 
 describe('tests.ui.unit.TableDefinitions', () => {
 
@@ -17,8 +17,8 @@ describe('tests.ui.unit.TableDefinitions', () => {
         // therefore we consider the "InObject" table definitions as "WithoutObjectInfo" :) 
 
         it('checks if apex trigger table definitions are correctly setting the columns with or without object information', () => {
-            const countColumnsWithObjectInfo = new ApexTriggersTableDefinitions().columns.length;
-            const countColumnsWithoutObjectInfo = new ApexTriggersInObjectTableDefinitions().columns.length;
+            const countColumnsWithObjectInfo = new ApexTriggersTableDefinition().columns.length;
+            const countColumnsWithoutObjectInfo = new ApexTriggersInObjectTableDefinition().columns.length;
             expect(countColumnsWithoutObjectInfo).toBeDefined();
             expect(countColumnsWithObjectInfo).toBeDefined();
             expect(countColumnsWithoutObjectInfo).toBeGreaterThan(0);
@@ -28,8 +28,8 @@ describe('tests.ui.unit.TableDefinitions', () => {
         
         it('checks if custom fields table definitions are correctly setting the columns with or without object information', () => {
             
-            const countColumnsWithObjectInfo = new CustomFieldsTableDefinitions().columns.length;
-            const countColumnsWithoutObjectInfo = new CustomFieldsInObjectTableDefinitions().columns.length;
+            const countColumnsWithObjectInfo = new CustomFieldsTableDefinition().columns.length;
+            const countColumnsWithoutObjectInfo = new CustomFieldsInObjectTableDefinition().columns.length;
             expect(countColumnsWithoutObjectInfo).toBeDefined();
             expect(countColumnsWithObjectInfo).toBeDefined();
             expect(countColumnsWithoutObjectInfo).toBeGreaterThan(0);
@@ -38,8 +38,8 @@ describe('tests.ui.unit.TableDefinitions', () => {
         });
 
         it('checks if flexi pages table definitions are correctly setting the columns with or without object information', () => {
-            const countColumnsWithObjectInfo = new FlexiPagesTableDefinitions().columns.length;
-            const countColumnsWithoutObjectInfo = new FlexiPagesInObjectTableDefinitions().columns.length;
+            const countColumnsWithObjectInfo = new FlexiPagesTableDefinition().columns.length;
+            const countColumnsWithoutObjectInfo = new FlexiPagesInObjectTableDefinition().columns.length;
             expect(countColumnsWithoutObjectInfo).toBeDefined();
             expect(countColumnsWithObjectInfo).toBeDefined();
             expect(countColumnsWithoutObjectInfo).toBeGreaterThan(0);
@@ -48,8 +48,8 @@ describe('tests.ui.unit.TableDefinitions', () => {
         });
 
         it('checks if record types table definitions are correctly setting the columns with or without object information', () => {
-            const countColumnsWithObjectInfo = new RecordTypesTableDefinitions().columns.length;
-            const countColumnsWithoutObjectInfo = new RecordTypesInObjectTableDefinitions().columns.length;
+            const countColumnsWithObjectInfo = new RecordTypesTableDefinition().columns.length;
+            const countColumnsWithoutObjectInfo = new RecordTypesInObjectTableDefinition().columns.length;
             expect(countColumnsWithoutObjectInfo).toBeDefined();
             expect(countColumnsWithObjectInfo).toBeDefined();
             expect(countColumnsWithoutObjectInfo).toBeGreaterThan(0);
@@ -58,8 +58,8 @@ describe('tests.ui.unit.TableDefinitions', () => {
         });
 
         it('checks if validation rules table definitions are correctly setting the columns with or without object information', () => {
-            const countColumnsWithObjectInfo = new ValidationRulesTableDefinitions().columns.length;
-            const countColumnsWithoutObjectInfo = new ValidationRulesInObjectTableDefinitions().columns.length;
+            const countColumnsWithObjectInfo = new ValidationRulesTableDefinition().columns.length;
+            const countColumnsWithoutObjectInfo = new ValidationRulesInObjectTableDefinition().columns.length;
             expect(countColumnsWithoutObjectInfo).toBeDefined();
             expect(countColumnsWithObjectInfo).toBeDefined();
             expect(countColumnsWithoutObjectInfo).toBeGreaterThan(0);
@@ -68,8 +68,8 @@ describe('tests.ui.unit.TableDefinitions', () => {
         });
 
         it('checks if web links table definitions are correctly setting the columns with or without object information', () => {
-            const countColumnsWithObjectInfo = new WebLinksTableDefinitions().columns.length;
-            const countColumnsWithoutObjectInfo = new WebLinksInObjectTableDefinitions().columns.length;
+            const countColumnsWithObjectInfo = new WebLinksTableDefinition().columns.length;
+            const countColumnsWithoutObjectInfo = new WebLinksInObjectTableDefinition().columns.length;
             expect(countColumnsWithoutObjectInfo).toBeDefined();
             expect(countColumnsWithObjectInfo).toBeDefined();
             expect(countColumnsWithoutObjectInfo).toBeGreaterThan(0);

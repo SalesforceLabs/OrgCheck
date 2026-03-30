@@ -1,7 +1,7 @@
-import { writeFileSync } from 'node:fs';
+// import { writeFileSync } from 'node:fs';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
 import { Messages, Connection } from '@salesforce/core';
-import orgcheck, { Data, DataCollectionStatisticsIntf, DataMatrixIntf } from '@orgcheck/api';
+import orgcheck, { RecipeAliases } from '@orgcheck/api';
 import { OrgCheckSfPluginLoggerSetup } from '../orgcheck-sfplugin/orgcheck-sfplugin-logger-setup.js';
 import { OrgCheckSfPluginStorageSetup } from '../orgcheck-sfplugin/orgcheck-sfplugin-storage-setup.js';
 import { OrgCheckSfPluginLoadThirdParties } from '../orgcheck-sfplugin/orgcheck-sfplugin-thirdparties.js';
@@ -19,11 +19,6 @@ export class Check extends SfCommand<void> {
   
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
-    'verbose': Flags.boolean({
-        char: 'v',
-        required: false,
-        summary: messages.getMessage('flags.verbose.summary')
-    }),
     'accept-the-terms': Flags.boolean({ 
         char: 'y',
         required: false,
@@ -66,10 +61,9 @@ export class Check extends SfCommand<void> {
     const { flags } = await this.parse(Check);
 
     const actionName: string = flags['action'];
-
     const connection: Connection = flags['target-org'].getConnection(undefined);
     const storageSetup: OrgCheckSfPluginStorageSetup = new OrgCheckSfPluginStorageSetup();
-    const loggerSetup: OrgCheckSfPluginLoggerSetup = new OrgCheckSfPluginLoggerSetup(this.spinner, flags['verbose'])
+    const loggerSetup: OrgCheckSfPluginLoggerSetup<void> = new OrgCheckSfPluginLoggerSetup(this);
     const orgcheckApi = orgcheck.ApiFactory.create({ 
         salesforce: { connection }, 
         storage: storageSetup, 
@@ -84,34 +78,41 @@ export class Check extends SfCommand<void> {
         }
     }
 
-    const results: Data | DataMatrixIntf | Data[] | DataCollectionStatisticsIntf[] | undefined = await orgcheck.ApiFactory.callGetter(
-        orgcheckApi, 
-        actionName, 
-        { namespace: flags['package'] ?? '', type: flags['sobject-type'] ?? '', sobject: flags['sobject'] ?? ''}
-    );
+    const output = await orgcheckApi.prepareData(actionName as RecipeAliases, flags['package'] ?? '', flags['sobject-type'] ?? '', flags['sobject'] ?? '');
+    this.logJson(JSON.stringify(output));
+
+    
+/*
+    
 
     if (flags['json-file']) {
-        writeFileSync(
-            flags['json-file'], 
-            JSON.stringify(
-                {
-                    orgCheck: { 
-                        version: orgcheckApi.version
-                    },
-                    salesforceOrganization: {
-                        id: orgcheckApi.orgId,
-                        requestAPIUsage: `${orgcheckApi.dailyApiRequestLimitInformation?.currentUsagePercentage ?? 0} %`
-                    },
-                    dateCheck: new Date().toISOString(),
-                    action: actionName,
-                    length: (Array.isArray(results) ? results.length : 0),
-                    results
-                }, 
-                (key, value): unknown => ( key.endsWith('Ref') ? undefined : value ), 
-                5
-            ), 
-            { flag: 'w' }
-        );
+        const json = {
+            orgCheck: { 
+                version: orgcheckApi.version
+            },
+            salesforceOrganization: {
+                id: orgcheckApi.orgId,
+                requestAPIUsage: `${orgcheckApi.dailyApiRequestLimitInformation?.currentUsagePercentage ?? 0} %`
+            },
+            dateCheck: new Date().toISOString(),
+            action: {
+                name: actionName,
+                label: actionTitle
+            },
+            length: (Array.isArray(output) ? output.length : 1),
+            result: output
+        };
+        const jsonStringified = JSON.stringify(json, (key, value): unknown => ( key.endsWith('Ref') ? undefined : value ), 5);
+        writeFileSync(flags['json-file'], jsonStringified, { flag: 'w' });
+    }*/
+/*
+    if (flags['xslx-file']) {
+        const tables = orgcheck.ApiFactory.getTables(actionName, output);
+        const sheets = Array.from(tables.keys()).map((key) => {
+            const table = tables.get(key);
+            if (table) return orgcheck.TableFactory.createAndExport(table, output, orgcheck.ApiFactory.getActionTitle(key));
+        }).filter((s) => s !== undefined);
+        writeFileSync(flags['xslx-file'], Buffer.from(orgcheck.TableFactory.asXlsx(sheets)), { flag: 'w' });
     }
-  }
+  */}
 }

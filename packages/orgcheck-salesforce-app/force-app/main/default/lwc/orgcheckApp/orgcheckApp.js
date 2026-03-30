@@ -90,15 +90,9 @@ export default class OrgcheckApp extends LightningElement {
     /**
      * @description Data received from the Org Check API and used in the different 
      *              tables and components of the UI.
-     * @type {Object<string, any>}
+     * @type {Object<string, Table | SfdcObjectAsTable>}
      */
     @track data = { };
-
-    /**
-     * @description Table definitions received from the Org Check API
-     * @type {Object<string, any>}
-     */
-    @track tableDefinitions = { };
 
     /**
      * @description Is something is loading?
@@ -202,7 +196,7 @@ export default class OrgcheckApp extends LightningElement {
             // Create an Org Check API
             this._private_properties.spinner?.sectionLog(SECTION_03, `Start initiating...`);
             try {
-                this._private_properties.api = __orgcheck__CreateAPI({
+                this._private_properties.api = __orgcheck__Get()?.ApiFactory?.create({
                     salesforce: {
                         authenticationOptions: {
                             accessToken: this.accessToken
@@ -399,7 +393,7 @@ export default class OrgcheckApp extends LightningElement {
             // --------------------------------------------------------------------------------
             // if forceRefresh = true, we want to refresh the data from the API 
             if (forceRefresh === true) {
-                __orgcheck__CallRemover(this._private_properties.api, action.name);
+                this._private_properties.api.cleanData(action.name, action.name, this.namespace, this.objectType, this.object);
             }
             
             // --------------------------------------------------------------------------------
@@ -409,7 +403,7 @@ export default class OrgcheckApp extends LightningElement {
             // needs top be updated
             // --------------------------------------------------------------------------------
             // get the current alias depending on the dependency with global filter values
-            let alias = __orgcheck__CacheStamp(this.namespace, this.objectType, this.object);
+            let alias = this._private_properties.api.cachestampData(action.name, action.name, this.namespace, this.objectType, this.object);
             if (alias === '-') forceRefresh = true;
 
             if (forceRefresh === true || action.lastAlias !== alias) {
@@ -417,19 +411,12 @@ export default class OrgcheckApp extends LightningElement {
                 action.lastAlias = alias;
                 // shall we proceed getting the data for this item? It depends if there is a onlyIf condition or not, and if yes if it is validated or not
                 if (action.onlyIf ? action.onlyIf(this) === true : true) {
-                    // If yes we call the getter
-                    let data = await __orgcheck__CallGetter(this._private_properties.api, action.name, this.namespace, this.objectType, this.object);
-                    if (data) {
-                        // Key in template can't have '-'
-                        const transform = (s) => (s.replaceAll('-', ''));
-                        // we set the data
-                        this.data[transform(action.name)] = data.rows ?? data;
-                        // we set the table definition(s)
-                        const tables = __orgcheck__GetTables(action.name, data);
-                        tables.forEach((table, key) => {
-                            this.tableDefinitions[transform(key)] = table;
-                        })
-                    }
+                    // If yes we prepare the data
+                    const mixture = await this._private_properties.api.prepareData(action.name, this.namespace, this.objectType, this.object);
+                    // then serve the data
+                    const plate = await this._private_properties.api.serveData(mixture);
+                    // Save the plate
+                    this.data[action.name.replaceAll('-', '')] = plate;
                 }                
             }
         }
@@ -569,38 +556,38 @@ export default class OrgcheckApp extends LightningElement {
      */
     _generateDataForCurrentObjectExport() {
         const sheets = [];
-        if (this.data.objectData) {
+        if (this.isObjectSpecified && this.data.object) {
             sheets.push({ 
                 header: 'General information',
                 columns: [ 'Label', 'Value' ],
                 rows: [
-                    [ 'API Name', `${this.data.objectData.apiname ?? ''}` ],
-                    [ 'Package', `${this.data.objectData.package ?? ''}` ],
-                    [ 'Singular Label', `${this.data.objectData.label ?? ''}` ],
-                    [ 'Plural Label', `${this.data.objectData.labelPlural ?? ''}` ],
-                    [ 'Description', `${this.data.objectData.description ?? ''}` ],
-                    [ 'Key Prefix', `${this.data.objectData.keyPrefix ?? ''}` ],
-                    [ 'Record Count (including deleted ones)', `${this.data.objectData.recordCount}` ],
-                    [ 'Is Custom?', `${this.data.objectData.isCustom?'true':'false'}` ],
-                    [ 'Feed Enable?', `${this.data.objectData.isFeedEnabled?'true':'false'}` ],
-                    [ 'Most Recent Enabled?', `${this.data.objectData.isMostRecentEnabled?'true':'false'}` ],
-                    [ 'Global Search Enabled?', `${this.data.objectData.isSearchable?'true':'false'}` ],
-                    [ 'Internal Sharing', `${this.data.objectData.internalSharingModel ?? ''}` ],
-                    [ 'External Sharing', `${this.data.objectData.externalSharingModel ?? ''}` ]
+                    [ 'API Name', `${this.data.object.apiname ?? ''}` ],
+                    [ 'Package', `${this.data.object.package ?? ''}` ],
+                    [ 'Singular Label', `${this.data.object.label ?? ''}` ],
+                    [ 'Plural Label', `${this.data.object.labelPlural ?? ''}` ],
+                    [ 'Description', `${this.data.object.description ?? ''}` ],
+                    [ 'Key Prefix', `${this.data.object.keyPrefix ?? ''}` ],
+                    [ 'Record Count (including deleted ones)', `${this.data.object.recordCount}` ],
+                    [ 'Is Custom?', `${this.data.object.isCustom?'true':'false'}` ],
+                    [ 'Feed Enable?', `${this.data.object.isFeedEnabled?'true':'false'}` ],
+                    [ 'Most Recent Enabled?', `${this.data.object.isMostRecentEnabled?'true':'false'}` ],
+                    [ 'Global Search Enabled?', `${this.data.object.isSearchable?'true':'false'}` ],
+                    [ 'Internal Sharing', `${this.data.object.internalSharingModel ?? ''}` ],
+                    [ 'External Sharing', `${this.data.object.externalSharingModel ?? ''}` ]
                 ]
             });
-            sheets.push(createAndExport(this.tableDefinitions.standardFields, this.data.objectData.standardFields, 'Standard Fields'));
-            sheets.push(createAndExport(this.tableDefinitions.customFieldsInObject, this.data.objectData.customFieldRefs, 'Custom Fields'));
-            sheets.push(createAndExport(this.tableDefinitions.apexTriggersInObject, this.data.objectData.apexTriggerRefs, 'Apex Triggers'));
-            sheets.push(createAndExport(this.tableDefinitions.fieldSets, this.data.objectData.fieldSets, 'Field Sets'));
-            sheets.push(createAndExport(this.tableDefinitions.pageLayouts, this.data.objectData.layouts, 'Page Layouts'));
-            sheets.push(createAndExport(this.tableDefinitions.flexiPagesInObject, this.data.objectData.flexiPages, 'Lightning Pages'));
-            sheets.push(createAndExport(this.tableDefinitions.limits, this.data.objectData.limits, 'Limits'));
-            sheets.push(createAndExport(this.tableDefinitions.validationRulesInObject, this.data.objectData.validationRules, 'Validation Rules'));
-            sheets.push(createAndExport(this.tableDefinitions.webLinksInObject, this.data.objectData.webLinks, 'Web Links'));
-            sheets.push(createAndExport(this.tableDefinitions.recordTypesInObject, this.data.objectData.recordTypes, 'Record Types'));
-            sheets.push(createAndExport(this.tableDefinitions.relationships, this.data.objectData.relationships, 'Relationships'));
-            sheets.push(createAndExport(this.tableDefinitions.workflows, this.data.objectData.workflows, 'Relationships'));            
+            sheets.push(__orgcheck__GenerateSheet(this.tableDefinitions.standardfieldsinobject, this.data.object.standardFields, 'Standard Fields'));
+            sheets.push(__orgcheck__GenerateSheet(this.tableDefinitions.customfieldsinobject, this.data.object.customFieldRefs, 'Custom Fields'));
+            sheets.push(__orgcheck__GenerateSheet(this.tableDefinitions.apextriggersinobject, this.data.object.apexTriggerRefs, 'Apex Triggers'));
+            sheets.push(__orgcheck__GenerateSheet(this.tableDefinitions.fieldsetsinobject, this.data.object.fieldSets, 'Field Sets'));
+            sheets.push(__orgcheck__GenerateSheet(this.tableDefinitions.pagelayoutsinobject, this.data.object.layouts, 'Page Layouts'));
+            sheets.push(__orgcheck__GenerateSheet(this.tableDefinitions.flexipagesinobject, this.data.object.flexiPages, 'Lightning Pages'));
+            sheets.push(__orgcheck__GenerateSheet(this.tableDefinitions.limitsinobject, this.data.object.limits, 'Limits'));
+            sheets.push(__orgcheck__GenerateSheet(this.tableDefinitions.validationrulesinobject, this.data.object.validationRules, 'Validation Rules'));
+            sheets.push(__orgcheck__GenerateSheet(this.tableDefinitions.weblinksinobject, this.data.object.webLinks, 'Web Links'));
+            sheets.push(__orgcheck__GenerateSheet(this.tableDefinitions.recordtypesinobject, this.data.object.recordTypes, 'Record Types'));
+            sheets.push(__orgcheck__GenerateSheet(this.tableDefinitions.relationshipsinobject, this.data.object.relationships, 'Relationships'));
+            sheets.push(__orgcheck__GenerateSheet(this.tableDefinitions.workflowsinobject, this.data.object.workflows, 'Relationships'));            
         }
         return sheets;
     }
@@ -659,7 +646,7 @@ export default class OrgcheckApp extends LightningElement {
             item?.countBadByRule?.forEach((c) => {
                 rulesRows.push([ navigationItem.title, c.ruleName, c.count ]);
             });
-            sheets.push(createAndExport(tableDefinition, item?.data, navigationItem.title));
+            sheets.push(__orgcheck__GenerateSheet(tableDefinition, item?.data, navigationItem.title));
         });
         sheets.unshift({ 
             header: 'Statistics (Reasons)', 
@@ -1054,44 +1041,24 @@ export default class OrgcheckApp extends LightningElement {
 
 const MAX_ITEMS_IN_HARDCODED_URLS_LIST = 15;
 
-const getOrgCheck = () => {
+const __orgcheck__Get = () => {
     return (typeof window !== 'undefined' ? window?.orgcheck : globalThis?.orgcheck ?? null)
 }
 
-const __orgcheck__CreateAPI = (setup) => {
-    return getOrgCheck()?.ApiFactory?.create(setup);
-}
-
-const __orgcheck__CallRemover = (api, actionName, parameters) => {
-    return getOrgCheck()?.ApiFactory?.callRemover(api, actionName, parameters);
-}
-
-const __orgcheck__CacheStamp = (namespace, objecttype, object) => {
-    return getOrgCheck()?.ApiFactory?.cacheStamp({ namespace: namespace, type: objecttype, sobject: object});
-}
-
-const __orgcheck__CallGetter = (api, actionName, namespace, objecttype, object) => {
-    return getOrgCheck()?.ApiFactory?.callGetter(api, actionName, { namespace: namespace, type: objecttype, sobject: object});
-}
-
-const __orgcheck__GetTables = (actionName, data) => {
-    return getOrgCheck()?.ApiFactory?.getTables(actionName, data);
-}
-
-const createAndExport = (... argv) => {
-    const method = getOrgCheck()?.TableFactory?.createAndExport;
+const __orgcheck__GenerateSheet = (... argv) => {
+    const method = __orgcheck__Get()?.TableFactory?.createAndExport;
     if (method) return method(... argv);
     return undefined;
 }
 
 const getRuleById = (id) => {
-    const method = getOrgCheck()?.Rules?.get;
+    const method = __orgcheck__Get()?.Rules?.get;
     if (method) return method(id);
     return undefined;
 }
 
 const parseApplicationNavigation = () => {
-    const getActionTitleMethod = getOrgCheck()?.ApiFactory?.getActionTitle;
+    const getActionTitleMethod = __orgcheck__Get()?.ApiFactory?.getActionTitle;
     const actionsByNavKey = new Map();
     const menuItems = Object.keys(APPLICATION_NAVIGATION).map((sectionKey) => { 
         const section = APPLICATION_NAVIGATION[sectionKey];

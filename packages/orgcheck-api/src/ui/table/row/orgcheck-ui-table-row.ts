@@ -23,24 +23,24 @@ export interface Row {
 
     /** 
      * @description List of bad fields (must match column's value)
-    /* @type {Array<string>} 
+    /* @type {string[]} 
      * @public
      */
-    badFields: Array<string>;
+    badFields: string[];
 
     /** 
      * @description List of reason id when this row is bad (can be empty, should not have duplicates)
-    /* @type {Array<string>} 
+    /* @type {string[]} 
      * @public
      */
-    badReasonIds: Array<string>;
+    badReasonIds: string[];
 
     /** 
      * @description List of cells in this row
-    /* @type {Array<any>}
+    /* @type {any[]}
      * @public
      */
-    cells: Array<any>;
+    cells: any[];
 
     /** 
      * @description Flag used when filtering the table. Meaning is obvious.

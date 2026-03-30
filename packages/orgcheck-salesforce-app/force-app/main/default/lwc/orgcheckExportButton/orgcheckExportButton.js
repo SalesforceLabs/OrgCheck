@@ -85,7 +85,7 @@ export default class OrgcheckExportButton extends LightningElement {
     async handleClickExportXLS() {
         this.isExporting = true;
         try {
-            const url = URL.createObjectURL(new Blob([getOrgCheckTableFactory()?.asXlsx(this.source)], { type: 'application/octet-stream' }));
+            const url = URL.createObjectURL(new Blob([__orgcheck__GenerateXlsx(this.source)], { type: 'application/octet-stream' }));
             const a = this.template.querySelector('a');
             a.href = url;
             a.download = `${this.basename}.xlsx`; // Filename Here
@@ -100,10 +100,12 @@ export default class OrgcheckExportButton extends LightningElement {
 }
 
 
-const getOrgCheck = () => {
+const __orgcheck__Get = () => {
     return (typeof window !== 'undefined' ? window?.orgcheck : globalThis?.orgcheck ?? null)
 }
 
-const getOrgCheckTableFactory = () => {
-    return getOrgCheck()?.TableFactory ?? undefined;
+const __orgcheck__GenerateXlsx = (source) => {
+    const method = __orgcheck__Get()?.TableFactory?.asXlsx;
+    if (method) return method(source);
+    return undefined;
 }

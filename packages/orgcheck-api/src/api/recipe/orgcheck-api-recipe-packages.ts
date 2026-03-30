@@ -7,27 +7,43 @@ import { SfdcPackage }from 'src/api/data/orgcheck-api-data-package';
 export class RecipePackages implements Recipe<SfdcPackage[]> {
 
     /**
-     * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
-     * @param {SimpleLoggerIntf} _logger - Logger
-     * @returns {Array<string | DatasetRunInformation>} The datasets aliases that this recipe is using
+     * @description Title of this recipe
+     * @type {string}
      * @public
      */
-    extract(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public readonly title: string = 'Packages';
+
+    /**
+     * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
+     * @param {SimpleLoggerIntf} _logger - Logger
+     * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
+     * @public
+     */
+    public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
         return [ DatasetAliases.PACKAGES ];
+    }
+    
+    /**
+     * @description List the parameters that this mix dependes on
+     * @returns {string[]} List of parameters that this mix dependes on
+     * @public
+     */
+    public mixDependencies(): string[] {
+        return [];
     }
 
     /**
-     * @description transform the data from the datasets and return the final result as a Map
-     * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
+     * @description mix the ingredients all together and return the result
+     * @param {Map<string, any>} ingredients - Records or information grouped by their alias in a Map
      * @param {SimpleLoggerIntf} _logger - Logger
-     * @returns {Promise<SfdcPackage[]>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<SfdcPackage[]>} Returns the mixture
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<SfdcPackage[]> {
+    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf): Promise<SfdcPackage[]> {
 
         // Get data
-        const packages: Map<string, SfdcPackage> = data.get(DatasetAliases.PACKAGES);
+        const packages: Map<string, SfdcPackage> = ingredients.get(DatasetAliases.PACKAGES);
 
         // Checking data
         if (!packages) throw new Error(`RecipePackages: Data from dataset alias 'PACKAGES' was undefined.`);

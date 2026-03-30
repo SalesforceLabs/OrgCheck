@@ -2,6 +2,7 @@
  * @description Data aliases
  */
 export enum DataAliases {
+    ScoreRule = 'Score Rule',
     SfdcApexTestMethodResult = 'Apex Test Method', 
     SfdcApexClass = 'Apex Class', 
     SfdcApexTrigger = 'Apex Trigger', 

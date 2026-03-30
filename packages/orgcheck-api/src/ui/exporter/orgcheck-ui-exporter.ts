@@ -45,7 +45,7 @@ export class Exporter {
                 }, 10);
                 return maxWidth ? { wch: maxWidth } : {};
             });
-            const sheetName = `${item.header} (${item.rows.length})`.substring(0, TITLE_MAX_SIZE); // Cannot exceed 31 characters!
+            const sheetName = `${item.label} (${item.rows.length})`.substring(0, TITLE_MAX_SIZE); // Cannot exceed 31 characters!
             xlsx.utils.book_append_sheet(workbook, worksheet, sheetName);
         });
 

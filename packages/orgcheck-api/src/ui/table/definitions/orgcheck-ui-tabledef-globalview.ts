@@ -1,9 +1,9 @@
-import { Table } from "src/ui/table/orgcheck-ui-table";
-import { TableColumn } from "src/ui/table/orgcheck-ui-table-column";
-import { ColumnType } from "src/ui/table/orgcheck-ui-table-columntype";
+import { TableDefinition } from "src/ui/table/orgcheck-ui-table-definition";
+import { TableColumn } from "src/ui/table/column/orgcheck-ui-table-column";
+import { ColumnType } from "src/ui/table/column/orgcheck-ui-table-columntype";
 import { SortOrder } from "src/ui/table/orgcheck-ui-table-sortorder";
 
-export class GlobalViewItemsTableDefinitions implements Table {
+export class GlobalViewItemsTableDefinition implements TableDefinition {
     
     /**
      * @description List of columns in a table

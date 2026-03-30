@@ -1,28 +1,71 @@
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
+import { ExportedTable } from 'src/ui/table/orgcheck-ui-table';
 
 /**
- * @description The interface for recipes that needs to extract datasets and transform them into an array of items. 
+ * @description The Recipe interface represents how Org Check will:
+ *                  - get a list of ingredients (aka Datasets), 
+ *                  - mix the ingredients all together (logical view of the data)
  */
 export interface Recipe<T> {
 
     /**
-     * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
-     * @param {SimpleLoggerIntf} logger - Logger
-     * @param {Map<string, any>} [parameters] - List of optional argument to pass
-     * @returns {Array<string | DatasetRunInformation>} The datasets aliases that this recipe is using
+     * @description Title of this recipe
+     * @type {string}
      * @public
      */
-    extract(logger: SimpleLoggerIntf, parameters: Map<string, any>): Array<string | DatasetRunInformation>;
+    title: string;
 
     /**
-     * @description transform the data from the datasets and return the final result as an Array
-     * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
+     * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
      * @param {SimpleLoggerIntf} logger - Logger
      * @param {Map<string, any>} [parameters] - List of optional argument to pass
-     * @returns {Promise<T>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
+     * @public
+     */
+    ingredients(logger: SimpleLoggerIntf, parameters: Map<string, any>): Array<string | DatasetRunInformation>;
+
+    /**
+     * @description mix the ingredients all together and return the result
+     * @param {Map<string, any>} ingredients - Records or information grouped by their alias in a Map
+     * @param {SimpleLoggerIntf} logger - Logger
+     * @param {Map<string, any>} [parameters] - List of optional argument to pass
+     * @returns {Promise<T>} Returns the mixture
      * @async
      * @public
      */
-    transform(data: Map<string, any>, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<T>;
+    mix(ingredients: Map<string, any>, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<T>;
+
+    /**
+     * @description List the parameters that this mix dependes on
+     * @returns {string[]} List of parameters that this mix dependes on
+     * @public
+     */
+    mixDependencies(): string[];
+}
+
+/**
+ * @description The ServedRecipe interface represents a Recipe that Org Check can:
+ *                  - serve to the table (use as a table view in the UI)
+ *                  - serve to go (use as an exported table view to generate Xslx etc.).
+ */
+export interface ServedRecipe<Mixture, Plate> extends Recipe<Mixture> {
+
+    /**
+     * @description Process the mixed data into a table format
+     * @param {Mixture} mixture - Mixed data to be served to a table
+     * @returns {Promise<Plate>} The processed view
+     * @async
+     * @public
+     */
+    serveToTable(mixture: Mixture): Promise<Plate>;
+
+    /**
+     * @description We put your plate in a doggy bag
+     * @param {Plate} plate - Plate which was on the table
+     * @returns {Promise<ExportedTable | ExportedTable[]>} Meal in a doggy bag, ready to take back home!
+     * @async
+     * @public
+     */
+    serveToGo(plate: Plate): Promise<ExportedTable | ExportedTable[]>;
 }

@@ -1,14 +1,8 @@
-import { 
-    WhereToGetTextData, 
-    WhereToGetScoreData, 
-    WhereToGetLinkData, 
-    WhereToGetObjectData,
-    WhereToGetTextsData,
-    WhereToGetLinksData, 
-    WhereToGetObjectsData } from 'src/ui/table/orgcheck-ui-table-datagetters';
-import { Modifier } from 'src/ui/table/orgcheck-ui-table-datamodifiers';
-import { ColumnType } from 'src/ui/table/orgcheck-ui-table-columntype';
-import { Orientation } from 'src/ui/table/orgcheck-ui-table-columnorientation';
+import { WhereToGetTextData, WhereToGetScoreData, WhereToGetLinkData, WhereToGetObjectData,
+    WhereToGetTextsData, WhereToGetLinksData, WhereToGetObjectsData } from 'src/ui/table/column/orgcheck-ui-table-wheretogetdata';
+import { Modifier } from 'src/ui/table/column/orgcheck-ui-table-modifier';
+import { ColumnType } from 'src/ui/table/column/orgcheck-ui-table-columntype';
+import { Orientation } from 'src/ui/table/column/orgcheck-ui-table-orientation';
 
 export interface TableColumn {
 

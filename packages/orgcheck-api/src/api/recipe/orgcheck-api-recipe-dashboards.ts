@@ -1,35 +1,54 @@
-import { Recipe } from 'src/api/core/orgcheck-api-recipe';
+import { ServedRecipe } from 'src/api/core/orgcheck-api-recipe';
+import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
+import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
 import { SfdcUser }from 'src/api/data/orgcheck-api-data-user';
 import { SfdcDashboard }from 'src/api/data/orgcheck-api-data-dashboard';
+import { DashboardsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-dashboards';
 
-export class RecipeDashboards implements Recipe<SfdcDashboard[]> {
+export class RecipeDashboards implements ServedRecipe<SfdcDashboard[], Table> {
 
     /**
-     * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
-     * @param {SimpleLoggerIntf} _logger - Logger
-     * @returns {Array<string | DatasetRunInformation>} The datasets aliases that this recipe is using
+     * @description Title of this recipe
+     * @type {string}
      * @public
      */
-    extract(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public readonly title: string = '🌲 Dashboards';
+
+    /**
+     * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
+     * @param {SimpleLoggerIntf} _logger - Logger
+     * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
+     * @public
+     */
+    public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
         return [DatasetAliases.INTERNALACTIVEUSERS, DatasetAliases.DASHBOARDS];
     }
 
     /**
-     * @description transform the data from the datasets and return the final result as an Array
-     * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
+     * @description List the parameters that this mix dependes on
+     * @returns {string[]} List of parameters that this mix dependes on
+     * @public
+     */
+    public mixDependencies(): string[] {
+        return [];
+    }
+
+    /**
+     * @description mix the ingredients all together and return the result
+     * @param {Map<string, any>} ingredients - Records or information grouped by their alias in a Map
      * @param {SimpleLoggerIntf} _logger - Logger
-     * @returns {Promise<SfdcDashboard[]>} Returns as it is the value returned by the transform method recipe.
+     * @returns {Promise<SfdcDashboard[]>} Returns the mixture
      * @async
      * @public
      */
-    async transform(data: Map<string, any>, _logger: SimpleLoggerIntf): Promise<SfdcDashboard[]> {
+    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf): Promise<SfdcDashboard[]> {
 
         // Get data
-        const dashboards: Map<string, SfdcDashboard> = data.get(DatasetAliases.DASHBOARDS);
-        const users: Map<string, SfdcUser> = data.get(DatasetAliases.INTERNALACTIVEUSERS);
+        const dashboards: Map<string, SfdcDashboard> = ingredients.get(DatasetAliases.DASHBOARDS);
+        const users: Map<string, SfdcUser> = ingredients.get(DatasetAliases.INTERNALACTIVEUSERS);
 
         // Checking data
         if (!dashboards) throw new Error(`RecipeDashboards: Data from dataset alias 'DASHBOARDS' was undefined.`);
@@ -37,5 +56,27 @@ export class RecipeDashboards implements Recipe<SfdcDashboard[]> {
 
         // Return data
         return [... dashboards.values()];        
+    }
+
+    /**
+     * @description Process the mixed data into a table format
+     * @param {SfdcDashboard[]} mixture - Mixed data to be served to a table
+     * @returns {Promise<Table>} The processed view
+     * @async
+     * @public
+     */
+    public async serveToTable(mixture: SfdcDashboard[]): Promise<Table> {
+        return TableFactory.create(this.title, new DashboardsTableDefinition(), mixture);
+    }
+
+    /**
+     * @description We put your plate in a doggy bag
+     * @param {Table} plate - Plate which was on the table
+     * @returns {Promise<ExportedTable>} Meal in a doggy bag, ready to take back home!
+     * @async
+     * @public
+     */
+    public async serveToGo(plate: Table): Promise<ExportedTable> {
+        return TableFactory.export(plate);
     }
 }

@@ -34,7 +34,6 @@ export class DatasetObjectTypes implements Dataset {
         // Return data
         return new Map(OBJECTTYPES.map((type) => [ 
             type.id, 
-            /** @type {SfdcObjectType} */
             objecTypeDataFactory.create({ properties: { id: type.id, label: type.label }}) 
         ]));
     } 

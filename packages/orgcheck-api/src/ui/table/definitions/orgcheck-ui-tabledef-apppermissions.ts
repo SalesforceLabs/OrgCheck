@@ -1,11 +1,11 @@
-import { ColumnType } from "src/ui/table/orgcheck-ui-table-columntype";
-import { Table } from "src/ui/table/orgcheck-ui-table";
+import { ColumnType } from "src/ui/table/column/orgcheck-ui-table-columntype";
+import { TableDefinition } from "src/ui/table/orgcheck-ui-table-definition";
 import { SortOrder } from "src/ui/table/orgcheck-ui-table-sortorder";
-import { TableColumn } from "src/ui/table/orgcheck-ui-table-column";
+import { TableColumn } from "src/ui/table/column/orgcheck-ui-table-column";
 import { DataMatrixIntf } from "src/api/core/orgcheck-api-data-matrix";
-import { Orientation } from "../orgcheck-ui-table-columnorientation";
+import { Orientation } from "../column/orgcheck-ui-table-orientation";
 
-export class ObjectPermissionsTableDefinitions implements Table {
+export class AppPermissionsTableDefinition implements TableDefinition {
     
     private _matrix: DataMatrixIntf;
 
@@ -29,14 +29,16 @@ export class ObjectPermissionsTableDefinitions implements Table {
             { label: 'Custom',  type: ColumnType.CHK, data: { value: 'header.isCustom' }}
         ];
         if (this._matrix) {
-            this._matrix.columnHeaders // returns an array of string representing Object Api names
-                .sort()
-                .forEach((/** @type {string} */ objectApiName) => {
+            this._matrix.columnHeaders // returns an array of Object like {id: string, label: string} representing an Application
+                .sort((a: { id: string; label: string; }, b: { id: string; label: string; }) => { 
+                    return a.label < b.label ? -1: 1; 
+                })
+                .forEach((app: { id: string; label: string; }) => {
                     columns.push({ 
-                        label: objectApiName, 
+                        label: app.label, 
                         type: ColumnType.TXT, 
                         data: { 
-                            value: `data.${objectApiName}` 
+                            value: `data.${app.id}` 
                         }, 
                         orientation: Orientation.VERTICAL 
                     });

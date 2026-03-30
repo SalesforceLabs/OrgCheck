@@ -7,12 +7,21 @@ import { ScoreRule } from 'src/orgcheck';
 export class RecipeHardcodedURLsView implements RecipeCollection {
 
     /**
+     * @description List the parameters that this recipe collection dependes on
+     * @returns {string[]} List of parameters that this recipe collection dependes on
+     * @public
+     */
+    public ingredientsDependencies(): string[] {
+        return [];
+    }
+
+    /**
      * @description List all recipe aliases that this recipe collection needs
      * @param {SimpleLoggerIntf} _logger - Logger
      * @returns {Array<string>} List of recipe aliases that this recipe collection needs
      * @public
      */
-    extract(_logger: SimpleLoggerIntf): Array<string> {
+    public ingredients(_logger: SimpleLoggerIntf): Array<string> {
         return [
             RecipeAliases.APEX_CLASSES,
             RecipeAliases.APEX_TRIGGERS,

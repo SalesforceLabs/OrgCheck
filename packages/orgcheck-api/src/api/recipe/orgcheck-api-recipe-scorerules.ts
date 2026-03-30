@@ -3,20 +3,22 @@ import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
+import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
+import { DataMatrixFactory } from 'src/api/core/orgcheck-api-data-matrix-factory';
 import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
-import { SfdcProfile }from 'src/api/data/orgcheck-api-data-profile';
-import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
-import { ProfilesTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-profiles';
+import { SfdcObjectPermission }from 'src/api/data/orgcheck-api-data-objectpermission';
+import { ObjectPermissionsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-objectpermissions';
+import { ScoreRule } from 'src/orgcheck';
 
-export class RecipeProfiles implements ServedRecipe<SfdcProfile[], Table> {
+export class RecipeScoreRules implements ServedRecipe<DataMatrixIntf, Table> {
 
     /**
      * @description Title of this recipe
      * @type {string}
      * @public
      */
-    public readonly title: string = '🚓 Profiles';
+    public readonly title: string = '🚦 Object Permissions';
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
@@ -25,7 +27,9 @@ export class RecipeProfiles implements ServedRecipe<SfdcProfile[], Table> {
      * @public
      */
     public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
-        return [DatasetAliases.PROFILES];
+        return [
+            DatasetAliases.SCORERULES
+        ];
     }
 
     /**
@@ -34,49 +38,47 @@ export class RecipeProfiles implements ServedRecipe<SfdcProfile[], Table> {
      * @public
      */
     public mixDependencies(): string[] {
-        return [OrgCheckGlobalParameter.PACKAGE_NAME];
+        return [];
     }
 
     /**
      * @description mix the ingredients all together and return the result
      * @param {Map<string, any>} ingredients - Records or information grouped by their alias in a Map
-     * @param {SimpleLoggerIntf} _logger - Logger
-     * @param {Map<string, any>} [parameters] - List of optional argument to pass
-     * @returns {Promise<SfdcProfile[]>} Returns the mixture
+     * @returns {Promise<DataMatrixIntf>} Returns the mixture
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<SfdcProfile[]> {
+    public async mix(ingredients: Map<string, any>): Promise<DataMatrixIntf> {
 
         // Get data and parameters
-        const profiles: Map<string, SfdcProfile> = ingredients.get(DatasetAliases.PROFILES);
-        const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
+        const scoreRules: Map<string, SfdcObjectPermission> = ingredients.get(DatasetAliases.SCORERULES);
 
-        // Checking data
-        if (!profiles) throw new Error(`RecipeProfiles: Data from dataset alias 'PROFILES' was undefined.`);
-
-        // Filter data
-        
-        const array: Array<SfdcProfile> = [];
-        await Processor.forEach(profiles, async (profile: SfdcProfile) => {
-            if (namespace === OrgCheckGlobalParameter.ALL_VALUES || profile.package === namespace) {
-                array.push(profile);
-            }
+        // Augment and Filter data
+        const workingMatrix = DataMatrixFactory.create();
+        await Processor.forEach(scoreRules, async (rule: ScoreRule) => {
+            workingMatrix.setRowHeader(`${rule.id}`, rule);
+            rule.applicable.forEach((dataAlias) => {
+                workingMatrix.addValueToProperty(
+                    `${rule.id}`,
+                    dataAlias?.toString() ?? 'N/A', 
+                    'true'
+                );
+            });
         });
 
         // Return data
-        return array;
+        return workingMatrix.toDataMatrix();
     }
 
     /**
      * @description Process the mixed data into a table format
-     * @param {SfdcProfile[]} mixture - Mixed data to be served to a table
+     * @param {DataMatrixIntf} mixture - Mixed data to be served to a table
      * @returns {Promise<Table>} The processed view
      * @async
      * @public
      */
-    public async serveToTable(mixture: SfdcProfile[]): Promise<Table> {
-        return TableFactory.create(this.title, new ProfilesTableDefinition(), mixture);
+    public async serveToTable(mixture: DataMatrixIntf): Promise<Table> {
+        return TableFactory.create(this.title, new ObjectPermissionsTableDefinition(mixture), mixture.rows);
     }
 
     /**

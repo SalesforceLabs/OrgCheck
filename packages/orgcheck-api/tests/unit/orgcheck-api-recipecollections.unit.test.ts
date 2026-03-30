@@ -10,7 +10,7 @@ describe('tests.api.unit.RecipeCollections', () => {
     ].forEach((recipeClass, index) => {
       it(`checks if the recipe collection "${recipeClass.name}" extracts and transforms correctly`, async () => {
         expect(`${index+1}: ${typeof recipeClass}`).toBe(`${index+1}: function`);
-        const recipes = new recipeClass().extract(new SimpleLoggerMock_DoingNothing());
+        const recipes = new recipeClass().ingredients(new SimpleLoggerMock_DoingNothing());
         expect(recipes).toBeDefined();
         expect(recipes instanceof Array).toBeTruthy();
         expect(recipes?.length).toBeDefined();

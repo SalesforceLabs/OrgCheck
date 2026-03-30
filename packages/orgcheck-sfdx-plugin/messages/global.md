@@ -1,6 +1,3 @@
-# flags.verbose.summary
-Activate the verbose mode in the plugin logs (not in the console!)
-
 # flags.action.summary
 Name of the check (or action) you would like to perform on this org 
 

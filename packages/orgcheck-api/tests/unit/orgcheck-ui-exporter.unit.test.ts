@@ -24,7 +24,7 @@ describe('tests.ui.unit.Exporter', () => {
 
         it('checks if exporter generates a file with only one worksheet', async () => {
             const buffer = Exporter.exportAsXls({
-                header: 'Test Table',
+                label: 'Test Table',
                 columns: [ 'Column 1', 'Column 2' ],
                 rows: [
                     [ 'Cell 1-1', 'Cell 1-2' ],
@@ -48,27 +48,26 @@ describe('tests.ui.unit.Exporter', () => {
         it('checks if exporter generates a file with three worksheets', async () => {
             const buffer = Exporter.exportAsXls([
                 {
-                    header: 'Test Table',
+                    label: 'Test Table',
                     columns: [ 'Column 1', 'Column 2' ],
                     rows: [
                         [ 'Cell 1-1', 'Cell 1-2' ],
                         [ 'Cell 2-1', 'Cell 2-2' ]
                     ]
                 }, {
-                    header: 'Test Table 2',
+                    label: 'Test Table 2',
                     columns: [ 'Column A', 'Column B' ],
                     rows: [
                         [ 'Cell A-1', 'Cell B-1' ],
                         [ 'Cell A-2', 'Cell B-2' ]
                     ]
                 }, {
-                    header: 'Test Table 3',
+                    label: 'Test Table 3',
                     columns: [ 'Column X', 'Column Y', 'Column Z' ],
                     rows: [
                         [ 'Cell X-1', 'Cell Y-1' ],
                         [ 'Cell X-2', 'Cell Y-2', 'Cell Z-2' ]  
-                    ]
-                }
+                    ]}
             ]);
             expect(buffer).toBeDefined();
             expect(buffer).toBeInstanceOf(ArrayBuffer);
@@ -81,7 +80,7 @@ describe('tests.ui.unit.Exporter', () => {
         it('checks if exporter truncates long cell content', async () => {
             const longString = 'A'.repeat(40000);
             const buffer = Exporter.exportAsXls({
-                header: 'Test Table',
+                label: 'Test Table',
                 columns: [ 'Column 1', 'Column 2' ],
                 rows: [
                     [ longString, 'Cell 1-2' ],

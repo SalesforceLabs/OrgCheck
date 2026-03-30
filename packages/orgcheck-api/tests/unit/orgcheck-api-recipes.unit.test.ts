@@ -86,7 +86,7 @@ describe('tests.api.unit.Recipes', () => {
       it(`checks if the recipe "${recipeClass.name}" extracts and transforms correctly`, async () => {
         expect(`${index+1}: ${typeof recipeClass}`).toBe(`${index+1}: function`);
         const recipe = new recipeClass();
-        const datasets = recipe.extract(new SimpleLoggerMock_DoingNothing(), new Map());
+        const datasets = recipe.ingredients(new SimpleLoggerMock_DoingNothing(), new Map());
         expect(datasets).toBeDefined();
         expect(datasets instanceof Array).toBeTruthy();
         expect(datasets?.length).toBeDefined();
@@ -94,7 +94,7 @@ describe('tests.api.unit.Recipes', () => {
         datasets.forEach((dataset) => {
           data.set(typeof dataset === 'string' ? dataset : dataset.alias , new Map());
         });
-        const results = await recipe.transform(data, new SimpleLoggerMock_DoingNothing(), new Map());
+        const results = await recipe.mix(data, new SimpleLoggerMock_DoingNothing(), new Map());
         expect(results).toBeDefined();
       });
     });
@@ -108,7 +108,7 @@ describe('tests.api.unit.Recipes', () => {
       it(`checks if the recipe collection "${recipeClass.name}" extracts and transforms correctly`, async () => {
         expect(`${index+1}: ${typeof recipeClass}`).toBe(`${index+1}: function`);
         const recipe = new recipeClass();
-        const datasets = recipe.extract(new SimpleLoggerMock_DoingNothing());
+        const datasets = recipe.ingredients(new SimpleLoggerMock_DoingNothing());
         expect(datasets).toBeDefined();
         expect(datasets instanceof Array).toBeTruthy();
         expect(datasets?.length).toBeDefined();
