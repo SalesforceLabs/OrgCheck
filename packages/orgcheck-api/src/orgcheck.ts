@@ -1,5 +1,9 @@
 import { API } from 'src/api/orgcheck-api-impl';
 import { ApiIntf, ApiSetup } from 'src/api/orgcheck-api';
+import { TableFactory } from './ui/table/orgcheck-ui-table-factory';
+import { SortOrder } from 'src/ui/table/orgcheck-ui-table-sortorder';
+import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
+import { RecipeAliases } from 'src/api/core/orgcheck-api-recipes-aliases';
 
 export type { ApiIntf, ApiSetup } from 'src/api/orgcheck-api';
 export type { LoggerSetup } from 'src/api/core/orgcheck-api-setup-logger';
@@ -10,7 +14,7 @@ export type { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 export type { SalesforceUsageInformationIntf } from 'src/api/core/orgcheck-api-limit-usageinformation';
 export type { RecipeAliases } from 'src/api/core/orgcheck-api-recipes-aliases';
 export type { SortOrder } from 'src/ui/table/orgcheck-ui-table-sortorder';
-export type { ExportedTable } from 'src/ui/table/orgcheck-ui-table';
+export type { Table, ExportedTable } from 'src/ui/table/orgcheck-ui-table';
 
 export type { ScoreRule } from 'src/api/data/orgcheck-api-data-scorerule';
 export type { SfdcApexClass } from 'src/api/data/orgcheck-api-data-apexclass';
@@ -54,5 +58,19 @@ export type { SfdcWorkflow } from 'src/api/data/orgcheck-api-data-workflow';
 export class ApiFactory {
     public static create(setup: ApiSetup): ApiIntf {
         return new API(setup);
+    }
+}
+
+export const Recipes: typeof RecipeAliases = RecipeAliases;
+
+export class TableUtils {
+    public static sort(table: Table, columnIndex: number, order: SortOrder): void {
+        TableFactory.sort(table, columnIndex, order);
+    }
+    public static filter(table: Table, searchInput: string): void {
+        TableFactory.filter(table, searchInput);
+    }
+    public static export(table: Table): ExportedTable {
+        return TableFactory.export(table);
     }
 }

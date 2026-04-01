@@ -8,6 +8,7 @@ export enum RecipeAliases {
     APEX_UNCOMPILED = 'apex-uncompiled',
     APP_PERMISSIONS = 'app-permissions',
     BROWSERS = 'browsers',
+    CACHE_ITEMS = 'cache-items',
     COLLABORATION_GROUPS = 'collaboration-groups',
     CURRENT_USER_PERMISSIONS = 'current-user-permissions',
     CUSTOM_FIELDS = 'custom-fields',

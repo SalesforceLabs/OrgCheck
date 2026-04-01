@@ -17,7 +17,7 @@ API *-- SalesforceManagerIntf : composition
 API *-- DataCacheManagerIntf : composition
 API *-- LoggerIntf : composition
 DataCacheManager --|> DataCacheManagerIntf : implements
-DataCacheManagerIntf --> DataCacheItemIntf : uses
+DataCacheManagerIntf --> CacheItem : uses
 Compressor --|> CompressorIntf : implements
 DataCacheManagerIntf --> CompressorIntf : uses
 DataCacheManagerIntf --> StorageIntf : uses
@@ -46,7 +46,7 @@ classDiagram
         +version() string
         +salesforceApiVersion() number
         +removeAllFromCache()
-        +getCacheInformation() Array~DataCacheItemIntf~
+        +getCacheInformation() Array~CacheItem~
         +getCacheData(string itemName) any
         +getAllScoreRulesAsDataMatrix() DataMatrixIntf
         +dailyApiRequestLimitInformation() SalesforceUsageInformation

@@ -3,13 +3,14 @@ import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
 import { DataCollectionStatisticsIntf } from 'src/api/core/orgcheck-api-data-datacollectionstats';
 import { SfdcObjectAsTable } from 'src/api/recipe/orgcheck-api-recipe-object';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
+import { RecipeAliases } from './orgcheck-api-recipes-aliases';
 
 /**
  * @description Recipe manager error class
  */
 export class RecipeManagerError extends Error {
     
-    constructor(public readonly recipe: string, message: string, public readonly cause?: Error) {
+    constructor(public readonly recipe: RecipeAliases, message: string, public readonly cause?: Error) {
         super(message);
     }
 }
@@ -32,7 +33,7 @@ export interface RecipeManagerIntf {
      * @async
      * @public
      */
-    prepare(alias: string, parameters: Map<string, any>): Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]>;
+    prepare(alias: RecipeAliases, parameters: Map<string, any>): Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]>;
 
     /**
      * @description Serve the mixture from a designated recipe to a table
@@ -43,7 +44,7 @@ export interface RecipeManagerIntf {
      * @async
      * @public
      */
-    serveToTable(alias: string, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<Table | SfdcObjectAsTable>;
+    serveToTable(alias: RecipeAliases, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<Table | SfdcObjectAsTable>;
 
     /**
      * @description Serve the mixture from a designated recipe to go
@@ -54,7 +55,7 @@ export interface RecipeManagerIntf {
      * @async
      * @public
      */
-    serveToGo(alias: string, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<ExportedTable | ExportedTable[]>;
+    serveToGo(alias: RecipeAliases, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<ExportedTable | ExportedTable[]>;
 
     /**
      * @description Returns the cache stamp for a designated recipe (by its alias)
@@ -63,8 +64,7 @@ export interface RecipeManagerIntf {
      * @returns {Promise<string>} Returns the cache stamp
      * @public
      */
-    cachestamp(alias: string, parameters: Map<string, any>): string;
-
+    cachestamp(alias: RecipeAliases, parameters: Map<string, any>): string;
 
     /**
      * @description Cleans a designated recipe (by its alias) and the corresponding datasets.
@@ -76,4 +76,11 @@ export interface RecipeManagerIntf {
      * @public
      */
     clean(alias: string, parameters?: Map<string, any>): void;
+
+    /**
+     * @description List all available recipe titles
+     * @returns {Map<RecipeAliases, string>} Returns the map of all available recipe titles
+     * @public
+     */
+    listAllTitles(): Map<RecipeAliases, string>;
 }

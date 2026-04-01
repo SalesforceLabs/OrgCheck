@@ -137,32 +137,67 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @description Total number of all rows (even if the filter is on)
      * @type {number}
      */
-    nbAllRows = 0;
+    get nbAllRows() {
+        return this._private_properties.table?.nbAllRows ?? 0;
+    }
 
     /**
      * @description Number of rows that match the filter
      * @type {number}
      */
-    nbFilteredRows = 0;
+    get nbFilteredRows() {
+        return this._private_properties.table?.nbFilteredRows ?? 0;
+    }
 
     /**
      * @description Total number of rows that have a bad score (>0)
      * @type {number}
      */
-    nbBadRows = 0;
+    get nbBadRows() {
+        return this._private_properties.table?.nbBadRows ?? 0;
+    }
     
     /**
      * @description Is the search active and records are filtered
      * @type {boolean}
      */
-    isFilterOn = false;
+    get isFilterOn() {
+        return this._private_properties.table?.isFilterOn ?? false;
+    }
 
     /**
      * @description Is filter gives no data?
      * @type {boolean}
      */
-    isFilteredDataEmpty;
+    get isFilteredDataEmpty() {
+        return this._private_properties.table?.isFilteredDataEmpty ?? false;
+    }
     
+
+    /**
+     * @description Is the table sorted implicitely or explicitely?
+     * @type {boolean}
+     */
+    get isSorted() {
+        return this._private_properties.table?.orderIndex !== undefined;
+    }
+
+    /**
+     * @description Label of the field the table is sorted by
+     * @type {string}
+     */
+    get sortingField() {
+        return this._private_properties.table?.definition.columns[this._private_properties.table?.orderIndex]?.label;
+    }
+
+    /**
+     * @description Order of the sorting (ascending or descending)
+     * @type {string}
+     */
+    get sortingOrder() {
+        return this._private_properties.table?.orderSort === 'asc' ? 'ascending' : 'descending';
+    }
+
     /**
      * @description How many rows are currently shown?
      * @type {number}
@@ -193,33 +228,6 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      */
     visibleRows;
 
-    /**
-     * @description Is the table sorted implicitely or explicitely?
-     * @type {boolean}
-     */
-    get isSorted() {
-        return this._private_properties.sortingIndex !== undefined;
-    }
-
-    /**
-     * @description Label of the field the table is sorted by
-     * @type {string}
-     */
-    get sortingField() {
-        return this._private_properties.tableDefinition.columns[this._private_properties.sortingIndex].label;
-    }
-
-    /**
-     * @description Order of the sorting (ascending or descending)
-     * @type {string}
-     */
-    get sortingOrder() {
-        return this._private_properties.sortingOrder === 'asc' ? 'ascending' : 'descending';
-    }
-
-
-
-
     // ----------------------------------------------------------------------------------------------------------------
     // ----------------------------------------------------------------------------------------------------------------
     // Internal/private properties
@@ -235,31 +243,22 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @property filteringSearchInput {string} Current value of the search input which is used by the filter method
      */
     _private_properties = {
+        table: undefined,
         allRows: undefined,
-        tableDefinition: undefined,
-        sortingIndex: undefined,
-        sortingOrder: undefined,
         filteringSearchInput: undefined
     }
 
     /**
-     * @description Setter for the columns (it will set the internal <code>_columns</code> property)
-     * @param {any} tableDefinition - Defintion of the table
+     * @description Set the table information: headers, rows, etc...
+     * @param {{ definition: { columns: any[]; }; rows: any[]; }} table
      */
-    @api set tableDefinition(tableDefinition) {
+    @api set table(table) {
 
-        // In case the table definition is not set just skip that method
-        if (!tableDefinition) return;
+        this._private_properties.table = table;
 
-        // Set the tableDefinition
-        this._private_properties.tableDefinition = tableDefinition;
-        this._private_properties.sortingIndex = tableDefinition.orderIndex;
-        this._private_properties.sortingOrder = tableDefinition.orderSort;
-        this.columnHeaders = tableDefinition.columns.map((c, i) => {
-            if (c.type === 'score') {
-                // if we show score column, bad cell will be highlighted as well so that we can understand the score (= nb of bad cells)
-                this._showScoreColumn = true; 
-            }
+        // Set the column headers based on the table definition
+        // We add some properties to the headers
+        this.columnHeaders = table?.definition?.columns.map((c, i) => {
             if (c.type === 'dependencies' && this.usesDependencyViewer === false) {
                 this.usesDependencyViewer = true;
             };
@@ -273,80 +272,47 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                           (c['orientation'] === 'vertical' ? 'vertical ' : ' ')
                           // Note: can't use instanceof on 'c'
             }
-        });
-    }
-
-    get tableDefinition() {
-        return this._private_properties.tableDefinition;
-    }
-    
-    /**
-     * @description Setter for the rows (it will set the internal <code>_allRows</code> property).
-     * @param {Array<any>} rows - Array of rows 
-     */
-    @api set rows(rows) {
-
-        // Some sanity checks
-        if (!this._private_properties.tableDefinition) return;
-        if (!this.columnHeaders) return;
-        if (!rows) return;
-
-        // All rows (no filter no scrolling etc... all of the rows
-        this.nbAllRows = rows.length || 0;
+        }) ?? [];
         
-        // If infinite scrolling is set then set the starting nb of rows to display (will be incremented later when we hit the "more rows" button)
+        // If infinite scrolling is set then set the starting nb of rows to 
+        // display (will be incremented later when we hit the "more rows" button)
         if (this.isInfiniteScrolling === true) {
             // @api decorator returns a string, that's why we are using parseInt()
             this.infiniteScrollingCurrentNbRows = Number.parseInt(this.infiniteScrollingInitialNbRows, 10);
         }
         
-        // Parse the rows
-        this.nbBadRows = 0;
-        this._allRows = __orgcheck__GenerateRows(
-            this.tableDefinition, 
-            rows, 
-            (row, isBad, rowIndex) => { 
-                if (isBad === true) {
-                    this.nbBadRows++;
-                    row.cssClass = 'bad';
-                }
-                row.key = `${rowIndex}`;
-            }, 
-            (cell, isBad, cellIndex, rowIndex) => {
-                cell.cssClass = `${this.isAllCellWrapped === true ? 'wrapped' : ''} ${isBad === true ? 'bad' : ''}`;
+        // Parse the rows and add some css style and keys
+        this._private_properties.allRows = table?.rows.map((/* @type {Row} */ row, /* @type {number} */ rowIndex) => {
+            row.key = `${rowIndex}`;
+            row.cssClass = row.score > 0 ? 'bad' : '';
+            row.cells.forEach((cell, cellIndex) => {
+                const isCellBad = row.badFields?.includes(table?.definition?.columns[cellIndex]?.label) ?? false;
                 cell.key = `${rowIndex}.${cellIndex}`;
-                if (cell.data && cell.data.values && cell.data.values.forEach) {
-                    cell.data.values.forEach((v, i) => {
-                        v.key = `${rowIndex}.${cellIndex}.${i}`;
-                    });
-                }
-            }
-        );
+                cell.cssClass = `${this.isAllCellWrapped === true ? 'wrapped' : ''} ${isCellBad ? 'bad' : ''}`;
+            });
+            return row;
+        }); 
+
+        // Sort, filter and set the visible rows
         this._sortAllRows();
         this._filterAllRows();
         this._setVisibleRows();
     }
 
     /**
-     * @description Getter for the rows (it will return the internal <code>_allRows</code> property)
-     * @returns {Array<any>} rows 
+     * @description Get the table information: headers, rows, etc...
      */
-    get rows() {
-        return this._allRows;
+    get table() {
+        return this._private_properties.table;
     }
+
 
     /**
      * @description Convert this table into an Excel data
      */ 
     get exportedRows() {
-        if (this._private_properties.tableDefinition && this._private_properties.tableDefinition.columns && this._allRows) {
-            return __orgcheck__ExportAsRaw(this._private_properties.tableDefinition, this._allRows, this.exportBasename);
-        }
-        return undefined;
+        return __orgcheck__Get()?.TableUtils.export(this._private_properties.table);
     }
-
-
-
 
     // ----------------------------------------------------------------------------------------------------------------
     // ----------------------------------------------------------------------------------------------------------------
@@ -429,7 +395,6 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @param {Event | any} event - The event information
      */
     handleViewDependency(event) {
-        /** @type {any} */
         const viewer = this.template.querySelector('c-orgcheck-dependency-viewer');
         viewer.open(event.target.whatId, event.target.whatName, event.target.dependencies);
     }
@@ -461,7 +426,10 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @private
      */
     _filterAllRows() {
-        __orgcheck__FilterRows(this._allRows, this._private_properties.filteringSearchInput);
+        __orgcheck__Get()?.TableUtils.filter(
+            this._private_properties.table, 
+            this._private_properties.filteringSearchInput
+        );
     }
 
     /**
@@ -469,7 +437,11 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @private
      */
     _sortAllRows() {
-        __orgcheck__SortRows(this._private_properties.tableDefinition, this._allRows, this._private_properties.sortingIndex, this._private_properties.sortingOrder);
+        __orgcheck__Get()?.TableUtils.sort(
+            this._private_properties.table, 
+            this._private_properties.sortingIndex,
+            this._private_properties.sortingOrder
+        );
     }
 
     /**
@@ -477,45 +449,18 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @private
      */
     _setVisibleRows() {
-        if (this._allRows) {
-            const allVisibleRows = this._allRows.filter((row) => row.isVisible === true);
-            this.isFilteredDataEmpty = this._private_properties.filteringSearchInput && allVisibleRows.length === 0;
-            if (this.isInfiniteScrolling === true && allVisibleRows) {
-                this.isInfiniteScrollingMoreData = this.infiniteScrollingCurrentNbRows < allVisibleRows.length;
-            }
-            if (this.isInfiniteScrollingMoreData === true) {
-                this.visibleRows = allVisibleRows.slice(0, this.infiniteScrollingCurrentNbRows);
-            } else {
-                this.visibleRows = allVisibleRows;
-            }
+        const allVisibleRows = this._private_properties.allRows?.filter((row) => row.isVisible === true) ?? [];
+        if (this.isInfiniteScrolling === true && allVisibleRows) {
+            this.isInfiniteScrollingMoreData = this.infiniteScrollingCurrentNbRows < allVisibleRows.length;
+        }
+        if (this.isInfiniteScrollingMoreData === true) {
+            this.visibleRows = allVisibleRows.slice(0, this.infiniteScrollingCurrentNbRows);
+        } else {
+            this.visibleRows = allVisibleRows;
         }
     }
 }
 
 const __orgcheck__Get = () => {
     return (typeof window !== 'undefined' ? window?.orgcheck : globalThis?.orgcheck ?? null)
-}
-
-const __orgcheck__GenerateRows = (tableDefinition, rows, eachRow, eachCell) => {
-    const method = __orgcheck__Get()?.TableFactory?.createRows;
-    if (method) return method(tableDefinition, rows, eachRow, eachCell);
-    return undefined;
-}
-
-const __orgcheck__ExportAsRaw = (tableDefinition, rows, title) => {
-    const method = __orgcheck__Get()?.TableFactory?.asRaw;
-    if (method) return method(tableDefinition, rows, title);
-    return undefined;
-}
-
-const __orgcheck__FilterRows = (rows, searchInput) => {
-    const method = __orgcheck__Get()?.TableFactory?.filterRows;
-    if (method) return method(rows, searchInput);
-    return undefined;
-}
-
-const __orgcheck__SortRows = (tableDefinition, rows, columnIndex, order) => {
-    const method = __orgcheck__Get()?.TableFactory?.sortRows;
-    if (method) return method(tableDefinition, rows, columnIndex, order);
-    return undefined;
 }

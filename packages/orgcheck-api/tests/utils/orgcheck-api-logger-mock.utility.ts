@@ -17,10 +17,11 @@ export class LoggerMock_DoingNothing implements LoggerIntf {
   public finalLog(): void { }
   public warn(): void { }
   public fatal(): void { }
-  public toSimpleLogger() { return { log: () => {}, debug: () => {} }; }
+  public toSimpleLogger(): SimpleLoggerIntf { return new SimpleLoggerMock_DoingNothing(); }
 }
 
 export class SimpleLoggerMock_DoingNothing implements SimpleLoggerIntf {
   public log() {}
+  public isDebugEnabled() { return true; }
   public debug() {}
 }

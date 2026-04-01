@@ -100,12 +100,9 @@ export class Logger implements LoggerIntf {
     public toSimpleLogger(operationName: string): SimpleLoggerIntf {
         const that = this;
         return { 
-            log: (message) => { 
-                that.setup?.messageLogged(operationName, message);
-            },
-            debug: (message) => { 
-                that.setup?.messageSilentlyLogged(operationName, message);
-            }
+            log: (message) => that.setup?.messageLogged(operationName, message),
+            isDebugEnabled: () => that.setup?.messageSilentlyLogged !== undefined,
+            debug: (message) => that.setup?.messageSilentlyLogged(operationName, message)
         };
     }
 }

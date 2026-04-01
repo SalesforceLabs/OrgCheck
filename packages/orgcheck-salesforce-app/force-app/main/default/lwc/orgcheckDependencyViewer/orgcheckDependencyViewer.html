@@ -6,45 +6,13 @@
                 <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Dependency viewer: {whatName} ({whatId})</h1>
             </div>
             <div class="slds-modal__content slds-scrollable">
-                <lightning-tabset variant="scoped">
-                    <lightning-tab label="🍁 Graphical View">
-                        <c-orgcheck-graphics 
-                            type="hierarchy"
-                            name={whatName}
-                            hierarchy-box-color-legend={dependencyBoxColorsLegend}
-                            hierarchy-box-color-decorator={dependencyBoxColorsDecorator}
-                            hierarchy-box-inner-html-decorator={dependencyBoxInnerHtmlDecorator}
-                            source={dependencyTreeByType}></c-orgcheck-graphics>
-                    </lightning-tab>
-                    <lightning-tab label="🌿 List of where is it referenced?">
-                        <c-orgcheck-extended-datatable
-                            empty-message="Nothing here."
-                            show-search
-                            show-statistics
-                            is-sticky-headers
-                            is-infinite-scrolling
-                            infinite-scrolling-initial-nb-rows=200
-                            infinite-scrolling-additional-nb-rows=100
-                            table-definition={dependencyTableDefinition}
-                            show-export-button
-                            export-basename={whatName}
-                            rows={dependencyUsedData}></c-orgcheck-extended-datatable>
-                    </lightning-tab>
-                    <lightning-tab label="☘️ List of what is it using?">
-                        <c-orgcheck-extended-datatable
-                            empty-message="Nothing here."
-                            show-search
-                            show-statistics
-                            is-sticky-headers
-                            is-infinite-scrolling
-                            infinite-scrolling-initial-nb-rows=200
-                            infinite-scrolling-additional-nb-rows=100
-                            table-definition={dependencyTableDefinition}
-                            show-export-button
-                            export-basename={whatName}
-                            rows={dependencyUsingData}></c-orgcheck-extended-datatable>
-                    </lightning-tab>
-                </lightning-tabset>
+                <c-orgcheck-graphics 
+                    type="hierarchy"
+                    name={whatName}
+                    hierarchy-box-color-legend={dependencyBoxColorsLegend}
+                    hierarchy-box-color-decorator={dependencyBoxColorsDecorator}
+                    hierarchy-box-inner-html-decorator={dependencyBoxInnerHtmlDecorator}
+                    source={dependencyTreeByType}></c-orgcheck-graphics>
             </div>
             <div class="slds-modal__footer">
                 <lightning-button variant="neutral" label="Close" onclick={handleClose}></lightning-button>

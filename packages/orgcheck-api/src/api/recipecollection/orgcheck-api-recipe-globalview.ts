@@ -6,6 +6,13 @@ import { ScoreRule } from 'src/api/data/orgcheck-api-data-scorerule';
 export class RecipeGlobalView implements RecipeCollection {
     
     /**
+     * @description Title of this recipe
+     * @type {string}
+     * @public
+     */
+    title: string = '🏞️ Global view';
+
+    /**
      * @description List the parameters that this recipe collection dependes on
      * @returns {string[]} List of parameters that this recipe collection dependes on
      * @public
@@ -17,10 +24,10 @@ export class RecipeGlobalView implements RecipeCollection {
     /**
      * @description List all recipe aliases that this recipe collection needs
      * @param {SimpleLoggerIntf} _logger - Logger
-     * @returns {Array<string>} List of recipe aliases that this recipe collection needs
+     * @returns {RecipeAliases[]} List of recipe aliases that this recipe collection needs
      * @public
      */
-    public ingredients(_logger: SimpleLoggerIntf): Array<string> {
+    public ingredients(_logger: SimpleLoggerIntf): RecipeAliases[] {
         return [
             RecipeAliases.APEX_CLASSES,
             RecipeAliases.APEX_TESTS,

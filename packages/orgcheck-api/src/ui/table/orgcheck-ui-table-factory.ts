@@ -93,11 +93,17 @@ export class TableFactory {
                     row.isVisible = false;
                 }
             });
+            table.isFilterOn = true;
+            table.nbFilteredRows = index;
+            table.isFilteredDataEmpty = index === 0;
         } else {
             table.rows.forEach((row, index) => { 
                 row.isVisible = true;
                 row.index = index+1;
             });
+            table.isFilterOn = false;
+            table.nbFilteredRows = 0;
+            table.isFilteredDataEmpty = false;
         }
     }
 

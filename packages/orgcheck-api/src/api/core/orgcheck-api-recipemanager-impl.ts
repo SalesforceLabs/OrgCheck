@@ -71,17 +71,17 @@ export class RecipeManager implements RecipeManagerIntf {
 
     /**
      * @description Map of recipes given their alias
-     * @type {Map<string, Recipe<any> | ServedRecipe<any, any>>}
+     * @type {Map<RecipeAliases, Recipe<any> | ServedRecipe<any, any>>}
      * @private
      */
-    private _recipes: Map<string, Recipe<any> | ServedRecipe<any, any>>;
+    private _recipes: Map<RecipeAliases, Recipe<any> | ServedRecipe<any, any>>;
 
     /**
      * @description Map of recipe collections given their alias.
-     * @type {Map<string, RecipeCollection>}
+     * @type {Map<RecipeAliases, RecipeCollection>}
      * @private
      */
-    private _recipeCollections: Map<string, RecipeCollection>;
+    private _recipeCollections: Map<RecipeAliases, RecipeCollection>;
 
     /**
      * @description Recipes need a dataset manager to work
@@ -99,8 +99,8 @@ export class RecipeManager implements RecipeManagerIntf {
 
         this._datasetManager = datasetManager;
         this._logger = logger;
-        this._recipes = new Map<string, Recipe<Data | Data[] | DataMatrixIntf | Map<string, boolean>>>();
-        this._recipeCollections = new Map<string, RecipeCollection>();
+        this._recipes = new Map<RecipeAliases, Recipe<Data | Data[] | DataMatrixIntf | Map<string, boolean>>>();
+        this._recipeCollections = new Map<RecipeAliases, RecipeCollection>();
 
         // Recipes
         this._recipes.set(RecipeAliases.INTERNAL_ACTIVE_USERS, new RecipeInternalActiveUsers());
@@ -162,14 +162,14 @@ export class RecipeManager implements RecipeManagerIntf {
      *   - Step 2. Run the given datasets and gather the global data retrieved
      *   - Step 3. Combine/mix all the data together
      *   - Step 4. Return the mixture
-     * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
+     * @param {RecipeAliases} alias -String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map<string, any>} [parameters] - List of values to pass to the recipe
      * @returns {Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]>} Returns the mixture
      * @throws {RecipeManagerError}
      * @async
      * @public
      */
-    public async prepare(alias: string, parameters: Map<string, any>): Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]> {
+    public async prepare(alias: RecipeAliases, parameters: Map<string, any>): Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]> {
         if (this._recipes.has(alias)) {
             return await this._prepareRecipe(alias, parameters);
         } else if (this._recipeCollections.has(alias)) {
@@ -181,14 +181,14 @@ export class RecipeManager implements RecipeManagerIntf {
 
     /**
      * @description Serve the mixture from a designated recipe to a table
-     * @param {string} alias - String representation of a recipe
+     * @param {RecipeAliases} alias -String representation of a recipe
      * @param {Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]} [mixture] - The mixture
      * @returns {Promise<Table | SfdcObjectAsTable>} Returns the mixture as a table
      * @throws {RecipeManagerError}
      * @async
      * @public
      */
-    public async serveToTable(alias: string, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<Table | SfdcObjectAsTable> {
+    public async serveToTable(alias: RecipeAliases, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<Table | SfdcObjectAsTable> {
         let recipe = this._recipes.get(alias) ?? this._recipeCollections.get(alias);
         if (recipe) {
             try {
@@ -204,14 +204,14 @@ export class RecipeManager implements RecipeManagerIntf {
 
     /**
      * @description Serve the mixture from a designated recipe to go
-     * @param {string} alias - String representation of a recipe
+     * @param {RecipeAliases} alias -String representation of a recipe
      * @param {Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]} [mixture] - The mixture
      * @returns {Promise<ExportedTable | ExportedTable[]>} Returns the mixture as to go
      * @throws {RecipeManagerError}
      * @async
      * @public
      */
-    public async serveToGo(alias: string, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<ExportedTable | ExportedTable[]> {
+    public async serveToGo(alias: RecipeAliases, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<ExportedTable | ExportedTable[]> {
         let recipe = this._recipes.get(alias) ?? this._recipeCollections.get(alias);
         if (recipe) {
             try {
@@ -227,12 +227,12 @@ export class RecipeManager implements RecipeManagerIntf {
 
     /**
      * @description Cleans a designated recipe (by its alias) and the corresponding datasets.
-     * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
+     * @param {RecipeAliases} alias -String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map<string, any>} [parameters] - List of values to pass to the recipe
      * @throws {RecipeManagerError}
      * @public
      */
-    public clean(alias: string, parameters: Map<string, any>) {
+    public clean(alias: RecipeAliases, parameters: Map<string, any>) {
         if (this._recipes.has(alias)) {
             this._cleanRecipe(alias, parameters);
         } else if (this._recipeCollections.has(alias)) {
@@ -244,12 +244,12 @@ export class RecipeManager implements RecipeManagerIntf {
 
     /**
      * @description Returns the cache stamp for a designated recipe (by its alias)
-     * @param {string} alias - String representation of a recipe
+     * @param {RecipeAliases} alias -String representation of a recipe
      * @param {Map<string, any>} [parameters] - List of values to pass to the recipe
      * @returns {Promise<string>} Returns the cache stamp
      * @public
      */
-    public cachestamp(alias: string, parameters: Map<string, any>): string {
+    public cachestamp(alias: RecipeAliases, parameters: Map<string, any>): string {
         if (this._recipes.has(alias)) {
             const recipe = this._recipes.get(alias);
             let cachestamp = '';
@@ -274,13 +274,13 @@ export class RecipeManager implements RecipeManagerIntf {
      *   - Step 1. Extract the list of datasets to run that this recipe uses
      *   - Step 2. Run the given datasets and gather the global data retrieved
      *   - Step 3. Transform the retrieved data and return the final result as a Map
-     * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
+     * @param {RecipeAliases} alias -String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map<string, any>} [parameters] List of values to pass to the recipe
      * @returns {Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean>>} Returns the value from the recipe or undefined if something bad happens
      * @throws {RecipeManagerError}
      * @async
      */
-    private async _prepareRecipe(alias: string, parameters: Map<string, any>): Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean>> {
+    private async _prepareRecipe(alias: RecipeAliases, parameters: Map<string, any>): Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean>> {
 
         const section = `Run recipe "${alias}"`;
         const recipe = this._recipes.get(alias);
@@ -328,13 +328,13 @@ export class RecipeManager implements RecipeManagerIntf {
     }
 
     /**
-     * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
+     * @param {RecipeAliases} alias -String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map<string, any>} [parameters] - List of values to pass to the recipe
      * @returns {Promise<DataCollectionStatisticsIntf[]>} Returns the value from the recipe collection or undefined if something bad happens.
      * @throws {RecipeManagerError}
      * @async
      */
-    private async _prepareRecipeCollection(alias: string, parameters: Map<string, any>): Promise<DataCollectionStatisticsIntf[]> {
+    private async _prepareRecipeCollection(alias: RecipeAliases, parameters: Map<string, any>): Promise<DataCollectionStatisticsIntf[]> {
 
         const section = `Run recipe collection "${alias}"`;
         const recipeCollection = this._recipeCollections.get(alias);
@@ -358,13 +358,11 @@ export class RecipeManager implements RecipeManagerIntf {
         // -------------------
         // STEP 2. Run the recipes in the collection
         // -------------------
-        /** @type {Map<string, Array<Data>>}} */
-        const data: Map<string, Array<Data>> = new Map();
-        /** @type {Map<string, Error>}} */
-        const recipesInError: Map<string, Error> = new Map();
+        const data: Map<RecipeAliases, Array<Data>> = new Map();
+        const recipesInError: Map<RecipeAliases, Error> = new Map();
         try {
             this._logger.optimisticByPass = true;
-            await Processor.forEach(recipes, async (recipe: string) => {
+            await Processor.forEach(recipes, async (recipe: RecipeAliases) => {
                 try {
                     const recipeData = await this._prepareRecipe(recipe, parameters);
                     if (recipeData && Array.isArray(recipeData)) {
@@ -480,12 +478,12 @@ export class RecipeManager implements RecipeManagerIntf {
      * @description Cleans a designated recipe (by its alias) and the corresponding datasets.
      *    - Step 1. Extract the list of datasets to clean that this recipe uses
      *    - Step 2. Clean the given datasets
-     * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
+     * @param {RecipeAliases} alias -String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map<string, any>} [parameters] List of values to pass to the recipe
      * @throws {RecipeManagerError}
      * @public
      */
-    private _cleanRecipe(alias: string, parameters: Map<string, any>) {
+    private _cleanRecipe(alias: RecipeAliases, parameters: Map<string, any>) {
 
         const section = `Clean recipe "${alias}"`;
         const recipe = this._recipes.get(alias);
@@ -518,12 +516,12 @@ export class RecipeManager implements RecipeManagerIntf {
     }
 
     /**
-     * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
+     * @param {RecipeAliases} alias -String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map<string, any>} [parameters] List of values to pass to the recipe
      * @throws {RecipeManagerError}
      * @public
      */
-    private _cleanRecipeCollection(alias: string, parameters: Map<string, any>) {
+    private _cleanRecipeCollection(alias: RecipeAliases, parameters: Map<string, any>) {
 
         const section = `Clean recipe collection "${alias}"`;
         const recipeCollection = this._recipeCollections.get(alias);
@@ -535,8 +533,7 @@ export class RecipeManager implements RecipeManagerIntf {
         // STEP 1. Extract
         // -------------------
         this._logger.log(section, 'How many recipes this recipe collection has?');
-        /** @type {Array<string>}} */
-        let recipes: Array<string>;
+        let recipes: RecipeAliases[];
         try {
             recipes = recipeCollection.ingredients(this._logger.toSimpleLogger(section), parameters);
         } catch(error) {
@@ -555,4 +552,16 @@ export class RecipeManager implements RecipeManagerIntf {
         }
         this._logger.finalLog(section, 'Datasets of these recipes succesfully cleaned!');
     }
+
+    /**
+     * @description List all available recipe titles
+     * @returns {Map<RecipeAliases, string>} Returns the map of all available recipe titles
+     * @public
+     */
+    public listAllTitles(): Map<RecipeAliases, string> {
+        const titles = new Map();;
+        [ this._recipes, this._recipeCollections ].forEach((map) => map.forEach((recipe, alias) => titles.set(alias, recipe.title)));
+        return titles;
+    }
+
 }

@@ -109,7 +109,7 @@
                                 {currentContentTitle}
                             </h1>
                             &nbsp;&nbsp;
-                            <lightning-button-icon icon-name="utility:sync" alternative-text="Refresh data" title="Refresh the current data being displayed" variant="border-filled" onclick={handleRefreshCurrentData} ></lightning-button-icon>
+                            <lightning-button-icon lwc:if={showRefreshButton} icon-name="utility:sync" alternative-text="Refresh data" title="Refresh the current data being displayed" variant="border-filled" onclick={handleRefreshCurrentData} ></lightning-button-icon>
                         </lightning-layout-item>
                         <!-- The global filters -->
                         <lightning-layout-item alignment-bump="left">
@@ -198,8 +198,7 @@
                                 <c-orgcheck-extended-datatable 
                                     is-sticky-headers 
                                     dont-use-all-space 
-                                    table-definition={tableDefinitions.scorerules} 
-                                    rows={data.scorerules}
+                                    table={data.scorerules}
                                     show-export-button  
                                     export-basename="Org Check Rules"></c-orgcheck-extended-datatable>
                             </div>
@@ -238,8 +237,7 @@
                                                             <section lwc:if={item.countBad}>
                                                                 <p class="slds-text-heading_small"><b>{item.countBad}</b> items to correct for the below reasons:</p>
                                                                 <c-orgcheck-extended-datatable 
-                                                                    table-definition={item.tableDefinition} 
-                                                                    rows={item.data}></c-orgcheck-extended-datatable>
+                                                                    table={item.data}></c-orgcheck-extended-datatable>
                                                             </section>
                                                             <section lwc:else class="slds-var-p-horizontal_small">
                                                                 <p>All good!!</p>
@@ -257,8 +255,7 @@
                             </div>
                             <div data-key="05" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
-                                    table-definition={tableDefinitions.hardcodedurls} 
-                                    rows={data.hardcodedurls} 
+                                    table={data.hardcodedurls} 
                                     show-export-button  
                                     export-basename="HardCodedURLs"
                                     dont-use-all-space></c-orgcheck-extended-datatable>
@@ -328,8 +325,7 @@
                                                 is-infinite-scrolling
                                                 infinite-scrolling-initial-nb-rows=25
                                                 infinite-scrolling-additional-nb-rows=100
-                                                table-definition={tableDefinitions.apextriggersinobject} 
-                                                rows={data.object.apexTriggerRefs}></c-orgcheck-extended-datatable>
+                                                table={data.object.apexTriggerRefs}></c-orgcheck-extended-datatable>
                                             <br /><br />
                                         </template>
                                         <template lwc:if={data.object.workflowRuleRefs.length}>
@@ -342,8 +338,7 @@
                                                 is-infinite-scrolling
                                                 infinite-scrolling-initial-nb-rows=25
                                                 infinite-scrolling-additional-nb-rows=100
-                                                table-definition={tableDefinitions.workflowsinobject} 
-                                                rows={data.object.workflowRuleRefs}></c-orgcheck-extended-datatable>
+                                                table={data.object.workflowRuleRefs}></c-orgcheck-extended-datatable>
                                             <br /><br />
                                         </template>
                                         <template lwc:if={data.object.fieldSets.length}>
@@ -356,8 +351,7 @@
                                                 is-infinite-scrolling
                                                 infinite-scrolling-initial-nb-rows=25
                                                 infinite-scrolling-additional-nb-rows=100
-                                                table-definition={tableDefinitions.fieldsetsinobject} 
-                                                rows={data.object.fieldSets}></c-orgcheck-extended-datatable>
+                                                table={data.object.fieldSets}></c-orgcheck-extended-datatable>
                                             <br /><br />
                                         </template>
                                         <template lwc:if={data.object.layouts.length}>
@@ -371,8 +365,7 @@
                                                 is-infinite-scrolling
                                                 infinite-scrolling-initial-nb-rows=25
                                                 infinite-scrolling-additional-nb-rows=100
-                                                table-definition={tableDefinitions.pagelayoutsinobject} 
-                                                rows={data.object.layouts}></c-orgcheck-extended-datatable>
+                                                table={data.object.layouts}></c-orgcheck-extended-datatable>
                                             <br /><br />
                                         </template>
                                         <template lwc:if={data.object.flexiPages.length}>
@@ -386,8 +379,7 @@
                                                 is-infinite-scrolling
                                                 infinite-scrolling-initial-nb-rows=25
                                                 infinite-scrolling-additional-nb-rows=100
-                                                table-definition={tableDefinitions.flexipagesinobject} 
-                                                rows={data.object.flexiPages}></c-orgcheck-extended-datatable>
+                                                table={data.object.flexiPages}></c-orgcheck-extended-datatable>
                                             <br /><br />
                                         </template>
                                         <template lwc:if={data.object.limits.length}>
@@ -401,8 +393,7 @@
                                                 is-infinite-scrolling
                                                 infinite-scrolling-initial-nb-rows=25
                                                 infinite-scrolling-additional-nb-rows=100
-                                                table-definition={tableDefinitions.limitsinobject} 
-                                                rows={data.object.limits}></c-orgcheck-extended-datatable>
+                                                table={data.object.limits}></c-orgcheck-extended-datatable>
                                             <br /><br />
                                         </template>
                                         <template lwc:if={data.object.validationRules.length}>
@@ -416,8 +407,7 @@
                                                 is-infinite-scrolling
                                                 infinite-scrolling-initial-nb-rows=25
                                                 infinite-scrolling-additional-nb-rows=100
-                                                table-definition={tableDefinitions.validationrulesinobject} 
-                                                rows={data.object.validationRules}></c-orgcheck-extended-datatable>
+                                                table={data.object.validationRules}></c-orgcheck-extended-datatable>
                                             <br /><br />
                                         </template>
                                         <template lwc:if={data.object.webLinks.length}>
@@ -431,8 +421,7 @@
                                                 is-infinite-scrolling
                                                 infinite-scrolling-initial-nb-rows=25
                                                 infinite-scrolling-additional-nb-rows=100
-                                                table-definition={tableDefinitions.weblinksinobject} 
-                                                rows={data.object.webLinks}></c-orgcheck-extended-datatable>
+                                                table={data.object.webLinks}></c-orgcheck-extended-datatable>
                                             <br /><br />
                                         </template>
                                         <template lwc:if={data.object.customFieldRefs.length}>
@@ -446,8 +435,7 @@
                                                 is-infinite-scrolling
                                                 infinite-scrolling-initial-nb-rows=25
                                                 infinite-scrolling-additional-nb-rows=100
-                                                table-definition={tableDefinitions.customfieldsinobject} 
-                                                rows={data.object.customFieldRefs}></c-orgcheck-extended-datatable>
+                                                table={data.object.customFieldRefs}></c-orgcheck-extended-datatable>
                                             <br /><br />
                                         </template>
                                         <template lwc:if={data.object.standardFields.length}>
@@ -461,8 +449,7 @@
                                                 is-infinite-scrolling
                                                 infinite-scrolling-initial-nb-rows=25
                                                 infinite-scrolling-additional-nb-rows=100
-                                                table-definition={tableDefinitions.standardfieldsinobject} 
-                                                rows={data.object.standardFields}></c-orgcheck-extended-datatable>
+                                                table={data.object.standardFields}></c-orgcheck-extended-datatable>
                                             <br /><br />
                                         </template>
                                         <template lwc:if={data.object.recordTypes.length}>
@@ -476,8 +463,7 @@
                                                 is-infinite-scrolling
                                                 infinite-scrolling-initial-nb-rows=25
                                                 infinite-scrolling-additional-nb-rows=100
-                                                table-definition={tableDefinitions.recordtypesinobject} 
-                                                rows={data.object.recordTypes}></c-orgcheck-extended-datatable>
+                                                table={data.object.recordTypes}></c-orgcheck-extended-datatable>
                                             <br /><br />
                                         </template>
                                         <template lwc:if={data.object.relationships.length}>
@@ -491,8 +477,7 @@
                                                 is-infinite-scrolling
                                                 infinite-scrolling-initial-nb-rows=25
                                                 infinite-scrolling-additional-nb-rows=100
-                                                table-definition={tableDefinitions.relationshipsinobject} 
-                                                rows={data.object.relationships}></c-orgcheck-extended-datatable>
+                                                table={data.object.relationships}></c-orgcheck-extended-datatable>
                                             <br /><br />
                                         </template>
                                     </template>                        
@@ -515,8 +500,7 @@
                                     is-infinite-scrolling 
                                     infinite-scrolling-initial-nb-rows=25 
                                     infinite-scrolling-additional-nb-rows=100 
-                                    table-definition={tableDefinitions.objects}
-                                    rows={data.objects} 
+                                    table={data.objects} 
                                     show-export-button 
                                     export-basename="Objects"></c-orgcheck-extended-datatable>
                             </div>
@@ -530,8 +514,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.customfields} 
-                                    rows={data.customfields}
+                                    table={data.customfields}
                                     show-export-button  
                                     export-basename="CustomFields"></c-orgcheck-extended-datatable>
                             </div>
@@ -545,8 +528,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.pagelayouts} 
-                                    rows={data.pagelayouts}
+                                    table={data.pagelayouts}
                                     show-export-button  
                                     export-basename="PageLayouts"></c-orgcheck-extended-datatable>
                             </div>
@@ -560,8 +542,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.validationrules} 
-                                    rows={data.validationrules}
+                                    table={data.validationrules}
                                     show-export-button  
                                     export-basename="ValidationRules"></c-orgcheck-extended-datatable>
                             </div>
@@ -574,8 +555,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.recordtypes} 
-                                    rows={data.recordtypes}
+                                    table={data.recordtypes}
                                     show-export-button  
                                     export-basename="RecordTypes"></c-orgcheck-extended-datatable>
                             </div>
@@ -588,8 +568,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.weblinks} 
-                                    rows={data.weblinks}
+                                    table={data.weblinks}
                                     show-export-button  
                                     export-basename="WebLinks"></c-orgcheck-extended-datatable>
                             </div>
@@ -603,8 +582,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.internalactiveusers} 
-                                    rows={data.internalactiveusers}
+                                    table={data.internalactiveusers}
                                     show-export-button  
                                     export-basename="Users"></c-orgcheck-extended-datatable>
                             </div>
@@ -618,8 +596,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.profiles} 
-                                    rows={data.profiles}
+                                    table={data.profiles}
                                     show-export-button  
                                     export-basename="Profiles"></c-orgcheck-extended-datatable>
                             </div>
@@ -633,8 +610,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.permissionsets} 
-                                    rows={data.permissionsets}
+                                    table={data.permissionsets}
                                     show-export-button  
                                     export-basename="PermissionSets"></c-orgcheck-extended-datatable>
                             </div>
@@ -648,8 +624,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.permissionsetlicenses} 
-                                    rows={data.permissionsetlicenses}
+                                    table={data.permissionsetlicenses}
                                     show-export-button  
                                     export-basename="PermissionSetLicenses"></c-orgcheck-extended-datatable>
                             </div>
@@ -663,8 +638,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.profilerestrictions} 
-                                    rows={data.profilerestrictions}
+                                    table={data.profilerestrictions}
                                     show-export-button  
                                     export-basename="ProfileRestrictions"></c-orgcheck-extended-datatable>
                             </div>
@@ -678,8 +652,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.profilepasswordpolicies} 
-                                    rows={data.profilepasswordpolicies}
+                                    table={data.profilepasswordpolicies}
                                     show-export-button  
                                     export-basename="ProfilePasswordPolicies"></c-orgcheck-extended-datatable>
                             </div>
@@ -695,8 +668,7 @@
                                     is-infinite-scrolling 
                                     infinite-scrolling-initial-nb-rows=25 
                                     infinite-scrolling-additional-nb-rows=100 
-                                    table-definition={tableDefinitions.objectpermissions} 
-                                    rows={data.objectpermissions}
+                                    table={data.objectpermissions}
                                     show-export-button  
                                     export-basename="ObjectPermissions"></c-orgcheck-extended-datatable>
                             </div>
@@ -715,8 +687,7 @@
                                     is-infinite-scrolling 
                                     infinite-scrolling-initial-nb-rows=25 
                                     infinite-scrolling-additional-nb-rows=100 
-                                    table-definition={tableDefinitions.fieldpermissions} 
-                                    rows={data.fieldpermissions}
+                                    table={data.fieldpermissions}
                                     show-export-button  
                                     export-basename="FieldPermissions"></c-orgcheck-extended-datatable>
                                 </template>
@@ -739,8 +710,7 @@
                                     is-infinite-scrolling 
                                     infinite-scrolling-initial-nb-rows=25 
                                     infinite-scrolling-additional-nb-rows=100 
-                                    table-definition={tableDefinitions.apppermissions} 
-                                    rows={data.apppermissions}
+                                    table={data.apppermissions}
                                     show-export-button  
                                     export-basename="AppPermissions"></c-orgcheck-extended-datatable>
                             </div>
@@ -755,8 +725,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.browsers} 
-                                    rows={data.browsers}
+                                    table={data.browsers}
                                     show-export-button  
                                     export-basename="Browsers"></c-orgcheck-extended-datatable>
                             </div>
@@ -781,8 +750,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.userroles} 
-                                    rows={data.userroles}
+                                    table={data.userroles}
                                     show-export-button  
                                     export-basename="Roles"></c-orgcheck-extended-datatable>
                             </div>
@@ -796,8 +764,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.publicgroups} 
-                                    rows={data.publicgroups}
+                                    table={data.publicgroups}
                                     show-export-button  
                                     export-basename="PublicGroups"></c-orgcheck-extended-datatable>
                             </div>
@@ -811,8 +778,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.queues} 
-                                    rows={data.queues}
+                                    table={data.queues}
                                     show-export-button  
                                     export-basename="Queues"></c-orgcheck-extended-datatable>
                             </div>
@@ -826,8 +792,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.collaborationgroups} 
-                                    rows={data.collaborationgroups}
+                                    table={data.collaborationgroups}
                                     show-export-button  
                                     export-basename="ChatterGroups"></c-orgcheck-extended-datatable>
                             </div>
@@ -841,8 +806,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.flows} 
-                                    rows={data.flows}
+                                    table={data.flows}
                                     show-export-button  
                                     export-basename="Flows"></c-orgcheck-extended-datatable>
                             </div>
@@ -856,8 +820,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.processbuilders} 
-                                    rows={data.processbuilders}
+                                    table={data.processbuilders}
                                     show-export-button  
                                     export-basename="ProcessBuilders"></c-orgcheck-extended-datatable>
                             </div>
@@ -872,8 +835,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.workflows} 
-                                    rows={data.workflows}
+                                    table={data.workflows}
                                     show-export-button  
                                     export-basename="Workflows"></c-orgcheck-extended-datatable>
                             </div>
@@ -887,8 +849,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.customlabels} 
-                                    rows={data.customlabels}
+                                    table={data.customlabels}
                                     show-export-button  
                                     export-basename="CustomLabels"></c-orgcheck-extended-datatable>
                             </div>
@@ -902,8 +863,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.documents} 
-                                    rows={data.documents}
+                                    table={data.documents}
                                     show-export-button  
                                     export-basename="Documents"></c-orgcheck-extended-datatable>
                             </div>
@@ -917,8 +877,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.emailtemplates} 
-                                    rows={data.emailtemplates}
+                                    table={data.emailtemplates}
                                     show-export-button  
                                     export-basename="EmailTemplates"></c-orgcheck-extended-datatable>
                             </div>
@@ -932,8 +891,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.knowledgearticles} 
-                                    rows={data.knowledgearticles}
+                                    table={data.knowledgearticles}
                                     show-export-button  
                                     export-basename="KnowledgeArticles"></c-orgcheck-extended-datatable>
                             </div>
@@ -947,8 +905,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.staticresources} 
-                                    rows={data.staticresources}
+                                    table={data.staticresources}
                                     show-export-button  
                                     export-basename="StaticResources"></c-orgcheck-extended-datatable>
                             </div>
@@ -962,8 +919,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.visualforcepages} 
-                                    rows={data.visualforcepages}
+                                    table={data.visualforcepages}
                                     show-export-button  
                                     export-basename="VisualForcePages"></c-orgcheck-extended-datatable>
                             </div>
@@ -977,8 +933,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.visualforcecomponents} 
-                                    rows={data.visualforcecomponents}
+                                    table={data.visualforcecomponents}
                                     show-export-button  
                                     export-basename="VisualForceComponents"></c-orgcheck-extended-datatable>
                             </div>
@@ -992,8 +947,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.lightningpages} 
-                                    rows={data.lightningpages}
+                                    table={data.lightningpages}
                                     show-export-button  
                                     export-basename="LightningPages"></c-orgcheck-extended-datatable>
                             </div>
@@ -1007,8 +961,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.lightningauracomponents} 
-                                    rows={data.lightningauracomponents}
+                                    table={data.lightningauracomponents}
                                     show-export-button  
                                     export-basename="LightningAuraComponents"></c-orgcheck-extended-datatable>
                             </div>
@@ -1022,8 +975,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.lightningwebcomponents} 
-                                    rows={data.lightningwebcomponents}
+                                    table={data.lightningwebcomponents}
                                     show-export-button  
                                     export-basename="LightningWebComponents"></c-orgcheck-extended-datatable>
                             </div>
@@ -1037,8 +989,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.homepages} 
-                                    rows={data.homepages}
+                                    table={data.homepages}
                                     show-export-button  
                                     export-basename="HomePageComponents"></c-orgcheck-extended-datatable>
                             </div>
@@ -1052,8 +1003,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.customtabs} 
-                                    rows={data.customtabs}
+                                    table={data.customtabs}
                                     show-export-button  
                                     export-basename="CustomTabs"></c-orgcheck-extended-datatable>
                             </div>
@@ -1067,8 +1017,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.apexclasses} 
-                                    rows={data.apexclasses}
+                                    table={data.apexclasses}
                                     show-export-button  
                                     export-basename="ApexClasses"></c-orgcheck-extended-datatable>
                             </div>
@@ -1082,8 +1031,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.apexuncompiled} 
-                                    rows={data.apexuncompiled}
+                                    table={data.apexuncompiled}
                                     show-export-button  
                                     export-basename="ApexClassesNeedCompilation"></c-orgcheck-extended-datatable>
                             </div>
@@ -1097,8 +1045,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.apextriggers} 
-                                    rows={data.apextriggers}
+                                    table={data.apextriggers}
                                     show-export-button  
                                     export-basename="ApexTriggers"></c-orgcheck-extended-datatable>
                             </div>
@@ -1112,8 +1059,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.apextests} 
-                                    rows={data.apextests}
+                                    table={data.apextests}
                                     show-export-button  
                                     export-basename="ApexUnitTests"></c-orgcheck-extended-datatable>
                             </div>
@@ -1127,8 +1073,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.reports} 
-                                    rows={data.reports}
+                                    table={data.reports}
                                     show-export-button  
                                     export-basename="Reports"></c-orgcheck-extended-datatable>
                             </div>
@@ -1142,8 +1087,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table-definition={tableDefinitions.dashboards} 
-                                    rows={data.dashboards}
+                                    table={data.dashboards}
                                     show-export-button  
                                     export-basename="Dashboards"></c-orgcheck-extended-datatable>
                             </div>

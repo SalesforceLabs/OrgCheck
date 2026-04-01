@@ -1,4 +1,4 @@
-import { DataCacheItemIntf } from 'src/api/core/orgcheck-api-cache-item';
+import { CacheItem } from 'src/api/data/orgcheck-api-data-cacheitem';
 
 /**
  * @description Global information stored in cache (both for data and metdata!)
@@ -61,9 +61,9 @@ export interface DataCacheManagerIntf {
 
     /**
      * @description Get details of the cache.
-     * @returns {Array<DataCacheItemIntf> | undefined} an array of objects that contains the name, the type, the size and the creation date of each entry.
+     * @returns {Array<CacheItem> | undefined} an array of objects that contains the name, the type, the size and the creation date of each entry.
      */
-    details(): DataCacheItemIntf[]
+    details(): CacheItem[]
 
     /**
      * @description Remove an entry of the cache.

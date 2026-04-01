@@ -43,7 +43,7 @@ export class DatasetOrganization implements Dataset {
         const organizationDataFactory = dataFactory.getInstance(DataAliases.SfdcOrganization);
 
         // Set the type
-        let type;
+        let type: string;
         if (record.OrganizationType === 'Developer Edition') type = ORGTYPE_DE;
         else if (record.IsSandbox === true) type = ORGTYPE_SANDBOX;
         else if (record.IsSandbox === false && record.TrialExpirationDate) type = ORGTYPE_TRIAL;

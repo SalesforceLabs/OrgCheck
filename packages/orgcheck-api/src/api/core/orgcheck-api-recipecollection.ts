@@ -2,6 +2,7 @@ import { DataCollectionStatisticsIntf } from 'src/api/core/orgcheck-api-data-dat
 import { Data } from 'src/api/core/orgcheck-api-data';
 import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
 import { ScoreRule } from 'src/api/data/orgcheck-api-data-scorerule';
+import { RecipeAliases } from 'src/api/core/orgcheck-api-recipes-aliases';
 
 /**
  * @description The super class for recipe collections that are defined only by executing a set of other recipes
@@ -9,13 +10,20 @@ import { ScoreRule } from 'src/api/data/orgcheck-api-data-scorerule';
 export interface RecipeCollection {
 
     /**
+     * @description Title of this recipe collection
+     * @type {string}
+     * @public
+     */
+    title: string;
+
+    /**
      * @description List all recipe aliases that this recipe collection needs
      * @param {SimpleLoggerIntf} logger - Logger
      * @param {Map<string, any>} [parameters] - List of optional argument to pass
-     * @returns {Array<string>} List of recipe aliases that this recipe collection needs
+     * @returns {RecipeAliases[]} List of recipe aliases that this recipe collection needs
      * @public
      */
-    ingredients(logger: SimpleLoggerIntf, parameters?: Map<string, any>): Array<string>;
+    ingredients(logger: SimpleLoggerIntf, parameters?: Map<string, any>): RecipeAliases[];
 
     /**
      * @description List the parameters that this recipe collection dependes on

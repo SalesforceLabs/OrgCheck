@@ -528,11 +528,10 @@ export class SalesforceManager implements SalesforceManagerIntf {
                     records = await this._standardSOQLQuery(query.tooling, query.string, query.byPasses, updateLogInformationOnQuery);
                 }
                 doneEntities.push(entityName)
-                //nbRecords += records?.length;
             } catch (error) {
                 errorEntities.push(entityName);
                 errors.push(error);
-                throw error;
+                ///////// throw error;
             } finally {
                 const index = pendingEntities.indexOf(entityName);
                 if (index > -1) pendingEntities.splice(index, 1);

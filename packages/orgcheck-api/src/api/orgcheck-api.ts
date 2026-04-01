@@ -6,7 +6,7 @@ import { SfdcObject } from 'src/api/data/orgcheck-api-data-object';
 import { SfdcObjectType } from 'src/api/data/orgcheck-api-data-objecttype';
 import { SfdcOrganization } from 'src/api/data/orgcheck-api-data-organization';
 import { SfdcPackage } from 'src/api/data/orgcheck-api-data-package';
-import { DataCacheItemIntf } from 'src/api/core/orgcheck-api-cache-item';
+import { CacheItem } from 'src/api/data/orgcheck-api-data-cacheitem';
 import { SfdcObjectAsTable } from 'src/api/recipe/orgcheck-api-recipe-object';
 import { RecipeAliases } from 'src/api/core/orgcheck-api-recipes-aliases';
 import { Data } from 'src/api/core/orgcheck-api-data';
@@ -73,10 +73,10 @@ export interface ApiIntf {
 
     /**
      * @description List all the items in the cache manager
-     * @returns {DataCacheItemIntf[]} list of cache information 
+     * @returns {CacheItem[]} list of cache information 
      * @public
      */
-    listCacheItems(): DataCacheItemIntf[];
+    listCacheItems(): CacheItem[];
 
     /**
      * @description Get cache item from cache manager
@@ -217,6 +217,8 @@ export interface ApiIntf {
     prepareData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string): Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]>;
 
     serveData(alias: RecipeAliases, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<Table | SfdcObjectAsTable>;
+
+    titlesForAllData(): Map<RecipeAliases, string>;
 
     /**
      * @description Remove all the cached information about a specific data

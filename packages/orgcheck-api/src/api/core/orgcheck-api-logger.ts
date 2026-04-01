@@ -72,4 +72,11 @@ export interface SimpleLoggerIntf {
      * @public
      */
     debug(message: string): void;
+
+    /**
+     * @description Check if debug is enabled
+     * @returns {boolean} true if debug is enabled
+     * @public
+     */
+    isDebugEnabled(): boolean;
 }

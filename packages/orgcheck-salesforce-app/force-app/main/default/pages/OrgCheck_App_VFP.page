@@ -164,7 +164,7 @@
                             component,
                             // attributes --------------------------
                             { 
-                                accessToken: '{! JSENCODE($Api.Session_Id) }', 
+                                verbose: true,accessToken: '{! JSENCODE($Api.Session_Id) }', 
                                 localStorage: window.localStorage
                             },
                             // domLocator --------------------------

@@ -47,18 +47,6 @@ export default class OrgcheckDependencyViewer extends LightningElement {
      */ 
     whatName;
 
-    /**
-     * @description List of items that are using the item
-     * @public
-     */ 
-    dependencyUsingData;
-
-    /**
-     * @description List of items that are used the item
-     * @public
-     */ 
-    dependencyUsedData;
-
     /** 
      * @description Hierarchical view of the dependency data
      * @type {{label: string, children: Array<{id: string, label: string, children: Array<{label: string, children: Array<{id: string, label: string, url: string}>}>}>}}>}
@@ -115,20 +103,6 @@ export default class OrgcheckDependencyViewer extends LightningElement {
     };
 
     /**
-     * @description Table definition for the tabular view of dependencies
-     * @public
-     */ 
-    dependencyTableDefinition = {
-        columns: [
-            { label: '#',     type: 'index' },
-            { label: 'Name',  type: 'id', data: { value: 'url', label: 'name' }},
-            { label: 'Type',  type: 'text', data: { value: 'type' }}
-        ],
-        orderIndex: 1,
-        orderSort: 'asc'
-    };
-
-    /**
      * @description Set information about the item and its dependencies and then open the modal
      * @param {string} whatId - Salesforce ID of the item
      * @param {string} whatName - Name of the item
@@ -143,8 +117,6 @@ export default class OrgcheckDependencyViewer extends LightningElement {
         // Set the information about the item ad its dependencies
         this.whatId = whatId;
         this.whatName = whatName;
-        this.dependencyUsingData = dependencies.using ?? [];
-        this.dependencyUsedData = dependencies.referenced ?? [];
 
         // Hierarchical view of the data by type
         this.dependencyTreeByType = { 

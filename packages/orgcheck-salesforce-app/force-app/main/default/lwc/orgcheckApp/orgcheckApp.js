@@ -5,6 +5,12 @@ import { loadScript } from 'lightning/platformResourceLoader';
 export default class OrgcheckApp extends LightningElement {
 
     /**
+     * @description Verbose mode for the logs (false by default) -- if true, we copy all the logs (and debugà in the console of the borwser
+     * @type {boolean}
+     */
+    @api verbose = false;
+
+    /**
      * @description Local storage
      * @type {Storage}
      * @public
@@ -106,7 +112,7 @@ export default class OrgcheckApp extends LightningElement {
      * @type {Array<{ label: string, name: string, expanded: boolean, items: Array<{ label: string, name: string, metatext: string }> }>}
      * @public
      */
-    navigationMenuItems;
+    @track navigationMenuItems;
 
     /**
      * @description Selected item in the navigation tree
@@ -121,6 +127,13 @@ export default class OrgcheckApp extends LightningElement {
      * @public
      */
     currentContentTitle;
+
+    /**
+     * @description Should we show the refresh button for the current content pane (depends on the navigation item definition)
+     * @type {boolean}
+     * @public
+     */
+    showRefreshButton;
 
     /**
      * @description Internal properties without LWC reactivity
@@ -139,6 +152,8 @@ export default class OrgcheckApp extends LightningElement {
         spinner: undefined,
         modal: undefined,
         filters: undefined,
+        tree: undefined,
+        appNavigation: undefined,
         initialNavigationMenuItems: undefined,
         actionsByNavKey: undefined
     };
@@ -150,15 +165,18 @@ export default class OrgcheckApp extends LightningElement {
     renderedCallback() { 
         // Wire child refs if not wired 
         if (!this._private_properties.spinner) this._private_properties.spinner = this.template.querySelector('c-orgcheck-spinner'); 
+        if (!this._private_properties.tree) this._private_properties.tree = this.template.querySelector('lightning-tree');
         if (!this._private_properties.modal) this._private_properties.modal = this.template.querySelector('c-orgcheck-modal'); 
         if (!this._private_properties.filters) this._private_properties.filters = this.template.querySelector('c-orgcheck-global-filters');
-        // Set children ready flag
-        if (this._private_properties.spinner && this._private_properties.modal && this._private_properties.filters && !this._private_properties.childrenReady) this._private_properties.childrenReady = true;
+        if (this._private_properties.spinner && this._private_properties.tree && this._private_properties.modal && this._private_properties.filters && !this._private_properties.childrenReady) this._private_properties.childrenReady = true;
         // Kick off initial flow once when both accessToken & localStorage is present and children are ready. 
         if (!this._private_properties.hasInitialized && this._private_properties.childrenReady && this.accessToken && this.localStorage) {
             this._private_properties.hasInitialized = true; 
             // Defer heavy work to a microtask to avoid re-entrancy in rendering
-            Promise.resolve().then(() => this.initApi()); 
+            Promise.resolve().then(() => this.initApi()).catch((error) => {
+                this.isLoading = false;
+                console.error('Uncaught error from initApi:', error);
+            });
         }
     }
 
@@ -212,11 +230,39 @@ export default class OrgcheckApp extends LightningElement {
                     },
                     // Log methods -- delegation to the UI spinner
                     logSettings: {
-                        started: () => { },
-                        messageLogged: (section, message) => { this._private_properties.spinner?.sectionLog(section, message); },
-                        endedWithError: (section, error) => { this._private_properties.spinner?.sectionFailed(section, error); },
-                        endedSuccessfully: (section, message) => { this._private_properties.spinner?.sectionEnded(section, message); },
-                        stopped: () => {}
+                        started: (section) => {
+                            if (this.verbose) {
+                                console.log(`Org Check [${section}] BEGIN`); 
+                            }
+                        },
+                        messageLogged: (section, message) => { 
+                            this._private_properties.spinner?.sectionLog(section, message); 
+                            if (this.verbose) {
+                                console.log(`Org Check [${section}] LOG: ${message}`); 
+                            }
+                        },
+                        endedWithError: (section, error) => { 
+                            this._private_properties.spinner?.sectionFailed(section, error); 
+                            if (this.verbose) {
+                                console.error(`Org Check [${section}] ERROR: ${error?.message}`, error); 
+                            }
+                        },
+                        endedSuccessfully: (section, message) => { 
+                            this._private_properties.spinner?.sectionEnded(section, message); 
+                            if (this.verbose) {
+                                console.log(`Org Check [${section}] SUCCESS: ${message}`); 
+                            }
+                        },
+                        messageSilentlyLogged: (section, message) => { 
+                            if (this.verbose) {
+                                console.debug(`Org Check [${section}] DEBUG: ${message}`); 
+                            }
+                        },
+                        stopped: (section) => {
+                            if (this.verbose) {
+                                console.log(`Org Check [${section}] END`); 
+                            }
+                        }
                     }
                 });
                 this._private_properties.spinner?.sectionEnded(SECTION_03, `Done.`);
@@ -235,11 +281,31 @@ export default class OrgcheckApp extends LightningElement {
                 this._private_properties.spinner?.sectionLog(SECTION_04, `Get the Salesforce API version used that Org Check is using...`);
                 this.salesforceApiVersion = this._private_properties.api?.salesforceApiVersion;
                 // Create the initial navigation tree
-                const appNavigationParsed = parseApplicationNavigation();
-                this.navigationMenuItems = this._private_properties.initialNavigationMenuItems = appNavigationParsed.menuItems;
-                this._private_properties.actionsByNavKey = appNavigationParsed.actionsByNavKey;
+                this._private_properties.appNavigation = this._initApplicationNavigationItems();
+                const allTitles = this._private_properties.api?.titlesForAllData();
+                this._private_properties.actionsByNavKey = new Map();
+                this.navigationMenuItems = this._private_properties.initialNavigationMenuItems = Object.keys(this._private_properties.appNavigation).map((sectionKey) => { 
+                    const section = this._private_properties.appNavigation[sectionKey];
+                    return {
+                        label: section.title,
+                        name: section.key,
+                        expanded: false,
+                        items: Object.keys(section.items).map((itemKey) => {
+                            const item = section.items[itemKey];
+                            const itemTitle = allTitles.get(item.actionName) ?? item.title;
+                            this._private_properties.actionsByNavKey.set(item.key, { 
+                                name: item.actionName, 
+                                title: itemTitle, 
+                                lastAlias: '', 
+                                refreshButtonVisible: item.refreshButtonVisible, 
+                                onlyIf: item.onlyIf 
+                            });
+                            return { label: itemTitle, name: item.key }
+                        })
+                    }
+                });
                 // Load basic information if the user has already accepted the terms
-                this._spinner?.sectionLog(SECTION_04, `Load basic information if the user has already accepted the terms...`);
+                this._private_properties.spinner?.sectionLog(SECTION_04, `Load basic information if the user has already accepted the terms...`);
                 await this._async_loadBasicInformationIfAccepted();
                 this._private_properties.spinner?.sectionEnded(SECTION_04, `Done.`);
             } catch (error) {
@@ -252,6 +318,123 @@ export default class OrgcheckApp extends LightningElement {
             this._private_properties.spinner?.sectionFailed(SECTION_01, error);
         } finally {
             this.isLoading = false;
+        }
+    }
+
+    /**
+     * @description Initialize the navigation menu items with the corresponding keys, titles and action names (to link with the API)
+     */
+    _initApplicationNavigationItems() {
+        const Recipes = __orgcheck__Get()?.Recipes;
+        return {
+            HOME: { 
+                key: 'A', 
+                title: 'Home',
+                items: { 
+                    WELCOME:       { key: '01', refreshButtonVisible: false, actionName: '-welcome-',         title: '👋​ Welcome!' },
+                    CACHE:         { key: '02', refreshButtonVisible: false, actionName: Recipes.CACHE_ITEMS, title: '🧹 Cache' },
+                    HELP:          { key: '03', refreshButtonVisible: false, actionName: Recipes.SCORE_RULES }
+                }
+            },
+            ORG: { 
+                key: 'B', 
+                title: '🗺️ Salesforce Organization',
+                items: {   
+                    GLOBAL_VIEW:   { key: '04', actionName: Recipes.GLOBAL_VIEW },
+                    URL_VIEW:      { key: '05', actionName: Recipes.HARDCODED_URLS_VIEW },
+                }
+            },
+            DATAMODEL: { 
+                key: 'C', 
+                title: '⚽ Data model',
+                items: { 
+                    SOBJ_DESC:     { key: '06', actionName: Recipes.OBJECT, /* get the data only if the object is specified */ onlyIf: (that) => (that.isObjectSpecified)  },
+                    SOBJECTS:      { key: '07', actionName: Recipes.OBJECTS },
+                    CUSTOM_FIELDS: { key: '08', actionName: Recipes.CUSTOM_FIELDS },
+                    LAYOUTS:       { key: '09', actionName: Recipes.PAGE_LAYOUTS },
+                    VRS:           { key: '0A', actionName: Recipes.VALIDATION_RULES },
+                    RTS:           { key: '0B', actionName: Recipes.RECORD_TYPES },
+                    WEB_LINKS:     { key: '0C', actionName: Recipes.WEBLINKS },
+                }
+            },
+            SECURITY: { 
+                key: 'D', 
+                title: '👮 Security and Access',
+                items: { 
+                    USERS:         { key: '0D', actionName: Recipes.INTERNAL_ACTIVE_USERS },
+                    PROFILES:      { key: '0E', actionName: Recipes.PROFILES },
+                    PSETS:         { key: '0F', actionName: Recipes.PERMISSION_SETS },
+                    PSLS:          { key: '10', actionName: Recipes.PERMISSION_SET_LICENSES },
+                    PROFILE_RSTRS: { key: '11', actionName: Recipes.PROFILE_RESTRICTIONS },
+                    PROFILE_PWDS:  { key: '12', actionName: Recipes.PROFILE_PASSWORD_POLICIES },
+                    CRUDS:         { key: '13', actionName: Recipes.OBJECT_PERMISSIONS },
+                    FLSS:          { key: '14', actionName: Recipes.FIELD_PERMISSIONS, /* get the data only if the object is specified */ onlyIf: (that) => (that.isObjectSpecified) },
+                    APP_PERMS:     { key: '15', actionName: Recipes.APP_PERMISSIONS },
+                    BROWSERS:      { key: '16', actionName: Recipes.BROWSERS },
+                }
+            },
+            BOXES: { 
+                key: 'E', 
+                title: '🐇 Boxes',
+                items: { 
+                    ROLES_GRAPH:   { key: '17', actionName: Recipes.USER_ROLES_TREE }, //???
+                    ROLES:         { key: '18', actionName: Recipes.USER_ROLES },
+                    PGS:           { key: '19', actionName: Recipes.PUBLIC_GROUPS },
+                    QUEUES:        { key: '1A', actionName: Recipes.QUEUES },
+                    CHT_GROUPS:    { key: '1B', actionName: Recipes.COLLABORATION_GROUPS },
+                }
+            },
+            AUTOMATION: { 
+                key: 'F', 
+                title: '🤖 Automations',
+                items: { 
+                    FLOWS:         { key: '1C', actionName: Recipes.FLOWS },
+                    PBS:           { key: '1D', actionName: Recipes.PROCESS_BUILDERS },
+                    WORKFLOWS:     { key: '1E', actionName: Recipes.WORKFLOWS },
+                }
+            },
+            SETTING: { 
+                key: 'G', 
+                title: '🎁 Setting',
+                items: {
+                    LABELS:        { key: '1F', actionName: Recipes.CUSTOM_LABELS },
+                    DOCUMENTS:     { key: '20', actionName: Recipes.DOCUMENTS },
+                    EMAIL_TPLS:    { key: '21', actionName: Recipes.EMAIL_TEMPLATES },
+                    ARTICLES:      { key: '22', actionName: Recipes.KNOWLEDGE_ARTICLES },
+                    SRS:           { key: '23', actionName: Recipes.STATIC_RESOURCES },
+                }
+            },
+            VISUAL: { 
+                key: 'H', 
+                title: '🥐 User Interface',
+                items: {
+                    VFPS:          { key: '24', actionName: Recipes.VISUALFORCE_PAGES },
+                    VFCS:          { key: '25', actionName: Recipes.VISUALFORCE_COMPONENTS },
+                    LG_PAGES:      { key: '26', actionName: Recipes.LIGHTNING_PAGES },
+                    AURAS:         { key: '27', actionName: Recipes.LIGHTNING_AURA_COMPONENTS },
+                    LWCS:          { key: '28', actionName: Recipes.LIGHTNING_WEB_COMPONENTS },
+                    HOME_PAGES:    { key: '29', actionName: Recipes.HOME_PAGES },
+                    TABS:          { key: '2A', actionName: Recipes.CUSTOM_TABS },
+                }
+            },
+            CODE: { 
+                key: 'I', 
+                title: '🔥 Programmatic',
+                items: {
+                    CLASSES:       { key: '2B', actionName: Recipes.APEX_CLASSES },
+                    UNCOMPILEDS:   { key: '2C', actionName: Recipes.APEX_UNCOMPILED },
+                    TRIGGERS:      { key: '2D', actionName: Recipes.APEX_TRIGGERS },
+                    TESTS:         { key: '2E', actionName: Recipes.APEX_TESTS },
+                }
+            },
+            ANALYTICS: { 
+                key: 'J', 
+                title: '⛰️ Analytics',
+                items: {
+                    REPORTS:       { key: '2F', actionName: Recipes.REPORTS },
+                    DASHBOARDS:    { key: '30', actionName: Recipes.DASHBOARDS },
+                }
+            }
         }
     }
 
@@ -315,7 +498,7 @@ export default class OrgcheckApp extends LightningElement {
      * @public
      */ 
     get isThereAnyApexUncompiled() {
-        return this.tabs.selectedSubTab === APPLICATION_NAVIGATION.CODE.items.UNCOMPILEDS.key && this.apexUncompiledTableData?.length > 0 || false;
+        return this.tabs.selectedSubTab === this._private_properties.appNavigation.CODE.items.UNCOMPILEDS.key && this.apexUncompiledTableData?.length > 0 || false;
     }
 
     // ----------------------------------------------------------------------------------------------------------------
@@ -336,7 +519,7 @@ export default class OrgcheckApp extends LightningElement {
                 this.isLoading = true;
                 if (this.useOrgCheck.accepted === false) {
                     // force to go to main page if terms not accepted
-                    this.navigationMenuSelected = APPLICATION_NAVIGATION.HOME.items.WELCOME.key;
+                    this.navigationMenuSelected = this._private_properties.appNavigation.HOME.items.WELCOME.key;
                 } else {
                     // else you go where you want!
                     this.navigationMenuSelected = keyPage;
@@ -388,36 +571,41 @@ export default class OrgcheckApp extends LightningElement {
         const action = this._private_properties.actionsByNavKey.get(this.navigationMenuSelected); 
         if (action && this._private_properties.api) {
 
-            // --------------------------------------------------------------------------------
-            // Potentially we need to refresh the data 
-            // --------------------------------------------------------------------------------
-            // if forceRefresh = true, we want to refresh the data from the API 
-            if (forceRefresh === true) {
-                this._private_properties.api.cleanData(action.name, action.name, this.namespace, this.objectType, this.object);
-            }
-            
-            // --------------------------------------------------------------------------------
-            // Alias is useful to check if the data has potentially changed
-            // Each data may have a dependency with global filters, so if one of the filter 
-            // changed and the value has dependency with it, it's more likely that the data 
-            // needs top be updated
-            // --------------------------------------------------------------------------------
-            // get the current alias depending on the dependency with global filter values
-            let alias = this._private_properties.api.cachestampData(action.name, action.name, this.namespace, this.objectType, this.object);
-            if (alias === '-') forceRefresh = true;
+            // by default the refresh button is visible unless it is precised in the navigation definition that it should not be
+            this.showRefreshButton = action.refreshButtonVisible !== false; 
 
-            if (forceRefresh === true || action.lastAlias !== alias) {
-                // update the last alias value with this alias
-                action.lastAlias = alias;
-                // shall we proceed getting the data for this item? It depends if there is a onlyIf condition or not, and if yes if it is validated or not
-                if (action.onlyIf ? action.onlyIf(this) === true : true) {
-                    // If yes we prepare the data
-                    const mixture = await this._private_properties.api.prepareData(action.name, this.namespace, this.objectType, this.object);
-                    // then serve the data
-                    const plate = await this._private_properties.api.serveData(mixture);
-                    // Save the plate
-                    this.data[action.name.replaceAll('-', '')] = plate;
-                }                
+            if (action.name?.startsWith('-') === false) {
+                // --------------------------------------------------------------------------------
+                // Potentially we need to refresh the data 
+                // --------------------------------------------------------------------------------
+                // if forceRefresh = true, we want to refresh the data from the API 
+                if (forceRefresh === true) {
+                    this._private_properties.api.cleanData(action.name, action.name, this.namespace, this.objectType, this.object);
+                }
+                
+                // --------------------------------------------------------------------------------
+                // Alias is useful to check if the data has potentially changed
+                // Each data may have a dependency with global filters, so if one of the filter 
+                // changed and the value has dependency with it, it's more likely that the data 
+                // needs top be updated
+                // --------------------------------------------------------------------------------
+                // get the current alias depending on the dependency with global filter values
+                let alias = this._private_properties.api.cachestampData(action.name, action.name, this.namespace, this.objectType, this.object);
+                if (alias === '-') forceRefresh = true;
+
+                if (forceRefresh === true || action.lastAlias !== alias) {
+                    // update the last alias value with this alias
+                    action.lastAlias = alias;
+                    // shall we proceed getting the data for this item? It depends if there is a onlyIf condition or not, and if yes if it is validated or not
+                    if (action.onlyIf ? action.onlyIf(this) === true : true) {
+                        // If yes we prepare the data
+                        const mixture = await this._private_properties.api.prepareData(action.name, this.namespace, this.objectType, this.object);
+                        // then serve the data
+                        const plate = await this._private_properties.api.serveData(mixture);
+                        // Save the plate
+                        this.data[action.name.replaceAll('-', '')] = plate;
+                    }                
+                }
             }
         }
     }
@@ -443,14 +631,23 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */ 
     async _async_checkTermsAcceptance() {
-        if (await this._private_properties.api?.checkUsageTerms()) {
-            this.useOrgCheck.needConfirmation = false;
-            this.useOrgCheck.accepted = true;
-        } else {
-            this.useOrgCheck.needConfirmation = true;
-            this.useOrgCheck.accepted = false;
+        try {
+            console?.log('Calling checkUsageTerms from API...')
+            if (await this._private_properties.api?.checkUsageTerms()) {
+                console?.log('Got TRUE!')
+                this.useOrgCheck.needConfirmation = false;
+                this.useOrgCheck.accepted = true;
+            } else {
+                console?.log('Got FALSE!')
+                this.useOrgCheck.needConfirmation = true;
+                this.useOrgCheck.accepted = false;
+            }
+            console?.log('Calling wereUsageTermsAcceptedManually from API...')
+            this.useOrgCheck.manuallyAccepted = this._private_properties.api?.wereUsageTermsAcceptedManually();
+            console?.log('Done!')
+        } catch (error) {
+            console?.error('Error occurred while checking terms acceptance:', error);
         }
-        this.useOrgCheck.manuallyAccepted = this._private_properties.api?.wereUsageTermsAcceptedManually();
     }
 
     /**
@@ -489,7 +686,7 @@ export default class OrgcheckApp extends LightningElement {
             await this._async_loadFilters();
 
             // We want to go to the HOME/WELCOME page
-            await this._async_goToPage(APPLICATION_NAVIGATION.HOME.items.WELCOME.key);
+            await this._async_goToPage(this._private_properties.appNavigation.HOME.items.WELCOME.key);
 
         } else {
             console?.log('The use of Org Check in this org was not confirmed. The user has to accept them.');
@@ -509,8 +706,8 @@ export default class OrgcheckApp extends LightningElement {
 
         if (forceRefresh === true) {
             console?.log('Clean data from cache (if any)...');
-            this._private_properties.api?.removeAllObjectsFromCache();
-            this._private_properties.api?.removeAllPackagesFromCache();
+            this._private_properties.api?.clearObjects();
+            this._private_properties.api?.clearPackages();
         }
 
         console?.log('Get packages, types and objects from the org...');
@@ -555,6 +752,7 @@ export default class OrgcheckApp extends LightningElement {
      * @private
      */
     _generateDataForCurrentObjectExport() {
+        /*
         const sheets = [];
         if (this.isObjectSpecified && this.data.object) {
             sheets.push({ 
@@ -590,6 +788,7 @@ export default class OrgcheckApp extends LightningElement {
             sheets.push(__orgcheck__GenerateSheet(this.tableDefinitions.workflowsinobject, this.data.object.workflows, 'Relationships'));            
         }
         return sheets;
+        */
     }
 
     /**
@@ -598,6 +797,7 @@ export default class OrgcheckApp extends LightningElement {
      * @returns {any}
      */ 
     _hardCodedURLsPostProcess(dataFromApi) {
+        /*
         const data = [];
         dataFromApi?.forEach((item) => {
             const navigationItem = NAVIGATION_ITEMS_BY_RECIPE.get(item.recipeName);
@@ -617,7 +817,7 @@ export default class OrgcheckApp extends LightningElement {
                 })
             });
         });
-        return data;
+        return data;*/
     }
 
     /**
@@ -626,6 +826,7 @@ export default class OrgcheckApp extends LightningElement {
      * @returns {any}
      */ 
     _globalViewPostProcess(dataFromApi) {
+        /*
         const data = [];
         const goodAndBadRows = [];
         const rulesRows = [];
@@ -663,6 +864,7 @@ export default class OrgcheckApp extends LightningElement {
         // Set the export structure to 'globalViewItemsExport'
         this.globalViewItemsExport = sheets;
         return data;
+        */
     }
 
     // ----------------------------------------------------------------------------------------------------------------
@@ -707,8 +909,20 @@ export default class OrgcheckApp extends LightningElement {
     async handleNavigationMenuSelect(event) {
         try {
             const item = event?.detail?.name;
-            if (item && item.length === 2) {
+            if (item?.length === 2) {
+                // When item length is 2, it means that it's a sub-item (and not a section)
+                // In this case, we just open the corresponding page
                 await this._async_goToPage(item);
+            } else if (item?.length === 1) {
+                // When item length is 1, it means that it's a section (and not a sub-item)
+                // Toggle the expanded state of the clicked section
+                const indexSection = this.navigationMenuItems.findIndex((section) => section.name === item);
+                if (indexSection !== -1) {
+                    const itemSection = this._private_properties.tree.items[indexSection];
+                    if (itemSection) {
+                        itemSection.expanded = !itemSection.expanded;
+                    }
+                }
             }
         } catch (error) {
             this._showError('handleNavigationMenuSelect', error);
@@ -764,7 +978,7 @@ export default class OrgcheckApp extends LightningElement {
     async handleRemoveAllCache() {
         try {
             // try to call the corresponding API method
-            this._private_properties.api?.removeAllFromCache(); // may throw an error
+            this._private_properties.api?.clearCache(); // may throw an error
             // and reload
             window.location.reload();
         } catch (error) {
@@ -778,7 +992,11 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */
     async handleRefreshCurrentData() {
-        await this._async_updateCurrentData(true);
+        try {
+            await this._async_updateCurrentData(true);
+        } catch (error) {
+            this._showError('handleRefreshCurrentData', error);
+        }
     }
 
     /**
@@ -791,7 +1009,7 @@ export default class OrgcheckApp extends LightningElement {
             // Get attribute data-item-name
             const itemName = event?.target?.getAttribute('data-item-name');
             // Get the data from cache
-            const cacheData = this._private_properties.api?.getCacheData(itemName);
+            const cacheData = this._private_properties.api?.getCacheItem(itemName);
             // Dump the cache in the dialogBox
             let htmlContent = '';
             if (cacheData === null || cacheData === undefined) {
@@ -1057,136 +1275,7 @@ const getRuleById = (id) => {
     return undefined;
 }
 
-const parseApplicationNavigation = () => {
-    const getActionTitleMethod = __orgcheck__Get()?.ApiFactory?.getActionTitle;
-    const actionsByNavKey = new Map();
-    const menuItems = Object.keys(APPLICATION_NAVIGATION).map((sectionKey) => { 
-        const section = APPLICATION_NAVIGATION[sectionKey];
-        return {
-            label: section.title,
-            name: section.key,
-            expanded: false,
-            items: Object.keys(section.items).map((itemKey) => {
-                const item = section.items[itemKey];
-                const title = getActionTitleMethod(item.actionName);
-                actionsByNavKey.set(item.key, { name: item.actionName, title, lastAlias: '', onlyIf: item.onlyIf });
-                return { label: title, name: item.key }
-            })
-        }
-    });
-    return { menuItems, actionsByNavKey };
-}
 
-const APPLICATION_NAVIGATION = {
-    HOME: { 
-        key: 'A', 
-        title: 'Home',
-        items: { 
-            WELCOME:       { key: '01', actionName: '-welcome-' },
-            CACHE:         { key: '02', actionName: '-cache-' },
-            HELP:          { key: '03', actionName: '-score-rules-' }
-        }
-    },
-    ORG: { 
-        key: 'B', 
-        title: '🗺️ Salesforce Organization',
-        items: { 
-            GLOBAL_VIEW:   { key: '04', actionName: 'global-view' },
-            URL_VIEW:      { key: '05', actionName: 'hardcoded-urls' },
-        }
-    },
-    DATAMODEL: { 
-        key: 'C', 
-        title: '⚽ Data model',
-        items: { 
-            SOBJ_DESC:     { key: '06', actionName: 'object', /* get the data only if the object is specified */ onlyIf: (that) => (that.isObjectSpecified)  },
-            SOBJECTS:      { key: '07', actionName: 'objects' },
-            CUSTOM_FIELDS: { key: '08', actionName: 'custom-fields' },
-            LAYOUTS:       { key: '09', actionName: 'page-layouts' },
-            VRS:           { key: '0A', actionName: 'validation-rules' },
-            RTS:           { key: '0B', actionName: 'record-types' },
-            WEB_LINKS:     { key: '0C', actionName: 'web-links' },
-        }
-    },
-    SECURITY: { 
-        key: 'D', 
-        title: '👮 Security and Access',
-        items: { 
-            USERS:         { key: '0D', actionName: 'internal-active-users' },
-            PROFILES:      { key: '0E', actionName: 'profiles' },
-            PSETS:         { key: '0F', actionName: 'permission-sets' },
-            PSLS:          { key: '10', actionName: 'permission-set-licenses' },
-            PROFILE_RSTRS: { key: '11', actionName: 'profile-restrictions' },
-            PROFILE_PWDS:  { key: '12', actionName: 'profile-password-policies' },
-            CRUDS:         { key: '13', actionName: 'object-permissions' },
-            FLSS:          { key: '14', actionName: 'field-permissions', /* get the data only if the object is specified */ onlyIf: (that) => (that.isObjectSpecified) },
-            APP_PERMS:     { key: '15', actionName: 'app-permissions' },
-            BROWSERS:      { key: '16', actionName: 'browsers' },
-        }
-    },
-    BOXES: { 
-        key: 'E', 
-        title: '🐇 Boxes',
-        items: { 
-            ROLES_GRAPH:   { key: '17', actionName: 'user-roles-tree' },
-            ROLES:         { key: '18', actionName: 'user-roles' },
-            PGS:           { key: '19', actionName: 'public-groups' },
-            QUEUES:        { key: '1A', actionName: 'queues' },
-            CHT_GROUPS:    { key: '1B', actionName: 'collaboration-groups' },
-        }
-    },
-    AUTOMATION: { 
-        key: 'F', 
-        title: '🤖 Automations',
-        items: { 
-            FLOWS:         { key: '1C', actionName: 'flows' },
-            PBS:           { key: '1D', actionName: 'process-builders' },
-            WORKFLOWS:     { key: '1E', actionName: 'workflows' },
-        }
-    },
-    SETTING: { 
-        key: 'G', 
-        title: '🎁 Setting',
-        items: {
-            LABELS:        { key: '1F', actionName: 'custom-labels' },
-            DOCUMENTS:     { key: '20', actionName: 'documents' },
-            EMAIL_TPLS:    { key: '21', actionName: 'email-templates' },
-            ARTICLES:      { key: '22', actionName: 'knowledge-articles' },
-            SRS:           { key: '23', actionName: 'static-resources' },
-        }
-    },
-    VISUAL: { 
-        key: 'H', 
-        title: '🥐 User Interface',
-        items: {
-            VFPS:          { key: '24', actionName: 'visualforce-pages' },
-            VFCS:          { key: '25', actionName: 'visualforce-components' },
-            LG_PAGES:      { key: '26', actionName: 'lightning-pages' },
-            AURAS:         { key: '27', actionName: 'lightning-aura-components' },
-            LWCS:          { key: '28', actionName: 'lightning-web-components' },
-            HOME_PAGES:    { key: '29', actionName: 'homepages' },
-            TABS:          { key: '2A', actionName: 'custom-tabs' },
-        }
-    },
-    CODE: { 
-        key: 'I', 
-        title: '🔥 Programmatic',
-        items: {
-            CLASSES:       { key: '2B', actionName: 'apex-classes' },
-            UNCOMPILEDS:   { key: '2C', actionName: 'apex-uncompiled' },
-            TRIGGERS:      { key: '2D', actionName: 'apex-triggers' },
-            TESTS:         { key: '2E', actionName: 'apex-tests' },
-        }
-    },
-    ANALYTICS: { 
-        key: 'J', 
-        title: '⛰️ Analytics',
-        items: {
-            REPORTS:       { key: '2F', actionName: 'reports' },
-            DASHBOARDS:    { key: '30', actionName: 'dashboards' },
-        }
-    }
-}
 
 const NAVIGATION_ITEMS_BY_RECIPE = new Map();
 

@@ -2,6 +2,7 @@
  * @description Data aliases
  */
 export enum DataAliases {
+    CacheItem = 'Cache Item',
     ScoreRule = 'Score Rule',
     SfdcApexTestMethodResult = 'Apex Test Method', 
     SfdcApexClass = 'Apex Class', 
