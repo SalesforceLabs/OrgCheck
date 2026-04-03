@@ -138,7 +138,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @type {number}
      */
     get nbAllRows() {
-        return this._private_properties.table?.nbAllRows ?? 0;
+        return this._private_properties.table?.length ?? 0;
     }
 
     /**
@@ -146,7 +146,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @type {number}
      */
     get nbFilteredRows() {
-        return this._private_properties.table?.nbFilteredRows ?? 0;
+        return this._private_properties.table?.length ?? 0;
     }
 
     /**
@@ -243,7 +243,9 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     _private_properties = {
         table: undefined,
         allRows: undefined,
-        filteringSearchInput: undefined
+        filteringSearchInput: undefined,
+        sortingIndex: undefined,
+        sortingOrder: undefined,
     }
 
     /**
@@ -262,7 +264,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                 index: (i + 1),
                 label: c.label,
                 isIterative: c.type === 'texts' || c.type === 'ids' || c.type === 'objects',
-                cssClass: (this._private_properties.sortingIndex === i ? `sorted ${this._private_properties.sortingOrder === 'asc' ? 'sorted-asc' : 'sorted-desc'} ` : '') + 
+                cssClass: (table?.orderIndex === i ? `sorted ${table?.orderSort === 'asc' ? 'sorted-asc' : 'sorted-desc'} ` : '') + 
                           (this.isStickyHeaders ? 'sticky ': '') + 
                           // eslint-disable-next-line dot-notation
                           (c['orientation'] === 'vertical' ? 'vertical ' : ' ')
@@ -299,6 +301,8 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
 
         this._private_properties.allRows = allRows;
         this._private_properties.table = table ? { ...table, rows: allRows } : undefined;
+        this._private_properties.sortingIndex = table?.orderIndex;
+        this._private_properties.sortingOrder = table?.orderSort;
 
         // Sort, filter and set the visible rows
         this._sortAllRows();
