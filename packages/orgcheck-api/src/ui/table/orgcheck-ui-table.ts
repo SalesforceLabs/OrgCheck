@@ -45,6 +45,13 @@ export interface Table {
     nbAllRows: number;
 
     /**
+     * @description Indicates if the data has at least one row (filtered or not)
+     * @type {boolean}
+     * @public
+     */
+    hasData: boolean;
+
+    /**
      * @description Number of rows after filtering (if no filter is applied, then nbFilteredRows should be equal to nbAllRows)
      * @type {number}
      * @public

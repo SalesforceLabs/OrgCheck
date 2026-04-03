@@ -39,6 +39,7 @@ export interface SfdcObjectAsTable {
     isSearchable: boolean;
     internalSharingModel: string;
     externalSharingModel: string;
+    type: string;
     standardFields: Table,
     customFields: Table,
     apexTriggers: Table,
@@ -189,6 +190,7 @@ export class RecipeObject implements ServedRecipe<SfdcObject, SfdcObjectAsTable>
             label: mixture.label,
             labelPlural: mixture.labelPlural,
             description : mixture.description,
+            type: mixture.typeRef?.label ?? '',
             keyPrefix: mixture.keyPrefix,
             recordCount: mixture.recordCount,
             isCustom: mixture.isCustom,

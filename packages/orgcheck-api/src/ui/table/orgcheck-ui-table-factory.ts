@@ -34,7 +34,8 @@ export class TableFactory {
             nbFilteredRows: 0,
             nbBadRows: nbBadRows,
             isFilterOn: false,
-            isFilteredDataEmpty: false
+            isFilteredDataEmpty: false,
+            hasData: rows?.length > 0
         };
     }
 
@@ -47,7 +48,7 @@ export class TableFactory {
      * @public
      */
     public static sort(table: Table, columnIndex: number, order: SortOrder): void {
-        const column = table.definition.columns[columnIndex];
+        const column = table?.definition?.columns[columnIndex];
         if (! column) return;
         const iOrder = order === SortOrder.ASC ? 1 : -1;
         const isIterative = column.type == ColumnType.OBJS || column.type == ColumnType.TXTS || column.type == ColumnType.URLS;
@@ -82,28 +83,30 @@ export class TableFactory {
      * @public
      */
     public static filter(table: Table, searchInput: string): void {
-        if (searchInput?.length > 2) {
-            const s = searchInput.toUpperCase();
-            let index = 0;                   
-            table.rows.forEach((row) => {
-                if (ARRAY_MATCHER(row.cells, s) === true) {
+        if (table) {
+            if (searchInput?.length > 2) {
+                const s = searchInput.toUpperCase();
+                let index = 0;                   
+                table.rows?.forEach((row) => {
+                    if (ARRAY_MATCHER(row.cells, s) === true) {
+                        row.isVisible = true;
+                        row.index = ++index;
+                    } else {
+                        row.isVisible = false;
+                    }
+                });
+                table.isFilterOn = true;
+                table.nbFilteredRows = index;
+                table.isFilteredDataEmpty = index === 0;
+            } else {
+                table.rows?.forEach((row, index) => { 
                     row.isVisible = true;
-                    row.index = ++index;
-                } else {
-                    row.isVisible = false;
-                }
-            });
-            table.isFilterOn = true;
-            table.nbFilteredRows = index;
-            table.isFilteredDataEmpty = index === 0;
-        } else {
-            table.rows.forEach((row, index) => { 
-                row.isVisible = true;
-                row.index = index+1;
-            });
-            table.isFilterOn = false;
-            table.nbFilteredRows = 0;
-            table.isFilteredDataEmpty = false;
+                    row.index = index+1;
+                });
+                table.isFilterOn = false;
+                table.nbFilteredRows = 0;
+                table.isFilteredDataEmpty = false;
+            }
         }
     }
 
@@ -115,10 +118,10 @@ export class TableFactory {
      * @public
      */
     public static export(table: Table): ExportedTable {
-        const exportedRows: ExportedTable = { label: table.name, columns: [], rows: [] };
+        const exportedRows: ExportedTable = { label: table?.name ?? '', columns: [], rows: [] };
 
         // Parsing columns
-        table.definition.columns.forEach((column) => {
+        table?.definition?.columns?.forEach((column) => {
             switch(column.type) {
                 //---
                 // In case we have a score column, then we want two things (instead of only one)
@@ -152,7 +155,7 @@ export class TableFactory {
         });
 
         // Parsing rows and cells
-        table.rows.forEach((row) => {
+        table?.rows?.forEach((row) => {
             // Add the row in the first table
             const exportRow: string[] = [];
             row.cells?.forEach((cell) => {
