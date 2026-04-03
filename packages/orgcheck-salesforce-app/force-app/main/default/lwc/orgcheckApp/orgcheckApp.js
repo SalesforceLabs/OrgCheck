@@ -1184,6 +1184,7 @@ export default class OrgcheckApp extends LightningElement {
      */
     globalViewItemsExport;
 }
+
 const __orgcheck__Get = () => {
     return (typeof window !== 'undefined' ? window?.orgcheck : globalThis?.orgcheck ?? null)
 }

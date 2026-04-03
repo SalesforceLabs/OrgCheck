@@ -4,6 +4,8 @@ import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
 import { SortOrder } from 'src/ui/table/orgcheck-ui-table-sortorder';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { RecipeAliases } from 'src/api/core/recipe/orgcheck-api-recipes-aliases';
+import { SecretSauce } from 'src/api/core/orgcheck-api-secretsauce';
+import { ScoreRule } from 'src/api/data/orgcheck-api-data-scorerule';
 
 export type { ApiIntf, ApiSetup } from 'src/api/orgcheck-api';
 export type { LoggerSetup } from 'src/api/core/setup/orgcheck-api-setup-logger';
@@ -58,6 +60,12 @@ export type { SfdcWorkflow } from 'src/api/data/orgcheck-api-data-workflow';
 export class ApiFactory {
     public static create(setup: ApiSetup): ApiIntf {
         return new API(setup);
+    }
+}
+
+export class Rules {
+    public static get(id: number): ScoreRule | undefined {
+        return SecretSauce.GetScoreRule(id);
     }
 }
 
