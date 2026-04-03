@@ -1,9 +1,9 @@
-import { ApexTriggersInObjectTableDefinition, ApexTriggersTableDefinition } from "src/ui/table/definitions/orgcheck-ui-tabledef-apextriggers";
-import { CustomFieldsTableDefinition, CustomFieldsInObjectTableDefinition } from "src/ui/table/definitions/orgcheck-ui-tabledef-customfields";
-import { FlexiPagesTableDefinition, FlexiPagesInObjectTableDefinition } from "src/ui/table/definitions/orgcheck-ui-tabledef-flexipages";
-import { RecordTypesTableDefinition, RecordTypesInObjectTableDefinition } from "src/ui/table/definitions/orgcheck-ui-tabledef-recordtypes";
-import { ValidationRulesTableDefinition, ValidationRulesInObjectTableDefinition } from "src/ui/table/definitions/orgcheck-ui-tabledef-validationrules";
-import { WebLinksTableDefinition, WebLinksInObjectTableDefinition } from "src/ui/table/definitions/orgcheck-ui-tabledef-weblinks";
+import { ApexTriggersInObjectTableDefinition, ApexTriggersTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-apextriggers';
+import { CustomFieldsTableDefinition, CustomFieldsInObjectTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-customfields';
+import { FlexiPagesTableDefinition, FlexiPagesInObjectTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-flexipages';
+import { RecordTypesTableDefinition, RecordTypesInObjectTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-recordtypes';
+import { ValidationRulesTableDefinition, ValidationRulesInObjectTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-validationrules';
+import { WebLinksTableDefinition, WebLinksInObjectTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-weblinks';
 
 describe('tests.ui.unit.TableDefinitions', () => {
 

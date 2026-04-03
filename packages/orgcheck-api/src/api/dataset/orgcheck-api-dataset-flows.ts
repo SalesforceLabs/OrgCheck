@@ -1,12 +1,12 @@
-import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
-import { DataFactoryIntf } from 'src/api/core/orgcheck-api-datafactory';
-import { Dataset } from 'src/api/core/orgcheck-api-dataset';
-import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
+import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
+import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
+import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
-import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
-import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
+import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
+import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcFlow, SfdcFlowVersion } from 'src/api/data/orgcheck-api-data-flow';
-import { LFSScanner } from 'src/api/scanner/orgcheck-api-lfs-scanner';
+import { LFSScanner } from 'src/api/core/salesforce/orgcheck-api-lfs-scanner';
 
 // Limited list of known types of Flow ProcessType
 // see all the list at https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_visual_workflow.htm
@@ -56,8 +56,8 @@ export class DatasetFlows implements Dataset {
         
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${flowDefRecords?.length} flow versions...`);
-        /** @type {Array<string>} */ 
-        const flowDependenciesIds: Array<string> = [];
+        /** @type {string[]} */ 
+        const flowDependenciesIds: string[] = [];
         await Processor.forEach(flowDefRecords, async (/** @type {any} */ record: any) => {
             // Add the ID15 of the most interesting flow version
             flowDependenciesIds.push(sfdcManager.caseSafeId(record.ActiveVersionId ?? record.LatestVersionId));
@@ -67,8 +67,8 @@ export class DatasetFlows implements Dataset {
         const flowDefinitionsDependencies = await sfdcManager.dependenciesQuery(flowDependenciesIds, logger);
         
         // List of active flows that we need to get information later (with Metadata API)
-        /** @type {Array<string>} */ 
-        const activeFlowIds: Array<string> = [];
+        /** @type {string[]} */ 
+        const activeFlowIds: string[] = [];
 
         // Create the map
         logger?.log(`Parsing ${flowDefRecords?.length} flow definitions...`);

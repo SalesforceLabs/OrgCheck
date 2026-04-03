@@ -1,5 +1,5 @@
-import { DataWithScore } from 'src/api/core/orgcheck-api-data';
-import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
+import { DataWithScore } from 'src/api/core/data/orgcheck-api-data';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 
 export interface SfdcPermissionSet extends DataWithScore {
 
@@ -138,29 +138,29 @@ export interface SfdcPermissionSet extends DataWithScore {
 
     /**
      * @description List of permission set Salesforce Ids associated with the current group (if it's a group!)
-     * @type {Array<string>}
+     * @type {string[]}
      * @public
      */
-    permissionSetIds: Array<string>;
+    permissionSetIds: string[];
 
     /**
      * @description Corresponding references of the permission sets associated with the current group (if it's a group!)
-     * @type {Array<SfdcPermissionSet>}
+     * @type {SfdcPermissionSet[]}
      * @public
      */
-    permissionSetRefs: Array<SfdcPermissionSet>;
+    permissionSetRefs: SfdcPermissionSet[];
 
     /**
      * @description List of permission set group Salesforce Ids that include the current permission set (if it's NOT a group!)
-     * @type {Array<string>}
+     * @type {string[]}
      * @public
      */
-    permissionSetGroupIds: Array<string>;
+    permissionSetGroupIds: string[];
 
     /**
      * @description Corresponding references of the permission set groups that include the current permission set (if it's NOT a group!)
-     * @type {Array<SfdcPermissionSet>}
+     * @type {SfdcPermissionSet[]}
      * @public
      */
-    permissionSetGroupRefs: Array<SfdcPermissionSet>;
+    permissionSetGroupRefs: SfdcPermissionSet[];
 }

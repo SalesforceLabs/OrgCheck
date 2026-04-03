@@ -1,5 +1,5 @@
-import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
-import { DataWithScore, DataWithoutScore } from 'src/api/core/orgcheck-api-data';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
+import { DataWithScore, DataWithoutScore } from 'src/api/core/data/orgcheck-api-data';
 import { SfdcProfile } from 'src/api/data/orgcheck-api-data-profile';
 
 export interface SfdcProfileRestrictions extends DataWithScore {
@@ -27,17 +27,17 @@ export interface SfdcProfileRestrictions extends DataWithScore {
 
     /**
      * @description IP Range Restriction list for this profile
-     * @type {Array<SfdcProfileIpRangeRestriction>}
+     * @type {SfdcProfileIpRangeRestriction[]}
      * @public
      */
-    ipRanges: Array<SfdcProfileIpRangeRestriction>;
+    ipRanges: SfdcProfileIpRangeRestriction[];
 
     /**
      * @description Login Hour Restriction list for this profile
-     * @type {Array<SfdcProfileLoginHourRestriction>}
+     * @type {SfdcProfileLoginHourRestriction[]}
      * @public
      */
-    loginHours: Array<SfdcProfileLoginHourRestriction>;
+    loginHours: SfdcProfileLoginHourRestriction[];
 }
 
 export interface SfdcProfileIpRangeRestriction extends DataWithoutScore {

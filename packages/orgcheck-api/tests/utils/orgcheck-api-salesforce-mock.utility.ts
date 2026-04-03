@@ -1,6 +1,6 @@
-import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
-import { SalesforceUsageInformation } from 'src/api/core/orgcheck-api-salesforce-watchdog';
-import { SalesforceManagerIntf, SalesforceMetadataRequest, SalesforceQueryRequest } from 'src/api/core/orgcheck-api-salesforcemanager';
+import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
+import { SalesforceUsageInformation } from 'src/api/core/salesforce/orgcheck-api-salesforce-watchdog';
+import { SalesforceManagerIntf, SalesforceMetadataRequest, SalesforceQueryRequest } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 
 export class SalesforceManagerMock_DoingNothing implements SalesforceManagerIntf {
     get apiVersion() { return 53; }
@@ -10,16 +10,16 @@ export class SalesforceManagerMock_DoingNothing implements SalesforceManagerIntf
     getObjectType(_objectName: any, isCustomSetting: any) { return isCustomSetting ? 'CustomSetting' : 'StandardObject'; }
     get dailyApiRequestLimitInformation(): SalesforceUsageInformation { return { currentUsageRatio: 0, currentUsagePercentage: "0%", 
       yellowThresholdPercentage: 0, redThresholdPercentage: 0, isGreenZone: true, isYellowZone: false,isRedZone: false }; }
-    async soqlQuery(_queries: Array<SalesforceQueryRequest | any>, _logger: SimpleLoggerIntf): Promise<Array<Array<any>>> { return [[]]; }
-    async soslQuery(_queries: Array<SalesforceQueryRequest | any>, _logger: SimpleLoggerIntf): Promise<Array<Array<any>>> { return [[]]; }
-    async dependenciesQuery(_ids: Array<string>, _logger: SimpleLoggerIntf): Promise<{ records: Array<any>; errors: Array<string>; }> { return { records: [], errors: [] }; }
-    async readMetadata(_metadatas: Array<SalesforceMetadataRequest>, _logger: SimpleLoggerIntf): Promise<Map<string, Array<any>>> { return new Map(); }
-    async readMetadataAtScale(_type: string, _ids: any[], _byPasses: string[], _logger: SimpleLoggerIntf): Promise<Array<any>> { return []; }
-    async describeGlobal(_logger: SimpleLoggerIntf): Promise<Array<any>> { return []; }
+    async soqlQuery(_queries: SalesforceQueryRequest | any[], _logger: SimpleLoggerIntf): Promise<Array<Array<any>>> { return [[]]; }
+    async soslQuery(_queries: SalesforceQueryRequest | any[], _logger: SimpleLoggerIntf): Promise<Array<Array<any>>> { return [[]]; }
+    async dependenciesQuery(_ids: string[], _logger: SimpleLoggerIntf): Promise<{ records: Array<any>; errors: Array<string>; }> { return { records: [], errors: [] }; }
+    async readMetadata(_metadatas: SalesforceMetadataRequest[], _logger: SimpleLoggerIntf): Promise<Map<string, Array<any>>> { return new Map(); }
+    async readMetadataAtScale(_type: string, _ids: any[], _byPasses: string[], _logger: SimpleLoggerIntf): Promise<any[]> { return []; }
+    async describeGlobal(_logger: SimpleLoggerIntf): Promise<any[]> { return []; }
     async describe(_sobjectDevName: string, _logger: SimpleLoggerIntf): Promise<any> { return {}; }
     async recordCount(_sobjectDevName: string, _logger: SimpleLoggerIntf): Promise<number> { return 0; }
     async runAllTests(_logger: SimpleLoggerIntf): Promise<string> { return ''; }
-    async compileClasses(_apexClassIds: Array<string>, _logger: SimpleLoggerIntf): Promise<Map<string, { isSuccess: boolean; reasons?: Array<string>; }>> { return new Map(); }
+    async compileClasses(_apexClassIds: string[], _logger: SimpleLoggerIntf): Promise<Map<string, { isSuccess: boolean; reasons?: Array<string>; }>> { return new Map(); }
 }
 
 export class SalesforceManagerMock_SoqlQuery extends SalesforceManagerMock_DoingNothing {
@@ -27,7 +27,7 @@ export class SalesforceManagerMock_SoqlQuery extends SalesforceManagerMock_Doing
   #soqlQueryResponses: Map<string, any> = new Map();
   #describeGlobal: any[] = [];
 
-  addSoqlQueryResponse(/** @type {string} */ queryMatch: string, /** @type {Array<any>} */ response: any[]) {
+  addSoqlQueryResponse(/** @type {string} */ queryMatch: string, /** @type {any[]} */ response: any[]) {
     this.#soqlQueryResponses.set(queryMatch, response);
   }
 

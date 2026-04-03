@@ -1,8 +1,9 @@
-import { DataCollectionStatisticsIntf } from 'src/api/core/orgcheck-api-data-datacollectionstats';
-import { Data } from 'src/api/core/orgcheck-api-data';
-import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
+import { DataCollectionStatisticsIntf } from 'src/api/core/data/orgcheck-api-data-datacollectionstats';
+import { Data } from 'src/api/core/data/orgcheck-api-data';
+import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { ScoreRule } from 'src/api/data/orgcheck-api-data-scorerule';
-import { RecipeAliases } from 'src/api/core/orgcheck-api-recipes-aliases';
+import { RecipeAliases } from 'src/api/core/recipe/orgcheck-api-recipes-aliases';
+import { Table } from 'src/ui/table/orgcheck-ui-table';
 
 /**
  * @description The super class for recipe collections that are defined only by executing a set of other recipes
@@ -36,10 +37,18 @@ export interface RecipeCollection {
      * @description Filter the data items by score rules
      * @param {SimpleLoggerIntf} logger - Logger
      * @param {Map<string, any>} [parameters] - List of optional argument to pass
-     * @returns {Array<ScoreRule>} List of score rule to filter by. Empty array means no filtering
+     * @returns {ScoreRule[]} List of score rule to filter by. Empty array means no filtering
      * @public
      */ 
-    filterByScoreRules(logger: SimpleLoggerIntf, parameters?: Map<string, any>): Array<ScoreRule>;
+    filterByScoreRules(logger: SimpleLoggerIntf, parameters?: Map<string, any>): ScoreRule[];
+
+    /**
+     * @description Serve the mixture from a designated recipe collection to a table
+     * @param {DataCollectionStatisticsIntf[]} mixture - The mixture
+     * @returns {Table[]} The tables
+     * @public
+     */
+    serveToTable(mixture: DataCollectionStatisticsIntf[]): Table[];
 }
 
 export class DataCollectionStatisticsOK implements DataCollectionStatisticsIntf {
@@ -114,24 +123,24 @@ export class DataCollectionStatisticsWithError implements DataCollectionStatisti
 
     /**
      * @description Number of bad records by rule
-     * @type {Array<{ruleId: number, ruleName: string, count: number}>}
+     * @type {{ruleId: number, ruleName: string, count: number}[]}
      * @default []
      * @public
      */
-    public readonly countBadByRule: Array<{ ruleId: number; ruleName: string; count: number; }> = [];
+    public readonly countBadByRule: { ruleId: number; ruleName: string; count: number; }[] = [];
 
     /**
      * @description List of distinct values automatically computed based on the rule description
-     * @type {Array<any>}
+     * @type {any[]}
      * @public
      */
-    distinctBadValues: Array<any> = [];
+    distinctBadValues: any[] = [];
 
     /**
      * @description List of all data items that are part of this collection
-     * @type {Array<Data>}
+     * @type {Data[]}
      * @default []
      * @public
      */ 
-    public readonly data: Array<Data> = [];
+    public readonly data: Data[] = [];
 }

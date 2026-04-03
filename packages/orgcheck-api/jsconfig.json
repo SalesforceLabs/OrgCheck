@@ -12,7 +12,7 @@
     "include": [
         "src/**/*.js",
         "tests/**/*.js"
-, "src/ui/tabledefinitions/tableDefinitions.ts"    ],
+, "src/ui/tabledefinitions/tableDefinitions.ts", "tests/unit/orgcheck-api.test.ts"    ],
     "exclude": [
         "node_modules"
     ]

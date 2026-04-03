@@ -151,7 +151,7 @@
                             <div data-key="02" class="slds-hide slds-var-p-horizontal_small">
                                 List of cached metadata from the Salesforce org you want to check into your Browser persistant cache.<br />
                                 <lightning-layout multiple-rows>
-                                    <template lwc:if={data.cache} for:each={data.cache} for:item="item">
+                                    <template lwc:if={data.cacheitems} for:each={data.cacheitems} for:item="item">
                                         <lightning-layout-item size="2" key={item.name} padding="around-small">
                                             <div class="viewCacheItem">
                                                 <lightning-card>
@@ -792,7 +792,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table={data.collaborationgroups}
+                                    table={data.chatterroups}
                                     show-export-button  
                                     export-basename="ChatterGroups"></c-orgcheck-extended-datatable>
                             </div>

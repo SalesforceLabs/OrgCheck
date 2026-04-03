@@ -1,16 +1,16 @@
-import { Data, DataWithScore } from 'src/api/core/orgcheck-api-data';
-import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
-import { DatasetManagerIntf } from 'src/api/core/orgcheck-api-datasetmanager';
-import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
-import { LoggerIntf } from 'src/api/core/orgcheck-api-logger';
+import { Data, DataWithScore } from 'src/api/core/data/orgcheck-api-data';
+import { DataMatrixIntf } from 'src/api/core/data/orgcheck-api-data-matrix';
+import { DatasetManagerIntf } from 'src/api/core/dataset/orgcheck-api-datasetmanager';
+import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
+import { LoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
-import { RecipeAliases } from 'src/api/core/orgcheck-api-recipes-aliases';
+import { RecipeAliases } from 'src/api/core/recipe/orgcheck-api-recipes-aliases';
 import { RecipeApexClasses, RecipeApexTests, RecipeApexUncompiled } from 'src/api/recipe/orgcheck-api-recipe-apexclasses';
 import { RecipeApexTriggers } from 'src/api/recipe/orgcheck-api-recipe-apextriggers';
 import { RecipeAppPermissions } from 'src/api/recipe/orgcheck-api-recipe-apppermissions';
 import { RecipeBrowsers } from 'src/api/recipe/orgcheck-api-recipe-browsers';
 import { RecipeCollaborationGroups } from 'src/api/recipe/orgcheck-api-recipe-collaborationgroups';
-import { DataCollectionStatisticsOK, DataCollectionStatisticsWithError, RecipeCollection } from 'src/api/core/orgcheck-api-recipecollection';
+import { DataCollectionStatisticsOK, DataCollectionStatisticsWithError, RecipeCollection } from 'src/api/core/recipe/orgcheck-api-recipecollection';
 import { RecipeCurrentUserPermissions } from 'src/api/recipe/orgcheck-api-recipe-currentuserpermissions';
 import { RecipeCustomFields } from 'src/api/recipe/orgcheck-api-recipe-customfields';
 import { RecipeCustomLabels } from 'src/api/recipe/orgcheck-api-recipe-customlabels';
@@ -28,7 +28,7 @@ import { RecipeKnowledgeArticles } from 'src/api/recipe/orgcheck-api-recipe-know
 import { RecipeLightningAuraComponents } from 'src/api/recipe/orgcheck-api-recipe-lightningauracomponents';
 import { RecipeLightningPages } from 'src/api/recipe/orgcheck-api-recipe-lightningpages';
 import { RecipeLightningWebComponents } from 'src/api/recipe/orgcheck-api-recipe-lightningwebcomponents';
-import { RecipeManagerError, RecipeManagerIntf } from 'src/api/core/orgcheck-api-recipemanager';
+import { RecipeManagerError, RecipeManagerIntf } from 'src/api/core/recipe/orgcheck-api-recipemanager';
 import { RecipeObject, SfdcObjectAsTable } from 'src/api/recipe/orgcheck-api-recipe-object';
 import { RecipeObjectPermissions } from 'src/api/recipe/orgcheck-api-recipe-objectpermissions';
 import { RecipeObjects } from 'src/api/recipe/orgcheck-api-recipe-objects';
@@ -52,9 +52,9 @@ import { RecipeVisualForceComponents } from 'src/api/recipe/orgcheck-api-recipe-
 import { RecipeVisualForcePages } from 'src/api/recipe/orgcheck-api-recipe-visualforcepages';
 import { RecipeWebLinks } from 'src/api/recipe/orgcheck-api-recipe-weblinks';
 import { RecipeWorkflows } from 'src/api/recipe/orgcheck-api-recipe-workflows';
-import { DataCollectionStatisticsIntf } from 'src/api/core/orgcheck-api-data-datacollectionstats';
+import { DataCollectionStatisticsIntf } from 'src/api/core/data/orgcheck-api-data-datacollectionstats';
 import { RecipeScoreRules } from 'src/api/recipe/orgcheck-api-recipe-scorerules';
-import { Recipe, ServedRecipe } from 'src/api/core/orgcheck-api-recipe';
+import { Recipe, ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 
 /**
@@ -183,12 +183,12 @@ export class RecipeManager implements RecipeManagerIntf {
      * @description Serve the mixture from a designated recipe to a table
      * @param {RecipeAliases} alias -String representation of a recipe
      * @param {Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]} [mixture] - The mixture
-     * @returns {Promise<Table | SfdcObjectAsTable>} Returns the mixture as a table
+     * @returns {Promise<Table | SfdcObjectAsTable | Table[]>} Returns the mixture as a table
      * @throws {RecipeManagerError}
      * @async
      * @public
      */
-    public async serveToTable(alias: RecipeAliases, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<Table | SfdcObjectAsTable> {
+    public async serveToTable(alias: RecipeAliases, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<Table | SfdcObjectAsTable | Table[]> {
         let recipe = this._recipes.get(alias) ?? this._recipeCollections.get(alias);
         if (recipe) {
             try {
@@ -254,16 +254,16 @@ export class RecipeManager implements RecipeManagerIntf {
             const recipe = this._recipes.get(alias);
             let cachestamp = '';
             recipe?.mixDependencies().forEach((p) => {
-                cachestamp += `${p}:${JSON.stringify(parameters.get(p)) ?? '-'},`;
+                cachestamp += `${p}:${JSON.stringify(parameters.get(p)) ?? ''},`;
             });
-            return cachestamp;
+            return `{${cachestamp}}`;
         } else if (this._recipeCollections.has(alias)) {
             const recipeCollection = this._recipeCollections.get(alias);
             let cachestamp = '';
             recipeCollection?.ingredientsDependencies().forEach((p) => {
-                cachestamp += `${p}:${JSON.stringify(parameters.get(p)) ?? '-'},`;
+                cachestamp += `${p}:${JSON.stringify(parameters.get(p)) ?? ''},`;
             });
-            return cachestamp;
+            return `{${cachestamp}}`;
         } else {
             throw new RecipeManagerError(alias, `The given alias (${alias}) does not correspond to a registered recipe.`);
         }
@@ -315,7 +315,7 @@ export class RecipeManager implements RecipeManagerIntf {
         // STEP 3. Transform
         // -------------------
         this._logger.log(section, 'This recipe will now transform all this information...');
-        let finalData: Array<Data> | DataMatrixIntf | Data | Map<string, any>;
+        let finalData: Data[] | DataMatrixIntf | Data | Map<string, any>;
         try {
             finalData = await recipe.mix(data, this._logger.toSimpleLogger(section), parameters);
         } catch(error) {
@@ -346,8 +346,8 @@ export class RecipeManager implements RecipeManagerIntf {
         // STEP 1. Extract recipes in the collection
         // -------------------
         this._logger.log(section, 'How many recipes this recipe collection has?');
-        /** @type {Array<string>}} */
-        let recipes: Array<string>;
+        /** @type {string[]}} */
+        let recipes: string[];
         try {
             recipes = recipeCollection.ingredients(this._logger.toSimpleLogger(section), parameters);
         } catch(error) {
@@ -358,7 +358,7 @@ export class RecipeManager implements RecipeManagerIntf {
         // -------------------
         // STEP 2. Run the recipes in the collection
         // -------------------
-        const data: Map<RecipeAliases, Array<Data>> = new Map();
+        const data: Map<RecipeAliases, Data[]> = new Map();
         const recipesInError: Map<RecipeAliases, Error> = new Map();
         try {
             this._logger.optimisticByPass = true;
@@ -392,10 +392,10 @@ export class RecipeManager implements RecipeManagerIntf {
         const listRulesByIds = new Map(listRules.map(rule => [ rule.id, rule ]));
         const listRuleIds = Array.from(listRulesByIds.keys());
         const isRuleFilterOn = listRules?.length > 0 || false;
-        const finalData: Array<DataCollectionStatisticsIntf> = [];
+        const finalData: DataCollectionStatisticsIntf[] = [];
         try {
             // Add the successful recipes and their stats in the final list
-            await Processor.forEach(data, async ( records: Array<DataWithScore>, recipe: string) => {
+            await Processor.forEach(data, async ( records: DataWithScore[], recipe: RecipeAliases) => {
                 // We get only the bad records (with score > 0)
                 // Potentially we can be asked to filter records on certain rules only (see `listRules`)
                 //   In this scenario, bad records are filtered and their badReasonIds as well

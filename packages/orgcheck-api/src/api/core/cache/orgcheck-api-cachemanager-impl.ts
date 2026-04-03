@@ -1,7 +1,9 @@
 import { CacheItem } from 'src/api/data/orgcheck-api-data-cacheitem';
-import { DataCacheManagerIntf, MetadataItemInCache, DataItemInCache } from 'src/api/core/orgcheck-api-cachemanager';
-import { CompressorIntf } from 'src/api/core/orgcheck-api-compressor';
-import { StorageIntf } from 'src/api/core/orgcheck-api-storage';
+import { DataCacheManagerIntf, MetadataItemInCache, DataItemInCache } from 'src/api/core/cache/orgcheck-api-cachemanager';
+import { CompressorIntf } from 'src/api/core/cache/orgcheck-api-compressor';
+import { StorageIntf } from 'src/api/core/cache/orgcheck-api-storage';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
+import { LoggerUtil } from '../logger/orgcheck-api-loggerutil';
 
 enum TYPE {
     MAP = 'map',
@@ -107,7 +109,7 @@ export class DataCacheManager implements DataCacheManagerIntf {
                 type: TYPE.OBJECT, length: 1, created: now
             });
             const dataEntry: DataItemInCache = value instanceof Map ? {
-                content: Array.from(value.entries()).filter(t => t[0]?.endsWith('Ref') === false), created: now
+                content: LoggerUtil.MapToArraysWithoutRef(value), created: now
             } : {
                 content: value, created: now
             };
@@ -125,7 +127,7 @@ export class DataCacheManager implements DataCacheManagerIntf {
 
     /**
      * @description Get details of the cache as an array ordered by their keys alphabetically.
-     * @returns {Array<CacheItem>} an array of objects that contains the name, the type, the size and the creation date of each entry.
+     * @returns {CacheItem[]} an array of objects that contains the name, the type, the size and the creation date of each entry.
      */
     public details(): CacheItem[] {
         return this._storage.keys()
@@ -136,6 +138,7 @@ export class DataCacheManager implements DataCacheManagerIntf {
                 const name = GENERATE_LOGICAL_KEY(key);
                 if (entry) {
                     return { 
+                        dataType: DataAliases.CacheItem,
                         name: name, 
                         isEmpty: entry.length === 0, 
                         isMap: entry.type === TYPE.MAP, 
@@ -147,6 +150,7 @@ export class DataCacheManager implements DataCacheManagerIntf {
                 }
                 // if null or undefined
                 return { 
+                    dataType: DataAliases.CacheItem,
                     name: name, 
                     isEmpty: true, 
                     isMap: false, 

@@ -1,4 +1,4 @@
-import { ApiIntf, SfdcOrganization } from "@orgcheck/api";
+import { ApiIntf, SfdcOrganization } from '@orgcheck/api';
 
 export type OrgCheckSfPluginResult<T> = {
   length: number;

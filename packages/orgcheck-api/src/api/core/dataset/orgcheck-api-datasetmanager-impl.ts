@@ -1,8 +1,8 @@
-import { DataCacheManagerIntf } from 'src/api/core/orgcheck-api-cachemanager';
-import { DataFactory } from 'src/api/core/orgcheck-api-datafactory-impl';
-import { DataFactoryIntf } from 'src/api/core/orgcheck-api-datafactory';
-import { Dataset } from 'src/api/core/orgcheck-api-dataset';
-import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
+import { DataCacheManagerIntf } from 'src/api/core/cache/orgcheck-api-cachemanager';
+import { DataFactory } from 'src/api/core/data/orgcheck-api-datafactory-impl';
+import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
+import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
+import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { DatasetApexClasses } from 'src/api/dataset/orgcheck-api-dataset-apexclasses';
 import { DatasetApexTriggers } from 'src/api/dataset/orgcheck-api-dataset-apextriggers';
 import { DatasetApplications } from 'src/api/dataset/orgcheck-api-dataset-applications';
@@ -25,7 +25,7 @@ import { DatasetKnowledgeArticles } from 'src/api/dataset/orgcheck-api-dataset-k
 import { DatasetLightningAuraComponents } from 'src/api/dataset/orgcheck-api-dataset-lightningauracomponents';
 import { DatasetLightningPages } from 'src/api/dataset/orgcheck-api-dataset-lightningpages';
 import { DatasetLightningWebComponents } from 'src/api/dataset/orgcheck-api-dataset-lightningwebcomponents';
-import { DatasetManagerIntf, DatasetManagerError } from 'src/api/core/orgcheck-api-datasetmanager';
+import { DatasetManagerIntf, DatasetManagerError } from 'src/api/core/dataset/orgcheck-api-datasetmanager';
 import { DatasetObject } from 'src/api/dataset/orgcheck-api-dataset-object';
 import { DatasetObjectPermissions } from 'src/api/dataset/orgcheck-api-dataset-objectpermissions';
 import { DatasetObjects } from 'src/api/dataset/orgcheck-api-dataset-objects';
@@ -40,7 +40,7 @@ import { DatasetProfileRestrictions } from 'src/api/dataset/orgcheck-api-dataset
 import { DatasetProfiles } from 'src/api/dataset/orgcheck-api-dataset-profiles';
 import { DatasetRecordTypes } from 'src/api/dataset/orgcheck-api-dataset-recordtypes';
 import { DatasetReports } from 'src/api/dataset/orgcheck-api-dataset-reports';
-import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
+import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
 import { DatasetStaticResources } from 'src/api/dataset/orgcheck-api-dataset-staticresources';
 import { DatasetUserRoles } from 'src/api/dataset/orgcheck-api-dataset-userroles';
 import { DatasetValidationRules } from 'src/api/dataset/orgcheck-api-dataset-validationrules';
@@ -48,8 +48,8 @@ import { DatasetVisualForceComponents } from 'src/api/dataset/orgcheck-api-datas
 import { DatasetVisualForcePages } from 'src/api/dataset/orgcheck-api-dataset-visualforcepages';
 import { DatasetWeblinks } from 'src/api/dataset/orgcheck-api-dataset-weblinks';
 import { DatasetWorkflows } from 'src/api/dataset/orgcheck-api-dataset-workflows';
-import { LoggerIntf } from 'src/api/core/orgcheck-api-logger';
-import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
+import { LoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
+import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { DatasetScoreRules } from 'src/api/dataset/orgcheck-api-dataset-scorerules';
 
 /**
@@ -66,10 +66,10 @@ export class DatasetManager implements DatasetManagerIntf {
 
     /**
      * @description Datasets promise cache
-     * @type {Map<string, Promise<Array<any>>>}
+     * @type {Map<string, Promise<any[]>>}
      * @private
      */
-    private _datasetPromisesCache: Map<string, Promise<Array<any>>>;
+    private _datasetPromisesCache: Map<string, Promise<any[]>>;
 
     /**
      * @description Data factory
@@ -139,20 +139,20 @@ export class DatasetManager implements DatasetManagerIntf {
 
     /**
      * @description Run the given list of datasets and return them as a result
-     * @param {Array<string | DatasetRunInformation>} datasets - The list of datasets to run
+     * @param {string | DatasetRunInformation[]} datasets - The list of datasets to run
      * @returns {Promise<Map<string, any>>} Returns the result 
      * @throws {DatasetManagerError}
      * @public
      * @async
      */
-    public async run(datasets: Array<string | DatasetRunInformation>): Promise<Map<string, any>> {
+    public async run(datasets: Array<string | DatasetRunInformation>): Promise<Map<string, any[]>> {
         if (datasets === undefined || datasets === null) {
             throw new DatasetManagerError('', `The given datasets is not defined.`);
         }
         if (datasets instanceof Array === false) {
             throw new DatasetManagerError('', `The given datasets is not an instance of Array (typeof= ${typeof datasets}).`);
         }
-        const data: Array<any> = await Promise.all(datasets.map(async (dataset) => {
+        const data: any[] = await Promise.all(datasets.map(async (dataset) => {
             const alias      = (typeof dataset === 'string' ? dataset : dataset.alias);
             const cacheKey   = (typeof dataset === 'string' ? dataset : dataset.cacheKey);
             const parameters = (typeof dataset === 'string' ? undefined : dataset.parameters);
@@ -197,7 +197,7 @@ export class DatasetManager implements DatasetManagerIntf {
 
     /**
      * @description Clean the given list of datasets from cache (if present)
-     * @param {Array<string | DatasetRunInformation>} datasets - The list of datasets to clean
+     * @param {string | DatasetRunInformation[]} datasets - The list of datasets to clean
      * @throws {DatasetManagerError}
      * @public
      */

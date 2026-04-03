@@ -1,5 +1,5 @@
-import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
-import { DataWithScore } from 'src/api/core/orgcheck-api-data';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
+import { DataWithScore } from 'src/api/core/data/orgcheck-api-data';
 import { SfdcPermissionSet } from 'src/api/data/orgcheck-api-data-permissionset';
 import { SfdcProfile } from 'src/api/data/orgcheck-api-data-profile';
 
@@ -84,10 +84,10 @@ export interface SfdcUser extends DataWithScore {
 
     /**
      * @description Set of sensible system permissions along with the Profile or PermSet that grants them to this users (like view all etc.)
-     * @type {{apiEnabled: Array<SfdcProfile>, viewSetup: Array<SfdcProfile>, modifyAllData: Array<SfdcProfile>, viewAllData: Array<SfdcProfile>, manageUsers: Array<SfdcProfile>, customizeApplication: Array<SfdcProfile>}}
+     * @type {{apiEnabled: SfdcProfile[], viewSetup: SfdcProfile[], modifyAllData: SfdcProfile[], viewAllData: SfdcProfile[], manageUsers: SfdcProfile[], customizeApplication: SfdcProfile[]}}
      * @public
      */
-    importantPermissionsGrantedBy: { apiEnabled: Array<SfdcProfile>; viewSetup: Array<SfdcProfile>; modifyAllData: Array<SfdcProfile>; viewAllData: Array<SfdcProfile>; manageUsers: Array<SfdcProfile>; customizeApplication: Array<SfdcProfile>; };
+    importantPermissionsGrantedBy: { apiEnabled: SfdcProfile[]; viewSetup: SfdcProfile[]; modifyAllData: SfdcProfile[]; viewAllData: SfdcProfile[]; manageUsers: SfdcProfile[]; customizeApplication: SfdcProfile[]; };
 
     /**
      * @description Is this user admin-like (has some powerful permissions)
@@ -112,17 +112,17 @@ export interface SfdcUser extends DataWithScore {
 
     /**
      * @description List of permission set ids assigned to this user
-     * @type {Array<string>}
+     * @type {string[]}
      * @public
      */
-    permissionSetIds: Array<string>;
+    permissionSetIds: string[];
 
     /**
      * @description List of permission set references assigned to this user
-     * @type {Array<SfdcPermissionSet>}
+     * @type {SfdcPermissionSet[]}
      * @public
      */
-    permissionSetRefs: Array<SfdcPermissionSet>;
+    permissionSetRefs: SfdcPermissionSet[];
 
     /**
      * @description Number of direct logins to salesforce

@@ -1,5 +1,5 @@
-import { DatasetManager } from 'src/api/core/orgcheck-api-datasetmanager-impl';
-import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
+import { DatasetManager } from 'src/api/core/dataset/orgcheck-api-datasetmanager-impl';
+import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SalesforceManagerMock_DoingNothing } from 'tests/utils/orgcheck-api-salesforce-mock.utility';
 import { CacheManagerMock_UsingMap } from 'tests/utils/orgcheck-api-cache-mock.utility';
 import { LoggerMock_DoingNothing } from 'tests/utils/orgcheck-api-logger-mock.utility';
@@ -17,8 +17,9 @@ describe('tests.api.unit.DatasetManager', () => {
     expect(results1.size).toBe(1);
     expect(results1.has(DatasetAliases.APEXCLASSES)).toBeTruthy();
     const apexClasses = results1.get(DatasetAliases.APEXCLASSES);
+    expect(apexClasses).toBeDefined();
     expect(apexClasses instanceof Map).toBeTruthy();
-    expect(apexClasses.size).toBe(0);
+    expect(apexClasses instanceof Map && apexClasses?.size === 0).toBeTruthy();
 
     const results2 = await manager.run([ DatasetAliases.PROFILEPWDPOLICIES ]);
     expect(results2).toBeDefined();
@@ -26,7 +27,8 @@ describe('tests.api.unit.DatasetManager', () => {
     expect(results2.size).toBe(1);
     expect(results2.has(DatasetAliases.PROFILEPWDPOLICIES)).toBeTruthy();
     const policies = results2.get(DatasetAliases.PROFILEPWDPOLICIES);
+    expect(policies).toBeDefined();
     expect(policies instanceof Map).toBeTruthy();
-    expect(policies.size).toBe(0);
+    expect(policies instanceof Map && policies.size === 0).toBeTruthy();
   });    
 });

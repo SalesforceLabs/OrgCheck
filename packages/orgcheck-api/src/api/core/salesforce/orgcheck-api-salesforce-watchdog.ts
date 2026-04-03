@@ -1,5 +1,5 @@
-import { SalesforceUsageInformationIntf } from 'src/api/core/orgcheck-api-limit-usageinformation';
-import { SalesforceError } from 'src/api/core/orgcheck-api-salesforcemanager';
+import { SalesforceUsageInformationIntf } from 'src/api/core/salesforce/orgcheck-api-limit-usageinformation';
+import { SalesforceError } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 
 /**
  * @description Threshold value when percentage is reaching a "warning" zone (not yet a "critical" zone)

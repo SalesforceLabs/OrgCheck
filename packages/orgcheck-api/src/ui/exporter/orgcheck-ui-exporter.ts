@@ -7,10 +7,10 @@ const TRUNCATE_MSG = '... (truncated)';
 export class Exporter {
 
     /**
-     * @param {Array<ExportedTable> | ExportedTable} source - Data to export
+     * @param {ExportedTable[] | ExportedTable} source - Data to export
      * @returns {ArrayBuffer} Generated XLS data
      */
-    static exportAsXls(source: Array<ExportedTable> | ExportedTable): ArrayBuffer {
+    static exportAsXls(source: ExportedTable[] | ExportedTable): ArrayBuffer {
         // @ts-ignore
         const xlsx = typeof window !== 'undefined' ? window?.XLSX : globalThis?.XLSX ?? null;
         if (!xlsx) {

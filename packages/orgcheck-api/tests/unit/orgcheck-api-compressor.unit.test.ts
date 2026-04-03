@@ -1,4 +1,4 @@
-import { Compressor } from 'src/api/core/orgcheck-api-compressor-impl';
+import { Compressor } from 'src/api/core/cache/orgcheck-api-compressor-impl';
 import fflate from 'fflate';
 
 describe('tests.api.unit.Compressor', () => {

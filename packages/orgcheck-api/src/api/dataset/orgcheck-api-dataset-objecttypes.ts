@@ -1,12 +1,12 @@
-import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
-import { DataFactoryIntf } from 'src/api/core/orgcheck-api-datafactory';
-import { Dataset } from 'src/api/core/orgcheck-api-dataset';
-import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
-import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
+import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
+import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
+import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
+import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcObjectType, SObjectTypes } from 'src/api/data/orgcheck-api-data-objecttype';
 
-/** @type {Array<{id: string, label: string}>} */ 
-const OBJECTTYPES: Array<{ id: string; label: string; }> = [
+/** @type {{id: string, label: string}[]} */ 
+const OBJECTTYPES: { id: string; label: string; }[] = [
     { id: SObjectTypes.STANDARD_SOBJECT,        label: 'Standard Object' },
     { id: SObjectTypes.CUSTOM_SOBJECT,          label: 'Custom Object' },
     { id: SObjectTypes.CUSTOM_EXTERNAL_SOBJECT, label: 'External Object' },

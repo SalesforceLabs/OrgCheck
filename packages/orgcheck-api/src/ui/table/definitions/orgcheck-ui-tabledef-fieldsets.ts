@@ -1,15 +1,15 @@
-import { ColumnType } from "src/ui/table/column/orgcheck-ui-table-columntype";
-import { TableDefinition } from "src/ui/table/orgcheck-ui-table-definition";
-import { SortOrder } from "src/ui/table/orgcheck-ui-table-sortorder";
-import { TableColumn } from "src/ui/table/column/orgcheck-ui-table-column";
+import { ColumnType } from 'src/ui/table/column/orgcheck-ui-table-columntype';
+import { TableDefinition } from 'src/ui/table/orgcheck-ui-table-definition';
+import { SortOrder } from 'src/ui/table/orgcheck-ui-table-sortorder';
+import { TableColumn } from 'src/ui/table/column/orgcheck-ui-table-column';
 
 export class FieldSetsTableDefinition implements TableDefinition {
     
     /**
      * @description List of columns in a table
-     * @type {Array<TableColumn>}
+     * @type {TableColumn[]}
      */
-    columns: Array<TableColumn> = [
+    columns: TableColumn[] = [
         { label: '#',           type: ColumnType.IDX },
         { label: 'Label',       type: ColumnType.URL, data: { value: 'url', label: 'label' }},
         { label: 'Description', type: ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}

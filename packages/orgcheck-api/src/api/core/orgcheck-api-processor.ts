@@ -2,12 +2,12 @@ export class Processor {
 
     /**
      * @description Runs in parallel a function for each item of a given array or map.
-     * @param {Array<any> | Map<string, any>} iterable - An array or a map to iterate over
+     * @param {any> | Map<string, any[]} iterable - An array or a map to iterate over
      * @param {(item: any, key?: string)} iteratee - A function to call on each item in the array. Invoked with (item). Not supposed to return anything.
      * @public
      * @async
      */
-    static forEach(iterable: Array<any> | Map<string, any>, iteratee: (item: any, key?: string) => Promise<void>): Promise<void> {
+    static async forEach(iterable: any[] | Map<string, any>, iteratee: (item: any, key?: string) => Promise<void>): Promise<void> {
         if (!iterable) return Promise.resolve();
         if (typeof iteratee !== 'function') throw new TypeError(`Given iteratee is not a proper function.`);
         if (Array.isArray(iterable) === true) {
@@ -45,14 +45,14 @@ export class Processor {
     /**
      * @description Runs in parallel a function for each item of a given iterable (must be an Array), and 
      *   constructs a new array with the same size but with the results of each call to the function.
-     * @param {Array<any>} iterable - An array to iterate over
+     * @param {any[]} iterable - An array to iterate over
      * @param {Function} iteratee - A function to call on each item in the array. Invoked with (item). Supposed to return a new item based on the original item.
      * @param {Function} [filterIteratee] - An optional function to call on each item in the array. Invoked with (item). Returns true or false.
-     * @returns {Promise<Array<any>>} Async operation that returns an array
+     * @returns {Promise<any[]>} Async operation that returns an array
      * @public
      * @async
      */
-    static map(iterable: Array<any>, iteratee: Function, filterIteratee?: Function): Promise<Array<any>> {
+    static async map(iterable: any[], iteratee: Function, filterIteratee?: Function): Promise<any[]> {
         if (!iterable) return Promise.resolve([]);
         if (Array.isArray(iterable) === false) throw new TypeError(`Given iterable is not a proper Array.`);
         if (typeof iteratee !== 'function') throw new TypeError(`Given iteratee is not a proper function.`);

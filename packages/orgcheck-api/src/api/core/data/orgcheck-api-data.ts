@@ -1,5 +1,5 @@
-import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
-import { DataDependenciesForOneItem } from 'src/api/core/orgcheck-api-data-dependencies';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
+import { DataDependenciesForOneItem } from 'src/api/core/data/orgcheck-api-data-dependencies';
 
 /**
  * @description This interface represents a data in Org Check
@@ -32,17 +32,17 @@ export interface DataWithScore extends Data {
     
     /**
      * @description If the above score is positive, then this property will contain a list of fields that need to be corrected.
-     * @type {Array<string>}
+     * @type {string[]}
      * @public
      */
-    badFields: Array<string>;
+    badFields: string[];
     
     /**
      * @description If the above score is positive, then this property will contain a list of reasons ids that explain why the score is positive.
-     * @type {Array<number>}
+     * @type {number[]}
      * @public
      */
-    badReasonIds: Array<number>;
+    badReasonIds: number[];
 }
 
 /**

@@ -1,5 +1,5 @@
 import { LightningElement, api, track } from 'lwc';
-import OrgCheckStaticResource from "@salesforce/resourceUrl/OrgCheck_SR";
+import OrgCheckStaticResource from '@salesforce/resourceUrl/OrgCheck_SR';
 
 /**
  * @description Represents the different statuses of a section
@@ -47,7 +47,7 @@ class Section {
 
   /**
    * @description Context information that could help the investigation
-   * @type {Array<{ key: string, value: string }>}
+   * @type {{ key: string, value: string }[]}
    */
   contextInformation;
 }
@@ -222,7 +222,7 @@ export default class OrgcheckSpinner extends LightningElement {
 
   /**
    * @description List of sections to show in the spinner
-   * @type {Array<Section>}
+   * @type {Section[]}
    */
   @track sections;
 

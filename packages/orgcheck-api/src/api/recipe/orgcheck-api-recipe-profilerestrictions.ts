@@ -1,10 +1,10 @@
-import { ServedRecipe } from 'src/api/core/orgcheck-api-recipe';
+import { ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
-import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
-import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
-import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
+import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
+import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
+import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SfdcProfile }from 'src/api/data/orgcheck-api-data-profile';
 import { SfdcProfileRestrictions }from 'src/api/data/orgcheck-api-data-profilerestrictions';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
@@ -62,7 +62,7 @@ export class RecipeProfileRestrictions implements ServedRecipe<SfdcProfileRestri
         if (!profileRestrictions) throw new Error(`RecipeProfileRestrictions: Data from dataset alias 'PROFILERESTRICTIONS' was undefined.`);
 
         // Augment and Filter data
-        const array: Array<SfdcProfileRestrictions> = [];
+        const array: SfdcProfileRestrictions[] = [];
         await Processor.forEach(profileRestrictions, async (restriction: SfdcProfileRestrictions) => {
             // Augment data
             const profileRef = profiles.get(restriction.profileId);

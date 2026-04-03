@@ -63,7 +63,7 @@ export class CodeScanner {
     /**
      * @description Find hard-coded URLs in the given source code.
      * @param {string} sourceCode - the source code to search for hard-coded URLs.
-     * @returns {Array<string>} Returns an array of hard-coded URLs found in the source code.
+     * @returns {string[]} Returns an array of hard-coded URLs found in the source code.
      * @public
      * @static
      */
@@ -79,7 +79,7 @@ export class CodeScanner {
     /**
      * @description Find hard-coded Salesforce IDs in the given source code.
      * @param {string} sourceCode - the source code to search for hard-coded Salesforce IDs.
-     * @returns {Array<string>} Returns an array of hard-coded Salesforce IDs found in the source code.
+     * @returns {string[]} Returns an array of hard-coded Salesforce IDs found in the source code.
      * @public
      * @static
      */

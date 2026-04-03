@@ -1,10 +1,10 @@
-import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
-import { DataFactoryIntf } from 'src/api/core/orgcheck-api-datafactory';
-import { Dataset } from 'src/api/core/orgcheck-api-dataset';
-import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
+import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
+import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
+import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
-import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
-import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
+import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
+import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcValidationRule } from 'src/api/data/orgcheck-api-data-validationrule';
 
 export class DatasetValidationRules implements Dataset {

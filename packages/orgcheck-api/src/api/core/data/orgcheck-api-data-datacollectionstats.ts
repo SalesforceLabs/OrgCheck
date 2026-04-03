@@ -1,4 +1,4 @@
-import { Data } from 'src/api/core/orgcheck-api-data';
+import { Data } from 'src/api/core/data/orgcheck-api-data';
 
 export interface DataCollectionStatisticsIntf {
 
@@ -46,24 +46,24 @@ export interface DataCollectionStatisticsIntf {
 
     /**
      * @description Number of bad records by rule
-     * @type {Array<{ruleId: number, ruleName: string, count: number}>}
+     * @type {{ruleId: number, ruleName: string, count: number}[]}
      * @default []
      * @public
      */
-    countBadByRule: Array<{ ruleId: number; ruleName: string; count: number; }>;
+    countBadByRule: { ruleId: number; ruleName: string; count: number; }[];
 
     /**
      * @description List of distinct values automatically computed based on the rule description
-     * @type {Array<any>}
+     * @type {any[]}
      * @public
      */
-    distinctBadValues: Array<any>;
+    distinctBadValues: any[];
 
     /**
      * @description List of all data items that are part of this collection
-     * @type {Array<Data>}
+     * @type {Data[]}
      * @default []
      * @public
      */ 
-    data: Array<Data>;
+    data: Data[];
 }

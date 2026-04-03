@@ -1,10 +1,10 @@
-import { ServedRecipe } from 'src/api/core/orgcheck-api-recipe';
+import { ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
-import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
-import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
-import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
+import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
+import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
+import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SfdcFlow }from 'src/api/data/orgcheck-api-data-flow';
 import { FlowsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-flows';
 
@@ -53,7 +53,7 @@ export class RecipeProcessBuilders implements ServedRecipe<SfdcFlow[], Table> {
         if (!flows) throw new Error(`RecipeProcessBuilders: Data from dataset alias 'FLOWS' was undefined.`);
 
         // Filter data
-        const array: Array<SfdcFlow> = [];
+        const array: SfdcFlow[] = [];
         await Processor.forEach(flows, async (flow: SfdcFlow) => {
             if (flow.isProcessBuilder === true) {
                 array.push(flow);

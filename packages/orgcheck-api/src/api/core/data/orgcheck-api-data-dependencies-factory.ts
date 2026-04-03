@@ -1,4 +1,4 @@
-import { DataDependenciesForOneItem, DataDependencies } from 'src/api/core/orgcheck-api-data-dependencies';
+import { DataDependenciesForOneItem, DataDependencies } from 'src/api/core/data/orgcheck-api-data-dependencies';
 
 /**
  * @description Factory of dependencies
@@ -8,7 +8,7 @@ export class DataDependenciesFactory {
     /**
      * @description Create a new instance of DataDependencies
      * @param {DataDependencies} data - The data containing records and errors
-     * @param {Array<string>} whatIds - The IDs for which we want to get the dependencies
+     * @param {string[]} whatIds - The IDs for which we want to get the dependencies
      * @returns {DataDependenciesForOneItem} Returns a new instance of DataDependencies containing the dependencies for the given whatIds
      */
     static create(data: DataDependencies, whatIds: string[]): DataDependenciesForOneItem {

@@ -1,9 +1,9 @@
-import { Data } from 'src/api/core/orgcheck-api-data';
-import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
-import { DataCollectionStatisticsIntf } from 'src/api/core/orgcheck-api-data-datacollectionstats';
+import { Data } from 'src/api/core/data/orgcheck-api-data';
+import { DataMatrixIntf } from 'src/api/core/data/orgcheck-api-data-matrix';
+import { DataCollectionStatisticsIntf } from 'src/api/core/data/orgcheck-api-data-datacollectionstats';
 import { SfdcObjectAsTable } from 'src/api/recipe/orgcheck-api-recipe-object';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
-import { RecipeAliases } from './orgcheck-api-recipes-aliases';
+import { RecipeAliases } from 'src/api/core/recipe/orgcheck-api-recipes-aliases';
 
 /**
  * @description Recipe manager error class
@@ -39,12 +39,12 @@ export interface RecipeManagerIntf {
      * @description Serve the mixture from a designated recipe to a table
      * @param {string} alias - String representation of a recipe
      * @param {Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]} [mixture] - The mixture
-     * @returns {Promise<Table | SfdcObjectAsTable>} Returns the mixture as a table
+     * @returns {Promise<Table | SfdcObjectAsTable | Table[]>} Returns the mixture as a table
      * @throws {RecipeManagerError}
      * @async
      * @public
      */
-    serveToTable(alias: RecipeAliases, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<Table | SfdcObjectAsTable>;
+    serveToTable(alias: RecipeAliases, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<Table | SfdcObjectAsTable | Table[]>;
 
     /**
      * @description Serve the mixture from a designated recipe to go

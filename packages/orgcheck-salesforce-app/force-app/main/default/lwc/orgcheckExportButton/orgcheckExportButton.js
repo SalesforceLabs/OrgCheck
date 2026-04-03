@@ -1,5 +1,5 @@
 import { LightningElement, api } from 'lwc';
-import OrgCheckStaticResource from "@salesforce/resourceUrl/OrgCheck_SR";
+import OrgCheckStaticResource from '@salesforce/resourceUrl/OrgCheck_SR';
 import { loadScript } from 'lightning/platformResourceLoader';
 
 export default class OrgcheckExportButton extends LightningElement {

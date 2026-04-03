@@ -1,9 +1,9 @@
-import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
-import { DataFactoryIntf } from 'src/api/core/orgcheck-api-datafactory';
-import { Dataset } from 'src/api/core/orgcheck-api-dataset';
-import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
+import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
+import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
+import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
-import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
+import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcProfileRestrictions } from 'src/api/data/orgcheck-api-data-profilerestrictions';
 
 const COMPUTE_NUMBER_FROM_IP = (/** @type {string} */ ip: string) => {

@@ -1,10 +1,10 @@
-import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
-import { DataFactoryIntf } from 'src/api/core/orgcheck-api-datafactory';
-import { Dataset } from 'src/api/core/orgcheck-api-dataset';
-import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
+import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
+import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
+import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
-import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
-import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
+import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
+import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcUserRole } from 'src/api/data/orgcheck-api-data-userrole';
 
 export class DatasetUserRoles implements Dataset {
@@ -34,9 +34,9 @@ export class DatasetUserRoles implements Dataset {
         const userRoleRecords = results[0];
         logger?.log(`Parsing ${userRoleRecords?.length} user roles...`);
         const childrenByParent = new Map();
-        /** @type {Array<any>} */ 
-        const roots: Array<any> = [];
-        const roles: Map<string, SfdcUserRole> = new Map(await Processor.map(userRoleRecords, async (/** @type {any} */ record: any) => {
+        /** @type {any[]} */ 
+        const roots: any[] = [];
+        const roles: Map<string, SfdcUserRole> = new Map(await Processor.map(userRoleRecords, async (record: any) => {
 
             // Get the ID15 of this custom label
             const id = sfdcManager.caseSafeId(record.Id);
@@ -68,7 +68,7 @@ export class DatasetUserRoles implements Dataset {
             // compute the numbers of users
             await Processor.forEach(
                 record?.Users?.records, 
-                async (/** @type {any} */ user: any) => {
+                async (user: any) => {
                     userRole.activeMemberIds.push(sfdcManager.caseSafeId(user.Id));
                 }
             );
@@ -86,7 +86,7 @@ export class DatasetUserRoles implements Dataset {
         });
 
         // Then compute the score of roles 
-        await Processor.forEach(roles, async (/** @type {any} */ userRole: any) => {
+        await Processor.forEach(roles, async (userRole: any) => {
             userRoleDataFactory.computeScore(userRole);
         });
 
@@ -96,7 +96,7 @@ export class DatasetUserRoles implements Dataset {
     } 
 }
 
-const RECURSIVE_LEVEL_CALCULUS = (/** @type {SfdcUserRole} */ parent: SfdcUserRole, /** @type {Map<string, Array<SfdcUserRole>>} */ childrenByParent: Map<string, Array<SfdcUserRole>>) => {
+const RECURSIVE_LEVEL_CALCULUS = (parent: SfdcUserRole, childrenByParent: Map<string, SfdcUserRole[]>) => {
     const children = childrenByParent.get(parent.id);
     children?.forEach((child) => {
         child.level = parent.level + 1;

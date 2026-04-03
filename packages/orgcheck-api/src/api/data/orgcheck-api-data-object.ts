@@ -1,5 +1,5 @@
-import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
-import { DataWithScore } from 'src/api/core/orgcheck-api-data';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
+import { DataWithScore } from 'src/api/core/data/orgcheck-api-data';
 import { SfdcApexTrigger } from 'src/api/data/orgcheck-api-data-apextrigger';
 import { SfdcField } from 'src/api/data/orgcheck-api-data-field';
 import { SfdcFieldSet } from 'src/api/data/orgcheck-api-data-fieldset';
@@ -146,17 +146,17 @@ export interface SfdcObject extends DataWithScore {
     
     /**
      * @description List of Apex Triggers ids for this object
-     * @type {Array<string>}
+     * @type {string[]}
      * @public
      */
-    apexTriggerIds: Array<string>;
+    apexTriggerIds: string[];
     
     /**
      * @description Corresponding Apex Trigger references fot this object
-     * @type {Array<SfdcApexTrigger>}
+     * @type {SfdcApexTrigger[]}
      * @public
      */
-    apexTriggerRefs: Array<SfdcApexTrigger>;
+    apexTriggerRefs: SfdcApexTrigger[];
 
     /**
      * @description Number of apex triggers (active or not) for this object
@@ -167,17 +167,17 @@ export interface SfdcObject extends DataWithScore {
     
     /**
      * @description List of field Sets for this object
-     * @type {Array<SfdcFieldSet>}
+     * @type {SfdcFieldSet[]}
      * @public
      */
-    fieldSets: Array<SfdcFieldSet>;
+    fieldSets: SfdcFieldSet[];
     
     /**
      * @description List of layouts for this object
-     * @type {Array<SfdcPageLayout>}
+     * @type {SfdcPageLayout[]}
      * @public
      */
-    layouts: Array<SfdcPageLayout>;
+    layouts: SfdcPageLayout[];
 
     /**
      * @description Number of page layouts for this object
@@ -188,24 +188,24 @@ export interface SfdcObject extends DataWithScore {
 
     /**
      * @description List of Ligthning Pages for this object
-     * @type {Array<SfdcLightningPage>}
+     * @type {SfdcLightningPage[]}
      * @public
      */
-    flexiPages: Array<SfdcLightningPage>;
+    flexiPages: SfdcLightningPage[];
     
     /**
      * @description Limits for this object
-     * @type {Array<SfdcLimit>}
+     * @type {SfdcLimit[]}
      * @public
      */
-    limits: Array<SfdcLimit>;
+    limits: SfdcLimit[];
     
     /**
      * @description List of validation rules for this object
-     * @type {Array<SfdcValidationRule>}
+     * @type {SfdcValidationRule[]}
      * @public
      */
-    validationRules: Array<SfdcValidationRule>;
+    validationRules: SfdcValidationRule[];
 
     /**
      * @description Number of validation rules for this object
@@ -216,24 +216,24 @@ export interface SfdcObject extends DataWithScore {
     
     /**
      * @description List of web links for this object
-     * @type {Array<SfdcWebLink>}
+     * @type {SfdcWebLink[]}
      * @public
      */
-    webLinks: Array<SfdcWebLink>;
+    webLinks: SfdcWebLink[];
     
     /**
      * @description List of standard fields for this object
-     * @type {Array<SfdcField>}
+     * @type {SfdcField[]}
      * @public
      */
-    standardFields: Array<SfdcField>;
+    standardFields: SfdcField[];
     
     /**
      * @description List of custom field Ids for this object
-     * @type {Array<string>}
+     * @type {string[]}
      * @public
      */
-    customFieldIds: Array<string>;
+    customFieldIds: string[];
 
     /**
      * @description Number of custom fields for this object
@@ -244,17 +244,17 @@ export interface SfdcObject extends DataWithScore {
     
     /**
      * @description List of custom field references for this object
-     * @type {Array<SfdcField>}
+     * @type {SfdcField[]}
      * @public
      */
-    customFieldRefs: Array<SfdcField>;
+    customFieldRefs: SfdcField[];
     
     /**
      * @description List of record types for this object
-     * @type {Array<SfdcRecordType>}
+     * @type {SfdcRecordType[]}
      * @public
      */
-    recordTypes: Array<SfdcRecordType>;
+    recordTypes: SfdcRecordType[];
     
     /**
      * @description Number of record types for this object
@@ -265,17 +265,17 @@ export interface SfdcObject extends DataWithScore {
 
     /**
      * @description List of Workflow Rules ids for this object
-     * @type {Array<string>}
+     * @type {string[]}
      * @public
      */
-    workflowRuleIds: Array<string>;
+    workflowRuleIds: string[];
     
     /**
      * @description Corresponding Workflow Rules references fot this object
-     * @type {Array<SfdcWorkflow>}
+     * @type {SfdcWorkflow[]}
      * @public
      */
-    workflowRuleRefs: Array<SfdcWorkflow>;
+    workflowRuleRefs: SfdcWorkflow[];
 
     /**
      * @description Number of workflow rules for this object
@@ -286,10 +286,10 @@ export interface SfdcObject extends DataWithScore {
 
     /**
      * @description List of relationships for this object
-     * @type {Array<SfdcObjectRelationShip>}
+     * @type {SfdcObjectRelationShip[]}
      * @public
      */
-    relationships: Array<SfdcObjectRelationShip>;
+    relationships: SfdcObjectRelationShip[];
     
     /**
      * @description Number of records for this object (including deleted ones)

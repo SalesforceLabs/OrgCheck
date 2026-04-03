@@ -1,4 +1,4 @@
-import { LoggerIntf, SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
+import { LoggerIntf, SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { LoggerSetup } from 'src/orgcheck';
 
 export class LoggerSetupMock_DoingNothing implements LoggerSetup {

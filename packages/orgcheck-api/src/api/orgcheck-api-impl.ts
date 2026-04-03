@@ -1,28 +1,29 @@
-import { LoggerIntf } from 'src/api/core/orgcheck-api-logger';
-import { DataCacheManagerIntf } from 'src/api/core/orgcheck-api-cachemanager';
-import { DataCacheManager } from 'src/api/core/orgcheck-api-cachemanager-impl';
-import { DatasetManager } from 'src/api/core/orgcheck-api-datasetmanager-impl';
-import { DatasetManagerIntf } from 'src/api/core/orgcheck-api-datasetmanager';
-import { Logger } from 'src/api/core/orgcheck-api-logger-impl';
+import { LoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
+import { DataCacheManagerIntf } from 'src/api/core/cache/orgcheck-api-cachemanager';
+import { DataCacheManager } from 'src/api/core/cache/orgcheck-api-cachemanager-impl';
+import { DatasetManager } from 'src/api/core/dataset/orgcheck-api-datasetmanager-impl';
+import { DatasetManagerIntf } from 'src/api/core/dataset/orgcheck-api-datasetmanager';
+import { Logger } from 'src/api/core/logger/orgcheck-api-logger-impl';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
-import { RecipeAliases } from 'src/api/core/orgcheck-api-recipes-aliases';
-import { RecipeManager } from 'src/api/core/orgcheck-api-recipemanager-impl';
-import { RecipeManagerIntf } from 'src/api/core/orgcheck-api-recipemanager';
-import { SalesforceManager } from 'src/api/core/orgcheck-api-salesforcemanager-impl';
-import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
-import { SalesforceUsageInformationIntf } from 'src/api/core/orgcheck-api-limit-usageinformation';
+import { RecipeAliases } from 'src/api/core/recipe/orgcheck-api-recipes-aliases';
+import { RecipeManager } from 'src/api/core/recipe/orgcheck-api-recipemanager-impl';
+import { RecipeManagerIntf } from 'src/api/core/recipe/orgcheck-api-recipemanager';
+import { SalesforceManager } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager-impl';
+import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
+import { SalesforceUsageInformationIntf } from 'src/api/core/salesforce/orgcheck-api-limit-usageinformation';
 import { SfdcObject } from 'src/api/data/orgcheck-api-data-object';
 import { SfdcObjectType } from 'src/api/data/orgcheck-api-data-objecttype';
 import { SfdcOrganization } from 'src/api/data/orgcheck-api-data-organization';
 import { SfdcPackage } from 'src/api/data/orgcheck-api-data-package';
-import { Storage } from 'src/api/core/orgcheck-api-storage-impl';
-import { Compressor } from 'src/api/core/orgcheck-api-compressor-impl';
+import { Storage } from 'src/api/core/cache/orgcheck-api-storage-impl';
+import { Compressor } from 'src/api/core/cache/orgcheck-api-compressor-impl';
 import { ApiSetup, ApiIntf } from 'src/api/orgcheck-api';
-import { SfdcObjectAsTable } from './recipe/orgcheck-api-recipe-object';
+import { SfdcObjectAsTable } from 'src/api/recipe/orgcheck-api-recipe-object';
 import { Data, DataMatrixIntf } from 'src/orgcheck';
-import { DataCollectionStatisticsIntf } from './core/orgcheck-api-data-datacollectionstats';
+import { DataCollectionStatisticsIntf } from 'src/api/core/data/orgcheck-api-data-datacollectionstats';
 import { Table } from 'src/ui/table/orgcheck-ui-table';
 import { CacheItem } from 'src/api/data/orgcheck-api-data-cacheitem';
+import { LoggerUtil } from './core/logger/orgcheck-api-loggerutil';
 
 /**
  * @description Org Check API main class
@@ -289,7 +290,7 @@ export class API implements ApiIntf {
         try {
             if (log?.isDebugEnabled()) log?.debug('Checking usage terms acceptance...');
             const orgInfo = (await this.getOrganizationInformation());
-            if (log?.isDebugEnabled()) log?.debug(`Organization info: ${JSON.stringify(orgInfo)}`);
+            if (log?.isDebugEnabled()) log?.debug(`Organization info: ${orgInfo.name}, isProduction: ${orgInfo.isProduction}`);
             if (orgInfo.isProduction === true && this._usageTermsAcceptedManually === false) {
                 if (log?.isDebugEnabled()) log?.debug('Usage terms not yet accepted for this org');
                 return false;
@@ -449,9 +450,6 @@ export class API implements ApiIntf {
     public cachestampData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string): string {
         const log = this._logger?.toSimpleLogger('Cache Stamp Data');
         try {
-            if (alias === RecipeAliases.CACHE_ITEMS) {
-                return '-'
-            }
             if (log?.isDebugEnabled()) log?.debug(`Calling the cachestamp method for recipe: ${alias} with namespace: ${namespace}, sobjectType: ${sobjectType} and sobject: ${sobject}`);
             return this._recipeManager.cachestamp(alias, new Map([
                 [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
@@ -467,9 +465,6 @@ export class API implements ApiIntf {
     public async prepareData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string): Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]> {
         const log = this._logger?.toSimpleLogger('Prepare Data');
         try {
-            if (alias === RecipeAliases.CACHE_ITEMS) {
-                return this.listCacheItems();
-            }
             // Check if usage terms were accepted
             if (log?.isDebugEnabled()) log?.debug('Checking if usage terms were accepted...');
             await this._throwExceptionIfUsageTermsNotAccepted();
@@ -487,7 +482,7 @@ export class API implements ApiIntf {
         }
     }
 
-    public async serveData(alias: RecipeAliases, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<Table | SfdcObjectAsTable> {
+    public async serveData(alias: RecipeAliases, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<Table | SfdcObjectAsTable | Table[]> {
         const log = this._logger?.toSimpleLogger('Serve Data');
         try {
             // Check if usage terms were accepted
@@ -495,7 +490,7 @@ export class API implements ApiIntf {
             await this._throwExceptionIfUsageTermsNotAccepted();
             if (log?.isDebugEnabled()) log?.debug('Passed the terms checking!');
             // Serve the data
-            if (log?.isDebugEnabled()) log?.debug(`Calling the serveToTable method for recipe: ${alias} with mixture: ${JSON.stringify(mixture)}`);
+            if (log?.isDebugEnabled()) log?.debug(`Calling the serveToTable method for recipe: ${alias} with mixture: ${LoggerUtil.JSONstringifyWithoutRef(mixture)}`);
             return await this._recipeManager.serveToTable(alias, mixture);
         } catch (error) {
             if (log?.isDebugEnabled()) log?.debug(`Error occurred: message: ${error.message}, stack: ${error.stack}`);

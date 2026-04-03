@@ -1,4 +1,4 @@
-import { Messages } from "@salesforce/core";
+import { Messages } from '@salesforce/core';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 

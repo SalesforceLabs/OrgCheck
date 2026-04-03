@@ -1,5 +1,5 @@
-import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
-import { DataWithScore } from 'src/api/core/orgcheck-api-data';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
+import { DataWithScore } from 'src/api/core/data/orgcheck-api-data';
 import { SfdcUser } from 'src/api/data/orgcheck-api-data-user';
 
 export interface SfdcUserRole extends DataWithScore {
@@ -76,17 +76,17 @@ export interface SfdcUserRole extends DataWithScore {
     
     /** 
      * @description Array of active member user ids
-     * @type {Array<string>}
+     * @type {string[]}
      * @public
      */
-    activeMemberIds: Array<string>;
+    activeMemberIds: string[];
     
     /**
      * @description Array of active member user references
-     * @type {Array<SfdcUser>}
+     * @type {SfdcUser[]}
      * @public
      */
-    activeMemberRefs: Array<SfdcUser>;
+    activeMemberRefs: SfdcUser[];
     
     /**
      * @description Does this role have active members?

@@ -1,5 +1,5 @@
-import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
-import { DataWithScore } from 'src/api/core/orgcheck-api-data';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
+import { DataWithScore } from 'src/api/core/data/orgcheck-api-data';
 import { SfdcUser } from 'src/api/data/orgcheck-api-data-user';
 
 /**
@@ -72,31 +72,31 @@ export interface SfdcGroup extends DataWithScore {
 
     /**
      * @description List of direct user ids
-     * @type {Array<string>}
+     * @type {string[]}
      * @public
      */
-    directUserIds: Array<string>;
+    directUserIds: string[];
 
     /**
      * @description List of direct user references
-     * @type {Array<SfdcUser>}
+     * @type {SfdcUser[]}
      * @public
      */
-    directUserRefs: Array<SfdcUser>;
+    directUserRefs: SfdcUser[];
 
     /**
      * @description List of direct group ids
-     * @type {Array<string>}
+     * @type {string[]}
      * @public
      */
-    directGroupIds: Array<string>;
+    directGroupIds: string[];
 
     /**
      * @description List of direct group references
-     * @type {Array<SfdcGroup>}
+     * @type {SfdcGroup[]}
      * @public
      */
-    directGroupRefs: Array<SfdcGroup>;
+    directGroupRefs: SfdcGroup[];
 
     /**
      * @description Is this a public group?

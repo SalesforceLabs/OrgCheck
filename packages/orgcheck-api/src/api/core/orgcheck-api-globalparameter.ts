@@ -131,12 +131,12 @@ export class OrgCheckGlobalParameter {
 
     /**
      * @description Get the list of system permissions from the parameters
-     * @param {Map<string, Array<string>>} parameters - Map of parameters
-     * @returns {Array<string>} The list of system permissions or an empty array if not specified
+     * @param {Map<string, string>[]} parameters - Map of parameters
+     * @returns {string[]} The list of system permissions or an empty array if not specified
      * @static
      * @public
      */
-    static getSystemPermissionsList(parameters: Map<string, Array<string>>): Array<string> {
+    static getSystemPermissionsList(parameters: Map<string, string[]>): string[] {
         return parameters?.get(SYSTEM_PERMISSIONS_LIST) ?? [];
     }
 

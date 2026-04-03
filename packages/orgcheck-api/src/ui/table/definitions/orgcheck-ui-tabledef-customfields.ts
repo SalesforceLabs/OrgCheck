@@ -1,8 +1,8 @@
-import { ColumnType } from "src/ui/table/column/orgcheck-ui-table-columntype";
-import { TableDefinition } from "src/ui/table/orgcheck-ui-table-definition";
-import { SortOrder } from "src/ui/table/orgcheck-ui-table-sortorder";
-import { TableColumn } from "src/ui/table/column/orgcheck-ui-table-column";
-import { SalesforceMetadataTypes } from "src/api/core/orgcheck-api-salesforce-metadatatypes";
+import { ColumnType } from 'src/ui/table/column/orgcheck-ui-table-columntype';
+import { TableDefinition } from 'src/ui/table/orgcheck-ui-table-definition';
+import { SortOrder } from 'src/ui/table/orgcheck-ui-table-sortorder';
+import { TableColumn } from 'src/ui/table/column/orgcheck-ui-table-column';
+import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
 
 class AbstractCustomFieldsTableDefinition implements TableDefinition {
     
@@ -50,9 +50,9 @@ class AbstractCustomFieldsTableDefinition implements TableDefinition {
 
     /**
      * @description List of columns in a table
-     * @type {Array<TableColumn>}
+     * @type {TableColumn[]}
      */
-    columns: Array<TableColumn>;
+    columns: TableColumn[];
 
     /**
      * @description Which index column is used for ordering?

@@ -1,5 +1,5 @@
-import { LoggerIntf, SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
-import { LoggerSetup } from './orgcheck-api-setup-logger';
+import { LoggerIntf, SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
+import { LoggerSetup } from '../setup/orgcheck-api-setup-logger';
 
 /**
  * @description Logger for  

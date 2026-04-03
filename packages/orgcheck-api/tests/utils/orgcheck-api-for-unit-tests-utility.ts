@@ -1,4 +1,4 @@
-import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 import { ApiFactory, SfdcOrganization } from 'src/orgcheck';
 import { LoggerSetupMock_DoingNothing } from 'tests/utils/orgcheck-api-logger-mock.utility';
 import { StorageSetupMock_BasedOnMap } from 'tests/utils/orgcheck-api-storage-mock.utility';

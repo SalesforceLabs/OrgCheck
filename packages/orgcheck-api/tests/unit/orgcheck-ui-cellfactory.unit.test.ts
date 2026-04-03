@@ -9,8 +9,8 @@ describe('tests.ui.unit.CellFactory', () => {
         /** @type {TableColumn} */
         const column: TableColumn = { label: '#', type: ColumnType.IDX };
 
-        /** @type {Array<any>} */
-        const data: Array<any> = [ 
+        /** @type {any[]} */
+        const data: any[] = [ 
             { id: 'uyt' }, 
             { id: 'yuiii' }, 
             { id: 'tttttt' } 
@@ -36,8 +36,8 @@ describe('tests.ui.unit.CellFactory', () => {
         /** @type {TableColumn} */
         const column: TableColumn = { label: 'Score', type: ColumnType.SCR, data: { value: 'score', id: 'id', name: 'label' }};
         
-        /** @type {Array<any>} */
-        const data: Array<any> = [ 
+        /** @type {any[]} */
+        const data: any[] = [ 
             { score: 0, id: 'iii', label: 'Label III' }, 
             { score: undefined, id: 'jjj', label: 'Label JJJ' },
             { score: 2, id: 'kkk', label: 'Label KKK' }
@@ -64,8 +64,8 @@ describe('tests.ui.unit.CellFactory', () => {
         /** @type {TableColumn} */
         const column: TableColumn = { label: 'Name', type: ColumnType.URL, data: { value: 'url', label: 'name' }};
         
-        /** @type {Array<any>} */
-        const data: Array<any> = [ 
+        /** @type {any[]} */
+        const data: any[] = [ 
             { score: 0, id: 'iii', name: 'Label III', url: '#.html' }, 
             { score: 1, id: 'jjj', name: 'Label JJJ', url: undefined },
             { score: 2, id: 'kkk', name: undefined, url: '#.html' }
@@ -91,8 +91,8 @@ describe('tests.ui.unit.CellFactory', () => {
         /** @type {TableColumn} */
         const column: TableColumn = { label: 'API Version', type: ColumnType.NUM, data: { value: 'apiVersion' }};
         
-        /** @type {Array<any>} */
-        const data: Array<any> = [ 
+        /** @type {any[]} */
+        const data: any[] = [ 
             { score: 0, id: 'iii', name: 'Label III', apiVersion: 6 }, 
             { score: 1, id: 'jjj', name: 'Label JJJ', apiVersion: undefined },
             { score: 2, id: 'kkk', name: 'Label KKK', apiVersion: '90' }
@@ -117,8 +117,8 @@ describe('tests.ui.unit.CellFactory', () => {
         /** @type {TableColumn} */
         const column: TableColumn = { label: 'Package', type: ColumnType.TXT, data: { value: 'package' }};
         
-        /** @type {Array<any>} */
-        const data: Array<any> = [ 
+        /** @type {any[]} */
+        const data: any[] = [ 
             { score: 0, id: 'iii', name: 'Label III', package: undefined }, 
             { score: 1, id: 'jjj', name: 'Label JJJ', package: '' },
             { score: 2, id: 'kkk', name: 'Label KKK', package: 'test' }
@@ -143,8 +143,8 @@ describe('tests.ui.unit.CellFactory', () => {
         /** @type {TableColumn} */
         const column: TableColumn = { label: 'Created date', type: ColumnType.DTM, data: { value: 'createdDate' }};
         
-        /** @type {Array<any>} */
-        const data: Array<any> = [ 
+        /** @type {any[]} */
+        const data: any[] = [ 
             { score: 0, id: 'iii', name: 'Label III', createdDate: undefined }, 
             { score: 1, id: 'jjj', name: 'Label JJJ', createdDate: Date.now() },
             { score: 2, id: 'kkk', name: 'Label KKK', createdDate: Date.now()-100000 }
@@ -169,8 +169,8 @@ describe('tests.ui.unit.CellFactory', () => {
         /** @type {TableColumn} */
         const column: TableColumn = { label: 'Dependencies',  type: ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }};
         
-        /** @type {Array<any>} */
-        const data: Array<any> = [ 
+        /** @type {any[]} */
+        const data: any[] = [ 
             { score: 0, id: 'iii', name: 'Label III', dependencies: {} }, 
             { score: 1, id: 'jjj', name: 'Label JJJ', dependencies: {} },
             { score: 2, id: 'kkk', name: 'Label KKK', dependencies: {} }
@@ -197,8 +197,8 @@ describe('tests.ui.unit.CellFactory', () => {
         /** @type {TableColumn} */
         const column: TableColumn = { label: 'Used (%)', type: ColumnType.PRC, data: { value: 'usedPercentage' }};
         
-        /** @type {Array<any>} */
-        const data: Array<any> = [ 
+        /** @type {any[]} */
+        const data: any[] = [ 
             { score: 0, id: 'iii', name: 'Label III', usedPercentage:  9.89 }, 
             { score: 1, id: 'jjj', name: 'Label JJJ', usedPercentage: 87.01 },
             { score: 2, id: 'kkk', name: 'Label KKK', usedPercentage:  9.00 }
@@ -223,8 +223,8 @@ describe('tests.ui.unit.CellFactory', () => {
         /** @type {TableColumn} */
         const column: TableColumn = { label: 'Is Active', type: ColumnType.CHK, data: { value: 'isActive' }};
         
-        /** @type {Array<any>} */
-        const data: Array<any> = [ 
+        /** @type {any[]} */
+        const data: any[] = [ 
             { score: 0, id: 'iii', name: 'Label III', isActive: false }, 
             { score: 1, id: 'jjj', name: 'Label JJJ', isActive: true },
             { score: 2, id: 'kkk', name: 'Label KKK', isActive: undefined }
@@ -249,8 +249,8 @@ describe('tests.ui.unit.CellFactory', () => {
         /** @type {TableColumn} */
         const column: TableColumn = { label: 'Ip Ranges', type: ColumnType.OBJS, data: { values: 'ipRanges', value: '.', template: (r) => `${r.description}: from ${r.startAddress} to ${r.endAddress} --> ${r.difference*1} address(es)` }};
 
-        /** @type {Array<any>} */
-        const data: Array<any> = [ 
+        /** @type {any[]} */
+        const data: any[] = [ 
             { score: 0, id: 'iii', name: 'Label III', ipRanges: [
                 { description: 'uuu', startAddress: '1.1.1.1', endAddress: '2.2.2.2', difference: 1000 }
             ]}, 
@@ -287,8 +287,8 @@ describe('tests.ui.unit.CellFactory', () => {
         /** @type {TableColumn} */
         const column: TableColumn = { label: 'Annotations', type: ColumnType.TXTS, data: { values: 'annotations', value: '.'}};
 
-        /** @type {Array<any>} */
-        const data: Array<any> = [ 
+        /** @type {any[]} */
+        const data: any[] = [ 
             { score: 0, id: 'iii', name: 'Label III', annotations: [ 'IsTest', 'ReadOnly', 'RemoteAction' ]}, 
             { score: 1, id: 'jjj', name: 'Label JJJ', annotations: [] }, 
             { score: 2, id: 'kkk', name: 'Label KKK', annotations: undefined }
@@ -318,8 +318,8 @@ describe('tests.ui.unit.CellFactory', () => {
         /** @type {TableColumn} */
         const column: TableColumn = { label: 'Users\' profiles', type: ColumnType.URLS, data: { values: 'assigneeProfileRefs', value: 'url', label: 'name' }};
 
-        /** @type {Array<any>} */
-        const data: Array<any> = [ 
+        /** @type {any[]} */
+        const data: any[] = [ 
             { score: 0, id: 'iii', name: 'Label III', assigneeProfileRefs: [
                 { name: 'uuu', url: '#1.html' }
             ]}, 
@@ -360,15 +360,15 @@ describe('tests.ui.unit.CellFactory', () => {
         const COLUMN2_VALUEBEFOREMIN = '<2';
         const COLUMN2_VALUEAFTERMAX = '>5';
 
-        /** @type {Array<TableColumn>} */
-        const columns: Array<TableColumn> = [
+        /** @type {TableColumn[]} */
+        const columns: TableColumn[] = [
             { label: 'Column 1', type: ColumnType.NUM, data: { value: 'propertyA' }, modifier: { minimum: 3, valueBeforeMin: COLUMN0_VALUEBEFOREMIN, valueIfEmpty: COLUMN0_VALUEIFEMPTY }},
             { label: 'Column 2', type: ColumnType.NUM, data: { value: 'propertyB' }, modifier: { maximum: 8, valueAfterMax: COLUMN1_VALUEAFTERMAX }},
             { label: 'Column 3', type: ColumnType.NUM, data: { value: 'propertyC' }, modifier: { minimum: 2, valueBeforeMin: COLUMN2_VALUEBEFOREMIN, maximum: 5, valueAfterMax: COLUMN2_VALUEAFTERMAX }}
         ];
 
-        /** @type {Array<any>} */
-        const data: Array<any> = [ 
+        /** @type {any[]} */
+        const data: any[] = [ 
             { score: 0, id: 'iii', propertyA: 4, propertyB: 6, propertyC: 4 }, // none of the properties will be decorated
             { score: 0, id: 'iii', propertyA: 3, propertyB: 6, propertyC: 4 }, // none of the properties will be decorated -- note: propA = min, not <
             { score: 0, id: 'jjj', propertyA: 2, propertyB: 6, propertyC: 4 }, // propA will be decorated (because < min), not the other props
@@ -452,15 +452,15 @@ describe('tests.ui.unit.CellFactory', () => {
         const COLUMN0_VALUEIFEMPTY = 'Empty value for A';
         const COLUMN2_VALUEIFEMPTY = 'Empty value for C';
 
-        /** @type {Array<TableColumn>} */
-        const columns: Array<TableColumn> = [
+        /** @type {TableColumn[]} */
+        const columns: TableColumn[] = [
             { label: 'Column 1', type: ColumnType.TXT, data: { value: 'propertyA' }, modifier: { maximumLength: 10, valueIfEmpty: COLUMN0_VALUEIFEMPTY }},
             { label: 'Column 2', type: ColumnType.TXT, data: { value: 'propertyB' }, modifier: { maximumLength: 8, preformatted: true }},
             { label: 'Column 3', type: ColumnType.TXT, data: { value: 'propertyC' }, modifier: { valueIfEmpty: COLUMN2_VALUEIFEMPTY }}
         ];
 
-        /** @type {Array<any>} */
-        const data: Array<any> = [ 
+        /** @type {any[]} */
+        const data: any[] = [ 
             { score: 0, id: 'iii', propertyA: 'text',        propertyB: 'text',      propertyC: 'text' },    // none of the properties will be decorated
             { score: 0, id: 'jjj', propertyA: 'text56789A',  propertyB: 'text',      propertyC: 'text' },    // none of the properties will be decorated -- note: propA.length = maximumLength, not >
             { score: 0, id: 'kkk', propertyA: 'text56789Az', propertyB: 'text',      propertyC: 'text' },    // propA will be decorated (because length > max), not the other props

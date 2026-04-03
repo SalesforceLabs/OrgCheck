@@ -1,5 +1,5 @@
-import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
-import { DataWithScoreAndDependencies } from 'src/api/core/orgcheck-api-data';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
+import { DataWithScoreAndDependencies } from 'src/api/core/data/orgcheck-api-data';
 
 /**
  * @description Representation of a Lightning Aura Component in Org Check

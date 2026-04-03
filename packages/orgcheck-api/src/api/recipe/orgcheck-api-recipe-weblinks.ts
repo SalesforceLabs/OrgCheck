@@ -1,9 +1,9 @@
-import { ServedRecipe } from 'src/api/core/orgcheck-api-recipe';
+import { ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
-import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
-import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
-import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
+import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
+import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
+import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SfdcWebLink }from 'src/api/data/orgcheck-api-data-weblink';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { SfdcObject }from 'src/api/data/orgcheck-api-data-object';
@@ -69,7 +69,7 @@ export class RecipeWebLinks implements ServedRecipe<SfdcWebLink[], Table> {
 
         // Augment and filter data
         
-        const array: Array<SfdcWebLink> = [];
+        const array: SfdcWebLink[] = [];
         await Processor.forEach(weblinks, async (/** @type {SfdcWebLink} */weblink: SfdcWebLink) => {
             // Augment data
             const objectRef = objects.get(weblink.objectId);

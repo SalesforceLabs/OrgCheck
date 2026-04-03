@@ -1,5 +1,5 @@
-import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
-import { DataWithScore } from 'src/api/core/orgcheck-api-data';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
+import { DataWithScore } from 'src/api/core/data/orgcheck-api-data';
 
 export interface SfdcWorkflow extends DataWithScore {
     
@@ -40,24 +40,24 @@ export interface SfdcWorkflow extends DataWithScore {
 
     /**
      * @description Direct actions associated with this item
-     * @type {Array<any>}
+     * @type {any[]}
      * @public
      */
-    actions: Array<any>;
+    actions: any[];
 
     /**
      * @description Future actions associated with this item
-     * @type {Array<any>}
+     * @type {any[]}
      * @public
      */
-    futureActions: Array<any>;
+    futureActions: any[];
 
     /**
      * @description Empty time triggers associated with this item
-     * @type {Array<any>}
+     * @type {any[]}
      * @public
      */
-    emptyTimeTriggers: Array<any>;
+    emptyTimeTriggers: any[];
 
     /**
      * @description Is this item active or not?

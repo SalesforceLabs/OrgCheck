@@ -1,9 +1,9 @@
-import { ColumnType } from "src/ui/table/column/orgcheck-ui-table-columntype";
-import { TableDefinition } from "src/ui/table/orgcheck-ui-table-definition";
-import { SortOrder } from "src/ui/table/orgcheck-ui-table-sortorder";
-import { TableColumn } from "src/ui/table/column/orgcheck-ui-table-column";
-import { DataMatrixIntf } from "src/api/core/orgcheck-api-data-matrix";
-import { Orientation } from "../column/orgcheck-ui-table-orientation";
+import { ColumnType } from 'src/ui/table/column/orgcheck-ui-table-columntype';
+import { TableDefinition } from 'src/ui/table/orgcheck-ui-table-definition';
+import { SortOrder } from 'src/ui/table/orgcheck-ui-table-sortorder';
+import { TableColumn } from 'src/ui/table/column/orgcheck-ui-table-column';
+import { DataMatrixIntf } from 'src/api/core/data/orgcheck-api-data-matrix';
+import { Orientation } from '../column/orgcheck-ui-table-orientation';
 
 export class ScoreRulesTableDefinition implements TableDefinition {
     
@@ -19,10 +19,10 @@ export class ScoreRulesTableDefinition implements TableDefinition {
 
     /**
      * @description List of columns in a table
-     * @type {Array<TableColumn>}
+     * @type {TableColumn[]}
      */
-    get columns(): Array<TableColumn> { 
-        const columns: Array<TableColumn> = [
+    get columns(): TableColumn[] { 
+        const columns: TableColumn[] = [
             { label: 'Rules (or reason why metadata is bad)', type: ColumnType.TXT, data: { value: 'header.description' }}
         ];
         if (this._matrix) {

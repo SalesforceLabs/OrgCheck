@@ -1,5 +1,5 @@
-import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
-import { DataWithScoreAndDependencies } from 'src/api/core/orgcheck-api-data';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
+import { DataWithScoreAndDependencies } from 'src/api/core/data/orgcheck-api-data';
 import { SfdcObject } from 'src/api/data/orgcheck-api-data-object';
 
 /**
@@ -163,16 +163,16 @@ export interface SfdcField extends DataWithScoreAndDependencies {
 
     /**
      * @description Only for formula field -- List of unique hard coded Salesforce URLs in the formula
-     * @type {Array<string>}
+     * @type {string[]}
      * @public
      */
-    hardCodedURLs: Array<string>;
+    hardCodedURLs: string[];
 
     /**
      * @description Only for formula field -- List of unique hard coded Salesforce IDs in the formula
-     * @type {Array<string>}
+     * @type {string[]}
      * @public
      */
-    hardCodedIDs: Array<string>;
+    hardCodedIDs: string[];
 
 }

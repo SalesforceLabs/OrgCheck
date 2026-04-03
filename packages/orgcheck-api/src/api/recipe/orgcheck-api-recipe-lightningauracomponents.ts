@@ -1,10 +1,10 @@
-import { ServedRecipe } from 'src/api/core/orgcheck-api-recipe';
+import { ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
-import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
-import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
-import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
+import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
+import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
+import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SfdcLightningAuraComponent }from 'src/api/data/orgcheck-api-data-lightningauracomponent';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 import { LightningWebComponentsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-lightningwebcomponents';
@@ -56,7 +56,7 @@ export class RecipeLightningAuraComponents implements ServedRecipe<SfdcLightning
         if (!components) throw new Error(`RecipeLightningAuraComponents: Data from dataset alias 'LIGHTNINGAURACOMPONENTS' was undefined.`);
 
         // Filter data
-        const array: Array<SfdcLightningAuraComponent> = [];
+        const array: SfdcLightningAuraComponent[] = [];
         await Processor.forEach(components, async (component: SfdcLightningAuraComponent) => {
             if (namespace === OrgCheckGlobalParameter.ALL_VALUES || component.package === namespace) {
                 array.push(component);

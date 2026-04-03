@@ -1,5 +1,5 @@
-import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
-import { DataWithScore } from 'src/api/core/orgcheck-api-data';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
+import { DataWithScore } from 'src/api/core/data/orgcheck-api-data';
 import { SfdcPermissionSet } from 'src/api/data/orgcheck-api-data-permissionset';
 
 export interface SfdcPermissionSetLicense extends DataWithScore {
@@ -55,17 +55,17 @@ export interface SfdcPermissionSetLicense extends DataWithScore {
 
     /**
      * @description Salesforce Id of the permission set associated with the current license
-     * @type {Array<string>}
+     * @type {string[]}
      * @public
      */
-    permissionSetIds: Array<string>;
+    permissionSetIds: string[];
 
     /**
      * @description Corresponding references of the permission set associated with the current license
-     * @type {Array<SfdcPermissionSet>}
+     * @type {SfdcPermissionSet[]}
      * @public
      */
-    permissionSetRefs: Array<SfdcPermissionSet>;
+    permissionSetRefs: SfdcPermissionSet[];
 
     /**
      * @description Number of distinct users assigned to the permission set license

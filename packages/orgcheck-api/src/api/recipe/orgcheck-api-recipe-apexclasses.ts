@@ -1,15 +1,15 @@
-import { ServedRecipe } from 'src/api/core/orgcheck-api-recipe';
+import { ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
-import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
-import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
+import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
+import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SfdcApexClass }from 'src/api/data/orgcheck-api-data-apexclass';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 import { ApexClassesTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-apexclasses';
 import { ApexTestsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-apextests';
 import { ApexUncompiledTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-apexuncompiled';
-import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
+import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 
 abstract class AbstractRecipeApexClasses implements ServedRecipe<SfdcApexClass[], Table> {
 
@@ -60,7 +60,7 @@ abstract class AbstractRecipeApexClasses implements ServedRecipe<SfdcApexClass[]
         if (!apexClasses) throw new Error(`RecipeApexClasses: Data from dataset alias 'APEXCLASSES' was undefined.`);
 
         // Augment and filter data
-        const array: Array<SfdcApexClass> = [];
+        const array: SfdcApexClass[] = [];
         await Processor.forEach(apexClasses, async (apexClass: SfdcApexClass) => {            
             // Augment data
             const results = await Promise.all([

@@ -1,4 +1,4 @@
-import { DataDependenciesFactory } from 'src/api/core/orgcheck-api-data-dependencies-factory';
+import { DataDependenciesFactory } from 'src/api/core/data/orgcheck-api-data-dependencies-factory';
 
 const APEX_TYPE = 'ApexClass';
 const CUSTOMFIELD_TYPE = 'CustomField';

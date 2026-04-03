@@ -1,5 +1,5 @@
-import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
-import { DataWithScoreAndDependencies } from 'src/api/core/orgcheck-api-data';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
+import { DataWithScoreAndDependencies } from 'src/api/core/data/orgcheck-api-data';
 
 export interface SfdcCustomTab extends DataWithScoreAndDependencies {
 
@@ -40,17 +40,17 @@ export interface SfdcCustomTab extends DataWithScoreAndDependencies {
 
     /**
      * @description Unique list of hard coded Salesforce URLs in this item
-     * @type {Array<string>}
+     * @type {string[]}
      * @public
      */
-    hardCodedURLs: Array<string>;
+    hardCodedURLs: string[];
 
     /**
      * @description Unique list of hard coded Salesforce IDs in this item
-     * @type {Array<string>}
+     * @type {string[]}
      * @public
      */
-    hardCodedIDs: Array<string>;
+    hardCodedIDs: string[];
 
     /**
      * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.

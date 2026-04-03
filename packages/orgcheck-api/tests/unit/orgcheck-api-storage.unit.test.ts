@@ -1,4 +1,4 @@
-import { Storage } from 'src/api/core/orgcheck-api-storage-impl';
+import { Storage } from 'src/api/core/cache/orgcheck-api-storage-impl';
 
 describe('tests.api.unit.Storage', () => {
     it('checks if the storage implementation runs correctly', async () => {

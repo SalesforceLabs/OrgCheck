@@ -1,17 +1,17 @@
-import { SalesforceUsageInformationIntf } from 'src/api/core/orgcheck-api-limit-usageinformation';
-import { LoggerSetup } from 'src/api/core/orgcheck-api-setup-logger';
-import { SalesforceManagerSetup } from 'src/api/core/orgcheck-api-setup-salesforcemanager';
-import { StorageSetup } from 'src/api/core/orgcheck-api-setup-storage';
+import { SalesforceUsageInformationIntf } from 'src/api/core/salesforce/orgcheck-api-limit-usageinformation';
+import { LoggerSetup } from 'src/api/core/setup/orgcheck-api-setup-logger';
+import { SalesforceManagerSetup } from 'src/api/core/setup/orgcheck-api-setup-salesforcemanager';
+import { StorageSetup } from 'src/api/core/setup/orgcheck-api-setup-storage';
 import { SfdcObject } from 'src/api/data/orgcheck-api-data-object';
 import { SfdcObjectType } from 'src/api/data/orgcheck-api-data-objecttype';
 import { SfdcOrganization } from 'src/api/data/orgcheck-api-data-organization';
 import { SfdcPackage } from 'src/api/data/orgcheck-api-data-package';
 import { CacheItem } from 'src/api/data/orgcheck-api-data-cacheitem';
 import { SfdcObjectAsTable } from 'src/api/recipe/orgcheck-api-recipe-object';
-import { RecipeAliases } from 'src/api/core/orgcheck-api-recipes-aliases';
-import { Data } from 'src/api/core/orgcheck-api-data';
-import { DataCollectionStatisticsIntf } from 'src/api/core/orgcheck-api-data-datacollectionstats';
-import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
+import { RecipeAliases } from 'src/api/core/recipe/orgcheck-api-recipes-aliases';
+import { Data } from 'src/api/core/data/orgcheck-api-data';
+import { DataCollectionStatisticsIntf } from 'src/api/core/data/orgcheck-api-data-datacollectionstats';
+import { DataMatrixIntf } from 'src/api/core/data/orgcheck-api-data-matrix';
 import { Table } from 'src/ui/table/orgcheck-ui-table';
 
 export interface ApiSetup { 
@@ -216,7 +216,7 @@ export interface ApiIntf {
 
     prepareData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string): Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]>;
 
-    serveData(alias: RecipeAliases, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<Table | SfdcObjectAsTable>;
+    serveData(alias: RecipeAliases, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<Table | SfdcObjectAsTable | Table[]>;
 
     titlesForAllData(): Map<RecipeAliases, string>;
 

@@ -1,7 +1,7 @@
 import jsforce from 'tests/utils/orgcheck-api-jsforce-mock.utility';
 import fflate from 'tests/utils/orgcheck-api-fflate-mock.utility';
 import { createAPIforUnitTests } from 'tests/utils/orgcheck-api-for-unit-tests-utility';
-import { RecipeAliases } from 'src/api/core/orgcheck-api-recipes-aliases';
+import { RecipeAliases } from 'src/api/core/recipe/orgcheck-api-recipes-aliases';
 
 describe('tests.api.API', () => {
 

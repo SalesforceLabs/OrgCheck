@@ -1,7 +1,7 @@
-import { Data } from 'src/api/core/orgcheck-api-data';
-import { DataFactoryIntf } from 'src/api/core/orgcheck-api-datafactory';
-import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
-import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
+import { Data } from 'src/api/core/data/orgcheck-api-data';
+import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
+import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
+import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 
 /**
  * @description Base class for all datasets

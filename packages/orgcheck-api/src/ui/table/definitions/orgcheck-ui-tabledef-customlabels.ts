@@ -1,16 +1,16 @@
-import { ColumnType } from "src/ui/table/column/orgcheck-ui-table-columntype";
-import { TableDefinition } from "src/ui/table/orgcheck-ui-table-definition";
-import { SortOrder } from "src/ui/table/orgcheck-ui-table-sortorder";
-import { TableColumn } from "src/ui/table/column/orgcheck-ui-table-column";
-import { SalesforceMetadataTypes } from "src/api/core/orgcheck-api-salesforce-metadatatypes";
+import { ColumnType } from 'src/ui/table/column/orgcheck-ui-table-columntype';
+import { TableDefinition } from 'src/ui/table/orgcheck-ui-table-definition';
+import { SortOrder } from 'src/ui/table/orgcheck-ui-table-sortorder';
+import { TableColumn } from 'src/ui/table/column/orgcheck-ui-table-column';
+import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
 
 export class CustomLabelsTableDefinition implements TableDefinition {
     
     /**
      * @description List of columns in a table
-     * @type {Array<TableColumn>}
+     * @type {TableColumn[]}
      */
-    columns: Array<TableColumn> = [
+    columns: TableColumn[] = [
         { label: '#',                   type: ColumnType.IDX },
         { label: 'Score',               type: ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
         { label: 'Name',                type: ColumnType.URL, data: { value: 'url', label: 'name' }},

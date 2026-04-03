@@ -1,5 +1,5 @@
-import { StorageIntf } from 'src/api/core/orgcheck-api-storage';
-import { StorageSetup } from 'src/api/core/orgcheck-api-setup-storage';
+import { StorageIntf } from 'src/api/core/cache/orgcheck-api-storage';
+import { StorageSetup } from 'src/api/core/setup/orgcheck-api-setup-storage';
 
 /**
  * @description Web Storage implementation of the Storage Interface
@@ -51,9 +51,9 @@ export class Storage implements StorageIntf {
     
     /**
      * @description Get all the keys in the storage
-     * @returns {Array<string>} List of keys
+     * @returns {string[]} List of keys
      */
-    public keys(): Array<string> {  
+    public keys(): string[] {  
         const keys: string[] = []; 
         for (let i = 0; i < this._storage?.length(); i++) {
             const key = this._storage.key(i);

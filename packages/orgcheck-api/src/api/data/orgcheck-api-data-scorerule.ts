@@ -1,5 +1,5 @@
-import { Data } from "src/api/core/orgcheck-api-data";
-import { DataAliases } from "src/api/core/orgcheck-api-data-aliases";
+import { Data } from 'src/api/core/data/orgcheck-api-data';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 
 /**
  * @description Org Check "score rule" used to qualify if an item is bad or not
@@ -51,10 +51,10 @@ export interface ScoreRule extends Data {
 
     /**
      * @description For which data this rule is applicable?
-     * @type {Array<any>}
+     * @type {any[]}
      * @public
      */    
-    applicable: Array<DataAliases>;
+    applicable: DataAliases[];
 
     /**
      * @description Category of the rule

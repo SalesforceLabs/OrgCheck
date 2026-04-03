@@ -64,14 +64,14 @@ export interface DataDependencies {
 
     /** 
      * @description List of dependencies between items
-     * @type {Array<DataDependency>} 
+     * @type {DataDependency[]} 
      * @public
      */
     records: DataDependency[];
     
     /** 
      * @description List of errors from system, if any
-     * @type {Array<string>} 
+     * @type {string[]} 
      * @public
      */
     errors: string[];
@@ -125,14 +125,14 @@ export interface DataDependenciesForOneItem {
 
     /**
      * @description List of items that the main item (identified by the given WhatId) is using
-     * @type {Array<DataDependencyItem>}
+     * @type {DataDependencyItem[]}
      * @public
      */
     using: DataDependencyItem[];
 
     /**
      * @description List of items that are using the main item (identified by the given WhatId)
-     * @type {Array<DataDependencyItem>}
+     * @type {DataDependencyItem[]}
      * @public
      */
     referenced: DataDependencyItem[];

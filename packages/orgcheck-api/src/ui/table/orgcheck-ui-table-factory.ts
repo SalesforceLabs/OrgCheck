@@ -1,9 +1,9 @@
-import { ExportedTable, Table } from "src/ui/table/orgcheck-ui-table";
-import { ColumnType } from "src/ui/table/column/orgcheck-ui-table-columntype";
-import { SortOrder } from "src/ui/table/orgcheck-ui-table-sortorder";
-import { TableDefinition } from "src/ui/table/orgcheck-ui-table-definition";
-import { RowsFactory } from "src/ui/table/row/orgcheck-ui-table-rowsfactory";
-import { SecretSauce } from "src/api/core/orgcheck-api-secretsauce";
+import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
+import { ColumnType } from 'src/ui/table/column/orgcheck-ui-table-columntype';
+import { SortOrder } from 'src/ui/table/orgcheck-ui-table-sortorder';
+import { TableDefinition } from 'src/ui/table/orgcheck-ui-table-definition';
+import { RowsFactory } from 'src/ui/table/row/orgcheck-ui-table-rowsfactory';
+import { SecretSauce } from 'src/api/core/orgcheck-api-secretsauce';
 
 export class TableFactory {
 
@@ -154,7 +154,7 @@ export class TableFactory {
         // Parsing rows and cells
         table.rows.forEach((row) => {
             // Add the row in the first table
-            const exportRow: Array<string> = [];
+            const exportRow: string[] = [];
             row.cells?.forEach((cell) => {
                 if (cell?.typeofindex === true) { // for INDEX typed cell, we set the row's index
                     exportRow.push(`${row?.index}`);

@@ -1,10 +1,10 @@
-import { ServedRecipe } from 'src/api/core/orgcheck-api-recipe';
+import { ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
-import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
-import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
-import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
+import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
+import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
+import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SfdcCustomLabel }from 'src/api/data/orgcheck-api-data-customlabel';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 import { CustomLabelsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-customlabels';
@@ -56,7 +56,7 @@ export class RecipeCustomLabels implements ServedRecipe<SfdcCustomLabel[], Table
         if (!customLabels) throw new Error(`RecipeCustomLabels: Data from dataset alias 'CUSTOMLABELS' was undefined.`);
 
         // Filter data
-        const array: Array<SfdcCustomLabel> = [];
+        const array: SfdcCustomLabel[] = [];
         await Processor.forEach(customLabels, async (customLabel: SfdcCustomLabel) => {
             if (namespace === OrgCheckGlobalParameter.ALL_VALUES || customLabel.package === namespace) {
                 array.push(customLabel);

@@ -1,4 +1,4 @@
-import { SalesforceManager } from 'src/api/core/orgcheck-api-salesforcemanager-impl';
+import { SalesforceManager } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager-impl';
 import { SimpleLoggerMock_DoingNothing } from 'tests/utils/orgcheck-api-logger-mock.utility';
 import jsforce from 'tests/utils/orgcheck-api-jsforce-mock.utility';
 

@@ -165,7 +165,7 @@ export default class OrgcheckGraphics extends LightningElement {
 
   /**
    * @description List of color to use in the legend (in case the graphic is a hierarchical one)
-   * @type {Array<{name: string, color: string}>}
+   * @type {{name: string, color: string}[]}
    * @public
    */
   @api hierarchyBoxColorLegend = [];
@@ -228,7 +228,7 @@ export default class OrgcheckGraphics extends LightningElement {
 
   /**
    * @description Pie categories to use in legend
-   * @type {Array<{name: string, value: number, color: string, cssStyle: string}>}
+   * @type {{name: string, value: number, color: string, cssStyle: string}[]}
    * @public
    */
   pieCategories = [];
@@ -242,7 +242,7 @@ export default class OrgcheckGraphics extends LightningElement {
 
   /**
    * @description Hierarchy legends to use
-   * @type {Array<{name: string, color: string, cssStyle: string}>}
+   * @type {{name: string, color: string, cssStyle: string}[]}
    * @public
    */
   hierarchyLegend = [];

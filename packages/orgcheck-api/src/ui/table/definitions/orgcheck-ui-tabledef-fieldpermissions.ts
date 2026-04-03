@@ -1,9 +1,9 @@
-import { ColumnType } from "src/ui/table/column/orgcheck-ui-table-columntype";
-import { TableDefinition } from "src/ui/table/orgcheck-ui-table-definition";
-import { SortOrder } from "src/ui/table/orgcheck-ui-table-sortorder";
-import { TableColumn } from "src/ui/table/column/orgcheck-ui-table-column";
-import { DataMatrixIntf } from "src/api/core/orgcheck-api-data-matrix";
-import { Orientation } from "../column/orgcheck-ui-table-orientation";
+import { ColumnType } from 'src/ui/table/column/orgcheck-ui-table-columntype';
+import { TableDefinition } from 'src/ui/table/orgcheck-ui-table-definition';
+import { SortOrder } from 'src/ui/table/orgcheck-ui-table-sortorder';
+import { TableColumn } from 'src/ui/table/column/orgcheck-ui-table-column';
+import { DataMatrixIntf } from 'src/api/core/data/orgcheck-api-data-matrix';
+import { Orientation } from '../column/orgcheck-ui-table-orientation';
 
 export class FieldPermissionsTableDefinition implements TableDefinition {
     
@@ -19,10 +19,10 @@ export class FieldPermissionsTableDefinition implements TableDefinition {
 
     /**
      * @description List of columns in a table
-     * @type {Array<TableColumn>}
+     * @type {TableColumn[]}
      */
-    get columns(): Array<TableColumn> { 
-        const columns: Array<TableColumn> = [
+    get columns(): TableColumn[] { 
+        const columns: TableColumn[] = [
             { label: 'Parent',  type: ColumnType.URL, data: { value: 'header.url', label: 'header.name' }},
             { label: 'Package', type: ColumnType.TXT, data: { value: 'header.package' }},
             { label: 'Type',    type: ColumnType.TXT, data: { value: 'header.type' }},

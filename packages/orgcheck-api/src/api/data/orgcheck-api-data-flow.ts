@@ -1,5 +1,5 @@
-import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
-import { DataWithScoreAndDependencies, DataWithoutScore } from 'src/api/core/orgcheck-api-data';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
+import { DataWithScoreAndDependencies, DataWithoutScore } from 'src/api/core/data/orgcheck-api-data';
 
 /**
  * Represents a Flow Definition and its Flow Version children
@@ -280,8 +280,8 @@ export interface SfdcFlowVersion extends DataWithoutScore {
 
     /**
      * @description LFS Violations (list of rule names) for this flow version
-     * @type {Array<string>}
+     * @type {string[]}
      * @public
      */
-    lfsViolations: Array<string>;
+    lfsViolations: string[];
 }

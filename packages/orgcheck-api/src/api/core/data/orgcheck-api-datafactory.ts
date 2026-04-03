@@ -1,4 +1,4 @@
-import { DataDependencies } from 'src/api/core/orgcheck-api-data-dependencies';
+import { DataDependencies } from 'src/api/core/data/orgcheck-api-data-dependencies';
 
 /**
  * @description Data factory interface
@@ -35,9 +35,9 @@ export interface DataFactoryInstanceCreateSetup_WithDependencies extends DataFac
 
     /** 
      * @description Data Dependencies for the new instance
-     * @type {Array<string>}
+     * @type {string[]}
      */
-    dependencyIdFields: Array<string>;
+    dependencyIdFields: string[];
 }
 
 /**

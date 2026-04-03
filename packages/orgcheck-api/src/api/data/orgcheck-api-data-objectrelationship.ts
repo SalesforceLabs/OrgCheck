@@ -1,5 +1,5 @@
-import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
-import { DataWithoutScore } from 'src/api/core/orgcheck-api-data';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
+import { DataWithoutScore } from 'src/api/core/data/orgcheck-api-data';
 
 export interface SfdcObjectRelationShip extends DataWithoutScore {
     

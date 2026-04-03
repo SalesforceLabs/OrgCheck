@@ -1,10 +1,10 @@
 import { SObjectTypes } from 'src/api/data/orgcheck-api-data-objecttype';
-import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
-import { SalesforceMetadataTypes } from 'src/api/core/orgcheck-api-salesforce-metadatatypes';
-import { SalesforceWatchDog, SalesforceUsageInformation } from 'src/api/core/orgcheck-api-salesforce-watchdog';
-import { SalesforceError, SalesforceManagerIntf, SalesforceMetadataRequest, SalesforceQueryRequest } from 'src/api/core/orgcheck-api-salesforcemanager';
+import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
+import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
+import { SalesforceWatchDog, SalesforceUsageInformation } from 'src/api/core/salesforce/orgcheck-api-salesforce-watchdog';
+import { SalesforceError, SalesforceManagerIntf, SalesforceMetadataRequest, SalesforceQueryRequest } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SecretSauce } from 'src/api/core/orgcheck-api-secretsauce';
-import { SalesforceManagerSetup } from 'src/api/core/orgcheck-api-setup-salesforcemanager';
+import { SalesforceManagerSetup } from 'src/api/core/setup/orgcheck-api-setup-salesforcemanager';
 
 /**
  * @description Maximum number of Ids that is contained per DAPI query
@@ -148,8 +148,15 @@ export class SalesforceManager implements SalesforceManagerIntf {
             }
 
             // 2. Create a JsForce Connection to the current salesforce org
-            // @ts-ignore
-            const jsforce = typeof window !== 'undefined' ? window?.jsforce : globalThis?.jsforce ?? null;
+            // In LWS (Lightning Web Security), window is a virtual proxy and assignments made by
+            // loadScript-loaded libraries to window.jsforce are not visible across compartments.
+            // Salesforce's recommended fix is to use `self`, which refers to the actual global
+            // scope shared within the LWS sandbox.
+            // eslint-disable-next-line no-undef
+            const jsforce = (typeof self !== 'undefined' && (self as any)?.jsforce) 
+                          || (typeof window !== 'undefined' && (window as any)?.jsforce) 
+                          || (typeof globalThis !== 'undefined' && (globalThis as any)?.jsforce) 
+                          || null;
             if (!jsforce) {
                 throw new Error(`jsforce not available`);
             }
@@ -302,18 +309,18 @@ export class SalesforceManager implements SalesforceManagerIntf {
     /**
      * @param {boolean | undefined} useTooling - Use the tooling or not
      * @param {string} query - SOQL query string
-     * @param {Array<string> | undefined} byPasses - List of error codes to by-pass
+     * @param {string[] | undefined} byPasses - List of error codes to by-pass
      * @param {Function} callback - Callback function
-     * @returns {Promise<Array<any>>} List of records
+     * @returns {Promise<any[]>} List of records
      * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @private
      */
-    private async _standardSOQLQuery(useTooling: boolean | undefined, query: string, byPasses: Array<string> | undefined, callback: Function): Promise<Array<any>> {
+    private async _standardSOQLQuery(useTooling: boolean | undefined, query: string, byPasses: string[] | undefined, callback: Function): Promise<Array<any>> {
         // Each query can use the tooling or not, se based on that flag we'll use the right JsForce connection
         const conn = useTooling === true ? this._connection.tooling : this._connection;
         // the records to return
-        const allRecords: Array<any> = [];
+        const allRecords: any[] = [];
         // If `locator` is undefined, it means we are calling doNextQuery() the first time
         const doNextQuery = async (locator?: string) => {
             // Let's start to check if we are 'allowed' to use the Salesforce API...
@@ -372,17 +379,17 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @param {string} query - SOQL query string
      * @param {string} field - Field name to use for the custom QueryMore
      * @param {Function} callback - Callback function
-     * @returns {Promise<Array<any>>} List of records
+     * @returns {Promise<any[]>} List of records
      * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @private
      */
-    private async _customSOQLQuery(useTooling: boolean | undefined, query: string, field: string, callback: Function): Promise<Array<any>> {
+    private async _customSOQLQuery(useTooling: boolean | undefined, query: string, field: string, callback: Function): Promise<any[]> {
         // Each query can use the tooling or not, se based on that flag we'll use the right JsForce connection
         const conn = useTooling === true ? this._connection.tooling : this._connection;
         // the records to return
-        /** @type {Array<any>} */
-        const allRecords: Array<any> = [];
+        /** @type {any[]} */
+        const allRecords: any[] = [];
         const indexOfFromStatment = query.indexOf(' FROM ');
         const indexOfGroupByStatment = query.indexOf(' GROUP BY ');
         const isWhereStatmentAlreadyUsed = query.indexOf(' WHERE ') !== -1;        
@@ -481,20 +488,20 @@ export class SalesforceManager implements SalesforceManagerIntf {
 
     /**
      * @see SalesforceManagerIntf.soqlQuery
-     * @param {Array<SalesforceQueryRequest>} queries - List of queries
+     * @param {SalesforceQueryRequest[]} queries - List of queries
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Array<Array<any>>>} List of list records -- order is the same as queries.
+     * @returns {Promise<Array<any[]>} List of list records -- order is the same as queries.
      * @throws {SalesforceError} If an error occurs during the query
      * @public
      */
-    public async soqlQuery(queries: Array<SalesforceQueryRequest>, logger: SimpleLoggerIntf): Promise<Array<Array<any>>> {
+    public async soqlQuery(queries: SalesforceQueryRequest[], logger: SimpleLoggerIntf): Promise<Array<Array<any>>> {
         // Now we can start, log some message
         logger?.log(`Preparing ${queries?.length} SOQL ${queries?.length>1?'queries':'query'}...`);
         let nbRecords = 0, nbQueryMore = 0;
-        const pendingEntities: Array<string> = [], 
-              doneEntities: Array<string> = [], 
-              errorEntities: Array<string> = [];
-        const errors: Array<Error> = [];
+        const pendingEntities: string[] = [], 
+              doneEntities: string[] = [], 
+              errorEntities: string[] = [];
+        const errors: Error[] = [];
         const updateLogInformation = () => {
             logger?.log(
                 `Processing ${queries?.length} SOQL ${queries?.length>1?'queries':'query'}... `+
@@ -554,14 +561,14 @@ export class SalesforceManager implements SalesforceManagerIntf {
 
     /**
      * @description Method to call a list of SOSL queries (tooling or not)
-     * @param {Array<SalesforceQueryRequest | any>} queries - List of queries
+     * @param {SalesforceQueryRequest | any[]} queries - List of queries
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Array<Array<any>>>} List of list records -- order is the same as queries.
+     * @returns {Promise<Array<any[]>} List of list records -- order is the same as queries.
      * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @public
      */
-    public async soslQuery(queries: Array<SalesforceQueryRequest | any>, logger: SimpleLoggerIntf): Promise<Array<Array<any>>> { 
+    public async soslQuery(queries: SalesforceQueryRequest[] | any[], logger: SimpleLoggerIntf): Promise<Array<Array<any>>> { 
         // Now we can start, log some message
         logger?.log(`Preparing ${queries?.length} SOSL ${queries?.length>1?'queries':'query'}...`);
         const allSettledPromisesResult = await Promise.allSettled(queries.map(async (query) => {
@@ -597,14 +604,14 @@ export class SalesforceManager implements SalesforceManagerIntf {
 
     /**
      * @see SalesforceManagerIntf.dependenciesQuery
-     * @param {Array<string>} ids - List of salesforce IDs
+     * @param {string[]} ids - List of salesforce IDs
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<{ records: Array<any>, errors: Array<string> }>} Dependencies data
+     * @returns {Promise<{ records: any>, errors: Array<string> }[]} Dependencies data
      * @throws {SalesforceError} If an error occurs during the query
      * @public
      * @async
      */
-    async dependenciesQuery(ids: Array<string>, logger: SimpleLoggerIntf): Promise<{ records: Array<any>; errors: Array<string>; }> {
+    async dependenciesQuery(ids: string[], logger: SimpleLoggerIntf): Promise<{ records: Array<any>; errors: Array<string>; }> {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         // Now we can start, log some message
@@ -672,10 +679,10 @@ export class SalesforceManager implements SalesforceManagerIntf {
             allResults.push(... results.filter((result) => result !== undefined));
         }
         logger?.log(`Got all the results`);
-        /** @type {Array<any>} */
-        const dependenciesRecords: Array<any> = []; // dependencies records
-        /** @type {Array<string>} */
-        const idsInError: Array<string> = []; // ids contained in a batch that has an error
+        /** @type {any[]} */
+        const dependenciesRecords: any[] = []; // dependencies records
+        /** @type {string[]} */
+        const idsInError: string[] = []; // ids contained in a batch that has an error
         const duplicateCheck = new Set(); // Using a set to filter duplicates
         allResults.forEach((result) => {
             result.compositeResponse.forEach((response: any) => {
@@ -729,14 +736,14 @@ export class SalesforceManager implements SalesforceManagerIntf {
 
     /**
      * @see SalesforceManagerIntf.readMetadata
-     * @param {Array<SalesforceMetadataRequest>} metadatas - Information of what metadata you want to retrieve
+     * @param {SalesforceMetadataRequest[]} metadatas - Information of what metadata you want to retrieve
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Map<string, Array<any>>>} Information by metadata type
+     * @returns {Promise<Map<string, any[]>} Information by metadata type
      * @throws {SalesforceError} If an error occurs during the metadata read
      * @public
      * @async
      */
-    public async readMetadata(metadatas: Array<SalesforceMetadataRequest>, logger: SimpleLoggerIntf): Promise<Map<string, Array<any>>> {
+    public async readMetadata(metadatas: SalesforceMetadataRequest[], logger: SimpleLoggerIntf): Promise<Map<string, Array<any>>> {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         // Now we can start, log some message
@@ -777,8 +784,8 @@ export class SalesforceManager implements SalesforceManagerIntf {
         // All the promises to list the types have been done and potentially altered the 'metadatas' array
         // At this point, no more wildcard, only types and legitime member values in 'metadatas'.
         // Second, we want to read the metatda for these types and members
-        /** @type {Array<Promise<void>>} */
-        const promises: Array<Promise<void>> = [];
+        /** @type {Promise<void>[]} */
+        const promises: Promise<void>[] = [];
         const response = new Map(); 
         metadatas.forEach((metadata) => {
             // Init the response array for this type 
@@ -830,19 +837,19 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @param {any[]} ids - List of salesforce Ids
      * @param {string[]} byPasses - List of bypass types
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Array<any>>} List of records
+     * @returns {Promise<any[]>} List of records
      * @throws {SalesforceError} If an error occurs during the query
      * @public
      * @async
      */
-    public async readMetadataAtScale(type: string, ids: any[], byPasses: string[], logger: SimpleLoggerIntf): Promise<Array<any>> {
+    public async readMetadataAtScale(type: string, ids: any[], byPasses: string[], logger: SimpleLoggerIntf): Promise<any[]> {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         logger?.log(`Reading metadata at scale for type=${type} and ${ids?.length ?? 0} id(s).`);
         // if no ids then just return empty array and basta!
         if ((ids?.length ?? 0) === 0) return [];
-        /** @type {Array<any>} */
-        const bodies: Array<any> = [];
+        /** @type {any[]} */
+        const bodies: any[] = [];
         /** @type {any} */
         let currentBody: any;
         ids.forEach((id, i) => {
@@ -896,8 +903,8 @@ export class SalesforceManager implements SalesforceManagerIntf {
             }));
             allResults.push(... results.filter((result) => result !== undefined)); // only add the non empty results
         }
-        /** @type {Array<any>} */
-        const records: Array<any> = [];
+        /** @type {any[]} */
+        const records: any[] = [];
         allResults.forEach((result) => {
             result.compositeResponse.forEach((/** @type {any} */ response: any) => {
                 if (response.httpStatusCode === 200) {
@@ -929,12 +936,12 @@ export class SalesforceManager implements SalesforceManagerIntf {
     /**
      * @see SalesforceManagerIntf.describeGlobal
      * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Array<any>>} List of records
+     * @returns {Promise<any[]>} List of records
      * @throws {SalesforceError} If an error occurs during the query
      * @public
      * @async
      */
-    public async describeGlobal(logger: SimpleLoggerIntf): Promise<Array<any>> {
+    public async describeGlobal(logger: SimpleLoggerIntf): Promise<any[]> {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         logger?.log(`Describing globally all sobjects in the org.`);
@@ -1034,14 +1041,14 @@ export class SalesforceManager implements SalesforceManagerIntf {
 
     /**
      * @see SalesforceManagerIntf.compileClasses
-     * @param {Array<string>} apexClassIds - List of Apex Class IDs
+     * @param {string[]} apexClassIds - List of Apex Class IDs
      * @param {SimpleLoggerIntf} [logger] - Logger to use
-     * @returns {Promise<Map<string, { isSuccess: boolean, reasons?: Array<string>}>>} List of results by Apex Class ID
+     * @returns {Promise<Map<string, { isSuccess: boolean, reasons?: string[]}>} List of results by Apex Class ID
      * @throws {SalesforceError} If an error occurs during the query
      * @public
      * @async
      */ 
-    public async compileClasses(apexClassIds: Array<string>, logger: SimpleLoggerIntf): Promise<Map<string, { isSuccess: boolean; reasons?: Array<string>; }>> {
+    public async compileClasses(apexClassIds: string[], logger: SimpleLoggerIntf): Promise<Map<string, { isSuccess: boolean; reasons?: string[]; }>> {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         logger?.log(`Compiling all classes in this org.`);
@@ -1050,8 +1057,8 @@ export class SalesforceManager implements SalesforceManagerIntf {
         // Check another time the limit
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         const timestamp = Date.now();
-        /** @type {Array<any>} */
-        const bodies: Array<any> = [];
+        /** @type {any[]} */
+        const bodies: any[] = [];
         /** @type {any} */
         let currentBody: any;
         let countBatches = 0;
@@ -1099,8 +1106,8 @@ export class SalesforceManager implements SalesforceManagerIntf {
         // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
         this._watchDog?.afterRequest(); // if limit has been reached, an error will be thrown here
         // Map the responses to finalResult
-        /** @type {Map<string, { isSuccess: boolean, reasons?: Array<string>}>} */
-        const finalResult: Map<string, { isSuccess: boolean; reasons?: Array<string>; }> = new Map();
+        /** @type {Map<string, { isSuccess: boolean, reasons?: string>}[]} */
+        const finalResult: Map<string, { isSuccess: boolean; reasons?: string[]; }> = new Map();
         responses?.forEach(response => 
             response.compositeResponse?.filter(compositeResponse => compositeResponse?.referenceId?.startsWith('01p'))
                 .forEach(compositeResponse => {
@@ -1132,10 +1139,10 @@ export class SalesforceManager implements SalesforceManagerIntf {
 /** 
  * @description Metadata API returns an array or a single object!
  * @param {any} data - Data to transform
- * @returns {Array<any>} If data is not an array, created array containing the data, or the given data
+ * @returns {any[]} If data is not an array, created array containing the data, or the given data
  * @private
  */
-const MAKE_IT_AN_ARRAY = (/** @type {any} */ data: any): Array<any> => data ? (Array.isArray(data) ? data : [ data ]) : []; 
+const MAKE_IT_AN_ARRAY = (data: any): any[] => data ? (Array.isArray(data) ? data : [ data ]) : []; 
 
 /**
  * @description Activity object that is not present in the describe API

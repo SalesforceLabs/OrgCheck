@@ -1,5 +1,5 @@
 import { LightningElement, api, track } from 'lwc';
-import OrgCheckStaticResource from "@salesforce/resourceUrl/OrgCheck_SR";
+import OrgCheckStaticResource from '@salesforce/resourceUrl/OrgCheck_SR';
 import { loadScript } from 'lightning/platformResourceLoader';
 
 
@@ -218,7 +218,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
 
     /**
      * @description Column headers -- tracked so any change in css can be reflected in table
-     * @type {Array<{label: string, cssClass: string, isIterative: boolean}>}
+     * @type {{label: string, cssClass: string, isIterative: boolean}[]}
      */
     @track columnHeaders = [];
 
@@ -237,9 +237,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     /**
      * @description Internal properties without LWC reactivity
      * @property allRows {Array} Array of all rows (even the one that are not visible because of the filter or infinite scrolling)
-     * @property tableDefinition {Object} Definition of the table (columns, ordering, etc...)
-     * @property sortingIndex {number} Index of the column used for sorting
-     * @property sortingOrder {string} Order of the sorting (asc or desc)
+     * @property table {Object} The whole table information as it is set by the caller with the "table" property (headers, rows, etc...)
      * @property filteringSearchInput {string} Current value of the search input which is used by the filter method
      */
     _private_properties = {
@@ -253,8 +251,6 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @param {{ definition: { columns: any[]; }; rows: any[]; }} table
      */
     @api set table(table) {
-
-        this._private_properties.table = table;
 
         // Set the column headers based on the table definition
         // We add some properties to the headers
@@ -282,16 +278,27 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
         }
         
         // Parse the rows and add some css style and keys
-        this._private_properties.allRows = table?.rows.map((/* @type {Row} */ row, /* @type {number} */ rowIndex) => {
-            row.key = `${rowIndex}`;
-            row.cssClass = row.score > 0 ? 'bad' : '';
-            row.cells.forEach((cell, cellIndex) => {
+        const allRows = table?.rows.map((row, rowIndex) => ({
+            key: `${rowIndex}`,
+            cssClass: row.score > 0 ? 'bad' : '',
+            index: row.index,
+            score: row.score,
+            name: row.name,
+            badFields: row.badFields ? [... row.badFields] : [],
+            badReasonIds: row.badReasonIds ? [... row.badReasonIds] : [],
+            isVisible: row.isVisible ?? true,
+            cells: row.cells.map((cell, cellIndex) => {
                 const isCellBad = row.badFields?.includes(table?.definition?.columns[cellIndex]?.label) ?? false;
-                cell.key = `${rowIndex}.${cellIndex}`;
-                cell.cssClass = `${this.isAllCellWrapped === true ? 'wrapped' : ''} ${isCellBad ? 'bad' : ''}`;
-            });
-            return row;
-        }); 
+                return {
+                    key: `${rowIndex}.${cellIndex}`,
+                    cssClass: `${this.isAllCellWrapped === true ? 'wrapped' : ''} ${isCellBad ? 'bad' : ''}`,
+                    ...cell
+                }
+            }) ?? [],
+        })) ?? []; 
+
+        this._private_properties.allRows = allRows;
+        this._private_properties.table = table ? { ...table, rows: allRows } : undefined;
 
         // Sort, filter and set the visible rows
         this._sortAllRows();

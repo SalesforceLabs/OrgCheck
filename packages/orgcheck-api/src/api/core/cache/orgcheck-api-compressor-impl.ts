@@ -1,4 +1,4 @@
-import { CompressorIntf } from 'src/api/core/orgcheck-api-compressor';
+import { CompressorIntf } from 'src/api/core/cache/orgcheck-api-compressor';
 
 export class Compressor implements CompressorIntf {
 

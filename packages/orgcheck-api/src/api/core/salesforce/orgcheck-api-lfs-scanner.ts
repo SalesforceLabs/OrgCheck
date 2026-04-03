@@ -37,11 +37,11 @@ export class LFSScanner {
 
     /**
      * @description Scan flows using Lightning Flow Scanner
-     * @param {Array<any>} flowRecords - Flow metadata records from Tooling API
+     * @param {any[]} flowRecords - Flow metadata records from Tooling API
      * @param {Function} CaseSafeId - Function to convert 18-char IDs to 15-char
-     * @returns {Promise<Map<string, Array<any>>>} Map of flow version ID to LFS violations
+     * @returns {Promise<Map<string, any[]>>} Map of flow version ID to LFS violations
      */
-    static async scanFlows(flowRecords: Array<any>, CaseSafeId: Function): Promise<Map<string, Array<any>>> {
+    static async scanFlows(flowRecords: any[], CaseSafeId: Function): Promise<Map<string, any[]>> {
         let results = new Map();
         try {
             // @ts-ignore
@@ -73,10 +73,10 @@ export class LFSScanner {
 
     /**
      * @description Map LFS scan results to OrgCheck format
-     * @param {Array<any>} scanResults - LFS scan results
-     * @returns {Map<string, Array<string>>} Map of flow version ID to violations
+     * @param {any[]} scanResults - LFS scan results
+     * @returns {Map<string, string[]>} Map of flow version ID to violations
      */
-    static mapResults(scanResults: Array<any>): Map<string, Array<string>> {
+    static mapResults(scanResults: any[]): Map<string, string[]> {
         const violationsMap = new Map();
         for (const result of scanResults) {
             const violations = result.ruleResults

@@ -42,9 +42,9 @@ import { SfdcVisualForceComponent } from 'src/api/data/orgcheck-api-data-visualf
 import { SfdcVisualForcePage } from 'src/api/data/orgcheck-api-data-visualforcepage';
 import { SfdcWebLink } from 'src/api/data/orgcheck-api-data-weblink';
 import { SfdcWorkflow } from 'src/api/data/orgcheck-api-data-workflow';
-import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
-import { DataDependenciesFactory } from 'src/api/core/orgcheck-api-data-dependencies-factory';
-import { DataFactoryIntf, DataFactoryInstanceIntf, DataFactoryInstanceCreateSetup, DataFactoryInstanceCreateSetup_WithDependencies } from 'src/api/core/orgcheck-api-datafactory';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
+import { DataDependenciesFactory } from 'src/api/core/data/orgcheck-api-data-dependencies-factory';
+import { DataFactoryIntf, DataFactoryInstanceIntf, DataFactoryInstanceCreateSetup, DataFactoryInstanceCreateSetup_WithDependencies } from 'src/api/core/data/orgcheck-api-datafactory';
 import { SecretSauce } from 'src/api/core/orgcheck-api-secretsauce';
 import { ScoreRule } from 'src/api/data/orgcheck-api-data-scorerule';
 
@@ -162,10 +162,10 @@ export class DataFactoryInstance implements DataFactoryInstanceIntf {
     private _dataAlias: DataAliases;
 
     /**
-     * @type {Array<ScoreRule>} 
+     * @type {ScoreRule[]} 
      * @private
      */
-    private _scoreRules: Array<ScoreRule>;
+    private _scoreRules: ScoreRule[];
 
     /**
      * @type {boolean} 
@@ -182,11 +182,11 @@ export class DataFactoryInstance implements DataFactoryInstanceIntf {
     /**
      * @description Constructor
      * @param {DataAliases} dataAlias - Alias of the data for which we want to create the factory instance
-     * @param {Array<ScoreRule>} scoreRules - The list of score rules to apply on the data
+     * @param {ScoreRule[]} scoreRules - The list of score rules to apply on the data
      * @param {boolean} isDependenciesNeeded - If true, the data will have dependencies information, otherwise it won't
      * @param {Function} caster - The caster method to call
      */
-    constructor(dataAlias: DataAliases, scoreRules: Array<ScoreRule>, isDependenciesNeeded: boolean, caster: Function) {
+    constructor(dataAlias: DataAliases, scoreRules: ScoreRule[], isDependenciesNeeded: boolean, caster: Function) {
         this._dataAlias = dataAlias;
         this._scoreRules = scoreRules;
         this._isDependenciesNeeded = isDependenciesNeeded;

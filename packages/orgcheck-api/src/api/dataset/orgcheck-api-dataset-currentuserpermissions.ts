@@ -1,8 +1,8 @@
-import { DataFactoryIntf } from 'src/api/core/orgcheck-api-datafactory';
-import { Dataset } from 'src/api/core/orgcheck-api-dataset';
+import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
+import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
-import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
-import { SalesforceManagerIntf } from 'src/api/core/orgcheck-api-salesforcemanager';
+import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
+import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 
 export class DatasetCurrentUserPermissions implements Dataset {
 

@@ -1,5 +1,5 @@
-import { StorageIntf } from 'src/api/core/orgcheck-api-storage';
-import { StorageSetup } from 'src/api/core/orgcheck-api-setup-storage';
+import { StorageIntf } from 'src/api/core/cache/orgcheck-api-storage';
+import { StorageSetup } from 'src/api/core/setup/orgcheck-api-setup-storage';
 
 export class StorageMock_BasedOnMap implements StorageIntf {
   _cache = new Map<string, any>();

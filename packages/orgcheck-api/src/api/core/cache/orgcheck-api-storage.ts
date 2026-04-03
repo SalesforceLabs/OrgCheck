@@ -22,7 +22,7 @@ export interface StorageIntf {
 
     /**
      * @description Get all the keys in the storage
-     * @returns {Array<string>} List of keys
+     * @returns {string[]} List of keys
      */
     keys(): string[];
 }

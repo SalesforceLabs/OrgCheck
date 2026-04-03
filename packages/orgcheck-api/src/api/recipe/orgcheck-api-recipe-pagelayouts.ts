@@ -1,10 +1,10 @@
-import { ServedRecipe } from 'src/api/core/orgcheck-api-recipe';
+import { ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
-import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
-import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
-import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
+import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
+import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
+import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SfdcObject }from 'src/api/data/orgcheck-api-data-object';
 import { SfdcPageLayout }from 'src/api/data/orgcheck-api-data-pagelayout';
 import { SfdcObjectType }from 'src/api/data/orgcheck-api-data-objecttype';
@@ -68,7 +68,7 @@ export class RecipePageLayouts implements ServedRecipe<SfdcPageLayout[], Table> 
         if (!pageLayouts) throw new Error(`RecipePageLayouts: Data from dataset alias 'PAGELAYOUTS' was undefined.`);
 
         // Augment and filter data
-        const array: Array<SfdcPageLayout> = [];
+        const array: SfdcPageLayout[] = [];
         await Processor.forEach(pageLayouts, async (pageLayout: SfdcPageLayout) => {
             // Augment data
             const objectRef = objects.get(pageLayout.objectId);

@@ -1,5 +1,5 @@
-import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
-import { DataWithScoreAndDependencies } from 'src/api/core/orgcheck-api-data';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
+import { DataWithScoreAndDependencies } from 'src/api/core/data/orgcheck-api-data';
 
 export interface SfdcVisualForceComponent extends DataWithScoreAndDependencies {
         
@@ -33,17 +33,17 @@ export interface SfdcVisualForceComponent extends DataWithScoreAndDependencies {
 
     /**
      * @description Unique list of hard coded Salesforce URLs in this item
-     * @type {Array<string>}
+     * @type {string[]}
      * @public
      */
-    hardCodedURLs: Array<string>;
+    hardCodedURLs: string[];
 
     /**
      * @description Unique list of hard coded Salesforce IDs in this item
-     * @type {Array<string>}
+     * @type {string[]}
      * @public
      */
-    hardCodedIDs: Array<string>;
+    hardCodedIDs: string[];
         
     /**
      * @description Name of the potential namespace/package where this item comes from. Empty string if none.

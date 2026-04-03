@@ -1,18 +1,18 @@
 import { API } from 'src/api/orgcheck-api-impl';
 import { ApiIntf, ApiSetup } from 'src/api/orgcheck-api';
-import { TableFactory } from './ui/table/orgcheck-ui-table-factory';
+import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
 import { SortOrder } from 'src/ui/table/orgcheck-ui-table-sortorder';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
-import { RecipeAliases } from 'src/api/core/orgcheck-api-recipes-aliases';
+import { RecipeAliases } from 'src/api/core/recipe/orgcheck-api-recipes-aliases';
 
 export type { ApiIntf, ApiSetup } from 'src/api/orgcheck-api';
-export type { LoggerSetup } from 'src/api/core/orgcheck-api-setup-logger';
-export type { StorageSetup } from 'src/api/core/orgcheck-api-setup-storage';
-export type { SalesforceManagerSetup, SalesforceAuthenticationOptions } from 'src/api/core/orgcheck-api-setup-salesforcemanager';
-export type { Data } from 'src/api/core/orgcheck-api-data';
-export type { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
-export type { SalesforceUsageInformationIntf } from 'src/api/core/orgcheck-api-limit-usageinformation';
-export type { RecipeAliases } from 'src/api/core/orgcheck-api-recipes-aliases';
+export type { LoggerSetup } from 'src/api/core/setup/orgcheck-api-setup-logger';
+export type { StorageSetup } from 'src/api/core/setup/orgcheck-api-setup-storage';
+export type { SalesforceManagerSetup, SalesforceAuthenticationOptions } from 'src/api/core/setup/orgcheck-api-setup-salesforcemanager';
+export type { Data } from 'src/api/core/data/orgcheck-api-data';
+export type { DataMatrixIntf } from 'src/api/core/data/orgcheck-api-data-matrix';
+export type { SalesforceUsageInformationIntf } from 'src/api/core/salesforce/orgcheck-api-limit-usageinformation';
+export type { RecipeAliases } from 'src/api/core/recipe/orgcheck-api-recipes-aliases';
 export type { SortOrder } from 'src/ui/table/orgcheck-ui-table-sortorder';
 export type { Table, ExportedTable } from 'src/ui/table/orgcheck-ui-table';
 

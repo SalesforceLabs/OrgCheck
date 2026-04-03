@@ -1,4 +1,4 @@
-import { DataMatrixIntf, DataMatrixRowIntf } from 'src/api/core/orgcheck-api-data-matrix';
+import { DataMatrixIntf, DataMatrixRowIntf } from 'src/api/core/data/orgcheck-api-data-matrix';
 
 /**
  * @description This class represents a factory to create DataMatrixWorking objects.

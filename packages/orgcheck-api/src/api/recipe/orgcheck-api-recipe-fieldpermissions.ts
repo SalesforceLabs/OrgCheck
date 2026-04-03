@@ -1,12 +1,12 @@
-import { ServedRecipe } from 'src/api/core/orgcheck-api-recipe';
+import { ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
-import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
-import { DataMatrixIntf } from 'src/api/core/orgcheck-api-data-matrix';
-import { DataMatrixFactory } from 'src/api/core/orgcheck-api-data-matrix-factory';
-import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
-import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
+import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
+import { DataMatrixIntf } from 'src/api/core/data/orgcheck-api-data-matrix';
+import { DataMatrixFactory } from 'src/api/core/data/orgcheck-api-data-matrix-factory';
+import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
+import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SfdcPermissionSet }from 'src/api/data/orgcheck-api-data-permissionset';
 import { SfdcProfile }from 'src/api/data/orgcheck-api-data-profile';
 import { SfdcFieldPermission }from 'src/api/data/orgcheck-api-data-fieldpermission';

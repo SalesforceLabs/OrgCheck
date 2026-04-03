@@ -1,5 +1,5 @@
-import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
-import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
+import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
+import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { ExportedTable } from 'src/ui/table/orgcheck-ui-table';
 
 /**

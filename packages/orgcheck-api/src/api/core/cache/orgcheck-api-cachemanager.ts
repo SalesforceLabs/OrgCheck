@@ -17,7 +17,7 @@ export interface ItemInCache {
 export interface DataItemInCache extends ItemInCache {
 
     /** 
-     * @type {Array<any>}
+     * @type {any[]}
      */
     content: any[];
 }
@@ -61,7 +61,7 @@ export interface DataCacheManagerIntf {
 
     /**
      * @description Get details of the cache.
-     * @returns {Array<CacheItem> | undefined} an array of objects that contains the name, the type, the size and the creation date of each entry.
+     * @returns {CacheItem[] | undefined} an array of objects that contains the name, the type, the size and the creation date of each entry.
      */
     details(): CacheItem[]
 

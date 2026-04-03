@@ -1,5 +1,5 @@
-import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
-import { DataWithScore } from 'src/api/core/orgcheck-api-data';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
+import { DataWithScore } from 'src/api/core/data/orgcheck-api-data';
 import { SfdcPermissionSet } from 'src/api/data/orgcheck-api-data-permissionset';
 import { SfdcProfile } from 'src/api/data/orgcheck-api-data-profile';
 

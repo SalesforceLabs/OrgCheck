@@ -1,7 +1,7 @@
-import { Recipe } from 'src/api/core/orgcheck-api-recipe';
-import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
-import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
-import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
+import { Recipe } from 'src/api/core/recipe/orgcheck-api-recipe';
+import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
+import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
+import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SfdcPackage }from 'src/api/data/orgcheck-api-data-package';
 
 export class RecipePackages implements Recipe<SfdcPackage[]> {

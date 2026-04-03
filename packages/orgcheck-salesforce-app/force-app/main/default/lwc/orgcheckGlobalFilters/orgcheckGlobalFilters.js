@@ -35,35 +35,35 @@ export default class OrgcheckGlobalFilters extends LightningElement {
 
     /** 
      * @description Package options
-     * @type {Array<Option>}
+     * @type {Option[]}
      * @public
      */
     packageOptions;
 
     /** 
      * @description SObject type options
-     * @type {Array<Option>}
+     * @type {Option[]}
      * @public
      */
     sobjectTypeOptions;
 
     /** 
      * @description SObject name options
-     * @type {Array<Option>}
+     * @type {Option[]}
      * @public
      */
     sobjectApiNameOptions;
 
     /** 
      * @description SObject name original data (used for filtering and generate name options)
-     * @type {Array<any>}
+     * @type {any[]}
      * @public
      */
     sobjectApiNameData;
 
     /** 
      * @description Yes/No options
-     * @type {Array<Option>}
+     * @type {Option[]}
      * @public
      */
     yesNoOptions = [
@@ -105,7 +105,7 @@ export default class OrgcheckGlobalFilters extends LightningElement {
      * @description Update the list of package options. This method adds systematically the 'All packages' 
      *                 and the 'No package' options on top.  It also sets the current filter value back to 
      *                 the 'All packages' option.
-     * @param {Array<any>} data - is an array coming from the Org Check API representing the list of Packages in the org
+     * @param {any[]} data - is an array coming from the Org Check API representing the list of Packages in the org
      * @public
      */
     @api updatePackageOptions(data) {
@@ -126,7 +126,7 @@ export default class OrgcheckGlobalFilters extends LightningElement {
     /**
      * @description Update the list of object type options. This method adds systematically the 'All types' 
      *                 option on top. It also sets the current filter value back to the 'All types' option.
-     * @param {Array<any>} data - is an array coming from the Org Check API representing the list of SObject Types in the org
+     * @param {any[]} data - is an array coming from the Org Check API representing the list of SObject Types in the org
      * @public
      */
     @api updateSObjectTypeOptions(data) {
@@ -146,7 +146,7 @@ export default class OrgcheckGlobalFilters extends LightningElement {
     /**
      * @description Update the list of object name options. This method adds systematically the 'All objects' 
      *                  option on top. It also sets the current filter value back to the 'All objects' option.
-     * @param {Array<any>} data - is an array coming from the Org Check API representing the list of SObject in the org
+     * @param {any[]} data - is an array coming from the Org Check API representing the list of SObject in the org
      * @public
      */
     @api updateSObjectApiNameOptions(data) {

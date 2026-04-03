@@ -1,5 +1,5 @@
-import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
-import { DataWithScoreAndDependencies, DataWithoutScore } from 'src/api/core/orgcheck-api-data';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
+import { DataWithScoreAndDependencies, DataWithoutScore } from 'src/api/core/data/orgcheck-api-data';
 
 export interface SfdcApexTestMethodResult extends DataWithoutScore {
 
@@ -207,17 +207,17 @@ export interface SfdcApexClass extends DataWithScoreAndDependencies {
 
     /**
      * @description List of interface that this class implements
-     * @type {Array<string>}
+     * @type {string[]}
      * @public
      */
-    interfaces: Array<string>;
+    interfaces: string[];
     
     /**
      * @description List of super class that this class extends
-     * @type {Array<string>}
+     * @type {string[]}
      * @public
      */
-   extends: Array<string>;
+   extends: string[];
 
     /**
      * @description Number of methods in this class (Note: if the class is a test, this not only the testing methods, this is ALL the methods)
@@ -228,17 +228,17 @@ export interface SfdcApexClass extends DataWithScoreAndDependencies {
 
     /**
      * @description List of test methods that were OK in the last run results but took more than 20 seconds
-     * @type {Array<SfdcApexTestMethodResult>}
+     * @type {SfdcApexTestMethodResult[]}
      * @public
      */
-    testPassedButLongMethods: Array<SfdcApexTestMethodResult>;
+    testPassedButLongMethods: SfdcApexTestMethodResult[];
 
     /**
      * @description List of test methods that were OK in the last run results
-     * @type {Array<SfdcApexTestMethodResult>}
+     * @type {SfdcApexTestMethodResult[]}
      * @public
      */
-    testFailedMethods: Array<SfdcApexTestMethodResult>;
+    testFailedMethods: SfdcApexTestMethodResult[];
 
     /**
      * @description Date/Time when this test class was last run. Information stored as a Unix timestamp.
@@ -256,10 +256,10 @@ export interface SfdcApexClass extends DataWithScoreAndDependencies {
 
     /**
      * @description List of annotations that this class uses
-     * @type {Array<string>}
+     * @type {string[]}
      * @public
      */
-    annotations: Array<string>;
+    annotations: string[];
 
     /**
      * @description Specified sharing mode for this class
@@ -284,17 +284,17 @@ export interface SfdcApexClass extends DataWithScoreAndDependencies {
 
     /**
      * @description Unique list of hard coded Salesforce URLs in this item
-     * @type {Array<string>}
+     * @type {string[]}
      * @public
      */
-    hardCodedURLs: Array<string>;
+    hardCodedURLs: string[];
 
     /**
      * @description Unique list of hard coded Salesforce IDs in this item
-     * @type {Array<string>}
+     * @type {string[]}
      * @public
      */
-    hardCodedIDs: Array<string>;
+    hardCodedIDs: string[];
 
     /**
      * @description When we do not have compiler information about this class, it means it needs to be recompiled manually.
@@ -312,31 +312,31 @@ export interface SfdcApexClass extends DataWithScoreAndDependencies {
 
     /**
      * @description List of test class Ids that participate in the current code coverage of this class (if this is a not test class).
-     * @type {Array<string>}
+     * @type {string[]}
      * @public
      */
-    relatedTestClassIds: Array<string>;
+    relatedTestClassIds: string[];
 
     /**
      * @description List of test class that participate in the current code coverage of this class (if this is a not test class).
-     * @type {Array<SfdcApexClass>}
+     * @type {SfdcApexClass[]}
      * @public
      */
-    relatedTestClassRefs: Array<SfdcApexClass>;
+    relatedTestClassRefs: SfdcApexClass[];
 
     /**
      * @description List of class Ids that are tested by this class (if this is a test class).
-     * @type {Array<string>}
+     * @type {string[]}
      * @public
      */
-    relatedClassIds: Array<string>;
+    relatedClassIds: string[];
 
     /**
      * @description List of class that are tested by this class (if this is a test class).
-     * @type {Array<SfdcApexClass>}
+     * @type {SfdcApexClass[]}
      * @public
      */
-    relatedClassRefs: Array<SfdcApexClass>;
+    relatedClassRefs: SfdcApexClass[];
     
     /**
      * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.

@@ -1,6 +1,6 @@
-import { LoggerIntf } from "src/api/core/orgcheck-api-logger";
-import { Logger } from "src/api/core/orgcheck-api-logger-impl";
-import { LoggerSetup } from "src/orgcheck";
+import { LoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
+import { Logger } from 'src/api/core/logger/orgcheck-api-logger-impl';
+import { LoggerSetup } from 'src/orgcheck';
 
 class LoggerSetupForTest implements LoggerSetup {
 

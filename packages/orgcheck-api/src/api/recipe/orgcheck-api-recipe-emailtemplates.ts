@@ -1,9 +1,9 @@
-import { ServedRecipe } from 'src/api/core/orgcheck-api-recipe';
+import { ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
-import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
-import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
-import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
+import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
+import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
+import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SfdcEmailTemplate }from 'src/api/data/orgcheck-api-data-emailtemplate';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
@@ -56,7 +56,7 @@ export class RecipeEmailTemplates implements ServedRecipe<SfdcEmailTemplate[], T
         if (!emailTemplates) throw new Error(`RecipeDocuments: Data from dataset alias 'EMAILTEMPLATES' was undefined.`);
 
         // Filter data
-        const array: Array<SfdcEmailTemplate> = [];
+        const array: SfdcEmailTemplate[] = [];
         await Processor.forEach(emailTemplates, async (emailTemplate: SfdcEmailTemplate) => {
             if (namespace === OrgCheckGlobalParameter.ALL_VALUES || emailTemplate.package === namespace) {
                 array.push(emailTemplate);

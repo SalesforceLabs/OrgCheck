@@ -1,5 +1,5 @@
-import { Data } from "src/api/core/orgcheck-api-data";
-import { DataAliases } from "src/api/core/orgcheck-api-data-aliases";
+import { Data } from 'src/api/core/data/orgcheck-api-data';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 
 /**
  * @description Cache item interface

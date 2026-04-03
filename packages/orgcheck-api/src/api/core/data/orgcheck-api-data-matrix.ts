@@ -19,17 +19,17 @@ export interface DataMatrixIntf {
 
     /**
      * @description Information about the columns that could be found in the rows.data structure. Keys are the name fo the properties. Values are the information for this property.
-     * @type {Array<any>}
+     * @type {any[]}
      * @public
      */
-    columnHeaders: Array<any>;
+    columnHeaders: any[];
 
     /** 
      * @description List of data for each "row". A row will have a headerId (used as row header in the matrix view). And data is an object with as many properties.
-     * @type {Array<DataMatrixRowIntf>}
+     * @type {DataMatrixRowIntf[]}
      * @public
      */
-    rows: Array<DataMatrixRowIntf>;
+    rows: DataMatrixRowIntf[];
 }
 
 /**

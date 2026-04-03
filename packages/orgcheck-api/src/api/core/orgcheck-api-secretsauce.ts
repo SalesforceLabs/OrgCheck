@@ -1,5 +1,5 @@
-import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
-import { DataWithScoreAndDependencies } from 'src/api/core/orgcheck-api-data';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
+import { DataWithScoreAndDependencies } from 'src/api/core/data/orgcheck-api-data';
 import { ScoreRule } from 'src/api/data/orgcheck-api-data-scorerule';
 import { SfdcApexClass } from 'src/api/data/orgcheck-api-data-apexclass';
 import { SfdcApexTrigger } from 'src/api/data/orgcheck-api-data-apextrigger';
@@ -54,11 +54,11 @@ const IS_OLD_APIVERSION = (currentVersion: any, version: any, definition_of_old:
 
 /**
  * @description Checks if a given value is "empty". The value can be a string or an Array.
- * @param {Array<any> | string} value - Any value to check
+ * @param {any[] | string} value - Any value to check
  * @returns {boolean} true if the value is empty. false otherwise
  * @private
  */
-const IS_EMPTY = (value: Array<any> | string): boolean => {
+const IS_EMPTY = (value: any[] | string): boolean => {
     // In case we have a numerial value as input
     if (typeof value === 'number' && value === 0) return false;
     // if the value is undefined or null --> it's EMPTY!
@@ -103,10 +103,10 @@ const SCORE_RULE_CATEGORIES = {
 
 /**
  * @description List of score rules
- * @type {Array<ScoreRule>}
+ * @type {ScoreRule[]}
  * @private
  */
-const ALL_SCORE_RULES: Array<ScoreRule> = [
+const ALL_SCORE_RULES: ScoreRule[] = [
     // IMPORTANT NOTE:
     // ScoreRule ids are explicitly hard coded in the following list. 
     // This is by choice and design. ;)
@@ -939,19 +939,19 @@ export class SecretSauce {
 
     /**
      * @description Returns an unmutable list of all score rules.
-     * @returns {Array<ScoreRule>} List of score rules
+     * @returns {ScoreRule[]} List of score rules
      * @static
      * @readonly
      */
-    static get AllScoreRules(): Array<ScoreRule> { return ALL_SCORE_RULES; }
+    static get AllScoreRules(): ScoreRule[] { return ALL_SCORE_RULES; }
 
     /**
      * @description Returns an unmutable array of score rules only related to hardcoded urls.
-     * @returns {Array<ScoreRule>} Score rues only related to hardcoded urls
+     * @returns {ScoreRule[]} Score rues only related to hardcoded urls
      * @static
      * @readonly
      */
-    static GetScoreRulesForHardCodedURLs(): Array<ScoreRule> { return ALL_SCORE_RULES.filter(r => r.category === SCORE_RULE_CATEGORIES.HARDCODED_URL); }
+    static GetScoreRulesForHardCodedURLs(): ScoreRule[] { return ALL_SCORE_RULES.filter(r => r.category === SCORE_RULE_CATEGORIES.HARDCODED_URL); }
 
     /**
      * @description Returns an unmutable score rule given its id.

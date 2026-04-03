@@ -1,6 +1,6 @@
-import { DataFactoryIntf } from 'src/api/core/orgcheck-api-datafactory';
-import { DataFactory } from 'src/api/core/orgcheck-api-datafactory-impl';
-import { DataAliases } from 'src/api/core/orgcheck-api-data-aliases';
+import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
+import { DataFactory } from 'src/api/core/data/orgcheck-api-datafactory-impl';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 
 describe('orgcheck-api-datafactory', () => {
     it('checks if datafactory constructor is working fine', () => {

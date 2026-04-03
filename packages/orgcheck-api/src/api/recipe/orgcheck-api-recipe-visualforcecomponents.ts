@@ -1,10 +1,10 @@
-import { ServedRecipe } from 'src/api/core/orgcheck-api-recipe';
+import { ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
 import { Processor } from 'src/api/core/orgcheck-api-processor';
-import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
-import { DatasetRunInformation } from 'src/api/core/orgcheck-api-dataset-runinformation';
-import { DatasetAliases } from 'src/api/core/orgcheck-api-datasets-aliases';
+import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
+import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
+import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SfdcVisualForceComponent }from 'src/api/data/orgcheck-api-data-visualforcecomponent';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 import { VisualForceComponentsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-visualforcecomponents';
@@ -57,7 +57,7 @@ export class RecipeVisualForceComponents implements ServedRecipe<SfdcVisualForce
 
         // Filter data
         
-        const array: Array<SfdcVisualForceComponent> = [];
+        const array: SfdcVisualForceComponent[] = [];
         await Processor.forEach(components, async (component: SfdcVisualForceComponent) => {
             if (namespace === OrgCheckGlobalParameter.ALL_VALUES || component.package === namespace) {
                 array.push(component);

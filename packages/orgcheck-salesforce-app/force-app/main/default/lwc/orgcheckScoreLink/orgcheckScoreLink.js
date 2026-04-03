@@ -22,12 +22,12 @@ export default class OrgcheckScoreLink extends LightningElement {
     @api score;
 
     /**
-     * @type {Array<string>}
+     * @type {string[]}
      */
     @api reasonIds; 
 
     /**
-     * @type {Array<string>}
+     * @type {string[]}
      */
     @api fields;
 

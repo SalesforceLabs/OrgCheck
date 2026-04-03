@@ -1,7 +1,11 @@
-import { RecipeCollection } from 'src/api/core/orgcheck-api-recipecollection';
-import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
-import { RecipeAliases } from 'src/api/core/orgcheck-api-recipes-aliases';
+import { RecipeCollection } from 'src/api/core/recipe/orgcheck-api-recipecollection';
+import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
+import { RecipeAliases } from 'src/api/core/recipe/orgcheck-api-recipes-aliases';
 import { ScoreRule } from 'src/api/data/orgcheck-api-data-scorerule';
+import { DataCollectionStatisticsIntf } from '../core/data/orgcheck-api-data-datacollectionstats';
+import { Table } from 'src/ui/table/orgcheck-ui-table';
+import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
+import { GlobalViewGlobalTableDefinition, GlobalViewPerRuleTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-globalview';
 
 export class RecipeGlobalView implements RecipeCollection {
     
@@ -10,7 +14,7 @@ export class RecipeGlobalView implements RecipeCollection {
      * @type {string}
      * @public
      */
-    title: string = '🏞️ Global view';
+    public title: string = '🏞️ Global view';
 
     /**
      * @description List the parameters that this recipe collection dependes on
@@ -72,10 +76,31 @@ export class RecipeGlobalView implements RecipeCollection {
 
     /**
      * @description Filter the data items by score rules
-     * @returns {Array<ScoreRule>} List of score rule to filter by. Empty array means no filtering
+     * @returns {ScoreRule[]} List of score rule to filter by. Empty array means no filtering
      * @public
      */ 
-    filterByScoreRules(): Array<ScoreRule> {
+    public filterByScoreRules(): ScoreRule[] {
         return [];
+    }
+
+    /**
+     * @description Serve the mixture from a designated recipe collection to a table
+     * @param {DataCollectionStatisticsIntf[]} mixture - The mixture
+     * @returns {Table[]} The tables
+     * @public
+     */
+    public serveToTable(mixture: DataCollectionStatisticsIntf[]): Table[] {
+        const statsGlobal: { name: string; countBad: number; countGood: number }[] = [];
+        const statsByRecipeAndRule: { name: string; ruleName: string; countBad: number }[] = [];
+        mixture?.forEach((item) => {
+            statsGlobal.push({ name: item.recipeName, countBad: item.countBad, countGood: item.countGood });
+            item.countBadByRule?.forEach((c) => {
+                statsByRecipeAndRule.push({ name: item.recipeName, ruleName: c.ruleName, countBad: c.count });
+            });
+        });
+        const tables: Table[] = [];
+        tables.push(TableFactory.create('Statistics (Good and Bad)', new GlobalViewGlobalTableDefinition(), statsGlobal));
+        tables.push(TableFactory.create('Statistics (Reasons)', new GlobalViewPerRuleTableDefinition(), statsByRecipeAndRule));
+        return tables;
     }
 }

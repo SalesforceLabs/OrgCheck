@@ -1,5 +1,5 @@
-import { SimpleLoggerIntf } from 'src/api/core/orgcheck-api-logger';
-import { SalesforceUsageInformationIntf } from 'src/api/core/orgcheck-api-limit-usageinformation';
+import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
+import { SalesforceUsageInformationIntf } from 'src/api/core/salesforce/orgcheck-api-limit-usageinformation';
 
 /**
  * @description Salesforce Query request
@@ -24,11 +24,11 @@ export interface SalesforceQueryRequest {
     
     /**
      * @description List of error codes to by-pass (empty by default)
-     * @type {Array<string>} [byPasses]
+     * @type {string[]} [byPasses]
      * @public
      * @readonly
      */
-    byPasses?: Array<string>;
+    byPasses?: string[];
     
     /** 
      * @description Unique field name to use for the custom QueryMore (Id by default)
@@ -53,10 +53,10 @@ export interface SalesforceMetadataRequest {
 
     /**
      * @description Array of names of the metadata to read/retrieve
-     * @type {Array<string>}
+     * @type {string[]}
      * @public
      */ 
-    members: Array<string>;
+    members: string[];
 }
 
 /**
@@ -150,46 +150,46 @@ export interface SalesforceManagerIntf {
 
     /**
      * @description Method to call a list of SOQL queries (tooling or not)
-     * @param {Array<SalesforceQueryRequest | any>} queries - Array of queries to be called
+     * @param {SalesforceQueryRequest | any[]} queries - Array of queries to be called
      * @param {SimpleLoggerIntf} logger - Logger to use
-     * @returns {Promise<Array<Array<any>>>} Results of the called queries
+     * @returns {Promise<Array<any[]>} Results of the called queries
      * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @public
      */
-    soqlQuery(queries: Array<SalesforceQueryRequest | any>, logger: SimpleLoggerIntf): Promise<Array<Array<any>>>;
+    soqlQuery(queries: SalesforceQueryRequest | any[], logger: SimpleLoggerIntf): Promise<any[][]>;
 
     /**
      * @description Method to call a list of SOSL queries (tooling or not)
-     * @param {Array<SalesforceQueryRequest | any>} queries - Array of queries to be called
+     * @param {SalesforceQueryRequest | any[]} queries - Array of queries to be called
      * @param {SimpleLoggerIntf} logger - Logger to use
-     * @returns {Promise<Array<Array<any>>>} Results of the called queries
+     * @returns {Promise<Array<any[]>>} Results of the called queries
      * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @public
      */
-    soslQuery(queries: Array<SalesforceQueryRequest | any>, logger: SimpleLoggerIntf): Promise<Array<Array<any>>>;
+    soslQuery(queries: SalesforceQueryRequest | any[], logger: SimpleLoggerIntf): Promise<any[][]>;
 
     /**
-     * @param {Array<string>} ids - Array of Salesforce Ids
+     * @param {string[]} ids - Array of Salesforce Ids
      * @param {SimpleLoggerIntf} logger - Logger to use
-     * @returns {Promise<{ records: Array<any>, errors: Array<string> }>} Dependency data
+     * @returns {Promise<{ records: any[], errors: string[] }>} Dependency data
      * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @public
      */
-    dependenciesQuery(ids: Array<string>, logger: SimpleLoggerIntf): Promise<{ records: Array<any>; errors: Array<string>; }>;
+    dependenciesQuery(ids: string[], logger: SimpleLoggerIntf): Promise<{ records: any[]; errors: string[]; }>;
 
     /**
      * @description Method to retrieve a list of metadata types
-     * @param {Array<SalesforceMetadataRequest>} metadatas - Information of what metadata you want to retrieve
+     * @param {SalesforceMetadataRequest[]} metadatas - Information of what metadata you want to retrieve
      * @param {SimpleLoggerIntf} logger - Logger to use
-     * @returns {Promise<Map<string, Array<any>>>} Information by metadata type
+     * @returns {Promise<Map<string, any[]>} Information by metadata type
      * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @public
      */
-    readMetadata(metadatas: Array<SalesforceMetadataRequest>, logger: SimpleLoggerIntf): Promise<Map<string, Array<any>>>;
+    readMetadata(metadatas: SalesforceMetadataRequest[], logger: SimpleLoggerIntf): Promise<Map<string, Array<any>>>;
     
     /**
      * @description Method to retrieve a list of metadata types by at Scale (using composite tooling api)
@@ -197,22 +197,22 @@ export interface SalesforceManagerIntf {
      * @param {any[]} ids - List of Ids to retrieve
      * @param {string[]} byPasses - Errors to bypass
      * @param {SimpleLoggerIntf} logger - Logger to use
-     * @returns {Promise<Array<any>>} Information of the metadata type
+     * @returns {Promise<any[]>} Information of the metadata type
      * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @public
      */
-    readMetadataAtScale(type: string, ids: any[], byPasses: string[], logger: SimpleLoggerIntf): Promise<Array<any>>;
+    readMetadataAtScale(type: string, ids: any[], byPasses: string[], logger: SimpleLoggerIntf): Promise<any[]>;
     
     /**
      * @description Method to get the list of sobjects
      * @param {SimpleLoggerIntf} logger - Logger to use
-     * @returns {Promise<Array<any>>} Information of the objects
+     * @returns {Promise<any[]>} Information of the objects
      * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @public
      */
-    describeGlobal(logger: SimpleLoggerIntf): Promise<Array<any>>;
+    describeGlobal(logger: SimpleLoggerIntf): Promise<any[]>;
 
     /**
      * @description Method to describe one particular sobject
@@ -248,12 +248,12 @@ export interface SalesforceManagerIntf {
 
     /**
      * @description Method to run compile given apex classes
-     * @param {Array<string>} apexClassIds - List of apex class ids to compile
+     * @param {string[]} apexClassIds - List of apex class ids to compile
      * @param {SimpleLoggerIntf} [logger] - Logger to use
-     * @returns {Promise<Map<string, { isSuccess: boolean, reasons?: Array<string>}>>} List of results by Apex Class ID
+     * @returns {Promise<Map<string, { isSuccess: boolean, reasons?: string[]}>} List of results by Apex Class ID
      * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @public
      */
-    compileClasses(apexClassIds: Array<string>, logger: SimpleLoggerIntf): Promise<Map<string, { isSuccess: boolean; reasons?: Array<string>; }>>;
+    compileClasses(apexClassIds: string[], logger: SimpleLoggerIntf): Promise<Map<string, { isSuccess: boolean; reasons?: string[]; }>>;
 }

@@ -49,13 +49,13 @@ export default class OrgcheckDependencyViewer extends LightningElement {
 
     /** 
      * @description Hierarchical view of the dependency data
-     * @type {{label: string, children: Array<{id: string, label: string, children: Array<{label: string, children: Array<{id: string, label: string, url: string}>}>}>}}>}
+     * @type {{label: string, children: {id: string, label: string, children: Array<{label: string, children: Array<{id: string, label: string, url: string}>}>}>}}[]}
      */
     dependencyTreeByType;
 
     /** 
      * @description Set the legend (color and label) for the dependency graphical view
-     * @type {Array<{color: string, name: string}>}
+     * @type {{color: string, name: string}[]}
      * @public
      */ 
     dependencyBoxColorsLegend = [
