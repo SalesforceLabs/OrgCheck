@@ -6,6 +6,7 @@ import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { RecipeAliases } from 'src/api/core/recipe/orgcheck-api-recipes-aliases';
 import { SecretSauce } from 'src/api/core/orgcheck-api-secretsauce';
 import { ScoreRule } from 'src/api/data/orgcheck-api-data-scorerule';
+import { Exporter } from 'src/ui/exporter/orgcheck-ui-exporter';
 
 export type { ApiIntf, ApiSetup } from 'src/api/orgcheck-api';
 export type { LoggerSetup } from 'src/api/core/setup/orgcheck-api-setup-logger';
@@ -63,13 +64,13 @@ export class ApiFactory {
     }
 }
 
+export const Recipes: typeof RecipeAliases = RecipeAliases;
+
 export class Rules {
     public static get(id: number): ScoreRule | undefined {
         return SecretSauce.GetScoreRule(id);
     }
 }
-
-export const Recipes: typeof RecipeAliases = RecipeAliases;
 
 export class TableUtils {
     public static sort(table: Table, columnIndex: number, order: SortOrder): void {
@@ -78,7 +79,7 @@ export class TableUtils {
     public static filter(table: Table, searchInput: string): void {
         TableFactory.filter(table, searchInput);
     }
-    public static export(table: Table): ExportedTable {
-        return TableFactory.export(table);
+    public static exportAsXls(source: ExportedTable | ExportedTable[]): ArrayBuffer {
+        return Exporter.exportAsXls(source);
     }
 }

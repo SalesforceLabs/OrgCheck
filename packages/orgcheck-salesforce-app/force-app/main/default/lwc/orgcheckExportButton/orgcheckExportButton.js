@@ -105,7 +105,7 @@ const __orgcheck__Get = () => {
 }
 
 const __orgcheck__GenerateXlsx = (source) => {
-    const method = __orgcheck__Get()?.TableFactory?.asXlsx;
+    const method = __orgcheck__Get()?.TableUtils?.exportAsXls;
     if (method) return method(source);
     return undefined;
 }

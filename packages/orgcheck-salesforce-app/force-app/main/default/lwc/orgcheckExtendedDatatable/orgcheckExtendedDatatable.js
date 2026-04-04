@@ -85,6 +85,12 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     @api exportBasename = 'Data';
 
     /**
+     * @description The source data for the export functionality
+     * @type {ExportedTable | ExportedTable[]}
+     */
+    @api exportSource = undefined;
+
+    /**
      * @description Do you want the table to use all the horizontal space or not? False by default.
      * @type {boolean}
      */
@@ -315,14 +321,6 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      */
     get table() {
         return this._private_properties.table;
-    }
-
-
-    /**
-     * @description Convert this table into an Excel data
-     */ 
-    get exportedRows() {
-        return __orgcheck__Get()?.TableUtils.export(this._private_properties.table);
     }
 
     // ----------------------------------------------------------------------------------------------------------------

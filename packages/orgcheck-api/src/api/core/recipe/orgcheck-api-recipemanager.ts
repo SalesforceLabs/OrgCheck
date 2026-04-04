@@ -49,13 +49,13 @@ export interface RecipeManagerIntf {
     /**
      * @description Serve the mixture from a designated recipe to go
      * @param {string} alias - String representation of a recipe
-     * @param {Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]} [mixture] - The mixture
+     * @param {Table | SfdcObjectAsTable | Table[]} plate - The plate to serve to go
      * @returns {Promise<ExportedTable | ExportedTable[]>} Returns the mixture as to go
      * @throws {RecipeManagerError}
      * @async
      * @public
      */
-    serveToGo(alias: RecipeAliases, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<ExportedTable | ExportedTable[]>;
+    serveToGo(alias: RecipeAliases, plate: Table | SfdcObjectAsTable | Table[]): Promise<ExportedTable | ExportedTable[]>;
 
     /**
      * @description Returns the cache stamp for a designated recipe (by its alias)

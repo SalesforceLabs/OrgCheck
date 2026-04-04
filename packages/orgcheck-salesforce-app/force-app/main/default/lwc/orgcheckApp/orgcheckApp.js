@@ -100,6 +100,8 @@ export default class OrgcheckApp extends LightningElement {
      */
     @track data = { };
 
+    @track exports = { };
+
     /**
      * @description Is something is loading?
      * @type {boolean}
@@ -606,10 +608,13 @@ export default class OrgcheckApp extends LightningElement {
                     if (appNavItem.onlyIf ? appNavItem.onlyIf(this) === true : true) {
                         // If yes we prepare the data
                         const mixture = await this._private_properties.api.prepareData(appNavItem.recipe, this.namespace, this.objectType, this.object);
-                        // then serve the data
+                        // serve the data
                         const plate = await this._private_properties.api.serveData(appNavItem.recipe, mixture);
+                        // and then export the data
+                        const doggyBag = await this._private_properties.api.exportData(appNavItem.recipe, plate);
                         // Save the plate
                         this.data[appNavItem.data] = plate;
+                        this.exports[appNavItem.data] = doggyBag;
                     }                
                 }
             }
@@ -1168,21 +1173,6 @@ export default class OrgcheckApp extends LightningElement {
     // ----------------------------------------------------------------------------------------------------------------
     // ----------------------------------------------------------------------------------------------------------------
 
-    /**
-     * @description Representation of an export for SObject Description data
-     */
-    get objectInformationExportSource() {
-        try {
-            return this._generateDataForCurrentObjectExport();
-        } catch (error) {
-            this._showError('objectInformationExportSource', error);
-        }
-    }
-
-    /**
-     * @description Representation of an export for the global view data
-     */
-    globalViewItemsExport;
 }
 
 const __orgcheck__Get = () => {

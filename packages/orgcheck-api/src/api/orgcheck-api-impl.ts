@@ -21,7 +21,7 @@ import { ApiSetup, ApiIntf } from 'src/api/orgcheck-api';
 import { SfdcObjectAsTable } from 'src/api/recipe/orgcheck-api-recipe-object';
 import { Data, DataMatrixIntf } from 'src/orgcheck';
 import { DataCollectionStatisticsIntf } from 'src/api/core/data/orgcheck-api-data-datacollectionstats';
-import { Table } from 'src/ui/table/orgcheck-ui-table';
+import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { CacheItem } from 'src/api/data/orgcheck-api-data-cacheitem';
 import { LoggerUtil } from './core/logger/orgcheck-api-loggerutil';
 
@@ -492,6 +492,18 @@ export class API implements ApiIntf {
             // Serve the data
             if (log?.isDebugEnabled()) log?.debug(`Calling the serveToTable method for recipe: ${alias} with mixture: ${LoggerUtil.JSONstringifyWithoutRef(mixture)}`);
             return await this._recipeManager.serveToTable(alias, mixture);
+        } catch (error) {
+            if (log?.isDebugEnabled()) log?.debug(`Error occurred: message: ${error.message}, stack: ${error.stack}`);
+            throw error;
+        }
+    }
+
+    public async exportData(alias: RecipeAliases, plate: Table | SfdcObjectAsTable | Table[]): Promise<ExportedTable | ExportedTable[]> {
+        const log = this._logger?.toSimpleLogger('Export Data');
+        try {
+            // Export the data
+            if (log?.isDebugEnabled()) log?.debug(`Calling the serveToGo method for recipe: ${alias} with plate: ${LoggerUtil.JSONstringifyWithoutRef(plate)}`);
+            return await this._recipeManager.serveToGo(alias, plate);
         } catch (error) {
             if (log?.isDebugEnabled()) log?.debug(`Error occurred: message: ${error.message}, stack: ${error.stack}`);
             throw error;

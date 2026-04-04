@@ -19,7 +19,7 @@
             </div>
         </lightning-layout-item>
         <lightning-layout-item alignment-bump="left">&nbsp;</lightning-layout-item>
-        <c-orgcheck-export-button if:true={showExportButton} source={exportedRows} basename={exportBasename}></c-orgcheck-export-button>
+        <c-orgcheck-export-button if:true={showExportButton} source={exportSource} basename={exportBasename}></c-orgcheck-export-button>
     </lightning-layout>
     <template if:true={showSearch}>
         <div>

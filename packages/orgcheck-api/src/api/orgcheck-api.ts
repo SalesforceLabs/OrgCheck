@@ -12,7 +12,7 @@ import { RecipeAliases } from 'src/api/core/recipe/orgcheck-api-recipes-aliases'
 import { Data } from 'src/api/core/data/orgcheck-api-data';
 import { DataCollectionStatisticsIntf } from 'src/api/core/data/orgcheck-api-data-datacollectionstats';
 import { DataMatrixIntf } from 'src/api/core/data/orgcheck-api-data-matrix';
-import { Table } from 'src/ui/table/orgcheck-ui-table';
+import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 
 export interface ApiSetup { 
     
@@ -217,6 +217,8 @@ export interface ApiIntf {
     prepareData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string): Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]>;
 
     serveData(alias: RecipeAliases, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<Table | SfdcObjectAsTable | Table[]>;
+    
+    exportData(alias: RecipeAliases, plate: Table | SfdcObjectAsTable | Table[]): Promise<ExportedTable | ExportedTable[]>;
 
     titlesForAllData(): Map<RecipeAliases, string>;
 

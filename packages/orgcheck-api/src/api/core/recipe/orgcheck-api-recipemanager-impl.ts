@@ -204,19 +204,19 @@ export class RecipeManager implements RecipeManagerIntf {
 
     /**
      * @description Serve the mixture from a designated recipe to go
-     * @param {RecipeAliases} alias -String representation of a recipe
-     * @param {Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]} [mixture] - The mixture
+     * @param {string} alias - String representation of a recipe
+     * @param {Table | SfdcObjectAsTable | Table[]} plate - The plate to serve to go
      * @returns {Promise<ExportedTable | ExportedTable[]>} Returns the mixture as to go
      * @throws {RecipeManagerError}
      * @async
      * @public
      */
-    public async serveToGo(alias: RecipeAliases, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<ExportedTable | ExportedTable[]> {
+    public async serveToGo(alias: RecipeAliases, plate: Table | SfdcObjectAsTable | Table[]): Promise<ExportedTable | ExportedTable[]> {
         let recipe = this._recipes.get(alias) ?? this._recipeCollections.get(alias);
         if (recipe) {
             try {
                 // @ts-ignore
-                return await recipe.serveToGo(mixture);
+                return await recipe.serveToGo(plate);
             } catch (error) {
                 throw new RecipeManagerError(alias, `The given alias (${alias}) does not correspond to a registered recipe that can be served.`, error);
             }
