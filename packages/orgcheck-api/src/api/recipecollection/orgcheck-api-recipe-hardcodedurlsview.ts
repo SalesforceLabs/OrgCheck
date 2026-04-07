@@ -3,7 +3,7 @@ import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { RecipeAliases } from 'src/api/core/recipe/orgcheck-api-recipes-aliases';
 import { SecretSauce } from 'src/api/core/orgcheck-api-secretsauce';
 import { DataCollectionStatisticsIntf } from 'src/api/core/data/orgcheck-api-data-datacollectionstats';
-import { Table } from 'src/ui/table/orgcheck-ui-table';
+import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
 import { ScoreRule } from 'src/api/data/orgcheck-api-data-scorerule';
 import { HardCodedURLsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-hardcodedurls';
@@ -61,14 +61,26 @@ export class RecipeHardcodedURLsView implements RecipeCollection {
     /**
      * @description Serve the mixture from a designated recipe collection to a table
      * @param {DataCollectionStatisticsIntf[]} mixture - The mixture
-     * @returns {Table[]} The tables
+     * @returns {Promise<Table[]>} The tables
+     * @async
      * @public
      */
-    public serveToTable(mixture: DataCollectionStatisticsIntf[]): Table[] {
+    public async serveToTable(mixture: DataCollectionStatisticsIntf[]): Promise<Table[]> {
         const stats: { name: string; countBad: number; countGood: number, badValues: string[] }[] = [];
         mixture?.forEach((item) => {
-            stats.push({ name: item.recipeName, countBad: item.countBad, countGood: item.countGood, badValues: item.distinctBadValues });
+            stats.push({ name: item.recipeName, countBad: item.countBad, countGood: item.countGood, badValues: item.distinctBadValues ?? [] });
         });
-        return [TableFactory.create('Hardcoded URLs', new HardCodedURLsTableDefinition(), stats)];
+        return [TableFactory.create(this.title, new HardCodedURLsTableDefinition(), stats)];
+    }
+
+    /**
+     * @description We put your plate in a doggy bag
+     * @param {Table[]} plates - Plates which were on the table
+     * @returns {Promise<ExportedTable>} Meal in a doggy bag, ready to take back home!
+     * @async
+     * @public
+     */
+    public async serveToGo(plates: Table[]): Promise<ExportedTable> {
+        return TableFactory.export(plates[0]);
     }
 }

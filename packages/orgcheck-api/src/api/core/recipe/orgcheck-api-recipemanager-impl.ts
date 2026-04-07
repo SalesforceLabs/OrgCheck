@@ -189,13 +189,13 @@ export class RecipeManager implements RecipeManagerIntf {
      * @public
      */
     public async serveToTable(alias: RecipeAliases, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<Table | SfdcObjectAsTable | Table[]> {
-        let recipe = this._recipes.get(alias) ?? this._recipeCollections.get(alias);
+        const recipe = this._recipes.get(alias) ?? this._recipeCollections.get(alias);
         if (recipe) {
             try {
                 // @ts-ignore
                 return await recipe.serveToTable(mixture);
             } catch (error) {
-                throw new RecipeManagerError(alias, `The given alias (${alias}) does not correspond to a registered recipe that can be served.`, error);
+                throw new RecipeManagerError(alias, `The given alias (${alias}) does not correspond to a registered recipe that can be served to table. ${error?.message} ${error?.stack}`, error);
             }
         } else {
             throw new RecipeManagerError(alias, `The given alias (${alias}) does not correspond to a registered recipe.`);
@@ -218,7 +218,7 @@ export class RecipeManager implements RecipeManagerIntf {
                 // @ts-ignore
                 return await recipe.serveToGo(plate);
             } catch (error) {
-                throw new RecipeManagerError(alias, `The given alias (${alias}) does not correspond to a registered recipe that can be served.`, error);
+                throw new RecipeManagerError(alias, `The given alias (${alias}) does not correspond to a registered recipe that can be served to go. ${error?.message} ${error?.stack}`, error);
             }
         } else {
             throw new RecipeManagerError(alias, `The given alias (${alias}) does not correspond to a registered recipe.`);
@@ -413,7 +413,7 @@ export class RecipeManager implements RecipeManagerIntf {
                     return a.score > b.score ? -1 : 1; 
                 });
                 const countOfBadRecordsPerRuleId = new Map<number, number>();
-                const badValues = new Set<any>();
+                const badValues = new Set<string>();
                 onlyBadRecords?.forEach((d) => {  // for each bad record...
                     d.badReasonIds.filter(id => { // only for the badReason that are part of the rules we want
                         return isRuleFilterOn === true ? listRuleIds.includes(id) : true;
@@ -423,7 +423,7 @@ export class RecipeManager implements RecipeManagerIntf {
                         // add the bad values in a set
                         const rule = listRulesByIds.get(id);
                         if (rule) {
-                            badValues.add(d[rule.badField] ?? '')
+                            d[rule.badField]?.forEach((url: string) => badValues.add(url));
                         }
                     });
                 });

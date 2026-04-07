@@ -1,12 +1,12 @@
 {
     "compilerOptions": {
         "module": "commonjs",
-        "target": "es2015",
-        "baseUrl": "."
+        "target": "es2015"
     },
     "include": [
-        "**/*.js"
-, "../orgcheck-api/src/ui/table/definitions/tableDefinitions.ts"    ],
+        "**/*.js", 
+        "../orgcheck-api/src/ui/table/definitions/tableDefinitions.ts"
+    ],
     "exclude": [
         "node_modules"
     ]

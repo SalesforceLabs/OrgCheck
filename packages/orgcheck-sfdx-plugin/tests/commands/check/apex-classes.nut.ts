@@ -11,8 +11,8 @@ const mockExecCmd = jest.mocked(execCmd);
 const mockJsonOutput = {
   status: 0,
   result: {
-    orgCheck: { version: '8.0.0' },
-    salesforceOrganization: { id: '00Dxx0000000000', name: 'Test Org', type: 'Developer Edition' },
+    orgCheckVersion: '8.0.0',
+    salesforceOrgId: '00Dxx0000000000',
     dateCheck: new Date().toISOString(),
     action: 'apex-classes',
     results: { length: 2, items: [{ name: 'TestClass1' }, { name: 'TestClass2' }] },
@@ -38,8 +38,8 @@ beforeEach(() => {
 describe('check apex-classes', () => {
   it('should run check apex-classes with --json and return valid output', () => {
     const result = execCmd<{
-      orgCheck: { version: string };
-      salesforceOrganization: { id: string; name: string; type: string };
+      orgCheckVersion: string;
+      salesforceOrgId: string;
       dateCheck: string;
       action: string;
       results: { length: number; items: unknown[] };
@@ -56,11 +56,8 @@ describe('check apex-classes', () => {
 
     const output = result.jsonOutput?.result;
     expect(output).toBeTruthy();
-    expect(output?.orgCheck).toBeTruthy();
-    expect(typeof output?.orgCheck.version).toBe('string');
-    expect(output?.salesforceOrganization).toBeTruthy();
-    expect(typeof output?.salesforceOrganization.id).toBe('string');
-    expect(typeof output?.salesforceOrganization.name).toBe('string');
+    expect(typeof output?.orgCheckVersion).toBe('string');
+    expect(typeof output?.salesforceOrgId).toBe('string');
     expect(output?.action).toBe('apex-classes');
     expect(output?.results).toBeTruthy();
     expect(typeof output?.results.length).toBe('number');

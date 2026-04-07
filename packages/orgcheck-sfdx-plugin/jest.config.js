@@ -6,11 +6,14 @@ export default {
     '^.+\\.tsx?$': [
       'ts-jest',
       {
-        tsconfig: 'test/jest-tsconfig.json',
+        tsconfig: 'tests/jest-tsconfig.json',
         diagnostics: { ignoreCodes: ['TS151002'] },
       },
     ],
   },
-  testMatch: ['**/test/**/*.nut.ts'],
+  testMatch: ['**/tests/**/*.nut.ts'],
   testPathIgnorePatterns: ['/node_modules/', '/lib/'],
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+  },
 };

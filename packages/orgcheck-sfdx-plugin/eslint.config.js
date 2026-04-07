@@ -1,51 +1,27 @@
-import { FlatCompat } from '@eslint/eslintrc';
-import js from '@eslint/js';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import eslint from '@eslint/js';
+import { defineConfig } from 'eslint/config';
+import tseslint from 'typescript-eslint';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-});
-
-export default [
-  {
-    ignores: ['**/*.cjs', 'lib/**'],
-  },
-  ...compat.extends(
-    'eslint-config-salesforce-typescript',
-    // 'plugin:sf-plugin/recommended' - incompatible with ESLint 10
-    'eslint-config-prettier'
-  ),
+export default defineConfig(
+  { ignores: ['**/*.cjs', 'lib/**'] },
+  eslint.configs.recommended,
+  tseslint.configs.recommended,
   {
     files: ['**/*.ts'],
     languageOptions: {
       parserOptions: {
-        project: ['./tsconfig.json', './test/tsconfig.json'],
+        project: ['./tsconfig.json', './tests/tsconfig.json'],
         sourceType: 'module',
         warnOnUnsupportedTypeScriptVersion: false,
       },
     },
     rules: {
-      header: 'off',
       '@typescript-eslint/no-unused-expressions': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
   {
-    files: ['test/**/*.ts'],
-    languageOptions: {
-      globals: {
-        describe: 'readonly',
-        it: 'readonly',
-        before: 'readonly',
-        after: 'readonly',
-        beforeEach: 'readonly',
-        afterEach: 'readonly',
-      },
-    },
+    files: ['tests/**/*.ts'],
     rules: {
       'no-unused-expressions': 'off',
       'prefer-arrow-callback': 'off',
@@ -54,7 +30,6 @@ export default [
       '@typescript-eslint/no-unsafe-call': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',
       '@typescript-eslint/require-await': 'off',
-      header: 'off',
     },
   },
-];
+);

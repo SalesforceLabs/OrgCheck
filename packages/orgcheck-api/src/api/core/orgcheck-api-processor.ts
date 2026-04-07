@@ -7,7 +7,7 @@ export class Processor {
      * @public
      * @async
      */
-    static async forEach(iterable: any[] | Map<string, any>, iteratee: (item: any, key?: string) => Promise<void>): Promise<void> {
+    static async forEach(iterable: any[] | Map<string, any>, iteratee: (item: any, key?: any) => Promise<void>): Promise<void> {
         if (!iterable) return Promise.resolve();
         if (typeof iteratee !== 'function') throw new TypeError(`Given iteratee is not a proper function.`);
         if (Array.isArray(iterable) === true) {

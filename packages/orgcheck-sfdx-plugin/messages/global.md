@@ -19,65 +19,64 @@ Filename of the CSV output
 # flags.json-file.summary
 Filename of the JSON ouput
 
-# flags.xslx-file.summary
-Filename of the XSLS output
+# flags.xlsx-file.summary
+Filename of the XLSX output
 
-# check.summary
-Check something in the org using Org Check command line
 
-# check.description
-Analyze something in your Salesforce org for technical debt and best practices.
 
-# check.examples
+# check.apex-classes.summary
+Check Apex Classes in the org using Org Check command line
+
+# check.apex-classes.description
+Analyze Apex Classes in your Salesforce org for technical debt and best practices.
+
+# check.apex-classes.examples
 - Check all Apex classes in the org
   sf check apex-classes --target-org MyOrg
 - Check Apex classes from the ABC package
   sf check apex-classes --package ABC --target-org MyOrg
-- Check all Apex unit tests in the org
-  sf check apex-tests --target-org MyOrg
-- Check Apex unit tests from the ABC package
-  sf check apex-tests --package ABC --target-org MyOrg
-- Check all Apex triggers in the org
-  sf check apex-triggers --target-org MyOrg
-- Check Apex triggers from the ABC package
-  sf check apex-triggers --package ABC --target-org MyOrg
-- Check all Apex classes that need recompilation
-  sf check apex-uncompiled --target-org MyOrg
-- Check uncompiled Apex classes from the ABC package
-  sf check apex-uncompiled --package ABC --target-org MyOrg
-- Check all application permissions in the org
-  sf check app-permissions --target-org MyOrg
-- Check application permissions from the ABC package
-  sf check app-permissions --package ABC --target-org MyOrg
-- Check browser login history in the org
-  sf check browsers --target-org MyOrg
-- Check all Chatter groups in the org
-  sf check collaboration-groups --target-org MyOrg
-- Check all custom fields in the org
-  sf check custom-fields --target-org MyOrg
-- Check custom fields from the ABC package
-  sf check custom-fields --package ABC --target-org MyOrg
-- Check custom fields under the Account object
-  sf check custom-fields --sobject Account --target-org MyOrg
-- Check all custom labels in the org
-  sf check custom-labels --target-org MyOrg
-- Check custom labels from the ABC package
-  sf check custom-labels --package ABC --target-org MyOrg
-- Check all custom tabs in the org
-  sf check custom-tabs --target-org MyOrg
-- Check custom tabs from the ABC package
-  sf check custom-tabs --package ABC --target-org MyOrg
-- Check all dashboards in the org
-  sf check dashboards --target-org MyOrg
-- Check all documents in the org
-  sf check documents --target-org MyOrg
-- Check documents from the ABC package
-  sf check documents --package ABC --target-org MyOrg
-- Check all email templates in the org
-  sf check email-templates --target-org MyOrg
-- Check email templates from the ABC package
-  sf check email-templates --package ABC --target-org MyOrg
-- Check field permissions for the Account object
-  sf check field-permissions --sobject Account --target-org MyOrg
-- Check field permissions for Account from the ABC package
-  sf check field-permissions --sobject Account --package ABC --target-org MyOrg
+- Check Apex classes and export the result as an excel file
+  sf check apex-classes --package ABC --target-org MyOrg --xlsx-file /tmp/results.xlsx
+- Check Apex classes and export the result as a CSV file
+  sf check apex-classes --package ABC --target-org MyOrg --csv-file /tmp/results.csv
+- Check Apex classes and export the result as a JSON file
+  sf check apex-classes --package ABC --target-org MyOrg --json-file /tmp/results.json
+
+
+
+
+# check.hardcoded-urls.summary
+Check Hardcoded URLs in the org across multiple metadata types using Org Check command line
+
+# check.hardcoded-urls.description
+Analyze multiple metadata types and look for Salesforce hardcoded URLs such as salesforce.com or force.com
+
+# check.hardcoded-urls.examples
+- Check all Hardcoded URLs in the org
+  sf check hardcoded-urls --target-org MyOrg
+- Check all Hardcoded URLs in the org and export the result as an excel file
+  sf check hardcoded-urls --package ABC --target-org MyOrg --xlsx-file /tmp/results.xlsx
+- Check all Hardcoded URLs in the org and export the result as a CSV file
+  sf check hardcoded-urls --package ABC --target-org MyOrg --csv-file /tmp/results.csv
+- Check all Hardcoded URLs in the org and export the result as a JSON file
+  sf check hardcoded-urls --package ABC --target-org MyOrg --json-file /tmp/results.json
+
+
+
+
+
+# check.global-view.summary
+Check all the metadata that Org Check can scan at once in the org using Org Check command line
+
+# check.global-view.description
+Analyze all the metadata that Org Check can scan at once and get some stats and details out of it
+
+# check.global-view.examples
+- Check the Global View of the org
+  sf check global-view --target-org MyOrg
+- Check the Global View of the org and export the result as an excel file
+  sf check global-view --target-org MyOrg --xlsx-file /tmp/results.xlsx
+- Check the Global View of the org and export the result as a CSV file
+  sf check global-view --target-org MyOrg --csv-file /tmp/results.csv
+- Check the Global View of the org and export the result as a JSON file
+  sf check global-view --target-org MyOrg --json-file /tmp/results.json

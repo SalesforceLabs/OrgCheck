@@ -13,7 +13,7 @@ export class HardCodedURLsTableDefinition implements TableDefinition {
         { label: 'Type of items', type: ColumnType.TXT, data: { value: 'name' }}, 
         { label: 'Count of good items', type: ColumnType.NUM, data: { value: 'countGood' }},
         { label: 'Count of bad items', type: ColumnType.NUM, data: { value: 'countBad' }},
-        { label: 'URLs found', type: ColumnType.TXTS, data: { value: 'badValues' }},
+        { label: 'URLs found', type: ColumnType.TXTS, data: { value: '.', values: 'badValues' }},
     ];
 
     /**

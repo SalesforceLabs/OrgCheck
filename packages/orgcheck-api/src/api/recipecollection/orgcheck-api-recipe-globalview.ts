@@ -3,7 +3,7 @@ import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { RecipeAliases } from 'src/api/core/recipe/orgcheck-api-recipes-aliases';
 import { ScoreRule } from 'src/api/data/orgcheck-api-data-scorerule';
 import { DataCollectionStatisticsIntf } from '../core/data/orgcheck-api-data-datacollectionstats';
-import { Table } from 'src/ui/table/orgcheck-ui-table';
+import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
 import { GlobalViewGlobalTableDefinition, GlobalViewPerRuleTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-globalview';
 
@@ -86,10 +86,11 @@ export class RecipeGlobalView implements RecipeCollection {
     /**
      * @description Serve the mixture from a designated recipe collection to a table
      * @param {DataCollectionStatisticsIntf[]} mixture - The mixture
-     * @returns {Table[]} The tables
+     * @returns {Promise<Table[]>} The tables
+     * @async
      * @public
      */
-    public serveToTable(mixture: DataCollectionStatisticsIntf[]): Table[] {
+    public async serveToTable(mixture: DataCollectionStatisticsIntf[]): Promise<Table[]> {
         const statsGlobal: { name: string; countBad: number; countGood: number }[] = [];
         const statsByRecipeAndRule: { name: string; ruleName: string; countBad: number }[] = [];
         mixture?.forEach((item) => {
@@ -102,5 +103,16 @@ export class RecipeGlobalView implements RecipeCollection {
         tables.push(TableFactory.create('Statistics (Good and Bad)', new GlobalViewGlobalTableDefinition(), statsGlobal));
         tables.push(TableFactory.create('Statistics (Reasons)', new GlobalViewPerRuleTableDefinition(), statsByRecipeAndRule));
         return tables;
+    }
+    
+    /**
+     * @description We put your plate in a doggy bag
+     * @param {Table[]} plates - Plates which were on the table
+     * @returns {Promise<ExportedTable>} Meal in a doggy bag, ready to take back home!
+     * @async
+     * @public
+     */
+    public async serveToGo(plates: Table[]): Promise<ExportedTable> {
+        return TableFactory.export(plates[0]);
     }
 }

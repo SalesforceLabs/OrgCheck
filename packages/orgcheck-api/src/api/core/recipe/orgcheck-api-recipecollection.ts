@@ -3,7 +3,7 @@ import { Data } from 'src/api/core/data/orgcheck-api-data';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { ScoreRule } from 'src/api/data/orgcheck-api-data-scorerule';
 import { RecipeAliases } from 'src/api/core/recipe/orgcheck-api-recipes-aliases';
-import { Table } from 'src/ui/table/orgcheck-ui-table';
+import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 
 /**
  * @description The super class for recipe collections that are defined only by executing a set of other recipes
@@ -46,9 +46,19 @@ export interface RecipeCollection {
      * @description Serve the mixture from a designated recipe collection to a table
      * @param {DataCollectionStatisticsIntf[]} mixture - The mixture
      * @returns {Table[]} The tables
+     * @async
      * @public
      */
-    serveToTable(mixture: DataCollectionStatisticsIntf[]): Table[];
+    serveToTable(mixture: DataCollectionStatisticsIntf[]): Promise<Table[]>;
+
+    /**
+     * @description We put your plate in a doggy bag
+     * @param {Table[]} plate - Plates which were on the table
+     * @returns {Promise<ExportedTable>} Meal in a doggy bag, ready to take back home!
+     * @async
+     * @public
+     */
+    serveToGo(plates: Table[]): Promise<ExportedTable>;
 }
 
 export class DataCollectionStatisticsOK implements DataCollectionStatisticsIntf {
@@ -134,7 +144,7 @@ export class DataCollectionStatisticsWithError implements DataCollectionStatisti
      * @type {any[]}
      * @public
      */
-    distinctBadValues: any[] = [];
+    public readonly distinctBadValues: any[] = [];
 
     /**
      * @description List of all data items that are part of this collection

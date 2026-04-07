@@ -1,7 +1,7 @@
+import terser from '@rollup/plugin-terser';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import typescript from '@rollup/plugin-typescript';
-import terser from '@rollup/plugin-terser';
 import { dts } from 'rollup-plugin-dts';
 
 export default [
@@ -9,7 +9,7 @@ export default [
         input: './src/orgcheck.ts',
         plugins: [
             resolve({ preferBuiltins: false, extensions: ['.js', '.ts'] }),
-            typescript({ tsconfig: './tsconfig.json' }),
+            typescript({ tsconfig: './tsconfig.build.json' }),
             commonjs({ extensions: ['.js', '.ts'] })
         ],
         output: {
@@ -25,9 +25,8 @@ export default [
         output: { file: './dist/orgcheck.d.ts', format: 'es' },
         plugins: [
             dts({
-                tsconfig: './tsconfig.json',
+                tsconfig: './tsconfig.build.json',
                 compilerOptions: { 
-                    baseUrl: '.', 
                     paths: { 
                         'src/*': ['./src/*'], 
                         'tslib': ['./node_modules/tslib/tslib.d.ts'] 

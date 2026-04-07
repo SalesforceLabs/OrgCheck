@@ -16,16 +16,16 @@ export class CellFactory {
         const columnData = column['data'] ?? {};
         switch (column.type) {
             case ColumnType.TXTS: {
-                cell.data.values = RESOLVE(row, columnData['values'])?.map((item: any) => DECORATE({ data: item }, modifier));
+                cell.data.values = MAP(RESOLVE(row, columnData['values']), (item: any) => DECORATE({ data: item }, modifier));
                 break;
             }
             case ColumnType.OBJS: {
                 const template = columnData['template'] ?? (() => '');
-                cell.data.values = RESOLVE(row, columnData['values'])?.map((item: any) => DECORATE({ data: template(item) }, modifier));
+                cell.data.values = MAP(RESOLVE(row, columnData['values']), (item: any) => DECORATE({ data: template(item) }, modifier));
                 break;
             }
             case ColumnType.URLS: {
-                cell.data.values = RESOLVE(row, columnData['values'])?.map((item: any) => {
+                cell.data.values = MAP(RESOLVE(row, columnData['values']), (item: any) => {
                     const value = { data: {}};
                     Object.keys(columnData).filter((p) => p !== 'values').forEach((property) => {
                         value.data[property] = RESOLVE(item, columnData[property]);
@@ -54,8 +54,15 @@ export class CellFactory {
  */
 const RESOLVE = (row: any, property: string): any => {
     let reference = row;
-    property.split('.').forEach((/** @type {string} */ p: string) => { if (reference) reference = reference[p]; });
+    property?.split('.').forEach((p: string) => { if (reference) reference = reference[p]; });
     return reference;
+}
+
+const MAP = (array: any[], callback: Function): any[] => {
+    if (Array.isArray(array)) {
+        return array.map((item) => callback(item));
+    }
+    return array;
 }
 
 /**

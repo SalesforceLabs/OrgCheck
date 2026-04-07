@@ -12,12 +12,11 @@
         "esModuleInterop": true,
         "strictNullChecks": true,
         "strictPropertyInitialization": true,
-        "ignoreDeprecations": "6.0",
+        "useUnknownInCatchVariables": false,
         "lib": [
             "ES2021",
             "DOM"
         ],
-        "types": ["jest"],
         "baseUrl": ".",
         "paths": {
             "tslib" :   [ "./node_modules/tslib/tslib.d.ts" ],
@@ -26,8 +25,7 @@
         }
     },
     "include": [
-        "src/**/*.ts",
-        "tests/**/*.ts"
+        "src/**/*.ts"
     ],
     "exclude": [
         "node_modules"
