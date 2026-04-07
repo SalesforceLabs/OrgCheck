@@ -58,9 +58,14 @@ div.autowidth {
     width: auto;
 }
 
+div.stickytable {
+    max-height: calc(100vh - 200px);
+}
+
 th.sticky {
     position: sticky;
     top: var(--lwc-spacingXxxSmall, 0); /* Don't forget this, required for the stickiness */
     z-index: 1000; /* when scrolling the header should stay on top */
     vertical-align: bottom;
+    background-color: var(--lwc-colorBackgroundAlt, white); /* prevent rows from showing through */
 }

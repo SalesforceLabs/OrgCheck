@@ -128,7 +128,9 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @type {string}
      */
     get tableContainerClasses() {
-        return `${this.dontUseAllSpace === true ? 'unsettablewidth' : ''} ${this.dontBeScrollable === false ? 'slds-scrollable autowidth' : ''}`;
+        return `${this.dontUseAllSpace === true ? 'unsettablewidth' : ''} `+
+               `${this.dontBeScrollable === false ? 'slds-scrollable autowidth' : ''} `+
+               `${this.isStickyHeaders === true ? 'stickytable' : ''}`;
     }
 
     /**
@@ -143,66 +145,49 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @description Total number of all rows (even if the filter is on)
      * @type {number}
      */
-    get nbAllRows() {
-        return this._private_properties.table?.length ?? 0;
-    }
+    nbAllRows;
 
     /**
      * @description Number of rows that match the filter
      * @type {number}
      */
-    get nbFilteredRows() {
-        return this._private_properties.table?.length ?? 0;
-    }
+    nbFilteredRows;
 
     /**
      * @description Total number of rows that have a bad score (>0)
      * @type {number}
      */
-    get nbBadRows() {
-        return this._private_properties.table?.nbBadRows ?? 0;
-    }
+    nbBadRows;
     
     /**
      * @description Is the search active and records are filtered
      * @type {boolean}
      */
-    get isFilterOn() {
-        return this._private_properties.table?.isFilterOn ?? false;
-    }
+    isFilterOn;
 
     /**
      * @description Is filter gives no data?
      * @type {boolean}
      */
-    get isFilteredDataEmpty() {
-        return this._private_properties.table?.isFilteredDataEmpty ?? false;
-    }
-    
+    isFilteredDataEmpty;
 
     /**
      * @description Is the table sorted implicitely or explicitely?
      * @type {boolean}
      */
-    get isSorted() {
-        return this._private_properties.table?.orderIndex !== undefined;
-    }
+    isSorted;
 
     /**
      * @description Label of the field the table is sorted by
      * @type {string}
      */
-    get sortingField() {
-        return this._private_properties.table?.definition.columns[this._private_properties.table?.orderIndex]?.label;
-    }
+    sortingField;
 
     /**
      * @description Order of the sorting (ascending or descending)
      * @type {string}
      */
-    get sortingOrder() {
-        return this._private_properties.table?.orderSort === 'asc' ? 'ascending' : 'descending';
-    }
+    sortingOrder;
 
     /**
      * @description How many rows are currently shown?
@@ -250,7 +235,6 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
         table: undefined,
         allRows: undefined,
         filteringSearchInput: undefined,
-        sortingIndex: undefined,
         sortingOrder: undefined,
     }
 
@@ -307,13 +291,12 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
 
         this._private_properties.allRows = allRows;
         this._private_properties.table = table ? { ...table, rows: allRows } : undefined;
-        this._private_properties.sortingIndex = table?.orderIndex;
-        this._private_properties.sortingOrder = table?.orderSort;
 
         // Sort, filter and set the visible rows
         this._sortAllRows();
         this._filterAllRows();
         this._setVisibleRows();
+        this._synchronizeCounters();
     }
 
     /**
@@ -337,6 +320,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
         const nextNbRows = this.infiniteScrollingCurrentNbRows + Number.parseInt(this.infiniteScrollingAdditionalNbRows, 10);
         this.infiniteScrollingCurrentNbRows = nextNbRows < this.nbAllRows ? nextNbRows : this.nbAllRows;
         this._setVisibleRows();
+        this._synchronizeCounters();
     }
 
     /**
@@ -345,6 +329,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     handleLoadAllData() {
         this.infiniteScrollingCurrentNbRows = this.nbAllRows;
         this._setVisibleRows();
+        this._synchronizeCounters();
     }
 
     /**
@@ -355,6 +340,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
         this._private_properties.filteringSearchInput = event.target.value;
         this._filterAllRows();
         this._setVisibleRows();
+        this._synchronizeCounters();
     }
 
     /**
@@ -364,23 +350,23 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     handleSortColumnClick(event) {
 
         // Get the old and new columns index
-        const previousSortingColumnIndex = this._private_properties.sortingIndex;
+        const previousSortingColumnIndex = this._private_properties.table.orderIndex;
         const newSortingColumnIndex = parseInt(event.target.getAttribute('aria-colindex'), 10) - 1; // aria-colindex is 1-based index, we need 0-based index
 
         // Set the new sorting column index
-        this._private_properties.sortingIndex = newSortingColumnIndex;
+        this._private_properties.table.orderIndex = newSortingColumnIndex;
 
         // Setting the sorting order accordingly
         if (previousSortingColumnIndex === newSortingColumnIndex) { 
             // If the previous and new are the same, we just switch the order!
-            if (this._private_properties.sortingOrder === 'asc') {
-                this._private_properties.sortingOrder = 'desc';
+            if (this._private_properties.table.orderSort === 'asc') {
+                this._private_properties.table.orderSort = 'desc';
             } else {
-                this._private_properties.sortingOrder = 'asc'
+                this._private_properties.table.orderSort = 'asc'
             }
         } else { 
             // if they are different, by default, the ordering is ASC
-            this._private_properties.sortingOrder = 'asc';
+            this._private_properties.table.orderSort = 'asc';
         }
 
         // Remove the style for the old column
@@ -392,11 +378,12 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
         // Add the sorting style to the new column
         const newColumn = this.columnHeaders[newSortingColumnIndex];
         if (newColumn) {
-            newColumn.cssClass += (this._private_properties.sortingOrder === 'asc' ? 'sorted sorted-asc' : 'sorted sorted-desc');
+            newColumn.cssClass += (this._private_properties.table.orderSort === 'asc' ? 'sorted sorted-asc' : 'sorted sorted-desc');
         }
 
         this._sortAllRows();
         this._setVisibleRows();
+        this._synchronizeCounters();
     }
 
     /**
@@ -431,6 +418,22 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     // ----------------------------------------------------------------------------------------------------------------
 
     /**
+     * @description Internal method to synchronize all the counters (nbAllRows, nbFilteredRows, nbBadRows, etc...) with the current table information
+     * @private
+     */
+    _synchronizeCounters() {
+        this.nbAllRows = this._private_properties.table?.rows?.length ?? 0;
+        this.nbFilteredRows = this._private_properties.table?.nbFilteredRows ?? 0;
+        this.nbBadRows = this._private_properties.table?.nbBadRows ?? 0
+        this.isFilterOn = this._private_properties.table?.isFilterOn ?? false;
+        this.isFilteredDataEmpty = this._private_properties.table?.isFilteredDataEmpty ?? false;
+        this.isSorted =  this._private_properties.table?.orderIndex !== undefined;
+        this.sortingField = this._private_properties.table?.definition.columns[this._private_properties.table?.orderIndex]?.label;
+        this.sortingOrder = this._private_properties.table?.orderSort === 'asc' ? 'ascending' : 'descending';
+    }
+
+
+    /**
      * @description Internal filter method which takes into account the <code>_filteringSearchInput</code> property
      * @private
      */
@@ -448,8 +451,8 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     _sortAllRows() {
         __orgcheck__Get()?.TableUtils.sort(
             this._private_properties.table, 
-            this._private_properties.sortingIndex,
-            this._private_properties.sortingOrder
+            this._private_properties.table.orderIndex,
+            this._private_properties.table.orderSort
         );
     }
 

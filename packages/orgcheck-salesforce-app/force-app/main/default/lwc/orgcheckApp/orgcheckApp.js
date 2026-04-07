@@ -757,51 +757,6 @@ export default class OrgcheckApp extends LightningElement {
         console.error(title, error);
     }
 
-    /**
-     * @description Generate the array for exporting the data of the current object
-     * @returns {Array}
-     * @private
-     */
-    _generateDataForCurrentObjectExport() {
-        /*
-        const sheets = [];
-        if (this.isObjectSpecified && this.data.object) {
-            sheets.push({ 
-                header: 'General information',
-                columns: [ 'Label', 'Value' ],
-                rows: [
-                    [ 'API Name', `${this.data.object.apiname ?? ''}` ],
-                    [ 'Package', `${this.data.object.package ?? ''}` ],
-                    [ 'Singular Label', `${this.data.object.label ?? ''}` ],
-                    [ 'Plural Label', `${this.data.object.labelPlural ?? ''}` ],
-                    [ 'Description', `${this.data.object.description ?? ''}` ],
-                    [ 'Key Prefix', `${this.data.object.keyPrefix ?? ''}` ],
-                    [ 'Record Count (including deleted ones)', `${this.data.object.recordCount}` ],
-                    [ 'Is Custom?', `${this.data.object.isCustom?'true':'false'}` ],
-                    [ 'Feed Enable?', `${this.data.object.isFeedEnabled?'true':'false'}` ],
-                    [ 'Most Recent Enabled?', `${this.data.object.isMostRecentEnabled?'true':'false'}` ],
-                    [ 'Global Search Enabled?', `${this.data.object.isSearchable?'true':'false'}` ],
-                    [ 'Internal Sharing', `${this.data.object.internalSharingModel ?? ''}` ],
-                    [ 'External Sharing', `${this.data.object.externalSharingModel ?? ''}` ]
-                ]
-            });
-            sheets.push(__orgcheck__GenerateSheet(this.tableDefinitions.standardfieldsinobject, this.data.object.standardFields, 'Standard Fields'));
-            sheets.push(__orgcheck__GenerateSheet(this.tableDefinitions.customfieldsinobject, this.data.object.customFieldRefs, 'Custom Fields'));
-            sheets.push(__orgcheck__GenerateSheet(this.tableDefinitions.apextriggersinobject, this.data.object.apexTriggerRefs, 'Apex Triggers'));
-            sheets.push(__orgcheck__GenerateSheet(this.tableDefinitions.fieldsetsinobject, this.data.object.fieldSets, 'Field Sets'));
-            sheets.push(__orgcheck__GenerateSheet(this.tableDefinitions.pagelayoutsinobject, this.data.object.layouts, 'Page Layouts'));
-            sheets.push(__orgcheck__GenerateSheet(this.tableDefinitions.flexipagesinobject, this.data.object.flexiPages, 'Lightning Pages'));
-            sheets.push(__orgcheck__GenerateSheet(this.tableDefinitions.limitsinobject, this.data.object.limits, 'Limits'));
-            sheets.push(__orgcheck__GenerateSheet(this.tableDefinitions.validationrulesinobject, this.data.object.validationRules, 'Validation Rules'));
-            sheets.push(__orgcheck__GenerateSheet(this.tableDefinitions.weblinksinobject, this.data.object.webLinks, 'Web Links'));
-            sheets.push(__orgcheck__GenerateSheet(this.tableDefinitions.recordtypesinobject, this.data.object.recordTypes, 'Record Types'));
-            sheets.push(__orgcheck__GenerateSheet(this.tableDefinitions.relationshipsinobject, this.data.object.relationships, 'Relationships'));
-            sheets.push(__orgcheck__GenerateSheet(this.tableDefinitions.workflowsinobject, this.data.object.workflows, 'Relationships'));            
-        }
-        return sheets;
-        */
-    }
-
     // ----------------------------------------------------------------------------------------------------------------
     // ----------------------------------------------------------------------------------------------------------------
     // User Experience Handlers

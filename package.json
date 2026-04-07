@@ -17,7 +17,7 @@
     ],
     "devDependencies": {
         "eslint-config-prettier": "^9.1.0",
-        "lerna": "^9.0.5"
+        "lerna": "^9.0.7"
     },
     "dependencies": {
         "@typescript-eslint/eslint-plugin": "^8.57.2",

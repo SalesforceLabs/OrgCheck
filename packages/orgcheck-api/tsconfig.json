@@ -12,9 +12,12 @@
         "esModuleInterop": true,
         "strictNullChecks": true,
         "strictPropertyInitialization": true,
-        "lib": [ 
-            "ES2021.String" // string.prototype.replaceAll is only available in ES2021 and later
+        "ignoreDeprecations": "6.0",
+        "lib": [
+            "ES2021",
+            "DOM"
         ],
+        "types": ["jest"],
         "baseUrl": ".",
         "paths": {
             "tslib" :   [ "./node_modules/tslib/tslib.d.ts" ],
