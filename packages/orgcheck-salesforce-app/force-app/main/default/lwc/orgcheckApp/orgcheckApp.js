@@ -96,10 +96,14 @@ export default class OrgcheckApp extends LightningElement {
     /**
      * @description Data received from the Org Check API and used in the different 
      *              tables and components of the UI.
-     * @type {Object<string, Table | SfdcObjectAsTable>}
+     * @type {Object<string, Table | SfdcObjectAsTable | Table[]>}
      */
     @track data = { };
 
+    /**
+     * @description Exports data
+     * @type {Object<string, ExportedTable | ExportedTable[]>}
+     */
     @track exports = { };
 
     /**
@@ -609,10 +613,12 @@ export default class OrgcheckApp extends LightningElement {
                         // If yes we prepare the data
                         const mixture = await this._private_properties.api.prepareData(appNavItem.recipe, this.namespace, this.objectType, this.object);
                         // serve the data
+                        /** @type Table | SfdcObjectAsTable | Table[] */
                         const plate = await this._private_properties.api.serveData(appNavItem.recipe, mixture);
                         // and then export the data
+                        /** @type ExportedTable | ExportedTable[] */
                         const doggyBag = await this._private_properties.api.exportData(appNavItem.recipe, plate);
-                        // Save the plate
+                        // Save the plate as data and doggybag as export
                         this.data[appNavItem.data] = plate;
                         this.exports[appNavItem.data] = doggyBag;
                     }                

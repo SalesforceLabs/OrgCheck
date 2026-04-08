@@ -7,6 +7,11 @@ import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
 import { GlobalViewGlobalTableDefinition, GlobalViewPerRuleTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-globalview';
 
+export interface GlobalViewAsTable {
+    statisticsGoodAndBad: Table;
+    statisticsReasons: Table;
+}
+
 export class RecipeGlobalView implements RecipeCollection {
     
     /**
@@ -86,33 +91,36 @@ export class RecipeGlobalView implements RecipeCollection {
     /**
      * @description Serve the mixture from a designated recipe collection to a table
      * @param {DataCollectionStatisticsIntf[]} mixture - The mixture
-     * @returns {Promise<Table[]>} The tables
+     * @returns {Promise<GlobalViewAsTable>} The global view as a table
      * @async
      * @public
      */
-    public async serveToTable(mixture: DataCollectionStatisticsIntf[]): Promise<Table[]> {
+    public async serveToTable(mixture: DataCollectionStatisticsIntf[]): Promise<GlobalViewAsTable> {
         const statsGlobal: { name: string; countBad: number; countGood: number }[] = [];
         const statsByRecipeAndRule: { name: string; ruleName: string; countBad: number }[] = [];
         mixture?.forEach((item) => {
-            statsGlobal.push({ name: item.recipeName, countBad: item.countBad, countGood: item.countGood });
+            statsGlobal.push({ name: item.recipeTitle, countBad: item.countBad, countGood: item.countGood });
             item.countBadByRule?.forEach((c) => {
-                statsByRecipeAndRule.push({ name: item.recipeName, ruleName: c.ruleName, countBad: c.count });
+                statsByRecipeAndRule.push({ name: item.recipeTitle, ruleName: c.ruleName, countBad: c.count });
             });
         });
-        const tables: Table[] = [];
-        tables.push(TableFactory.create('Statistics (Good and Bad)', new GlobalViewGlobalTableDefinition(), statsGlobal));
-        tables.push(TableFactory.create('Statistics (Reasons)', new GlobalViewPerRuleTableDefinition(), statsByRecipeAndRule));
-        return tables;
+        return {
+            statisticsGoodAndBad: TableFactory.create('Statistics (Good and Bad)', new GlobalViewGlobalTableDefinition(), statsGlobal),
+            statisticsReasons: TableFactory.create('Statistics (Reasons)', new GlobalViewPerRuleTableDefinition(), statsByRecipeAndRule)
+        }
     }
     
     /**
      * @description We put your plate in a doggy bag
-     * @param {Table[]} plates - Plates which were on the table
-     * @returns {Promise<ExportedTable>} Meal in a doggy bag, ready to take back home!
+     * @param {Table[]} plate - Plates which were on the table
+     * @returns {Promise<ExportedTable[]>} Meal in a doggy bag, ready to take back home!
      * @async
      * @public
      */
-    public async serveToGo(plates: Table[]): Promise<ExportedTable> {
-        return TableFactory.export(plates[0]);
+    public async serveToGo(plate: GlobalViewAsTable): Promise<ExportedTable[]> {
+        return [
+            TableFactory.export(plate.statisticsGoodAndBad),
+            TableFactory.export(plate.statisticsReasons)
+        ];
     }
 }

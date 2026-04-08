@@ -59,7 +59,7 @@ export interface ApiIntf {
      * @type {string}
      * @public
      */
-    orgId: string;
+    orgId?: string;
 
     // -----------------------
     // CACHE
@@ -212,14 +212,60 @@ export interface ApiIntf {
     // GENERIC DATA RETRIEVER
     // -----------------------
 
+    /**
+     * @description Get a cachestamp for a specific data. A cachestamp is a string that represents the current state 
+     *                  of the data in the org. It can be used to know if the data has changed since the last time it 
+     *                  was retrieved.
+     * @param {RecipeAliases} alias - name of the data you want to get
+     * @param namespace 
+     * @param sobjectType 
+     * @param sobject 
+     * @returns {string} cachestamp of the data
+     * @public
+     */
     cachestampData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string): string;
 
+    /**
+     * @description Prepare data for a specific recipe. This method will retrieve the data from the org, compute the 
+     *                  score and return the data in a format that can be used by the UI.
+     * @param {RecipeAliases} alias - name of the data you want to get
+     * @param namespace 
+     * @param sobjectType 
+     * @param sobject 
+     * @returns {Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]>} data prepared for the UI
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
     prepareData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string): Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]>;
 
+    /**
+     * @description Serve data for a specific recipe. This method will format the data in a way that can be used by the UI.
+     * @param {RecipeAliases} alias - name of the data you want to get
+     * @param mixture 
+     * @returns {Promise<Table | SfdcObjectAsTable | Table[]>} data formatted for the UI
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
     serveData(alias: RecipeAliases, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<Table | SfdcObjectAsTable | Table[]>;
     
+    /**
+     * @description Export data for a specific recipe. This method will format the data in a way that can be used for export.
+     * @param {RecipeAliases} alias - name of the data you want to get
+     * @param plate 
+     * @returns {Promise<ExportedTable | ExportedTable[]>} data formatted for export
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
     exportData(alias: RecipeAliases, plate: Table | SfdcObjectAsTable | Table[]): Promise<ExportedTable | ExportedTable[]>;
 
+    /**
+     * @description Get the titles for all available data
+     * @returns {Map<RecipeAliases, string>} Map of data titles
+     * @public
+     */
     titlesForAllData(): Map<RecipeAliases, string>;
 
     /**

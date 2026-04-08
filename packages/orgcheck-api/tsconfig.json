@@ -1,9 +1,7 @@
 {
     "compilerOptions": {
-        "alwaysStrict": false, // to switch to true asap
         "allowSyntheticDefaultImports": true,
         "module": "ESNext",
-        "moduleResolution": "node",
         "noImplicitAny": false, // to switch to true asap
         "noImplicitReturns": true,
         "noUnusedLocals": true,
@@ -17,7 +15,6 @@
             "ES2021",
             "DOM"
         ],
-        "baseUrl": ".",
         "paths": {
             "tslib" :   [ "./node_modules/tslib/tslib.d.ts" ],
             "src/*":    [ "./src/*" ],

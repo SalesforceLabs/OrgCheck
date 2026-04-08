@@ -8,6 +8,9 @@ import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
 import { ScoreRule } from 'src/api/data/orgcheck-api-data-scorerule';
 import { HardCodedURLsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-hardcodedurls';
 
+export interface HardcodedURLsViewAsTable {
+}
+
 export class RecipeHardcodedURLsView implements RecipeCollection {
     
     /**
@@ -61,26 +64,26 @@ export class RecipeHardcodedURLsView implements RecipeCollection {
     /**
      * @description Serve the mixture from a designated recipe collection to a table
      * @param {DataCollectionStatisticsIntf[]} mixture - The mixture
-     * @returns {Promise<Table[]>} The tables
+     * @returns {Promise<Table>} The table view of hardcoded URLs
      * @async
      * @public
      */
-    public async serveToTable(mixture: DataCollectionStatisticsIntf[]): Promise<Table[]> {
+    public async serveToTable(mixture: DataCollectionStatisticsIntf[]): Promise<Table> {
         const stats: { name: string; countBad: number; countGood: number, badValues: string[] }[] = [];
         mixture?.forEach((item) => {
-            stats.push({ name: item.recipeName, countBad: item.countBad, countGood: item.countGood, badValues: item.distinctBadValues ?? [] });
+            stats.push({ name: item.recipeTitle, countBad: item.countBad, countGood: item.countGood, badValues: item.distinctBadValues ?? [] });
         });
-        return [TableFactory.create(this.title, new HardCodedURLsTableDefinition(), stats)];
+        return TableFactory.create(this.title, new HardCodedURLsTableDefinition(), stats);
     }
 
     /**
      * @description We put your plate in a doggy bag
-     * @param {Table[]} plates - Plates which were on the table
+     * @param {Table} plate - Plate which was on the table
      * @returns {Promise<ExportedTable>} Meal in a doggy bag, ready to take back home!
      * @async
      * @public
      */
-    public async serveToGo(plates: Table[]): Promise<ExportedTable> {
-        return TableFactory.export(plates[0]);
+    public async serveToGo(plate: Table): Promise<ExportedTable> {
+        return TableFactory.export(plate);
     }
 }

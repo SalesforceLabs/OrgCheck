@@ -187,7 +187,7 @@ export abstract class OrgCheckSfPluginAbstractCommand extends SfCommand<CheckRes
 
         const json = {
             orgCheckVersion: orgcheckApi.version,
-            salesforceOrgId: orgcheckApi.orgId,
+            salesforceOrgId: orgcheckApi.orgId ?? '<unknown>',
             dateCheck: new Date().toISOString(),
             action: recipe,
             result: mixture
@@ -218,6 +218,7 @@ export abstract class OrgCheckSfPluginAbstractCommand extends SfCommand<CheckRes
                 exportedTable.rows.forEach(row => {
                     this.log(csvJoiner(row));
                 });
+                this.log();
             })
         }
 

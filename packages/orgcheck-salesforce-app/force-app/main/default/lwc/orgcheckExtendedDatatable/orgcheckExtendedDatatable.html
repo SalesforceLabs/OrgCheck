@@ -22,15 +22,7 @@
         <c-orgcheck-export-button if:true={showExportButton} source={exportSource} basename={exportBasename}></c-orgcheck-export-button>
     </lightning-layout>
     <template if:true={showSearch}>
-        <div>
-            <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_left" role="none">
-                <lightning-icon size="x-small" style="margin-top: -5px!important;" class="iconMargin slds-icon slds-input__icon slds-input__icon_left slds-icon-text-default" icon-name="utility:search"></lightning-icon>
-                <lightning-input 
-                    placeholder="Search any string field values (more than 2 characters)"
-                    onchange={handleSearchInputChanged}>
-                </lightning-input>
-            </div>
-        </div>
+        <lightning-input type="search" aria-placeholder="Search any string field values (more than 2 characters)" variant="label-hidden" name="search" onchange={handleSearchInputChanged}></lightning-input>
     </template>
     <div id="tableContainer" class={tableContainerClasses}>
         <table class="slds-table slds-table_bordered">

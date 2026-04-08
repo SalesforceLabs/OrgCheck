@@ -56,6 +56,7 @@ import { DataCollectionStatisticsIntf } from 'src/api/core/data/orgcheck-api-dat
 import { RecipeScoreRules } from 'src/api/recipe/orgcheck-api-recipe-scorerules';
 import { Recipe, ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
+import { SecretSauce } from '../orgcheck-api-secretsauce';
 
 /**
  * @description Recipe Manager
@@ -296,7 +297,7 @@ export class RecipeManager implements RecipeManagerIntf {
         try {
             datasets = recipe.ingredients(this._logger.toSimpleLogger(section), parameters);
         } catch (error) {
-            throw new RecipeManagerError(alias, `An error occurred while extracting the datasets (message: ${error.message}).`, error);
+            throw new RecipeManagerError(alias, `An error occurred while extracting the datasets (message: ${error?.message}, stack: ${error?.stack}).`, error);
         }
         this._logger.log(section, `This recipe has ${datasets?.length} ${datasets?.length>1?'datasets':'dataset'}: ${datasets.map((d) => d instanceof DatasetRunInformation ? d.alias : d ).join(', ')}...`);
 
@@ -307,7 +308,7 @@ export class RecipeManager implements RecipeManagerIntf {
         try {
             data = await this._datasetManager.run(datasets);
         } catch(error) {
-            throw new RecipeManagerError(alias, `An error occurred while running the dataset (message: ${error.message}).`, error);
+            throw new RecipeManagerError(alias, `An error occurred while running the dataset (message: ${error?.message}, stack: ${error?.stack}).`, error);
         }
         this._logger.log(section, 'Datasets information successfuly retrieved!');
 
@@ -319,7 +320,7 @@ export class RecipeManager implements RecipeManagerIntf {
         try {
             finalData = await recipe.mix(data, this._logger.toSimpleLogger(section), parameters);
         } catch(error) {
-            throw new RecipeManagerError(alias, `An error occurred while transforming the data (message: ${error.message}).`, error);
+            throw new RecipeManagerError(alias, `An error occurred while transforming the data (message: ${error?.message}, stack: ${error?.stack}).`, error);
         }
         this._logger.finalLog(section, 'Transformation successfuly done!');
         
@@ -351,7 +352,7 @@ export class RecipeManager implements RecipeManagerIntf {
         try {
             recipes = recipeCollection.ingredients(this._logger.toSimpleLogger(section), parameters);
         } catch(error) {
-            throw new RecipeManagerError(alias, `An error occurred while extracting the recipes (message: ${error.message}).`)
+            throw new RecipeManagerError(alias, `An error occurred while extracting the recipes (message: ${error?.message}, stack: ${error?.stack}).`)
         }
         this._logger.log(section, `This recipe collection has ${recipes?.length} ${recipes?.length>1?'recipes':'recipe'}: ${recipes.join(', ')}...`);
 
@@ -378,7 +379,7 @@ export class RecipeManager implements RecipeManagerIntf {
                 }
             });
         } catch (error) {
-            throw new RecipeManagerError(alias, `An error occurred while running the recipes (message: ${error.message}).`);
+            throw new RecipeManagerError(alias, `An error occurred while running the recipes (message: ${error?.message}, stack: ${error?.stack}).`);
         } finally {
             this._logger.optimisticByPass = false;
         }
@@ -388,9 +389,9 @@ export class RecipeManager implements RecipeManagerIntf {
         // STEP 3. Transform the recipe collection finally
         // -------------------
         this._logger.log(section, 'This recipe collection will now transform all this information...');
+        // Note: if listRules is empty it means we want ALL the rules
         const listRules = recipeCollection.filterByScoreRules(this._logger.toSimpleLogger(section), parameters);
-        const listRulesByIds = new Map(listRules.map(rule => [ rule.id, rule ]));
-        const listRuleIds = Array.from(listRulesByIds.keys());
+        const listRuleIds = Array.from(listRules.map((rule) => rule.id));
         const isRuleFilterOn = listRules?.length > 0 || false;
         const finalData: DataCollectionStatisticsIntf[] = [];
         try {
@@ -421,17 +422,20 @@ export class RecipeManager implements RecipeManagerIntf {
                         // add the count of bad records per rule
                         countOfBadRecordsPerRuleId.set(id, (countOfBadRecordsPerRuleId.get(id) ?? 0) + 1);
                         // add the bad values in a set
-                        const rule = listRulesByIds.get(id);
+                        const rule = SecretSauce.GetScoreRule(id);
                         if (rule) {
-                            d[rule.badField]?.forEach((url: string) => badValues.add(url));
+                            //d[rule.badField]?.forEach((url: string) => badValues.add(url));
+                            badValues.add(d[rule.badField]);
                         }
                     });
                 });
+                const listRulesFound = Array.from(countOfBadRecordsPerRuleId.keys()).map((ruleId) => SecretSauce.GetScoreRule(ruleId));
                 finalData.push(new DataCollectionStatisticsOK(
                     recipe,
+                    this._recipes.get(recipe)?.title ?? recipe,
                     (records?.length ?? 0),
                     (onlyBadRecords?.length ?? 0),
-                    listRules.map((rule) => {
+                    listRulesFound.map((rule) => {
                         return {
                             ruleId: rule.id,
                             ruleName: rule.description,
@@ -449,6 +453,7 @@ export class RecipeManager implements RecipeManagerIntf {
             recipesInError.forEach((lastError, recipe) => {
                 finalData.push(new DataCollectionStatisticsWithError(
                     recipe,
+                    this._recipes.get(recipe)?.title ?? recipe,
                     lastError?.message || 'Unknown error'
                 ));
             });
@@ -466,7 +471,7 @@ export class RecipeManager implements RecipeManagerIntf {
             })
 
         } catch(error) {
-            throw new RecipeManagerError(alias, `An error occurred while transforming the data (message: ${error.message}).`, error);
+            throw new RecipeManagerError(alias, `An error occurred while transforming the data (message: ${error?.message}, stack: ${error?.stack}).`, error);
         }
         this._logger.finalLog(section, 'Transformation successfuly done!');
 
@@ -499,7 +504,7 @@ export class RecipeManager implements RecipeManagerIntf {
         try {
             datasets = recipe.ingredients(this._logger.toSimpleLogger(section), parameters);
         } catch(error) {
-            throw new RecipeManagerError(alias, `An error occurred while extracting the datasets (message: ${error.message}).`, error);
+            throw new RecipeManagerError(alias, `An error occurred while extracting the datasets (message: ${error?.message}, stack: ${error?.stack}).`, error);
         }
         this._logger.log(section, `This recipe has ${datasets?.length} ${datasets?.length>1?'datasets':'dataset'}: ${datasets.map((d) => d instanceof DatasetRunInformation ? d.alias : d ).join(', ')}...`);
 
@@ -510,7 +515,7 @@ export class RecipeManager implements RecipeManagerIntf {
         try {
             this._datasetManager.clean(datasets);
         } catch(error) {
-            throw new RecipeManagerError(alias, `An error occurred while cleaning the datasets (message: ${error.message}).`, error);
+            throw new RecipeManagerError(alias, `An error occurred while cleaning the datasets (message: ${error?.message}, stack: ${error?.stack}).`, error);
         }
         this._logger.finalLog(section, 'Datasets succesfully cleaned!');
     }
@@ -537,7 +542,7 @@ export class RecipeManager implements RecipeManagerIntf {
         try {
             recipes = recipeCollection.ingredients(this._logger.toSimpleLogger(section), parameters);
         } catch(error) {
-            throw new RecipeManagerError(alias, `An error occurred while extracting the recipes (message: ${error.message}).`, error);
+            throw new RecipeManagerError(alias, `An error occurred while extracting the recipes (message: ${error?.message}, stack: ${error?.stack}).`, error);
         }
         this._logger.log(section, `This recipe collection has ${recipes?.length} ${recipes?.length>1?'recipes':'recipe'}: ${recipes.join(', ')}...`);
 
@@ -548,7 +553,7 @@ export class RecipeManager implements RecipeManagerIntf {
         try {
             recipes.forEach((recipe) => { this._cleanRecipe(recipe, parameters); });
         } catch(error) {
-            throw new RecipeManagerError(alias, `An error occurred while cleaning the datasets (message: ${error.message}).`, error);
+            throw new RecipeManagerError(alias, `An error occurred while cleaning the datasets (message: ${error?.message}, stack: ${error?.stack}).`, error);
         }
         this._logger.finalLog(section, 'Datasets of these recipes succesfully cleaned!');
     }

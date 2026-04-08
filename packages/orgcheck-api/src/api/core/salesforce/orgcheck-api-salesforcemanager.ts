@@ -99,13 +99,6 @@ export class SalesforceError extends Error {
  */
 export interface SalesforceManagerIntf {
 
-    /** 
-     * @description Salesforce ID of the organization
-     * @type {string}
-     * @public
-     */
-    orgId: string;
-
     /**
      * @description Numerical representation of the Salesforce API used by the manager
      * @returns {number} API Version as a number

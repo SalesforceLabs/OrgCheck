@@ -108,8 +108,20 @@
                             <h1 class="slds-text-heading_large">
                                 {currentContentTitle}
                             </h1>
-                            &nbsp;&nbsp;
-                            <lightning-button-icon lwc:if={showRefreshButton} icon-name="utility:sync" alternative-text="Refresh data" title="Refresh the current data being displayed" variant="border-filled" onclick={handleRefreshCurrentData} ></lightning-button-icon>
+                        </lightning-layout-item>
+                        <lightning-layout-item>
+                            &nbsp;&nbsp;&nbsp;
+                            <ul class="slds-button-group-row">
+                                <li class="slds-button-group-item">
+                                    <lightning-button-icon 
+                                        lwc:if={showRefreshButton} 
+                                        icon-name="utility:sync" 
+                                        alternative-text="Refresh data" 
+                                        title="Refresh the current data being displayed" 
+                                        variant="border-filled" 
+                                        onclick={handleRefreshCurrentData} ></lightning-button-icon>
+                                </li>
+                            </ul>
                         </lightning-layout-item>
                         <!-- The global filters -->
                         <lightning-layout-item alignment-bump="left">
@@ -203,56 +215,35 @@
                                     export-source={exports.scorerules} 
                                     export-basename="Org Check Rules"></c-orgcheck-extended-datatable>
                             </div>
-                            <div data-key="04" class="slds-hide slds-var-p-horizontal_small">
+                            <div data-key="04" class="slds-hide slds-var-p-horizontal_medium">
                                 <template lwc:if={data.globalview}>
                                     <lightning-layout>
-                                        <lightning-layout-item>
-                                            <span class="slds-badge slds-theme_success">There are {data.globalview.length} items.</span>
-                                            <span class="slds-badge">Items are sorted by number of "bad" rows in descending order.</span>
-                                            <br /><br />
-                                            <span class="slds-badge viewCard-some-bad-data">Contains at least one "bad" row.</span>
-                                            <span class="slds-badge viewCard-no-bad-data">Contains no "bad" row at all.</span>
-                                            <span class="slds-badge viewCard-error">Error while retrieving the data</span>
-                                        </lightning-layout-item>
                                         <lightning-layout-item alignment-bump="left">
-                                            <c-orgcheck-export-button label="Export all details" source={exports.globalview} basename="GlobalView"></c-orgcheck-export-button>
+                                            <c-orgcheck-export-button source={exports.globalview} basename="GlobalView"></c-orgcheck-export-button>
                                         </lightning-layout-item>
                                     </lightning-layout>
-                                    <lightning-layout multiple-rows>
-                                        <template for:each={data.globalview} for:item="item">
-                                            <lightning-layout-item size="4" padding="around-small" key={item.label}>
-                                                <div class={item.class}>
-                                                    <lightning-card>
-                                                        <h1 class="slds-text-heading_medium" slot="title">{item.label}</h1>
-                                                        <lightning-button-icon 
-                                                            slot="actions"
-                                                            variant="border-filled" 
-                                                            icon-name="utility:new_window"
-                                                            title="Go the corresponding page and see the details for this type of items..."
-                                                            onclick={handleOpenPage}
-                                                            data-key-page={item.keyPage}></lightning-button-icon>
-                                                        <template lwc:if={item.hadError}>
-                                                            <p>Sorry, we had an error loading this data...</p>
-                                                        </template>
-                                                        <template lwc:else>
-                                                            <section lwc:if={item.countBad}>
-                                                                <p class="slds-text-heading_small"><b>{item.countBad}</b> items to correct for the below reasons:</p>
-                                                                <c-orgcheck-extended-datatable 
-                                                                    table={item.data}></c-orgcheck-extended-datatable>
-                                                            </section>
-                                                            <section lwc:else class="slds-var-p-horizontal_small">
-                                                                <p>All good!!</p>
-                                                            </section>
-                                                        </template>
-                                                    </lightning-card>
-                                                </div>
-                                            </lightning-layout-item>  
-                                        </template>
+                                    <lightning-layout>
+                                        <lightning-layout-item class="slds-p-right_small">
+                                            <h1 class="slds-text-heading_medium">Count of good and bad items per type</h1>
+                                            <c-orgcheck-extended-datatable 
+                                                table={data.globalview.statisticsGoodAndBad} 
+                                                empty-message="There is no statistics to show." 
+                                                show-search 
+                                                dont-use-all-space></c-orgcheck-extended-datatable>
+                                        </lightning-layout-item>
+                                        <lightning-layout-item class="slds-p-left_medium">
+                                            <h1 class="slds-text-heading_medium">Count of bad items per type and reasons</h1>
+                                            <c-orgcheck-extended-datatable 
+                                                table={data.globalview.statisticsReasons} 
+                                                empty-message="There is no statistics to show." 
+                                                show-search 
+                                                dont-use-all-space></c-orgcheck-extended-datatable>
+                                        </lightning-layout-item>
                                     </lightning-layout>
-                                </template> 
+                                </template>
                                 <template lwc:else>
                                     <span><img src="/img/loading.gif" alt="[loading]" />&nbsp;<font color="orange"><b>Please wait while the overview is loading...</b></font></span>
-                                </template>
+                                </template>                                
                             </div>
                             <div data-key="05" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 

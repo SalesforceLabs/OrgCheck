@@ -120,6 +120,9 @@ export class TableFactory {
     public static export(table: Table): ExportedTable {
         const exportedRows: ExportedTable = { label: table?.name ?? '', columns: [], rows: [] };
 
+        // sorting the columns by their order index
+        TableFactory.sort(table, table?.definition?.orderIndex ?? 0, table?.definition?.orderSort ?? SortOrder.ASC);
+
         // Parsing columns
         table?.definition?.columns?.forEach((column) => {
             switch(column.type) {

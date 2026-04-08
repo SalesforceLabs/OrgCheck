@@ -49,7 +49,7 @@ export class API implements ApiIntf {
      * @type {string}
      * @public
      */
-    public readonly orgId: string;
+    public orgId?: string;
 
     /**
      * @description Private Recipe Manager property used to run a recipe given its alias
@@ -115,7 +115,6 @@ export class API implements ApiIntf {
         }
         this._sfdcManager = new SalesforceManager(setup?.salesforce);
         this.salesforceApiVersion = this._sfdcManager.apiVersion;
-        this.orgId = this._sfdcManager.orgId;
 
         // --------------------
         // Cache Manager
@@ -181,7 +180,11 @@ export class API implements ApiIntf {
         try {
             if (log?.isDebugEnabled()) log?.debug(`Calling the prepare method for recipe: ${RecipeAliases.ORGANIZATION}`);
             // @ts-ignore
-            return (await this._recipeManager.prepare(RecipeAliases.ORGANIZATION));
+            const org: SfdcOrganization = (await this._recipeManager.prepare(RecipeAliases.ORGANIZATION));
+            if (this.orgId === undefined) {
+                this.orgId = org.id;
+            }
+            return org;
         } catch (error) {
             if (log?.isDebugEnabled()) log?.debug(`Error occurred: message: ${error.message}, stack: ${error.stack}`);
             throw error;
@@ -447,6 +450,17 @@ export class API implements ApiIntf {
     // GENERIC DATA RETRIEVER
     // -----------------------
 
+    /**
+     * @description Get a cachestamp for a specific data. A cachestamp is a string that represents the current state 
+     *                  of the data in the org. It can be used to know if the data has changed since the last time it 
+     *                  was retrieved.
+     * @param {RecipeAliases} alias - name of the data you want to get
+     * @param namespace 
+     * @param sobjectType 
+     * @param sobject 
+     * @returns {string} cachestamp of the data
+     * @public
+     */
     public cachestampData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string): string {
         const log = this._logger?.toSimpleLogger('Cache Stamp Data');
         try {
@@ -462,6 +476,18 @@ export class API implements ApiIntf {
         }
     }
 
+    /**
+     * @description Prepare data for a specific recipe. This method will retrieve the data from the org, compute the 
+     *                  score and return the data in a format that can be used by the UI.
+     * @param {RecipeAliases} alias - name of the data you want to get
+     * @param namespace 
+     * @param sobjectType 
+     * @param sobject 
+     * @returns {Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]>} data prepared for the UI
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
     public async prepareData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string): Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]> {
         const log = this._logger?.toSimpleLogger('Prepare Data');
         try {
@@ -482,6 +508,15 @@ export class API implements ApiIntf {
         }
     }
 
+    /**
+     * @description Serve data for a specific recipe. This method will format the data in a way that can be used by the UI.
+     * @param {RecipeAliases} alias - name of the data you want to get
+     * @param mixture 
+     * @returns {Promise<Table | SfdcObjectAsTable | Table[]>} data formatted for the UI
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
     public async serveData(alias: RecipeAliases, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<Table | SfdcObjectAsTable | Table[]> {
         const log = this._logger?.toSimpleLogger('Serve Data');
         try {
@@ -498,6 +533,15 @@ export class API implements ApiIntf {
         }
     }
 
+    /**
+     * @description Export data for a specific recipe. This method will format the data in a way that can be used for export.
+     * @param {RecipeAliases} alias - name of the data you want to get
+     * @param plate 
+     * @returns {Promise<ExportedTable | ExportedTable[]>} data formatted for export
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
     public async exportData(alias: RecipeAliases, plate: Table | SfdcObjectAsTable | Table[]): Promise<ExportedTable | ExportedTable[]> {
         const log = this._logger?.toSimpleLogger('Export Data');
         try {
@@ -510,6 +554,11 @@ export class API implements ApiIntf {
         }
     }
 
+    /**
+     * @description Get the titles for all available data
+     * @returns {Map<RecipeAliases, string>} Map of data titles
+     * @public
+     */
     public titlesForAllData(): Map<RecipeAliases, string> {
         const log = this._logger?.toSimpleLogger('Get All Titles For Data');
         try {
@@ -529,7 +578,7 @@ export class API implements ApiIntf {
      * @param sobject 
      * @public
      */
-    cleanData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string): void {
+    public cleanData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string): void {
         const log = this._logger?.toSimpleLogger('Clean Data');
         try {
             // Clean the data

@@ -4,6 +4,9 @@
   "compilerOptions": {
     "skipLibCheck": true,
     "isolatedModules": true,
-    "types": ["node", "jest"]
+    "types": [
+      "node", 
+      "jest"
+    ]
   }
 }
