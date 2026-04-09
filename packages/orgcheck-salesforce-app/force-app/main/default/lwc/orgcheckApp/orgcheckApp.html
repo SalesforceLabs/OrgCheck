@@ -161,7 +161,14 @@
                                 </ul>
                             </div>
                             <div data-key="02" class="slds-hide slds-var-p-horizontal_small">
-                                List of cached metadata from the Salesforce org you want to check into your Browser persistant cache.<br />
+                                <lightning-layout>
+                                    <lightning-layout-item>
+                                        List of cached metadata from the Salesforce org you want to check into your Browser persistant cache
+                                    </lightning-layout-item>
+                                    <lightning-layout-item alignment-bump="left">
+                                        <lightning-button label="Clear" variant="destructive" onclick={handleRemoveAllCache}></lightning-button>
+                                    </lightning-layout-item>
+                                </lightning-layout>
                                 <lightning-layout multiple-rows>
                                     <template lwc:if={tableData.cacheitems} for:each={tableData.cacheitems} for:item="item">
                                         <lightning-layout-item size="2" key={item.name} padding="around-small">
@@ -195,8 +202,11 @@
                                     </template>
                                 </lightning-layout>
                                 <br /><br />
-                                If you want to clear all the cache items and restart the application click on the following button:<br />
-                                <lightning-button label="Clear all" style="width: 100%" variant="destructive" onclick={handleRemoveAllCache}></lightning-button>
+                                
+                                <h1 class="slds-text-heading_large">And Now for Something Completely Different...</h1> 
+                                <template for:each={jokes} for:item="joke" for:>
+                                    <p key={joke.question}><b>{joke.question}...</b> &nbsp;&nbsp; <i>{joke.answer}</i></p>
+                                </template>
                             </div>
                             <div data-key="03" class="slds-hide slds-var-p-horizontal_small">
                                 <p>

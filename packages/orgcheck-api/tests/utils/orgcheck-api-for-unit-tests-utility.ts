@@ -23,7 +23,8 @@ export const createAPIforUnitTests = (isProduction: boolean) => {
       isSandbox: isProduction ? false : true, 
       isTrial: false, 
       isProduction : isProduction ? true : false, 
-      localNamespace: 'test'
+      localNamespace: 'test',
+      url: ''
     });
   });
   return api;

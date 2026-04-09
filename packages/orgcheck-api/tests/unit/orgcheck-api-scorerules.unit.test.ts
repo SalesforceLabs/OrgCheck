@@ -1,5 +1,5 @@
 import { SecretSauce } from 'src/api/core/orgcheck-api-secretsauce';
-import { ScoreRule } from 'src/api/data/orgcheck-api-data-scorerule';
+import { ScoreRule } from 'src/api/core/orgcheck-api-data-scorerule';
 import jsforce from 'tests/utils/orgcheck-api-jsforce-mock.utility';
 import fflate from 'tests/utils/orgcheck-api-fflate-mock.utility';
 import { createAPIforUnitTests } from 'tests/utils/orgcheck-api-for-unit-tests-utility';

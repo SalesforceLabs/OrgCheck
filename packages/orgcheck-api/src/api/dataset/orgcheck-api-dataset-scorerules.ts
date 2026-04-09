@@ -3,7 +3,7 @@ import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
 import { SecretSauce } from 'src/api/core/orgcheck-api-secretsauce';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
-import { ScoreRule } from 'src/api/data/orgcheck-api-data-scorerule';
+import { ScoreRule } from 'src/api/core/orgcheck-api-data-scorerule';
 
 export class DatasetScoreRules implements Dataset {
 

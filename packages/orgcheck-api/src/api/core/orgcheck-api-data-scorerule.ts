@@ -1,18 +1,10 @@
-import { Data } from 'src/api/core/data/orgcheck-api-data';
-import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
+import { DataAliases } from "./data/orgcheck-api-data-aliases";
 
 /**
  * @description Org Check "score rule" used to qualify if an item is bad or not
  * @public
  */
-export interface ScoreRule extends Data {
-
-    /**
-     * @description Identifier of what this interface represents
-     * @type {DataAliases}
-     * @public
-     */
-    dataType: DataAliases.ScoreRule;
+export interface ScoreRule {
 
     /**
      * @description Unique identifier of that rule

@@ -1,18 +1,8 @@
-import { Data } from 'src/api/core/data/orgcheck-api-data';
-import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
-
 /**
  * @description Cache item interface
  */ 
-export interface CacheItem extends Data {
+export interface CacheItem {
 
-    /**
-     * @description Identifier of what this interface represents
-     * @type {DataAliases}
-     * @public
-     */
-    dataType: DataAliases.CacheItem;
-    
     /** 
      * @type {string}
      */

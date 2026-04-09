@@ -1,7 +1,7 @@
 import { DataCollectionStatisticsIntf } from 'src/api/core/data/orgcheck-api-data-datacollectionstats';
 import { Data } from 'src/api/core/data/orgcheck-api-data';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
-import { ScoreRule } from 'src/api/data/orgcheck-api-data-scorerule';
+import { ScoreRule } from 'src/api/core/orgcheck-api-data-scorerule';
 import { RecipeAliases } from 'src/api/core/recipe/orgcheck-api-recipes-aliases';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { GlobalViewAsTable } from 'src/api/recipecollection/orgcheck-api-recipe-globalview';

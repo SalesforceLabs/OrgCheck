@@ -5,7 +5,7 @@ import { SecretSauce } from 'src/api/core/orgcheck-api-secretsauce';
 import { DataCollectionStatisticsIntf } from 'src/api/core/data/orgcheck-api-data-datacollectionstats';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
-import { ScoreRule } from 'src/api/data/orgcheck-api-data-scorerule';
+import { ScoreRule } from 'src/api/core/orgcheck-api-data-scorerule';
 import { HardCodedURLsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-hardcodedurls';
 
 export interface HardcodedURLsViewAsTable {

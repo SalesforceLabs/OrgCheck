@@ -26,6 +26,12 @@ export default class OrgcheckApp extends LightningElement {
     @api accessToken;
 
     /**
+     * @description We want the jokes of the day to be available in the app as well!
+     * @type {{ question: string, answer: string }[]}
+     */
+    @api jokes;
+
+    /**
      * @description URL for the logo in the header
      * @type {string} 
      * @public

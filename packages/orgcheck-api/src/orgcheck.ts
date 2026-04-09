@@ -5,7 +5,7 @@ import { SortOrder } from 'src/ui/table/orgcheck-ui-table-sortorder';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { RecipeAliases } from 'src/api/core/recipe/orgcheck-api-recipes-aliases';
 import { SecretSauce } from 'src/api/core/orgcheck-api-secretsauce';
-import { ScoreRule } from 'src/api/data/orgcheck-api-data-scorerule';
+import { ScoreRule } from 'src/api/core/orgcheck-api-data-scorerule';
 import { Exporter } from 'src/ui/exporter/orgcheck-ui-exporter';
 
 export type { ApiIntf, ApiSetup } from 'src/api/orgcheck-api';
@@ -20,7 +20,7 @@ export type { RecipeAliases } from 'src/api/core/recipe/orgcheck-api-recipes-ali
 export type { SortOrder } from 'src/ui/table/orgcheck-ui-table-sortorder';
 export type { Table, ExportedTable } from 'src/ui/table/orgcheck-ui-table';
 
-export type { ScoreRule } from 'src/api/data/orgcheck-api-data-scorerule';
+export type { ScoreRule } from 'src/api/core/orgcheck-api-data-scorerule';
 export type { SfdcApexClass } from 'src/api/data/orgcheck-api-data-apexclass';
 export type { SfdcApexTrigger } from 'src/api/data/orgcheck-api-data-apextrigger';
 export type { SfdcBrowser } from 'src/api/data/orgcheck-api-data-browser';

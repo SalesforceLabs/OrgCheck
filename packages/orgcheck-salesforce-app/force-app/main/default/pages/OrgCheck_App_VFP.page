@@ -17,19 +17,11 @@
         .orgcheck-loading-logo {
         }
         .orgcheck-loading-text {
-            opacity: 0;
-            animation: orgcheck-intro 2s ease-out 1s forwards;
             color: rgb(75, 213, 238);
             font-weight: 400;
             font-size: 300%;
         }
-        @keyframes orgcheck-intro {
-            0%   { opacity: 0.25; }
-            100% { opacity: 1; }
-        }        
         .orgcheck-jokes-board {
-            opacity: 0;
-            animation: orgcheck-jokes-board 1s ease-out 3s forwards;
             border-radius: 15px;
             box-shadow: 10px 10px 10px #9daf8b;
             background-color: black;
@@ -37,12 +29,6 @@
             padding: 10px 20px 10px 20px;
             margin: 5em auto auto;
         }
-        @keyframes orgcheck-jokes-board {
-            0%   { opacity: 0; }
-            10%   { opacity: 0.25; }
-            50%   { opacity: 0.50; }
-            100% { opacity: 1; }
-        } 
         .orgcheck-jokes-content {
             font-size: small ; 
             font-family: monospace;
@@ -125,25 +111,25 @@
         ];
         const NB_JOKES = 5;
         let jokeContent = '';
+        const jokesOfTheDay = [];
         for (let i = 0; i < NB_JOKES; i++) {
             const index = Math.floor(Math.random() * jokes.length);
             const joke = jokes.splice(index, 1)[0];
             jokeContent += `${joke.question} \n ${joke.answer} \n\n`;
+            jokesOfTheDay.push(joke);
         }
-        document.getElementById('orgcheck-loading-text').addEventListener('animationend', () => {
-            const divJokes = document.getElementById('orgcheck-jokes');
-            let iCar = 0;
-            const iId = setInterval(() => {
-                if (iCar < jokeContent.length) {
-                    // there are still some characters to display, let's keep going
-                    const c = jokeContent.charAt(iCar++);
-                    divJokes.innerHTML += c === '\n' ? '<br />' : c;
-                } else {
-                    // stop the interval -- we are done with the jokes content
-                    clearInterval(iId);
-                }
-            }, 55); // display the jokes one character at a time for a typewriter effect -- 55 milliseconds is the sweet spot
-        }, true);
+        const divJokes = document.getElementById('orgcheck-jokes');
+        let iCar = 0;
+        const iId = setInterval(() => {
+            if (iCar < jokeContent.length) {
+                // there are still some characters to display, let's keep going
+                const c = jokeContent.charAt(iCar++);
+                divJokes.innerHTML += c === '\n' ? '<br />' : c;
+            } else {
+                // stop the interval -- we are done with the jokes content
+                clearInterval(iId);
+            }
+        }, 55); // display the jokes one character at a time for a typewriter effect -- 55 milliseconds is the sweet spot
 
         /* Determine the namespace where the app is running (if local/standalone the package is 'c') */ 
         const firstSubDomain = document.location.host.split('.')[0];
@@ -164,8 +150,10 @@
                             component,
                             // attributes --------------------------
                             { 
-                                verbose: true,accessToken: '{! JSENCODE($Api.Session_Id) }', 
-                                localStorage: window.localStorage
+                                verbose: false,
+                                accessToken: '{! JSENCODE($Api.Session_Id) }', 
+                                localStorage: window.localStorage,
+                                jokes: jokesOfTheDay
                             },
                             // domLocator --------------------------
                             'orgcheck-app',

@@ -231,22 +231,22 @@ export interface SalesforceManagerIntf {
 
     /**
      * @description Method to run all apex test in the org
-     * @param {SimpleLoggerIntf} logger - Logger to use
+     * @param {SimpleLoggerIntf | undefined} logger - Logger to use
      * @returns {Promise<string>} Result of the tests running from tooling api
      * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @public
      */
-    runAllTests(logger: SimpleLoggerIntf): Promise<string>;
+    runAllTests(logger?: SimpleLoggerIntf | undefined): Promise<string>;
 
     /**
      * @description Method to run compile given apex classes
      * @param {string[]} apexClassIds - List of apex class ids to compile
-     * @param {SimpleLoggerIntf} [logger] - Logger to use
+     * @param {SimpleLoggerIntf | undefined} [logger] - Logger to use
      * @returns {Promise<Map<string, { isSuccess: boolean, reasons?: string[]}>} List of results by Apex Class ID
      * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @public
      */
-    compileClasses(apexClassIds: string[], logger: SimpleLoggerIntf): Promise<Map<string, { isSuccess: boolean; reasons?: string[]; }>>;
+    compileClasses(apexClassIds: string[], logger?: SimpleLoggerIntf | undefined): Promise<Map<string, { isSuccess: boolean; reasons?: string[]; }>>;
 }

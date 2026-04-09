@@ -46,7 +46,7 @@ import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 import { DataDependenciesFactory } from 'src/api/core/data/orgcheck-api-data-dependencies-factory';
 import { DataFactoryIntf, DataFactoryInstanceIntf, DataFactoryInstanceCreateSetup, DataFactoryInstanceCreateSetup_WithDependencies } from 'src/api/core/data/orgcheck-api-datafactory';
 import { SecretSauce } from 'src/api/core/orgcheck-api-secretsauce';
-import { ScoreRule } from 'src/api/data/orgcheck-api-data-scorerule';
+import { ScoreRule } from 'src/api/core/orgcheck-api-data-scorerule';
 
 const DATA_METADATA = new Map([
    [ DataAliases.SfdcApexClass , { hasScore: true, hasDependencies: true, caster: (p) => (p as SfdcApexClass)}],
