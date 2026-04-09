@@ -11,27 +11,6 @@ export interface SfdcUser extends DataWithScore {
      * @public
      */
     dataType: DataAliases.SfdcUser;
-
-     /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id: string;
-    
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url: string;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name: string;
     
     /**
      * @description Datetime of the last login of that user. Undefined if never logged in.

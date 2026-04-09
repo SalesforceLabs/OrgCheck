@@ -49,9 +49,9 @@ export interface LoggerIntf {
     /**
      * @description Turn this logger into a simple logger for a specific operation
      * @param {string} operationName - the name of the operation
-     * @returns {SimpleLoggerIntf} - a simple logger
+     * @returns {SimpleLoggerIntf | undefined} - a simple logger or undefined if the operation has already been finished
      */ 
-    toSimpleLogger(operationName: string): SimpleLoggerIntf;
+    toSimpleLogger(operationName: string): SimpleLoggerIntf | undefined;
 }
 
 /**

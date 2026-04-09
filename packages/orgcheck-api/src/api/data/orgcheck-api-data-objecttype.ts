@@ -9,14 +9,7 @@ export interface SfdcObjectType extends DataWithoutScore {
      * @public
      */
     dataType: DataAliases.SfdcObjectType;
-        
-     /**
-     * @description Technical representation of this type
-     * @type {string}
-     * @public
-     */
-    id: string;
-    
+
     /**
      * @description Label of the type
      * @type {string}

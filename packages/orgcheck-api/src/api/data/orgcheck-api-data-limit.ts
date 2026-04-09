@@ -13,13 +13,6 @@ export interface SfdcLimit extends DataWithScore {
      */
     dataType: DataAliases.SfdcLimit;
 
-     /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id: string;
-    
     /**
      * @description Label of this limit
      * @type {string}

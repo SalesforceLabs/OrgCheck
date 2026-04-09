@@ -18,11 +18,17 @@
                 <span if:false={isSorted} class="slds-badge">Table is not sorted yet.</span>
             </div>
         </lightning-layout-item>
-        <lightning-layout-item alignment-bump="left">&nbsp;</lightning-layout-item>
-        <c-orgcheck-export-button if:true={showExportButton} source={exportSource} basename={exportBasename}></c-orgcheck-export-button>
+        <lightning-layout-item alignment-bump="left">
+            <ul class="slds-button-group-row">
+                <slot></slot>
+                <li class="slds-button-group-item" if:true={showExportButton}>
+                    <c-orgcheck-export-button source={exportSource} basename={exportBasename}></c-orgcheck-export-button>
+                </li>
+            </ul>
+        </lightning-layout-item>
     </lightning-layout>
     <template if:true={showSearch}>
-        <lightning-input type="search" aria-placeholder="Search any string field values (more than 2 characters)" variant="label-hidden" name="search" onchange={handleSearchInputChanged}></lightning-input>
+        <lightning-input class="searchInput" type="search" aria-placeholder="Search any string field values (more than 2 characters)" variant="label-hidden" name="search" onchange={handleSearchInputChanged}></lightning-input>
     </template>
     <div id="tableContainer" class={tableContainerClasses}>
         <table class="slds-table slds-table_bordered">

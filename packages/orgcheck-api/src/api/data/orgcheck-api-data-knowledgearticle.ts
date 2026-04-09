@@ -10,13 +10,6 @@ export interface SfdcKnowledgeArticle extends DataWithScore {
      */
     dataType: DataAliases.SfdcKnowledgeArticle;
 
-     /**
-     * @description Unique identifier of this article in the org.
-     * @type {string}
-     * @public
-     */
-    id: string;
-
     /**
      * @description Current version id published for this article.
      * @type {string}
@@ -51,13 +44,6 @@ export interface SfdcKnowledgeArticle extends DataWithScore {
      * @public
      */
     lastModifiedDate: number;
-
-    /**
-     * @description Url to the article in the setup of the org.
-     * @type {string}
-     * @public
-     */
-    url: string;
 
     /**
      * @description Title of this article

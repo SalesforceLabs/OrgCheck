@@ -9,20 +9,6 @@ export interface SfdcOrganization extends DataWithoutScore {
      * @public
      */
     dataType: DataAliases.SfdcOrganization;
-        
-     /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id: string;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name: string;
     
     /**
      * @description Type of this item

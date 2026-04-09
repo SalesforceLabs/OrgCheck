@@ -13,20 +13,6 @@ export interface SfdcLightningPage extends DataWithScoreAndDependencies {
      * @public
      */
     dataType: DataAliases.SfdcLightningPage;
-        
-     /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id: string;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name: string;
     
     /**
      * @description Type of the Lightning Page
@@ -112,11 +98,4 @@ export interface SfdcLightningPage extends DataWithScoreAndDependencies {
      * @public
      */
     nbFields: number;
-
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url: string;
 }

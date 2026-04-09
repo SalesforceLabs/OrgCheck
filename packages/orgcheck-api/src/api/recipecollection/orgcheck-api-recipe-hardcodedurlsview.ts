@@ -69,11 +69,17 @@ export class RecipeHardcodedURLsView implements RecipeCollection {
      * @public
      */
     public async serveToTable(mixture: DataCollectionStatisticsIntf[]): Promise<Table> {
-        const stats: { name: string; countBad: number; countGood: number, badValues: string[] }[] = [];
-        mixture?.forEach((item) => {
-            stats.push({ name: item.recipeTitle, countBad: item.countBad, countGood: item.countGood, badValues: item.distinctBadValues ?? [] });
-        });
-        return TableFactory.create(this.title, new HardCodedURLsTableDefinition(), stats);
+        return TableFactory.create(
+            this.title, 
+            new HardCodedURLsTableDefinition(), 
+            mixture?.map((item) => ({ 
+                name: item.recipeTitle, 
+                countBad: item.countBad, 
+                countGood: item.countGood, 
+                badItems: item.badItems, 
+                badValues: item.distinctBadValues ?? [] 
+            })) ?? []
+        );
     }
 
     /**

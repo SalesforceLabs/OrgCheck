@@ -12,27 +12,6 @@ export interface SfdcFlow extends DataWithScoreAndDependencies {
      * @public
      */
     dataType: DataAliases.SfdcFlow;
-
-    /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id: string;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name: string;
-    
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url: string;
     
     /**
      * @description API Version (as a number) set in the metadata for this item.
@@ -130,27 +109,6 @@ export interface SfdcFlowVersion extends DataWithoutScore {
      * @public
      */
     dataType: DataAliases.SfdcFlowVersion;
-
-    /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id: string;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name: string;
-    
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url: string;
 
     /**
      * @description API Version (as a string) set in the metadata for this item.

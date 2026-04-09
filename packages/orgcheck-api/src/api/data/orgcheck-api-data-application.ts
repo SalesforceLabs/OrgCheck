@@ -14,20 +14,6 @@ export interface SfdcApplication extends DataWithoutScore {
     dataType: DataAliases.SfdcApplication;
     
     /**
-     * @description Salesforce Id of the application
-     * @type {string}
-     * @public
-     */
-    id: string;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name: string;
-    
-    /**
      * @description Label
      * @type {string}
      * @public

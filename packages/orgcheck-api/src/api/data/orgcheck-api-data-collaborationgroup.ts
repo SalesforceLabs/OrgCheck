@@ -10,20 +10,6 @@ export interface SfdcCollaborationGroup extends DataWithScore {
      */
     dataType: DataAliases.SfdcCollaborationGroup;
     
-     /**
-     * @description Unique identifier of this group in the org.
-     * @type {string}
-     * @public
-     */
-    id: string;
-
-    /**
-     * @description Name of this group in the org.
-     * @type {string}
-     * @public
-     */
-    name: string;
-
     /**
      * @description Description of this group in the org.
      * @type {string}
@@ -58,13 +44,6 @@ export interface SfdcCollaborationGroup extends DataWithScore {
      * @public
      */
     lastModifiedDate: number;
-
-    /**
-     * @description Url to the group in the setup of the org.
-     * @type {string}
-     * @public
-     */
-    url: string;
 
     /**
      * @description Name of the package where this group is stored.

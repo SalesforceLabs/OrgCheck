@@ -10,20 +10,6 @@ export interface SfdcVisualForceComponent extends DataWithScoreAndDependencies {
      */
     dataType: DataAliases.SfdcVisualForceComponent;
     
-     /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id: string;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name: string;
-    
     /**
      * @description API Version (as a number) set in the metadata for this item.
      * @type {number}
@@ -72,11 +58,4 @@ export interface SfdcVisualForceComponent extends DataWithScoreAndDependencies {
      * @public
      */
     description: string;
-    
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url: string;
 }

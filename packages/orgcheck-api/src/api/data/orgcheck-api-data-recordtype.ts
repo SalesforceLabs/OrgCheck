@@ -10,21 +10,7 @@ export interface SfdcRecordType extends DataWithScore {
      * @public
      */
     dataType: DataAliases.SfdcRecordType;
-    
-     /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id: string;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name: string;
-    
+
     /**
      * @description Developer Name
      * @type {string}
@@ -38,13 +24,6 @@ export interface SfdcRecordType extends DataWithScore {
      * @public
      */
     package: string;
-
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url: string;
 
     /**
      * @description Is this item active or not?

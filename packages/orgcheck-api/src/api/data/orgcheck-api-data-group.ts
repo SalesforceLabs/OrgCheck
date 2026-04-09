@@ -13,27 +13,6 @@ export interface SfdcGroup extends DataWithScore {
      * @public
      */
     dataType: DataAliases.SfdcGroup;
-
-     /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id: string;
-    
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url: string;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name: string;
     
     /**
      * @description Developer Name

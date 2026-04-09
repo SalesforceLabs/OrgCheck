@@ -10,20 +10,6 @@ export interface SfdcWebLink extends DataWithScoreAndDependencies {
      * @public
      */
     dataType: DataAliases.SfdcWebLink;
-        
-     /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id: string;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name: string;
 
     /**
      * @description Unique list of hard coded Salesforce URLs in this item
@@ -80,13 +66,6 @@ export interface SfdcWebLink extends DataWithScoreAndDependencies {
      * @public
      */
     description: string;
-
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url: string;
 
     /**
      * @description Identifier of the object for this trigger

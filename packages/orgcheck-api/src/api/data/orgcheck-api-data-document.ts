@@ -10,20 +10,6 @@ export interface SfdcDocument extends DataWithScore {
      */
     dataType: DataAliases.SfdcDocument;
 
-     /**
-     * @description Unique identifier of this document in the org.
-     * @type {string}
-     * @public
-     */
-    id: string;
-
-    /**
-     * @description Name of the document.
-     * @type {string}
-     * @public
-     */
-    name: string;
-
     /**
      * @description URL to the document in the org.
      * @type {string}
@@ -86,13 +72,6 @@ export interface SfdcDocument extends DataWithScore {
      * @public
      */
     folderId: string;
-
-    /**
-     * @description Url to the document in the setup of the org.
-     * @type {string}
-     * @public
-     */
-    url: string;
 
     /**
      * @description Name of the package where this document is stored.

@@ -69,3 +69,7 @@ th.sticky {
     vertical-align: bottom;
     background-color: var(--lwc-colorBackgroundAlt, white); /* prevent rows from showing through */
 }
+
+.searchInput {
+    margin: 5px 0 2px 0;
+}

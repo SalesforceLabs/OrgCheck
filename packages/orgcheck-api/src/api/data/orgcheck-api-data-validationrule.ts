@@ -10,20 +10,6 @@ export interface SfdcValidationRule extends DataWithScore {
      * @public
      */
     dataType: DataAliases.SfdcValidationRule;
-
-     /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id: string;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name: string;
     
     /**
      * @description Is this item active or not?
@@ -87,11 +73,4 @@ export interface SfdcValidationRule extends DataWithScore {
      * @public
      */
     lastModifiedDate: number;
-
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url: string;
 }

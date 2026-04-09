@@ -10,20 +10,6 @@ export interface SfdcCustomTab extends DataWithScoreAndDependencies {
      */
     dataType: DataAliases.SfdcCustomTab;
 
-     /**
-     * @description Unique identifier of this custom tab in the org.
-     * @type {string}
-     * @public
-     */
-    id: string;
-
-    /**
-     * @description Name of this custom tab in the org.
-     * @type {string}
-     * @public
-     */
-    name: string;
-
     /**
      * @description Type of this custom tab
      * @type {string}
@@ -65,13 +51,6 @@ export interface SfdcCustomTab extends DataWithScoreAndDependencies {
      * @public
      */
     lastModifiedDate: number;
-
-    /**
-     * @description Url to the group in the setup of the org.
-     * @type {string}
-     * @public
-     */
-    url: string;
 
     /**
      * @description Name of the package where this page is stored.

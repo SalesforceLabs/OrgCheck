@@ -9,21 +9,7 @@ export interface SfdcStaticResource extends DataWithScoreAndDependencies {
      * @public
      */
     dataType: DataAliases.SfdcStaticResource;
-        
-     /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id: string;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name: string;
-    
+
     /**
      * @description Name of the potential namespace/package where this item comes from. Empty string if none.
      * @type {string}
@@ -58,11 +44,4 @@ export interface SfdcStaticResource extends DataWithScoreAndDependencies {
      * @public
      */
     description: string;
-    
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url: string;
 }

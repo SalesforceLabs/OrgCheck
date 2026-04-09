@@ -10,27 +10,6 @@ export interface SfdcEmailTemplate extends DataWithScore {
      */
     dataType: DataAliases.SfdcEmailTemplate;
 
-     /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id: string;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name: string;
-    
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url: string;
-
     /**
      * @description Type of the UI this item is used in
      * @type {string}

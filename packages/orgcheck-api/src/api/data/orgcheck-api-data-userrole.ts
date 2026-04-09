@@ -12,32 +12,11 @@ export interface SfdcUserRole extends DataWithScore {
     dataType: DataAliases.SfdcUserRole;
     
     /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id: string;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name: string;
-    
-    /**
      * @description API Name
      * @type {string}
      * @public
      */
     apiname: string;
-    
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url: string;
 
     /**
      * @description Salesforce Id of the related parent Role

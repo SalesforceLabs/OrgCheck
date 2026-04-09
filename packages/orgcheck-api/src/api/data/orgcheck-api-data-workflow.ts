@@ -9,27 +9,6 @@ export interface SfdcWorkflow extends DataWithScore {
      * @public
      */
     dataType: DataAliases.SfdcWorkflow;
-
-     /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id: string;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name: string;
-    
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url: string;
     
     /**
      * @description Full description of that item

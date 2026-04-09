@@ -415,6 +415,7 @@ export class RecipeManager implements RecipeManagerIntf {
                 });
                 const countOfBadRecordsPerRuleId = new Map<number, number>();
                 const badValues = new Set<string>();
+                const badItems = new Map<string, { id: string, name: string, url: string }>();
                 onlyBadRecords?.forEach((d) => {  // for each bad record...
                     d.badReasonIds.filter(id => { // only for the badReason that are part of the rules we want
                         return isRuleFilterOn === true ? listRuleIds.includes(id) : true;
@@ -424,9 +425,10 @@ export class RecipeManager implements RecipeManagerIntf {
                         // add the bad values in a set
                         const rule = SecretSauce.GetScoreRule(id);
                         if (rule) {
-                            //d[rule.badField]?.forEach((url: string) => badValues.add(url));
                             badValues.add(d[rule.badField]);
                         }
+                        // add a reference to this item
+                        if (badItems.has(d.id) === false) badItems.set(d.id, { id: d.id, name: d.name, url: d.url });
                     });
                 });
                 const listRulesFound = Array.from(countOfBadRecordsPerRuleId.keys()).map((ruleId) => SecretSauce.GetScoreRule(ruleId));
@@ -445,6 +447,7 @@ export class RecipeManager implements RecipeManagerIntf {
                         return a.count > b.count ? -1 : 1; 
                     }),
                     Array.from(badValues),
+                    Array.from(badItems.values()),
                     onlyBadRecords
                 ));
             });

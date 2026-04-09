@@ -12,13 +12,6 @@ export interface SfdcFieldSet extends DataWithScore {
      * @public
      */
     dataType: DataAliases.SfdcFieldSet;
-        
-     /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id: string;
     
     /**
      * @description Label
@@ -33,11 +26,4 @@ export interface SfdcFieldSet extends DataWithScore {
      * @public
      */
     description: string;
-    
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url: string;
 }

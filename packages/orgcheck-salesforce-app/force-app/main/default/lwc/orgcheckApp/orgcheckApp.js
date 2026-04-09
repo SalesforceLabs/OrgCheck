@@ -95,10 +95,17 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Data received from the Org Check API and used in the different 
+     *              components of the UI.
+     * @type {Object<string, Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]>}
+     */
+    @track data = { };
+
+    /**
+     * @description Data received from the Org Check API and used in the different 
      *              tables and components of the UI.
      * @type {Object<string, Table | SfdcObjectAsTable | Table[]>}
      */
-    @track data = { };
+    @track tableData = { };
 
     /**
      * @description Exports data
@@ -583,7 +590,7 @@ export default class OrgcheckApp extends LightningElement {
             this.showRefreshButton = appNavItem.refreshButtonVisible !== false; 
 
             if (appNavItem.action) {
-                this.data[appNavItem.data] = appNavItem.action(this._private_properties.api);
+                this.tableData[appNavItem.data] = appNavItem.action(this._private_properties.api);
             }
 
             if (appNavItem.recipe) {
@@ -618,8 +625,9 @@ export default class OrgcheckApp extends LightningElement {
                         // and then export the data
                         /** @type ExportedTable | ExportedTable[] */
                         const doggyBag = await this._private_properties.api.exportData(appNavItem.recipe, plate);
-                        // Save the plate as data and doggybag as export
-                        this.data[appNavItem.data] = plate;
+                        // Save the mixture, the plate and doggybag
+                        this.data[appNavItem.data] = mixture;
+                        this.tableData[appNavItem.data] = plate;
                         this.exports[appNavItem.data] = doggyBag;
                     }                
                 }
@@ -1006,14 +1014,14 @@ export default class OrgcheckApp extends LightningElement {
             /** @type {Map<string, string>} */;
             const apexClassNamesById = new Map();
             this._private_properties.spinner?.sectionLog(LOG_SECTION, 'Processing...');
-            this.apexUncompiledTableData.slice(0, 25).forEach(c => {
+            this.data?.apexuncompiled?.slice(0, 25).forEach(c => {
                 const classId = c.id.substring(0, 15);
                 const className = c.name;
                 this._private_properties.spinner?.sectionLog(`${LOG_SECTION}-${classId}`, `Asking to recompile class: ${className}`);
                 apexClassNamesById.set(classId, className);
             });
             /** @type {Map<string, {isSuccess: boolean, reasons?: string>}[]} */
-            const responses = await this._private_properties.api?.compileClasses(Array.from(apexClassNamesById.keys()), );
+            const responses = await this._private_properties.api?.compileClasses(Array.from(apexClassNamesById.keys()));
             this._private_properties.spinner?.sectionLog(LOG_SECTION, 'We got the response from the server...');
             let noError = true;
             responses.forEach((result, id) => {

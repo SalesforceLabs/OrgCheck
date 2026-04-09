@@ -11,8 +11,8 @@ export class GlobalViewGlobalTableDefinition implements TableDefinition {
      */
     columns: TableColumn[] = [
         { label: 'Type of items', type: ColumnType.TXT, data: { value: 'name' }}, 
-        { label: 'Count of good items', type: ColumnType.NUM, data: { value: 'countGood' }},
-        { label: 'Count of bad items', type: ColumnType.NUM, data: { value: 'countBad' }} 
+        { label: '✅ count', type: ColumnType.NUM, data: { value: 'countGood' }},
+        { label: '❌ count', type: ColumnType.NUM, data: { value: 'countBad' }} 
     ];
              
     /**
@@ -37,7 +37,7 @@ export class GlobalViewPerRuleTableDefinition implements TableDefinition {
     columns: TableColumn[] = [
         { label: 'Type of items', type: ColumnType.TXT, data: { value: 'name' }},
         { label: 'Why are they considered bad?', type: ColumnType.TXT, data: { value: 'ruleName' }},
-        { label: 'Count of bad items', type: ColumnType.NUM, data: { value: 'countBad' }}
+        { label: '❌ count', type: ColumnType.NUM, data: { value: 'countBad' }}
     ];
              
     /**

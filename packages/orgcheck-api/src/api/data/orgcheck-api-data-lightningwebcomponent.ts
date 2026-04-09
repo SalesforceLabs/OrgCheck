@@ -12,20 +12,6 @@ export interface SfdcLightningWebComponent extends DataWithScoreAndDependencies 
      * @public
      */
     dataType: DataAliases.SfdcLightningWebComponent;
-        
-     /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id: string;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name: string;
     
     /**
      * @description API Version (as a number) set in the metadata for this item.
@@ -60,12 +46,5 @@ export interface SfdcLightningWebComponent extends DataWithScoreAndDependencies 
      * @type {string}
      * @public
      */
-    description: string;    
-
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url: string;
+    description: string;
 }

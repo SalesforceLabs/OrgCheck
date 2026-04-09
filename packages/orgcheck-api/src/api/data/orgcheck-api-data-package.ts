@@ -9,20 +9,6 @@ export interface SfdcPackage extends DataWithScore {
      * @public
      */
     dataType: DataAliases.SfdcPackage;
-        
-     /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id: string;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name: string;
     
     /**
      * @description Namespace

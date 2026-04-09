@@ -13,20 +13,6 @@ export interface SfdcCustomLabel extends DataWithScoreAndDependencies {
      */
     dataType: DataAliases.SfdcCustomLabel;
     
-     /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id: string;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name: string;
-    
     /**
      * @description Name of the potential namespace/package where this item comes from. Empty string if none.
      * @type {string}
@@ -68,13 +54,6 @@ export interface SfdcCustomLabel extends DataWithScoreAndDependencies {
      * @public
      */
     value: string;
-    
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url: string;
     
     /**
      * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.

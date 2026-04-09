@@ -21,13 +21,6 @@ export interface SfdcBrowser extends DataWithScore {
     fullName: string;
 
     /**
-     * @description Name of the browser
-     * @type {string}
-     * @public
-     */
-    name: string;
-
-    /**
      * @description Version (as a number) of the browser
      * @type {number}
      * @public

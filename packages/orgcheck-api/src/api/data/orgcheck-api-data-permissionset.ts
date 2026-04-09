@@ -9,27 +9,6 @@ export interface SfdcPermissionSet extends DataWithScore {
      * @public
      */
     dataType: DataAliases.SfdcPermissionSet;
-            
-    /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id: string;
-    
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url: string;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name: string;
     
     /**
      * @description Full description of that item

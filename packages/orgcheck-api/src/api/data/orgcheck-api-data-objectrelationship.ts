@@ -9,13 +9,6 @@ export interface SfdcObjectRelationShip extends DataWithoutScore {
      * @public
      */
     dataType: DataAliases.SfdcObjectRelationShip;
-        
-     /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name: string;
     
     /**
      * @description Child object

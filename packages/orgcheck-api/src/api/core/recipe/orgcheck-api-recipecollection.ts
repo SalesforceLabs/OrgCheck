@@ -20,12 +20,12 @@ export interface RecipeCollection {
 
     /**
      * @description List all recipe aliases that this recipe collection needs
-     * @param {SimpleLoggerIntf} logger - Logger
+     * @param {SimpleLoggerIntf | undefined} logger - Logger
      * @param {Map<string, any>} [parameters] - List of optional argument to pass
      * @returns {RecipeAliases[]} List of recipe aliases that this recipe collection needs
      * @public
      */
-    ingredients(logger: SimpleLoggerIntf, parameters?: Map<string, any>): RecipeAliases[];
+    ingredients(logger: SimpleLoggerIntf | undefined, parameters?: Map<string, any>): RecipeAliases[];
 
     /**
      * @description List the parameters that this recipe collection dependes on
@@ -36,12 +36,12 @@ export interface RecipeCollection {
 
     /**
      * @description Filter the data items by score rules
-     * @param {SimpleLoggerIntf} logger - Logger
+     * @param {SimpleLoggerIntf | undefined} logger - Logger
      * @param {Map<string, any>} [parameters] - List of optional argument to pass
      * @returns {ScoreRule[]} List of score rule to filter by. Empty array means no filtering
      * @public
      */ 
-    filterByScoreRules(logger: SimpleLoggerIntf, parameters?: Map<string, any>): ScoreRule[];
+    filterByScoreRules(logger: SimpleLoggerIntf | undefined, parameters?: Map<string, any>): ScoreRule[];
 
     /**
      * @description Serve the mixture from a designated recipe collection to a table
@@ -72,12 +72,14 @@ export class DataCollectionStatisticsOK implements DataCollectionStatisticsIntf 
      * @param countBad Number of records that are considered "bad" (i.e. at least one bad reason id)
      * @param countBadByRule Number of bad records by rule
      * @param distinctBadValues List of distinct values automatically computed based on the rule description
+     * @param badItems List of bad items
      * @param data List of all data items that are part of this collection
      */
     constructor(public readonly recipeAlias: string, public readonly recipeTitle: string, 
         public readonly countAll: number, public readonly countBad: number, 
         public readonly countBadByRule: { ruleId: number; ruleName: string; count: number; }[], 
-        public readonly distinctBadValues: any[], public readonly data: Data[]) {
+        public readonly distinctBadValues: any[], public readonly badItems: { id: string, name: string, url: string }[] , 
+        public readonly data: Data[]) {
         this.countGood = countAll - countBad;
     }
 
@@ -155,6 +157,13 @@ export class DataCollectionStatisticsWithError implements DataCollectionStatisti
      * @public
      */
     public readonly distinctBadValues: any[] = [];
+
+    /**
+     * @description List of bad items id, name and url
+     * @type {{ id: string, name: string, url: string }[]}
+     * @public
+     */
+    public readonly badItems: { id: string, name: string, url: string }[] = [];
 
     /**
      * @description List of all data items that are part of this collection

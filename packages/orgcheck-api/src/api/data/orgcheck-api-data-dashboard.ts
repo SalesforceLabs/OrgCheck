@@ -11,13 +11,6 @@ export interface SfdcDashboard extends DataWithScore {
      */
     dataType: DataAliases.SfdcDashboard;
 
-     /**
-     * @description Unique identifier of this dashboard in the org.
-     * @type {string}
-     * @public
-     */
-    id: string;
-
     /**
      * @description Title of the dashboard.
      * @type {string}
@@ -87,13 +80,6 @@ export interface SfdcDashboard extends DataWithScore {
      * @public
      */
     folderName: string;
-
-    /**
-     * @description Url to the dashboard in the setup of the org.
-     * @type {string}
-     * @public
-     */
-    url: string;
 
     /**
      * @description Name of the package where this dashboard is stored.

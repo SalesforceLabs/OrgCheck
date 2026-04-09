@@ -10,20 +10,6 @@ export interface SfdcPageLayout extends DataWithScoreAndDependencies {
      * @public
      */
     dataType: DataAliases.SfdcPageLayout;
-        
-     /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id: string;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name: string;
     
     /**
      * @description Type of this item
@@ -59,13 +45,6 @@ export interface SfdcPageLayout extends DataWithScoreAndDependencies {
      * @public
      */
     profileAssignmentCount: number;
-    
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url: string;
 
     /**
      * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.

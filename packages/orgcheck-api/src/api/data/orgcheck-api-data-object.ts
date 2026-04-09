@@ -24,13 +24,6 @@ export interface SfdcObject extends DataWithScore {
      * @public
      */
     dataType: DataAliases.SfdcObject;
-        
-     /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id: string;
     
     /**
      * @description Label of this object
@@ -82,25 +75,11 @@ export interface SfdcObject extends DataWithScore {
     keyPrefix: string;
     
     /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name: string;
-    
-    /**
      * @description API name
      * @type {string}
      * @public
      */
     apiname: string;
-    
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url: string;
     
     /**
      * @description Name of the potential namespace/package where this item comes from. Empty string if none.

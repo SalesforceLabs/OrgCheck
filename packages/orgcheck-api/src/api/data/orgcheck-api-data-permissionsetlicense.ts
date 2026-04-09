@@ -10,20 +10,6 @@ export interface SfdcPermissionSetLicense extends DataWithScore {
      * @public
      */
     dataType: DataAliases.SfdcPermissionSetLicense;
-    
-     /**
-     * @description Salesforce Id of this item
-     * @type {string}
-     * @public
-     */ 
-    id: string;
-
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name: string;
 
     /**
      * @description Total count of licenses
@@ -108,11 +94,4 @@ export interface SfdcPermissionSetLicense extends DataWithScore {
      * @public
      */
     lastModifiedDate: number;
-
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url: string;
 }

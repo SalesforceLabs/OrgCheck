@@ -171,7 +171,7 @@ export class RecipeApexUncompiled extends AbstractRecipeApexClasses {
      * @public
      */ 
     public constructor() {
-        super('🌋 Apex Classes That Need Recompilation', (ac: SfdcApexClass) => ac.needsRecompilation === true);
+        super('🌋 Uncompiled Apex Classes', (ac: SfdcApexClass) => ac.needsRecompilation === true);
     }
 
     /**

@@ -15,6 +15,27 @@ export interface Data {
      * @public
      */
     dataType: DataAliases;
+
+    /**
+     * @description Salesforce Id
+     * @type {string}
+     * @public
+     */
+    id: string;
+    
+    /**
+     * @description Name
+     * @type {string}
+     * @public
+     */
+    name: string;
+    
+    /**
+     * @description Setup URL of this item
+     * @type {string}
+     * @public
+     */
+    url: string;
 }
 
 /**

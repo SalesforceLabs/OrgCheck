@@ -18,23 +18,23 @@ export interface Recipe<T> {
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
-     * @param {SimpleLoggerIntf} logger - Logger
+     * @param {SimpleLoggerIntf | undefined} logger - Logger
      * @param {Map<string, any>} [parameters] - List of optional argument to pass
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    ingredients(logger: SimpleLoggerIntf, parameters: Map<string, any>): Array<string | DatasetRunInformation>;
+    ingredients(logger: SimpleLoggerIntf | undefined, parameters: Map<string, any>): Array<string | DatasetRunInformation>;
 
     /**
      * @description mix the ingredients all together and return the result
      * @param {Map<string, any>} ingredients - Records or information grouped by their alias in a Map
-     * @param {SimpleLoggerIntf} logger - Logger
+     * @param {SimpleLoggerIntf | undefined} logger - Logger
      * @param {Map<string, any>} [parameters] - List of optional argument to pass
      * @returns {Promise<T>} Returns the mixture
      * @async
      * @public
      */
-    mix(ingredients: Map<string, any>, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<T>;
+    mix(ingredients: Map<string, any>, logger: SimpleLoggerIntf | undefined, parameters: Map<string, any>): Promise<T>;
 
     /**
      * @description List the parameters that this mix dependes on

@@ -10,20 +10,6 @@ export interface SfdcReport extends DataWithScore {
      * @public
      */
     dataType: DataAliases.SfdcReport;
-    
-     /**
-     * @description Unique identifier of this report in the org.
-     * @type {string}
-     * @public
-     */
-    id: string;
-
-    /**
-     * @description Name of the report.
-     * @type {string}
-     * @public
-     */
-    name: string;
 
     /**
      * @description Developer name of the report.
@@ -87,13 +73,6 @@ export interface SfdcReport extends DataWithScore {
      * @public
      */
     folderName: string;
-
-    /**
-     * @description Url to the report in the setup of the org.
-     * @type {string}
-     * @public
-     */
-    url: string;
 
     /**
      * @description Name of the package where this report is stored.
