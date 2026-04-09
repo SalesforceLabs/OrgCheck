@@ -6,10 +6,9 @@ import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { DataMatrixIntf } from 'src/api/core/data/orgcheck-api-data-matrix';
 import { DataMatrixFactory } from 'src/api/core/data/orgcheck-api-data-matrix-factory';
 import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
-import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
-import { SfdcObjectPermission }from 'src/api/data/orgcheck-api-data-objectpermission';
 import { ScoreRule } from 'src/orgcheck';
 import { ScoreRulesTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-scorerules';
+import { SecretSauce } from '../core/orgcheck-api-secretsauce';
 
 export class RecipeScoreRules implements ServedRecipe<DataMatrixIntf, Table> {
 
@@ -27,9 +26,7 @@ export class RecipeScoreRules implements ServedRecipe<DataMatrixIntf, Table> {
      * @public
      */
     public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
-        return [
-            DatasetAliases.SCORERULES
-        ];
+        return [];
     }
 
     /**
@@ -43,19 +40,15 @@ export class RecipeScoreRules implements ServedRecipe<DataMatrixIntf, Table> {
 
     /**
      * @description mix the ingredients all together and return the result
-     * @param {Map<string, any>} ingredients - Records or information grouped by their alias in a Map
      * @returns {Promise<DataMatrixIntf>} Returns the mixture
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, any>): Promise<DataMatrixIntf> {
-
-        // Get data and parameters
-        const scoreRules: Map<string, SfdcObjectPermission> = ingredients.get(DatasetAliases.SCORERULES);
+    public async mix(): Promise<DataMatrixIntf> {
 
         // Augment and Filter data
         const workingMatrix = DataMatrixFactory.create();
-        await Processor.forEach(scoreRules, async (rule: ScoreRule) => {
+        await Processor.forEach(SecretSauce.AllScoreRules, async (rule: ScoreRule) => {
             workingMatrix.setRowHeader(`${rule.id}`, rule);
             rule.applicable.forEach((dataAlias) => {
                 workingMatrix.addValueToProperty(

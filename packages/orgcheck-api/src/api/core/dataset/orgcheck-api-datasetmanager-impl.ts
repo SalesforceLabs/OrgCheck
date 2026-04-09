@@ -50,7 +50,6 @@ import { DatasetWeblinks } from 'src/api/dataset/orgcheck-api-dataset-weblinks';
 import { DatasetWorkflows } from 'src/api/dataset/orgcheck-api-dataset-workflows';
 import { LoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
-import { DatasetScoreRules } from 'src/api/dataset/orgcheck-api-dataset-scorerules';
 
 /**
  * @description Dataset manager
@@ -126,7 +125,6 @@ export class DatasetManager implements DatasetManagerIntf {
         this._datasets.set(DatasetAliases.PROFILES, new DatasetProfiles());
         this._datasets.set(DatasetAliases.RECORDTYPES, new DatasetRecordTypes());
         this._datasets.set(DatasetAliases.REPORTS, new DatasetReports());
-        this._datasets.set(DatasetAliases.SCORERULES, new DatasetScoreRules());
         this._datasets.set(DatasetAliases.STATICRESOURCES, new DatasetStaticResources());
         this._datasets.set(DatasetAliases.USERROLES, new DatasetUserRoles());
         this._datasets.set(DatasetAliases.INTERNALACTIVEUSERS, new DatasetInternalActiveUsers());

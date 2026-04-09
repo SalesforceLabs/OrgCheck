@@ -12,13 +12,6 @@ export class Logger implements LoggerIntf {
      * @private
      */
     private _runningOperations: Set<string>;
-    
-    /**
-     * @description Map of created simple loggers from this logger
-     * @type {Map<string, SimpleLoggerIntf[]>}
-     * @private
-     */
-    private _simpleLoggers: Map<string, SimpleLoggerIntf[]>;
 
     /**
      * @description Flag that turns fatal() to simple warning() if set to true
@@ -34,7 +27,6 @@ export class Logger implements LoggerIntf {
     constructor(private readonly setup: LoggerSetup) {
         this.optimisticByPass = false;
         this._runningOperations = new Set();
-        this._simpleLoggers = new Map();
     }    
 
     /**
@@ -55,8 +47,6 @@ export class Logger implements LoggerIntf {
     private _stopOperationIfNeeded(operationName: string): void {
         if (this._runningOperations.has(operationName) === true) {
             this._runningOperations.delete(operationName);
-            this._simpleLoggers.get(operationName)?.forEach(() => console.error(`simpleLogger should be stopped`));
-            this._simpleLoggers.delete(operationName);
             this.setup?.stopped(operationName);
         }
     }
@@ -128,16 +118,13 @@ export class Logger implements LoggerIntf {
     public toSimpleLogger(operationName: string): SimpleLoggerIntf | undefined {
         if (this._runningOperations.has(operationName)) {
             const that = this;
-            const simmpleLogger = { 
-                log: (message?: string | undefined) => that.setup?.messageLogged(operationName, message),
-                isDebugEnabled: () => that.setup?.messageSilentlyLogged !== undefined,
-                debug: (message?: string | undefined) => that.setup?.messageSilentlyLogged(operationName, message)
+            const shouldRun = () => (that._runningOperations.has(operationName));
+            const simpleLogger = { 
+                log: (message?: string | undefined) => { if (shouldRun()) that.setup?.messageLogged(operationName, message); },
+                isDebugEnabled: () => (shouldRun() ? that.setup?.messageSilentlyLogged !== undefined : false),
+                debug: (message?: string | undefined) => { if (shouldRun())that.setup?.messageSilentlyLogged(operationName, message); }
             };
-            if (this._simpleLoggers.has(operationName) === false) {
-                this._simpleLoggers.set(operationName, []);
-            }
-            this._simpleLoggers.get(operationName)?.push(simmpleLogger);
-            return simmpleLogger;
+            return simpleLogger;
         }
         return undefined;
     }

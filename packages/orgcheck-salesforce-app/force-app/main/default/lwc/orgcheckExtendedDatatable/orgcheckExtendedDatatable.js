@@ -451,8 +451,8 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     _sortAllRows() {
         __orgcheck__Get()?.TableUtils.sort(
             this._private_properties.table, 
-            this._private_properties.table.orderIndex,
-            this._private_properties.table.orderSort
+            this._private_properties.table?.orderIndex,
+            this._private_properties.table?.orderSort
         );
     }
 
