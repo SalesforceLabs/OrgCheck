@@ -11,26 +11,32 @@ mermaid: true
 
 ```mermaid
 classDiagram
+ApiSetup --> LoggerSetup : logSettings
+ApiSetup --> SalesforceManagerSetup : salesforce
+ApiSetup --> StorageSetup : storage
+
 API *-- RecipeManagerIntf : composition
 API *-- DatasetManagerIntf : composition
 API *-- SalesforceManagerIntf : composition
 API *-- DataCacheManagerIntf : composition
 API *-- LoggerIntf : composition
+
+Logger --|> LoggerIntf : implements
+SalesforceManager --|> SalesforceManagerIntf : implements
+DatasetManager --|> DatasetManagerIntf : implements
+RecipeManager --|> RecipeManagerIntf : implements
+
 DataCacheManager --|> DataCacheManagerIntf : implements
 DataCacheManagerIntf --> CacheItem : uses
 Compressor --|> CompressorIntf : implements
+Storage --|> StorageIntf : implements
 DataCacheManagerIntf --> CompressorIntf : uses
 DataCacheManagerIntf --> StorageIntf : uses
+
 DataWithDependencies --|> Data : implements
 DataFactory --|> DataFactoryIntf : implements
 DataFactoryInstance --|> DataFactoryInstanceIntf : implements
-DatasetManager --|> DatasetManagerIntf : implements
-Logger --|> LoggerIntf : implements
-LoggerIntf --|> BasicLoggerIntf : implements
-RecipeManager --|> RecipeManagerIntf : implements
-SalesforceManager --|> SalesforceManagerIntf : implements
 SalesforceError --|> Error : implements
-Storage --|> StorageIntf : implements
 ```
 
 ## Starting point: the API class!
@@ -43,26 +49,30 @@ built and exported as `packages/orgcheck-api/dist/orgcheck.js`.
 ```mermaid
 classDiagram
     class API {
-        +version() string
-        +salesforceApiVersion() number
-        +removeAllFromCache()
-        +getCacheInformation() Array~CacheItem~
-        +getCacheData(string itemName) any
-        +getAllScoreRulesAsDataMatrix() DataMatrixIntf
-        +dailyApiRequestLimitInformation() SalesforceUsageInformation
-        +runAllTestsAsync() string
-        +compileClasses(Array~string~ apexClassIds) Map~string, any~
-        +getOrganizationInformation() SfdcOrganization
-        +checkUsageTerms() boolean
+        +version string
+        +salesforceApiVersion number
+        +orgId string
+        +clearCache() void
+        +listCacheItems() Array~CacheItem~
+        +getCacheItem(string itemName) any
+        +dailyApiRequestLimitInformation SalesforceUsageInformationIntf
+        +getOrganizationInformation() Promise~SfdcOrganization~
+        +checkCurrentUserPermissions() Promise~boolean~
+        +runAllTestsAsync() Promise~string~
+        +compileClasses(Array~string~ apexClassIds) Promise~Map~
+        +checkUsageTerms() Promise~boolean~
         +wereUsageTermsAcceptedManually() boolean
-        +acceptUsageTermsManually()
-        +checkCurrentUserPermissions() boolean
-        +getPackages() Array~SfdcPackage~
-        +removeAllPackagesFromCache()
-        +getPageLayouts(string namespace, string sobjectType, string sobject) Array~SfdcPageLayout~
-        +removeAllPageLayoutsFromCache()
-        +get...()
-        +removeAll...FromCache()
+        +acceptUsageTermsManually() void
+        +getPackages() Promise~Array~SfdcPackage~~
+        +getObjectTypes() Promise~Array~SfdcObjectType~~
+        +getObjects(string namespace, string sobjectType) Promise~Array~SfdcObject~~
+        +getRolesAsTree() Promise~SfdcUserRole~
+        +cachestampData(alias, namespace, sobjectType, sobject) string
+        +prepareData(alias, namespace, sobjectType, sobject) Promise~Data|Data[]|DataMatrixIntf|Map|Stats[]~
+        +serveData(alias, mixture) Promise~Table|SfdcObjectAsTable|Table[]~
+        +exportData(alias, plate) Promise~ExportedTable|ExportedTable[]~
+        +titlesForAllData() Map~RecipeAliases, string~
+        +cleanData(alias, namespace, sobjectType, sobject) void
     }
 
 API *-- RecipeManagerIntf : composition
@@ -115,62 +125,23 @@ the term by calling api.acceptUsageTermsManually().
 
 ### Retrieve data from the org via the API class
 
-Multiple methods are accessible to retrieve data from the org that is scored by Org Check. 
-This data is a result of the Recipe process discussed later.
-All these methods are `async`.
+The current API exposes a generic data pipeline. You choose a `RecipeAliases` value, then:
+- use `prepareData(...)` to load and score data,
+- use `serveData(...)` to format data as UI tables,
+- use `exportData(...)` to format export payloads.
+
+Most retrieval/processing methods are `async`.
 
 ```mermaid
 classDiagram
     class API {
-        +getOrganizationInformation() SfdcOrganization
-        +getPackages() Array~SfdcPackage~
-        +getPageLayouts(namespace, sobjectType, sobject) Array~SfdcPageLayout~
-        +getObjectTypes() Array~SfdcObjectType~
-        +getObjects(namespace, sobjectType) Array~SfdcObject~
-        +getObject(sobject) SfdcObject
-        +getObjectPermissionsPerParent(namespace) DataMatrixIntf
-        +getApplicationPermissionsPerParent(namespace) DataMatrixIntf
-        +getKnowledgeArticles() Array~SfdcKnowledgeArticle~
-        +getChatterGroups() Array~SfdcCollaborationGroup~
-        +getCustomFields(namespace, sobjectType, sobject) Array~SfdcField~
-        +getPermissionSets(namespace) Array~SfdcPermissionSet~
-        +getPermissionSetLicenses() Array~SfdcPermissionSetLicense~
-        +getProfiles(namespace) Array~SfdcProfile~
-        +getProfileRestrictions(namespace) Array~SfdcProfileRestrictions~
-        +getProfilePasswordPolicies() Array~SfdcProfilePasswordPolicy~
-        +getActiveUsers() Array~SfdcUser~
-        +getBrowsers() Array~SfdcBrowser~
-        +getCustomLabels(namespace) Array~SfdcCustomLabel~
-        +getCustomTabs(namespace) Array~SfdcCustomTab~
-        +getDocuments(namespace) Array~SfdcDocument~
-        +getLightningWebComponents(namespace) Array~SfdcLightningWebComponent~
-        +getLightningAuraComponents(namespace) Array~SfdcLightningAuraComponent~
-        +getLightningPages(namespace) Array~SfdcLightningPage~
-        +getVisualForceComponents(namespace) Array~SfdcVisualForceComponent~
-        +getVisualForcePages(namespace) Array~SfdcVisualForcePage~
-        +getPublicGroups() Array~SfdcGroup~
-        +getQueues() Array~SfdcGroup~
-        +getApexClasses(namespace) Array~SfdcApexClass~
-        +getApexTests(namespace) Array~SfdcApexClass~
-        +getApexUncompiled(namespace) Array~SfdcApexClass~
-        +getApexTriggers(namespace) Array~SfdcApexTrigger~
-        +getRoles() Array~SfdcUserRole~
-        +getRolesTree() SfdcUserRole
-        +getStaticResources(namespace) Array~SfdcStaticResource~
-        +getWeblinks(namespace, sobjectType, sobject) Array~SfdcWebLink~
-        +getWorkflows() Array~SfdcWorkflow~
-        +getRecordTypes(namespace, sobjectType, sobject) Array~SfdcRecordType~
-        +getFieldPermissionsPerParent(sobject, namespace) DataMatrixIntf
-        +getFlows() Array~SfdcFlow~
-        +getEmailTemplates(namespace) Array~SfdcEmailTemplate~
-        +getHomePageComponents() Array~SfdcHomePageComponent~
-        +getProcessBuilders() Array~SfdcFlow~
-        +getValidationRules(namespace, sobjectType, sobject) Array~SfdcValidationRule~
-        +getDashboards() Array~SfdcDashboard~
-        +getReports() Array~SfdcReport~
-        +getGlobalView() Array~DataCollectionStatisticsIntf~
-        +getHardcodedURLsView() Array~DataCollectionStatisticsIntf~
-}
+        +prepareData(alias, namespace, sobjectType, sobject) Promise~Mixture~
+        +serveData(alias, mixture) Promise~Plate~
+        +exportData(alias, plate) Promise~Go~
+        +cachestampData(alias, namespace, sobjectType, sobject) string
+        +cleanData(alias, namespace, sobjectType, sobject) void
+        +titlesForAllData() Map~RecipeAliases, string~
+    }
 ```
 
 ## Recipes

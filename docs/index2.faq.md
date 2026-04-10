@@ -83,3 +83,14 @@ For more information, you can check that closed issue: https://github.com/Salesf
 <a href="https://sfdc.co/OrgCheck-InstallToday-DE"><img src="../assets/pngs/Install-DevEdition.png" alt="Installation on dev edition" style="max-width: 300px; min-width: 200px;" width="100%" /></a><br />
 
 
+## Question 8: Can I run Org Check from Salesforce CLI?
+- Yes. Org Check includes an `sf` plugin package named `@orgcheck/sfdx-plugin`.
+- You can install it with:
+  - `sf plugins install @orgcheck/sfdx-plugin`
+- Current commands:
+  - `sf check apex-classes --target-org MyOrg`
+  - `sf check hardcoded-urls --target-org MyOrg`
+  - `sf check global-view --target-org MyOrg`
+- You can export results to files with flags like `--csv-file`, `--json-file`, and `--xlsx-file`.
+- In production orgs, you might need to explicitly accept terms by adding `--accept-the-terms`.
+

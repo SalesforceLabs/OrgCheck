@@ -23,6 +23,7 @@ Before you begin, ensure you have installed the following elements:
 - Yarn
 - A development tool like VsCode
 - Salesforce CLI
+- Node.js >= 18
 
 
 ## Step 1: Clone the Org Check Project
@@ -34,10 +35,9 @@ git clone https://github.com/SalesforceLabs/OrgCheck.git
 cd OrgCheck
 ```
 
-Make sure your user is correctly set up in git:
+Install dependencies from the repository root:
 ```bash
-git config --global user.name "<Your Fullname>"
-git config --global user.email "<Your Email>"
+yarn install
 ```
 
 
@@ -64,6 +64,23 @@ You need two developer orgs:
 1. Go to **App Launcher**.
 2. Search for **Namespace Registries**.
 3. Click **Link** and sign in to your Namespace Org.
+
+## Step 3: Build packages in the monorepo
+
+Build the Org Check API package first (produces `packages/orgcheck-api/dist/orgcheck.js`):
+```bash
+yarn workspace @orgcheck/api build
+```
+
+Build the Salesforce static resource package:
+```bash
+yarn workspace @orgcheck/salesforce-app build
+```
+
+Build the sf CLI plugin package:
+```bash
+yarn workspace @orgcheck/sfdx-plugin build
+```
 
 ## Step 4: Update Project Definition
 
@@ -101,14 +118,7 @@ Alternatively, you can also create and test the OrgCheck App as a Managed packag
 sf package create --name "Org Check" --package-type Managed --path force-app --target-dev-hub <devhubalias>
 ```
 
-## Step 6: Create the JavaScript files
-
-Build the Org Check API package (produces `packages/orgcheck-api/dist/orgcheck.js`):
-```bash
-yarn install && yarn workspace @orgcheck/api build
-```
-
-## Step 7: Create the Static Resource
+## Step 6: Create the Static Resource
 
 From the `@orgcheck/salesforce-app` package, run the build script to generate the static resource at `force-app/main/default/staticresources/OrgCheck_SR.resource`:
 
@@ -121,7 +131,7 @@ Or from the salesforce-app directory:
 cd packages/orgcheck-salesforce-app && node ./build/static-resource/build-static-resource.js
 ```
 
-## Step 8: Create a Package Version
+## Step 7: Create a Package Version
 
 Create a package version with the generated **Package Id**:
 
@@ -131,7 +141,7 @@ sf package version create --package "Org Check" --installation-key-bypass --wait
 
 Note the **Subscriber Package Version Id** from the output.
 
-## Step 9: Optional - Create a Scratch Org
+## Step 8: Optional - Create a Scratch Org
 
 If you want to use a scratch org, create it using:
 
@@ -139,18 +149,29 @@ If you want to use a scratch org, create it using:
 sf org create scratch --definition-file orgs/dev.json --alias <scratchorgalias> --target-dev-hub <devhubalias> --wait 10
 ```
 
-## Step 10: Deploy the Package
+## Step 9: Deploy the Package
 
 Deploy the package to your org using the **Subscriber Package Version Id**.
 
 ```bash
-sf package install --package <subscriberpackageversionid> -u <scratchorgalias> -w 10
+sf package install --package <subscriberpackageversionid> --target-org <scratchorgalias> --wait 10
 ```
 
 Alternatively, you can use the corresponding **alias** of the version id, which has been generated for you (on step 7) in the sfdx-project.json under the section **packageAliases**.
 
 ```bash
-sf package install --package <namespace>@1.2.3.4 -u <scratchorgalias> -w 10
+sf package install --package <namespace>@1.2.3.4 --target-org <scratchorgalias> --wait 10
+```
+
+## Step 10: Optional - Run Org Check from Salesforce CLI
+
+From the repo root, you can test the plugin commands:
+
+```bash
+sf plugins link ./packages/orgcheck-sfdx-plugin
+sf check apex-classes --target-org <scratchorgalias>
+sf check hardcoded-urls --target-org <scratchorgalias>
+sf check global-view --target-org <scratchorgalias>
 ```
 
 ## Debugging

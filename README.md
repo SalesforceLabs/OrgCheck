@@ -1,8 +1,8 @@
 <div align="center">
   <img src="docs/assets/pngs/Logo+Mascot-v3.png" width="256" alt="Org Check Logo" />
-  <h1>Org Check Salesforce Application</h1>
+  <h1>Org Check: API, Salesforce App and sf plugin</h1>
   <p>
-    <b>Org Check</b> is an easy-to-install and easy-to-use <b>Salesforce application</b> in order to quickly analyze your org and its <b>technical debt</b>.
+    <b>Org Check</b> is an easy-to-install and easy-to-use <b>Salesforce application</b> and <b>sf plugin</b> in order to quickly analyze your org and its <b>technical debt</b>.
   </p>
   <img alt="GitHub Created At" src="https://img.shields.io/github/created-at/SalesforceLabs/OrgCheck?style=plastic" />&nbsp;
   <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/SalesforceLabs/OrgCheck?style=plastic" />&nbsp;
@@ -14,10 +14,25 @@
 
 ---
 
+## Same logic across a Salesforce App and a sf plugin
+
+### Org Check Salesforce App
+- The app is available from the AppExchange
+- You need to install the app in the org you want to analyze
+- The app has a nice UI allowing to see and export the result of the analysis
+
+### Org Check sf plugin
+- The plugin is published on npmjs (as any sf plugins)
+- You need to install the plugin in your local machine via `sf plugins install @orgcheck/sfdx-plugin`
+- From there, you can run analysis on multiple orgs providing you have access to them via the flag `--target-org`in the sf CLI
+- JSON, CSV and XLSX output
+
+
 ## More about Org Check:
 - [Website](https://SalesforceLabs.github.io/OrgCheck/)
 - [LinkedIn](https://www.linkedin.com/company/orgchecksfdc/)
 - [AppExchange](https://sfdc.co/OrgCheck-InstallToday-AppExchange)
+- [NPMjs](https://www.npmjs.com/package/@orgcheck/sfdx-plugin)
 - [FAQ](https://SalesforceLabs.github.io/OrgCheck/faq/)
 
 

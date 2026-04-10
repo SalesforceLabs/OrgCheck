@@ -1136,6 +1136,23 @@ Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-workflows.ts
 
 #### Query on WorkflowRule
 ```
-SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate 
+SELECT Id
 FROM WorkflowRule
+```
+
+### Tooling Composite + Tooling SObjects Record describe
+Note: This type of access is performed by the method we call `readMetadataAtScale()`.
+
+#### Query on WorkflowRule
+This query is run with composite using batch size=1000.
+Each Record describe is about a unique id (obviously).
+Below is an example of such a composite query (version and id in `url` will vary):
+```
+POST /tooling/composite
+[
+    { method: 'GET', url: '/services/data/v64.0/tooling/sobjects/WorkflowRule/xyz000000000001' },
+    { method: 'GET', url: '/services/data/v64.0/tooling/sobjects/WorkflowRule/xyz000000000002' },
+    { method: 'GET', url: '/services/data/v64.0/tooling/sobjects/WorkflowRule/xyz000000000003' },
+    ...
+]
 ```
