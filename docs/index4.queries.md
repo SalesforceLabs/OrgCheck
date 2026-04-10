@@ -14,7 +14,7 @@ database access methods with their characteristics.
 
 
 ## Queries performed by the Apex Classes dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-apexclasses.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-apexclasses.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-apexclasses.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-apexclasses.ts)
 
 ### Tooling SOQL Queries
 
@@ -100,7 +100,7 @@ POST /tooling/composite
 
 
 ## Queries performed by the Apex Triggers dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-apextriggers.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-apextriggers.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-apextriggers.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-apextriggers.ts)
 
 ### Tooling SOQL Queries
 
@@ -148,7 +148,7 @@ POST /tooling/composite
 
 
 ## Queries performed by the Applications dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-applications.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-applications.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-applications.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-applications.ts)
 
 ### SOQL Queries
 
@@ -163,7 +163,7 @@ WHERE Type = 'TabSet'
 
 
 ## Queries performed by the Application Permissions dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-apppermissions.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-apppermissions.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-apppermissions.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-apppermissions.ts)
 
 ### SOQL Queries
 
@@ -185,7 +185,7 @@ WHERE SetupEntityType = 'TabSet'
 
 
 ## Queries performed by the Browsers dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-browsers.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-browsers.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-browsers.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-browsers.ts)
 
 ### SOQL Queries
 
@@ -201,7 +201,7 @@ GROUP BY Browser
 
 
 ## Queries performed by the Chatter Groups dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-collaborationgroups.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-collaborationgroups.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-collaborationgroups.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-collaborationgroups.ts)
 
 ### SOQL Queries
 
@@ -216,7 +216,7 @@ FROM CollaborationGroup
 
 
 ## Queries performed by the Current User Permissions dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-currentuserpermissions.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-currentuserpermissions.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-currentuserpermissions.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-currentuserpermissions.ts)
 
 ### SOQL Queries
 
@@ -233,7 +233,7 @@ FROM UserPermissionAccess
 
 
 ## Queries performed by the Custom Fields dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-customfields.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-customfields.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-customfields.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-customfields.ts)
 
 ### Tooling SOQL Queries
 
@@ -297,7 +297,7 @@ POST /tooling/composite
 
 
 ## Queries performed by the Custom Labels dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-customlabels.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-customlabels.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-customlabels.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-customlabels.ts)
 
 ### Tooling SOQL Queries
 
@@ -345,7 +345,7 @@ POST /tooling/composite
 
 
 ## Queries performed by the Custom Tabs dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-customtabs.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-customtabs.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-customtabs.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-customtabs.ts)
 
 ### Tooling SOQL Queries
 
@@ -393,7 +393,7 @@ POST /tooling/composite
 
 
 ## Queries performed by the Dashboards dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-dashboards.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-dashboards.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-dashboards.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-dashboards.ts)
 
 ### SOQL Queries
 
@@ -410,7 +410,7 @@ FROM Dashboard
 
 
 ## Queries performed by the Documents dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-documents.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-documents.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-documents.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-documents.ts)
 
 ### SOQL Queries
 
@@ -425,7 +425,7 @@ FROM Document
 
 
 ## Queries performed by the Email Templates dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-emailtemplates.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-emailtemplates.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-emailtemplates.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-emailtemplates.ts)
 
 ### SOQL Queries
 
@@ -441,7 +441,7 @@ FROM EmailTemplate
 
 
 ## Queries performed by the Field Permissions dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-fieldpermissions.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-fieldpermissions.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-fieldpermissions.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-fieldpermissions.ts)
 
 ### Tooling SOQL Queries
 
@@ -456,7 +456,7 @@ FROM FieldPermissions
 
 
 ## Queries performed by the Flow and Process Builder dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-flows.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-flows.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-flows.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-flows.ts)
 
 ### Tooling SOQL Queries
 
@@ -493,7 +493,7 @@ POST /tooling/composite
 
 
 ## Queries performed by the Public Groups and Queues dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-groups.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-groups.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-groups.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-groups.ts)
 
 ### SOQL Queries
 
@@ -508,7 +508,7 @@ FROM Group
 
 
 ## Queries performed by the Homepage Components dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-homepagecomponents.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-homepagecomponents.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-homepagecomponents.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-homepagecomponents.ts)
 
 ### Tooling SOQL Queries
 
@@ -523,7 +523,7 @@ WHERE ManageableState IN ('installedEditable', 'unmanaged')
 
 
 ## Queries performed by the Internal Active Users dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-internalactiveusers.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-internalactiveusers.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-internalactiveusers.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-internalactiveusers.ts)
 
 ### SOQL Queries
 
@@ -563,7 +563,7 @@ GROUP BY UserId, LoginType, AuthMethodReference, Status
 
 
 ## Queries performed by the Knowledge Articles dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-knowledgearticles.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-knowledgearticles.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-knowledgearticles.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-knowledgearticles.ts)
 
 ### SOSL Queries
 
@@ -578,7 +578,7 @@ RETURNING KnowledgeArticleVersion (Id, KnowledgeArticleId, ArticleNumber,
 
 
 ## Queries performed by the Aura Components dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-lightningauracomponents.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-lightningauracomponents.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-lightningauracomponents.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-lightningauracomponents.ts)
 
 ### Tooling SOQL Queries
 
@@ -594,7 +594,7 @@ WHERE ManageableState IN ('installedEditable', 'unmanaged')
 
 
 ## Queries performed by the Lightning Pages dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-lightningpages.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-lightningpages.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-lightningpages.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-lightningpages.ts)
 
 ### Tooling SOQL Queries
 
@@ -610,7 +610,7 @@ WHERE ManageableState IN ('installedEditable', 'unmanaged')
 
 
 ## Queries performed by the Lightning Web Components dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-lightningwebcomponents.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-lightningwebcomponents.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-lightningwebcomponents.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-lightningwebcomponents.ts)
 
 ### Tooling SOQL Queries
 
@@ -626,7 +626,7 @@ WHERE ManageableState IN ('installedEditable', 'unmanaged')
 
 
 ## Queries performed by the SObject dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-object.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-object.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-object.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-object.ts)
 
 ### Tooling SOQL Queries
 
@@ -660,7 +660,7 @@ WHERE EntityDefinition.QualifiedApiName = '<object_api_name>'
 
 
 ## Queries performed by the SObject permissions dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-objectpermissions.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-objectpermissions.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-objectpermissions.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-objectpermissions.ts)
 
 ### SOQL Queries
 
@@ -677,7 +677,7 @@ FROM ObjectPermissions
 
 
 ## Queries performed by the SObjects dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-objects.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-objects.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-objects.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-objects.ts)
 
 ### Tooling SOQL Queries
 
@@ -737,7 +737,7 @@ GROUP BY EntityDefinitionId
 
 
 ## Queries performed by the Object Types dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-objecttypes.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-objecttypes.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-objecttypes.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-objecttypes.ts)
 
 Not accessing any data
 
@@ -745,7 +745,7 @@ Not accessing any data
 
 
 ## Queries performed by the Organization Information dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-organization.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-organization.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-organization.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-organization.ts)
 
 ### SOQL Queries
 
@@ -760,7 +760,7 @@ LIMIT 1
 
 
 ## Queries performed by the Packages dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-packages.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-packages.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-packages.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-packages.ts)
 
 ### Tooling SOQL Queries
 
@@ -779,7 +779,7 @@ SELECT NamespacePrefix FROM Organization LIMIT 1
 
 
 ## Queries performed by the Page Layouts dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-pagelayouts.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-pagelayouts.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-pagelayouts.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-pagelayouts.ts)
 
 ### Tooling SOQL Queries
 
@@ -802,7 +802,7 @@ GROUP BY LayoutId
 
 
 ## Queries performed by the Permission Set Licenses dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-permissionsetlicenses.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-permissionsetlicenses.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-permissionsetlicenses.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-permissionsetlicenses.ts)
 
 ### SOQL Queries
 
@@ -835,7 +835,7 @@ ORDER BY PermissionSetId
 
 
 ## Queries performed by the Permission Sets dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-permissionsets.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-permissionsets.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-permissionsets.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-permissionsets.ts)
 
 ### SOQL Queries
 
@@ -895,7 +895,7 @@ ORDER BY PermissionSetGroupId
 
 
 ## Queries performed by the Profile Password Policies dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-profilepasswordpolicies.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-profilepasswordpolicies.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-profilepasswordpolicies.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-profilepasswordpolicies.ts)
 
 ### Metadata API Calls
 
@@ -911,7 +911,7 @@ readMetadata({
 
 
 ## Queries performed by the Profile Restrictions dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-profilerestrictions.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-profilerestrictions.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-profilerestrictions.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-profilerestrictions.ts)
 
 ### SOQL Queries
 
@@ -941,7 +941,7 @@ POST /tooling/composite
 
 
 ## Queries performed by the Profiles dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-profiles.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-profiles.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-profiles.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-profiles.ts)
 
 ### SOQL Queries
 
@@ -984,7 +984,7 @@ GROUP BY PermissionSet.ProfileId
 
 
 ## Queries performed by the Record Types dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-recordtypes.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-recordtypes.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-recordtypes.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-recordtypes.ts)
 
 ### SOQL Queries
 
@@ -1020,7 +1020,7 @@ POST /tooling/composite
 
 
 ## Queries performed by the Reports dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-reports.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-reports.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-reports.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-reports.ts)
 
 ### SOQL Queries
 
@@ -1035,7 +1035,7 @@ FROM Report
 
 
 ## Queries performed by the Static Resources dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-staticresources.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-staticresources.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-staticresources.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-staticresources.ts)
 
 ### SOQL Queries
 
@@ -1057,7 +1057,7 @@ dependenciesQuery(<resourceIds>)
 
 
 ## Queries performed by the User Roles dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-userroles.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-userroles.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-userroles.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-userroles.ts)
 
 ### SOQL Queries
 
@@ -1073,7 +1073,7 @@ WHERE PortalType = 'None'
 
 
 ## Queries performed by the Validation Rules dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-validationrules.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-validationrules.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-validationrules.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-validationrules.ts)
 
 ### Tooling SOQL Queries
 
@@ -1088,7 +1088,7 @@ FROM ValidationRule
 
 
 ## Queries performed by the Visualforce Components dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-visualforcecomponents.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-visualforcecomponents.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-visualforcecomponents.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-visualforcecomponents.ts)
 
 ### Tooling SOQL Queries
 
@@ -1102,7 +1102,7 @@ FROM ApexComponent
 
 
 ## Queries performed by the Visualforce Pages dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-visualforcepages.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-visualforcepages.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-visualforcepages.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-visualforcepages.ts)
 
 ### Tooling SOQL Queries
 
@@ -1116,7 +1116,7 @@ FROM ApexPage
 
 
 ## Queries performed by the Web Links dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-weblinks.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-weblinks.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-weblinks.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-weblinks.ts)
 
 ### Tooling SOQL Queries
 
@@ -1130,12 +1130,29 @@ FROM WebLink
 
 
 ## Queries performed by the Workflows dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-workflows.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-workflows.js)
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-workflows.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-workflows.ts)
 
 ### Tooling SOQL Queries
 
 #### Query on WorkflowRule
 ```
-SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate 
+SELECT Id
 FROM WorkflowRule
+```
+
+### Tooling Composite + Tooling SObjects Record describe
+Note: This type of access is performed by the method we call `readMetadataAtScale()`.
+
+#### Query on WorkflowRule
+This query is run with composite using batch size=1000.
+Each Record describe is about a unique id (obviously).
+Below is an example of such a composite query (version and id in `url` will vary):
+```
+POST /tooling/composite
+[
+    { method: 'GET', url: '/services/data/v64.0/tooling/sobjects/WorkflowRule/xyz000000000001' },
+    { method: 'GET', url: '/services/data/v64.0/tooling/sobjects/WorkflowRule/xyz000000000002' },
+    { method: 'GET', url: '/services/data/v64.0/tooling/sobjects/WorkflowRule/xyz000000000003' },
+    ...
+]
 ```

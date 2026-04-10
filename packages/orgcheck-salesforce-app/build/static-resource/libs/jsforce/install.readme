@@ -1,0 +1,13 @@
+Name: Javascript Force framework
+Website: https://jsforce.github.io/
+Version: v1.11.1 minimized
+Release: https://github.com/jsforce/jsforce/releases/tag/1.11.1
+Source: https://cdn.jsdelivr.net/npm/jsforce@1.11.1/build/jsforce.min.js
+
+
+
+Name: Javascript Force framework
+Website: https://jsforce.github.io/
+Version: v3.10.14 minimized
+Release: https://github.com/jsforce/jsforce/releases/tag/3.10.14
+https://cdn.jsdelivr.net/npm/jsforce@3.10.14/dist/jsforce-core.min.js

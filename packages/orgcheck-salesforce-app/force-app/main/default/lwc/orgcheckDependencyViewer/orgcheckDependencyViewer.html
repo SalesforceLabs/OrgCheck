@@ -1,0 +1,23 @@
+<template>
+    <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class={dialogCssClasses}>
+        <div class="slds-modal__container">
+            <lightning-icon icon-name="utility:close" alternative-text="Close" title="Close" onclick={handleClose} class="slds-modal__close"></lightning-icon>
+            <div class="slds-modal__header">
+                <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Dependency viewer: {whatName} ({whatId})</h1>
+            </div>
+            <div class="slds-modal__content slds-scrollable">
+                <c-orgcheck-graphics 
+                    type="hierarchy"
+                    name={whatName}
+                    hierarchy-box-color-legend={dependencyBoxColorsLegend}
+                    hierarchy-box-color-decorator={dependencyBoxColorsDecorator}
+                    hierarchy-box-inner-html-decorator={dependencyBoxInnerHtmlDecorator}
+                    source={dependencyTreeByType}></c-orgcheck-graphics>
+            </div>
+            <div class="slds-modal__footer">
+                <lightning-button variant="neutral" label="Close" onclick={handleClose}></lightning-button>
+            </div>
+        </div>
+        </section>
+    <div class={backdropCssClasses} role="presentation"></div>
+</template>

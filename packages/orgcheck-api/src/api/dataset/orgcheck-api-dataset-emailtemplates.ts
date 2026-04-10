@@ -1,0 +1,75 @@
+import { CodeScanner } from 'src/api/core/orgcheck-api-codescanner';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
+import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
+import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
+import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
+import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
+import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
+import { SfdcEmailTemplate } from 'src/api/data/orgcheck-api-data-emailtemplate';
+
+export class DatasetEmailTemplates implements Dataset {
+
+    /**
+     * @description Run the dataset and return the result
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
+     * @returns {Promise<Map<string, SfdcEmailTemplate>>} The result of the dataset
+     */
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcEmailTemplate>> {
+
+        // First SOQL query
+        logger?.log(`Querying REST API about EmailTemplates in the org...`);            
+        const results = await sfdcManager.soqlQuery([{
+            string: 'SELECT Id, Name, ApiVersion, IsActive, HtmlValue, Body, Markup, CreatedDate, ' +
+                        'LastModifiedDate, FolderId, FolderName, Description, LastUsedDate, '+
+                        'TimesUsed, UiType, TemplateType, NamespacePrefix ' +
+                    'FROM EmailTemplate'
+        }], logger);
+            
+        // Init the factories
+        const emailTemplateDataFactory = dataFactory.getInstance(DataAliases.SfdcEmailTemplate);
+        const emailTemplateRecords = results[0];
+         
+        // Create the map
+        logger?.log(`Parsing ${emailTemplateRecords?.length} email templates...`);
+        const emailTemplates: Map<string, SfdcEmailTemplate> = new Map(await Processor.map(emailTemplateRecords, (/** @type {any} */ record: any) => {
+        
+            // Get the ID15
+            const id = sfdcManager.caseSafeId(record.Id);
+            const sourceCode = CodeScanner.RemoveCommentsFromXML(record.HtmlValue || record.Body || record.Markup || '');
+
+            // Create the instance
+            /** @type {SfdcEmailTemplate} */
+            const emailTemplate: SfdcEmailTemplate = emailTemplateDataFactory.createWithScore({
+                    properties: {
+                    id: id,
+                    name: record.Name,
+                    apiVersion: record.ApiVersion, 
+                    isActive: record.IsActive,
+                    description: record.Description,
+                    package: record.NamespacePrefix || '',
+                    hardCodedURLs: CodeScanner.FindHardCodedURLs(sourceCode),
+                    hardCodedIDs: CodeScanner.FindHardCodedIDs(sourceCode),
+                    createdDate: record.CreatedDate,
+                    uiType: record.UiType,
+                    type: record.TemplateType,
+                    lastModifiedDate: record.LastModifiedDate,
+                    lastUsedDate: record.LastUsedDate,
+                    timesUsed: record.TimesUsed,
+                    folderId: record.FolderId,
+                    folderName: record.FolderName,
+                    url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.EMAIL_TEMPLATE)
+                }
+            });
+
+            // Add it to the map
+            return [ emailTemplate.id, emailTemplate ];
+        }));
+
+        // Return data as map
+        logger?.log(`Done`);
+        return emailTemplates;
+    } 
+}

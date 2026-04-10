@@ -1,0 +1,1156 @@
+<template>
+    <span lwc:if={useOrgCheck.manuallyAccepted}>
+        <div class="slds-color__background_gray-1 slds-text-align_center slds-size_full slds-text-body_regular oneSystemMessage">
+            <div aria-live="polite" class="slds-notify_alert system-message level-info slds-theme_info">
+                Using Org Check in this Salesforce organization has been confirmed by you.
+            </div>
+        </div>
+    </span>
+    <span lwc:if={useOrgCheck.needConfirmation}>
+        <div class="slds-text-align_center slds-size_full slds-text-body_regular oneSystemMessage">
+            <div aria-live="polite" class="slds-notify_alert system-message level-info slds-theme_info" style="background-color: #7d7d57;">
+                Using Org Check in this Salesforce organization needs your confirmation.
+            </div>
+        </div>
+    </span>
+    <div style="padding-bottom: 12px">
+        <lightning-layout>
+            <!-- Logo and versions -->
+            <lightning-layout-item padding="around-small">
+                <div class="slds-media" tabindex="0">
+                    <div class="slds-media__figure">
+                        <object data={logoURL} type="image/svg+xml" style="width: 4rem; height: 2.9rem;"><img src={logoURL} width="4rem" height="2.9rem" alt="Org Check Logo" /></object>
+                    </div>
+                    <div class="slds-media__body">
+                        <div class="slds-page-header__name">
+                            <div class="slds-page-header__name-title">
+                                <h1><span class="slds-page-header__title slds-truncate">Welcome in Org Check ({orgCheckVersion})</span></h1>
+                                Monitor your org seamlessly (using Salesforce API v{salesforceApiVersion}.0)
+                                <span lwc:if={isLoading}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="/img/loading.gif" alt="[loading]" />&nbsp;<font color="orange"><b>Please wait while loading...</b></font></span>
+                                <br />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </lightning-layout-item>
+            <lightning-layout-item padding="around-small" alignment-bump="left">
+                <!-- Separator -->
+                <lightning-icon icon-name="utility:threedots_vertical" alternative-text="separator" title="separator" class="slds-var-m-left_x-small"></lightning-icon>
+                <!-- Org information -->
+                <div class="slds-var-m-left_x-small" style="text-align: center; display: inline-table; vertical-align: middle;">
+                    <lightning-badge label={orgInformation.name}></lightning-badge>
+                    <br />
+                    <lightning-badge label={orgInformation.type} class={orgInformation.theme}></lightning-badge>
+                    <template lwc:if={orgLimit.hasInformation}>
+                        &nbsp;
+                        <lightning-badge label={orgLimit.usage} class={orgLimit.theme}></lightning-badge>
+                    </template>
+                </div>
+            </lightning-layout-item>
+        </lightning-layout>
+        <!-- Spinner and modal utilities -->
+        <c-orgcheck-spinner></c-orgcheck-spinner>
+        <c-orgcheck-modal></c-orgcheck-modal>
+        <!-- Acceptance screen (if needed) -->
+        <div lwc:if={useOrgCheck.needConfirmation} class="pleaseAcceptTheTerms">
+            <h1 class="slds-text-heading_medium">Just to let you know...</h1> 
+            Using <b>Org Check</b> in this Salesforce organization <b>will</b> increase
+            its <b>API Request limit</b>. The number of requests it will make to your org 
+            really depends on how much metadata you have.
+            <br />
+            <br />
+            <h1 class="slds-text-heading_medium">What is Salesforce saying about this limit?</h1> 
+            If your org reaches or exceeds its daily API request limit, Salesforce still lets 
+            the operations proceed by a certain amount, if possible. It helps avoid blocking 
+            your workflows during unexpected spikes in workloads and occasional peak periods. 
+            A hard cap is in place to safeguard platform resources and prevent API requests 
+            from exceeding the daily limit unimpeded. (see <a href="https://developer.salesforce.com/docs/atlas.en-us.salesforce_app_limits_cheatsheet.meta/salesforce_app_limits_cheatsheet/salesforce_app_limits_platform_api.htm">developer.salesforce.com</a>)
+            <br />
+            <br />
+            <h1 class="slds-text-heading_medium">How do we manage this limit in Org Check?</h1>
+            <b>Org Check</b> is monitoring the <b>API Request limit</b> of your org every time it 
+            uses the Salesforce APIs (and without any additional calls of course!). The usage of 
+            this limit will be shown in the application everytime. Additionally, the application 
+            will <b>warn</b> you when the limit starts reaching <b>70%</b>, and, 
+            will <b>stop</b> working when the limit reaches <b>90%</b>.
+            <br />
+            <br />
+            <h1 class="slds-text-heading_medium">Some last comments...</h1>
+            We strongly encourage you to use Org Check in a <b>dedicated Sandbox</b> which
+            is not part of your Salesforce development lifecycle. We discourage you from 
+            using the application directly in your Production. Even if we put in place 
+            a control about this limit, we remind you that Salesforce Labs applications
+            (like Org Check) have no warranty of any sort (as described in our AppExchange 
+            listing).
+            <br />
+            <br />
+            <h1 class="slds-text-heading_medium">Now... Do you want to use Org Check in this Salesforce org?</h1>
+            <div class="slds-text-align_center">
+                <lightning-button variant="brand" title="Yes, I accept to use Org Check in this environment!" label="Yes" onclick={handleClickUsageAcceptance}></lightning-button>
+                &nbsp;&nbsp;&nbsp;
+                <lightning-button variant="destructive" title="No, I do not accept this terms and I will use Org Check in another environment instead." label="No"></lightning-button>
+            </div>
+        </div>
+        <!-- The navigation, title, filters and content (only if the use was accepted!!) -->
+        <div data-key="orgcheck-main" class="slds-hide">
+            <lightning-layout>
+                <!-- The left part with the navigation menu in form of a tree -->
+                <lightning-layout-item padding="around-small" size="2">
+                    <lightning-input type="search" variant="label-hidden" name="search" onchange={handleNavigationMenuSearch}></lightning-input>
+                    <lightning-tree items={navigationMenuItems} selected-item={navigationMenuSelected} onselect={handleNavigationMenuSelect}></lightning-tree>
+                </lightning-layout-item>
+                <!-- The right part with the title, the filters and the content -->
+                <lightning-layout-item size="10">
+                    <!-- Top header with title and filters -->
+                    <lightning-layout vertical-align="center" class="contentTitle">
+                        <!-- The title -->
+                        <lightning-layout-item padding="around-small">
+                            <h1 class="slds-text-heading_large">
+                                {currentContentTitle}
+                            </h1>
+                        </lightning-layout-item>
+                        <lightning-layout-item>
+                            &nbsp;&nbsp;&nbsp;
+                            <ul class="slds-button-group-row">
+                                <li class="slds-button-group-item">
+                                    <lightning-button-icon 
+                                        lwc:if={showRefreshButton} 
+                                        icon-name="utility:sync" 
+                                        alternative-text="Refresh data" 
+                                        title="Refresh the current data being displayed" 
+                                        variant="border-filled" 
+                                        onclick={handleRefreshCurrentData} ></lightning-button-icon>
+                                </li>
+                            </ul>
+                        </lightning-layout-item>
+                        <!-- The global filters -->
+                        <lightning-layout-item alignment-bump="left">
+                            <c-orgcheck-global-filters 
+                                dropdown-alignment="right"
+                                onvalidatechange={handleFiltersValidated} 
+                                onrefresh={handleFiltersRefreshed}></c-orgcheck-global-filters>
+                        </lightning-layout-item>
+                    </lightning-layout>
+                    <!-- The content -->
+                    <lightning-card>
+                        <div data-key="orgcheck-content">
+                            <div data-key="01" class="slds-hide slds-var-p-horizontal_small">
+                                Introducing <b>Org Check</b>. An easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and 
+                                its technical debt.<br /><br />
+                                <b>Support and feedback</b>
+                                <ul class="slds-list_dotted">
+                                    <li><b>Issues or new ideas?</b> Track them at <a href="https://sfdc.co/OrgCheck-Backlog" 
+                                        target="_blank" rel="external noopener noreferrer">sfdc.co/OrgCheck-Backlog</a></li>
+                                    <li><b>Want to chat with other users?</b> Join us on the Trailblazer Community at <a href="https://sfdc.co/OrgCheck-Community" 
+                                        target="_blank" rel="external noopener noreferrer">sfdc.co/OrgCheck-Community</a></li>
+                                    <li><b>Social Media</b> Like and share posts on <a href="https://www.linkedin.com/company/OrgChecksfdc" 
+                                        target="_blank" rel="external noopener noreferrer">LinkedIn</a>!</li>
+                                </ul>
+                                <br />
+                                <b>Org Check is free to use, but is not an official Salesforce product. </b> Org Check has not been officially tested or documented.
+                                Salesforce support is not available for Org Check. Support requests for Org Check should be directed to GitHub. Source code for Org 
+                                Check can be found on GitHub under separate and different license terms.<br /><br />
+                                <b>Third party components</b>
+                                <ul class="slds-list_dotted">
+                                    <li><b>D3js</b>: distributed under the ISC license, more info at <a href="https://d3js.org" target="_blank" rel="external noopener noreferrer">d3js.org</a></li>
+                                    <li><b>fflate</b>: distributed under the MIT license, more info at <a href="https://101arrowz.github.io/fflate" target="_blank" rel="external noopener noreferrer">101arrowz.github.io/fflate</a></li>
+                                    <li><b>JsForce</b>: distributed under the MIT license, more info at <a href="https://jsforce.github.io" target="_blank" rel="external noopener noreferrer">jsforce.github.io</a></li>
+                                    <li><b>SheetJS</b>: distributed under the Apache license v2.0, more info at <a href="https://sheetjs.com/" target="_blank" rel="external noopener noreferrer">sheetjs.com</a></li>
+                                    <li><b>Lightning Flow Scanner</b>: distributed under the MIT License, more info at <a href="https://flow-scanner.github.io/lightning-flow-scanner" target="_blank" rel="external noopener noreferrer">flow-scanner.github.io/lightning-flow-scanner</a></li>
+                                    <li><b>Xyris</b>: online website used to animated Org Checky (our mascot), more info at <a href="https://xyris.app/" target="_blank" rel="external noopener noreferrer">xyris.app</a></li>
+                                </ul>
+                            </div>
+                            <div data-key="02" class="slds-hide slds-var-p-horizontal_small">
+                                <lightning-layout>
+                                    <lightning-layout-item>
+                                        List of cached metadata from the Salesforce org you want to check into your Browser persistant cache
+                                    </lightning-layout-item>
+                                    <lightning-layout-item alignment-bump="left">
+                                        <lightning-button label="Clear" variant="destructive" onclick={handleRemoveAllCache}></lightning-button>
+                                    </lightning-layout-item>
+                                </lightning-layout>
+                                <lightning-layout multiple-rows>
+                                    <template lwc:if={tableData.cacheitems} for:each={tableData.cacheitems} for:item="item">
+                                        <lightning-layout-item size="2" key={item.name} padding="around-small">
+                                            <div class="viewCacheItem">
+                                                <lightning-card>
+                                                    <lightning-button-icon icon-name="utility:zoomin" alternative-text="Show details" slot="actions" onclick={handleLogCacheItem} data-item-name={item.name}></lightning-button-icon>
+                                                    <h3 slot="title">
+                                                        <lightning-layout vertical-align="center">
+                                                            <lightning-layout-item>
+                                                                <lightning-icon icon-name="utility:database" size="small"></lightning-icon>
+                                                                &nbsp;
+                                                            </lightning-layout-item>
+                                                            <lightning-layout-item>
+                                                                <div class="slds-line-clamp">{item.name}</div>
+                                                            </lightning-layout-item>
+                                                        </lightning-layout>
+                                                    </h3>
+                                                    <div slot="footer">
+                                                        <lightning-badge class="slds-badge_lightest" lwc:if={item.created} icon-name="utility:date_time" label={item.created}></lightning-badge>
+                                                        <lightning-badge class="slds-badge_lightest" lwc:if={item.isMap} icon-name="action:map" label="Map"></lightning-badge>
+                                                        <lightning-badge class="slds-badge_lightest" lwc:else label="Object" icon-name="utility:sparkles" ></lightning-badge>
+                                                    </div>
+                                                    <div class="slds-var-p-horizontal_small">
+                                                        <h1 class="slds-text-heading_large slds-align_absolute-center">
+                                                            <lightning-formatted-number value={item.length}></lightning-formatted-number>
+                                                        </h1>
+                                                    </div>
+                                                </lightning-card>
+                                            </div>
+                                        </lightning-layout-item>  
+                                    </template>
+                                </lightning-layout>
+                                <br /><br />
+                                
+                                <h1 class="slds-text-heading_large">And Now for Something Completely Different...</h1> 
+                                <template for:each={jokes} for:item="joke" for:>
+                                    <p key={joke.question}><b>{joke.question}...</b> &nbsp;&nbsp; <i>{joke.answer}</i></p>
+                                </template>
+                            </div>
+                            <div data-key="03" class="slds-hide slds-var-p-horizontal_small">
+                                <p>
+                                    <b>Org Check</b> uses a set of <b>rules</b> to compute its scores. <b>Rules</b> represent bad practices or 
+                                    anti-pattern if you will. These rules are listed in the matrix below in the row headers.
+                                </p>
+                                <p>
+                                    The way we <b>compute the score</b> is rather simple. For each metadata we analyze, depending on its type, 
+                                    we run a set of appropriate rules. Every time a rule is met, the score increases by <b>+1</b>.
+                                </p>
+                                <c-orgcheck-extended-datatable 
+                                    is-sticky-headers 
+                                    dont-use-all-space 
+                                    table={tableData.scorerules}
+                                    show-export-button  
+                                    export-source={exports.scorerules} 
+                                    export-basename="Org Check Rules"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="04" class="slds-hide slds-var-p-horizontal_medium">
+                                <template lwc:if={tableData.globalview}>
+                                    <lightning-layout>
+                                        <lightning-layout-item alignment-bump="left">
+                                            <c-orgcheck-export-button source={exports.globalview} basename="GlobalView"></c-orgcheck-export-button>
+                                        </lightning-layout-item>
+                                    </lightning-layout>
+                                    <lightning-layout>
+                                        <lightning-layout-item class="slds-p-right_small">
+                                            <h1 class="slds-text-heading_medium">Count of ✅ and ❌ per type</h1>
+                                            <c-orgcheck-extended-datatable 
+                                                table={tableData.globalview.statisticsGoodAndBad} 
+                                                empty-message="There is no statistics to show." 
+                                                show-search 
+                                                dont-use-all-space></c-orgcheck-extended-datatable>
+                                        </lightning-layout-item>
+                                        <lightning-layout-item class="slds-p-left_medium">
+                                            <h1 class="slds-text-heading_medium">Count of ❌ per type and reason</h1>
+                                            <c-orgcheck-extended-datatable 
+                                                table={tableData.globalview.statisticsReasons} 
+                                                empty-message="There is no statistics to show." 
+                                                show-search 
+                                                dont-use-all-space></c-orgcheck-extended-datatable>
+                                        </lightning-layout-item>
+                                    </lightning-layout>
+                                </template>
+                                <template lwc:else>
+                                    <span><img src="/img/loading.gif" alt="[loading]" />&nbsp;<font color="orange"><b>Please wait while the overview is loading...</b></font></span>
+                                </template>                                
+                            </div>
+                            <div data-key="05" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    table={tableData.hardcodedurls} 
+                                    show-export-button  
+                                    export-source={exports.hardcodedurls} 
+                                    export-basename="HardCodedURLs"
+                                    dont-use-all-space></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="06" class="slds-hide slds-var-p-horizontal_small">
+                                <template lwc:if={isObjectSpecified}>
+                                    <template lwc:if={tableData.object}>
+                                        <lightning-layout>
+                                            <lightning-layout-item>
+                                                <h1 class="slds-text-heading_large">{tableData.object.label} ({tableData.object.apiname})</h1>
+                                            </lightning-layout-item>
+                                            <lightning-layout-item alignment-bump="left">
+                                                <c-orgcheck-export-button source={exports.object} basename={tableData.object.apiname}></c-orgcheck-export-button>
+                                            </lightning-layout-item>
+                                        </lightning-layout>
+                                        <div class="slds-text-body_small">
+                                            <span> | </span>
+                                            <span lwc:if={tableData.object.apexTriggers.hasData}><a href="#apexTriggers-0">Apex Triggers ({tableData.object.apexTriggers.nbAllRows})</a> | </span>
+                                            <span lwc:if={tableData.object.workflowRules.hasData}><a href="#workflowRules-0">Workflow Rules ({tableData.object.workflowRules.nbAllRows})</a> | </span>
+                                            <span lwc:if={tableData.object.fieldSets.hasData}><a href="#fieldSets-0">Field Sets ({tableData.object.fieldSets.nbAllRows})</a> | </span>
+                                            <span lwc:if={tableData.object.layouts.hasData}><a href="#layouts-0">Page Layout ({tableData.object.layouts.nbAllRows})</a> | </span>
+                                            <span lwc:if={tableData.object.flexiPages.hasData}><a href="#flexiPages-0">Lightning Pages ({tableData.object.flexiPages.nbAllRows})</a> | </span>
+                                            <span lwc:if={tableData.object.limits.hasData}><a href="#limits-0">Limits ({tableData.object.limits.nbAllRows})</a> | </span>
+                                            <span lwc:if={tableData.object.validationRules.hasData}><a href="#validationRules-0">Validation Rules ({tableData.object.validationRules.nbAllRows})</a> | </span>
+                                            <span lwc:if={tableData.object.webLinks.hasData}><a href="#webLinks-0">Web Links ({tableData.object.webLinks.nbAllRows})</a> | </span>
+                                            <span lwc:if={tableData.object.customFields.hasData}><a href="#customFields-0">Custom Fields ({tableData.object.customFields.nbAllRows})</a> | </span>
+                                            <span lwc:if={tableData.object.standardFields.hasData}><a href="#standardFields-0">Standard Fields ({tableData.object.standardFields.nbAllRows})</a> | </span>
+                                            <span lwc:if={tableData.object.recordTypes.hasData}><a href="#recordTypes-0">Record Types ({tableData.object.recordTypes.nbAllRows})</a> | </span>
+                                            <span lwc:if={tableData.object.relationships.hasData}><a href="#relationships-0">Relationships ({tableData.object.relationships.nbAllRows})</a> | </span>
+                                        </div>
+                                        <br />
+                                        <h1 class="slds-text-heading_medium">General information</h1>
+                                        <div class="slds-grid slds-gutters">
+                                            <div class="slds-col">
+                                                <div class="slds-has-divider_bottom"><lightning-input type="text" label="API Name" value={tableData.object.apiname} read-only></lightning-input></div>
+                                                <div class="slds-has-divider_bottom"><lightning-input type="text" label="Object Type" value={tableData.object.type} read-only></lightning-input></div>
+                                                <div class="slds-has-divider_bottom"><lightning-input type="text" label="Package" value={tableData.object.package} read-only></lightning-input></div>
+                                            </div>
+                                            <div class="slds-col">
+                                                <div class="slds-has-divider_bottom"><lightning-input type="text" label="Singular Label" value={tableData.object.label} read-only></lightning-input></div>
+                                                <div class="slds-has-divider_bottom"><lightning-input type="text" label="Plural Label" value={tableData.object.labelPlural} read-only></lightning-input></div>
+                                                <div class="slds-has-divider_bottom"><lightning-input type="text" label="Description" value={tableData.object.description} read-only></lightning-input></div>
+                                            </div>
+                                            <div class="slds-col">
+                                                <div class="slds-has-divider_bottom"><lightning-input type="text" label="Key Prefix" value={tableData.object.keyPrefix} read-only></lightning-input></div>
+                                                <div class="slds-has-divider_bottom"><lightning-input type="number" label="Record Count (including deleted ones)" value={tableData.object.recordCount} read-only></lightning-input></div>
+                                            </div>
+                                            <div class="slds-col">
+                                                <div class="slds-has-divider_bottom"><lightning-input type="toggle" label="Is Custom?" value={tableData.object.isCustom} disabled></lightning-input></div>
+                                                <div class="slds-has-divider_bottom"><lightning-input type="toggle" label="Feed Enable?" value={tableData.object.isFeedEnabled} disabled></lightning-input></div>
+                                                <div class="slds-has-divider_bottom"><lightning-input type="toggle" label="Most Recent Enabled?" value={tableData.object.isMostRecentEnabled} disabled></lightning-input></div>
+                                                <div class="slds-has-divider_bottom"><lightning-input type="toggle" label="Global Search Enabled?" value={tableData.object.isSearchable} disabled></lightning-input></div>
+                                            </div>
+                                            <div class="slds-col">
+                                                <div class="slds-has-divider_bottom"><lightning-input type="text" label="Internal Sharing" value={tableData.object.internalSharingModel} read-only></lightning-input></div>
+                                                <div class="slds-has-divider_bottom"><lightning-input type="text" label="External Sharing" value={tableData.object.externalSharingModel} read-only></lightning-input></div>
+                                            </div>
+                                        </div>
+                                        <br /><br />
+                                        <template lwc:if={tableData.object.apexTriggers.hasData}>
+                                            <h1 class="slds-text-heading_medium"><a id="apexTriggers"></a>Apex Triggers</h1>
+                                            <c-orgcheck-extended-datatable
+                                                dont-use-all-space 
+                                                onviewscore={handleViewScore} 
+                                                show-search
+                                                show-statistics
+                                                is-infinite-scrolling
+                                                infinite-scrolling-initial-nb-rows=25
+                                                infinite-scrolling-additional-nb-rows=100
+                                                table={tableData.object.apexTriggers}></c-orgcheck-extended-datatable>
+                                            <br /><br />
+                                        </template>
+                                        <template lwc:if={tableData.object.workflowRules.hasData}>
+                                            <h1 class="slds-text-heading_medium"><a id="workflowRules"></a>Workflow Rules</h1>
+                                            <c-orgcheck-extended-datatable
+                                                dont-use-all-space 
+                                                onviewscore={handleViewScore} 
+                                                show-search
+                                                show-statistics
+                                                is-infinite-scrolling
+                                                infinite-scrolling-initial-nb-rows=25
+                                                infinite-scrolling-additional-nb-rows=100
+                                                table={tableData.object.workflowRules}></c-orgcheck-extended-datatable>
+                                            <br /><br />
+                                        </template>
+                                        <template lwc:if={tableData.object.fieldSets.hasData}>
+                                            <h1 class="slds-text-heading_medium"><a id="fieldSets"></a>Field Sets</h1>
+                                            <c-orgcheck-extended-datatable
+                                                dont-use-all-space 
+                                                onviewscore={handleViewScore} 
+                                                show-search
+                                                show-statistics
+                                                is-infinite-scrolling
+                                                infinite-scrolling-initial-nb-rows=25
+                                                infinite-scrolling-additional-nb-rows=100
+                                                table={tableData.object.fieldSets}></c-orgcheck-extended-datatable>
+                                            <br /><br />
+                                        </template>
+                                        <template lwc:if={tableData.object.layouts.hasData}>
+                                            <a id="layouts"></a>
+                                            <h1 class="slds-text-heading_medium">Page Layouts</h1>
+                                            <c-orgcheck-extended-datatable
+                                                dont-use-all-space 
+                                                onviewscore={handleViewScore} 
+                                                show-search
+                                                show-statistics
+                                                is-infinite-scrolling
+                                                infinite-scrolling-initial-nb-rows=25
+                                                infinite-scrolling-additional-nb-rows=100
+                                                table={tableData.object.layouts}></c-orgcheck-extended-datatable>
+                                            <br /><br />
+                                        </template>
+                                        <template lwc:if={tableData.object.flexiPages.hasData}>
+                                            <a id="flexiPages"></a>
+                                            <h1 class="slds-text-heading_medium">Lightning Pages</h1>
+                                            <c-orgcheck-extended-datatable
+                                                dont-use-all-space 
+                                                onviewscore={handleViewScore} 
+                                                show-search
+                                                show-statistics
+                                                is-infinite-scrolling
+                                                infinite-scrolling-initial-nb-rows=25
+                                                infinite-scrolling-additional-nb-rows=100
+                                                table={tableData.object.flexiPages}></c-orgcheck-extended-datatable>
+                                            <br /><br />
+                                        </template>
+                                        <template lwc:if={tableData.object.limits.hasData}>
+                                            <a id="limits"></a>
+                                            <h1 class="slds-text-heading_medium">Limits</h1>
+                                            <c-orgcheck-extended-datatable
+                                                dont-use-all-space 
+                                                onviewscore={handleViewScore} 
+                                                show-search
+                                                show-statistics
+                                                is-infinite-scrolling
+                                                infinite-scrolling-initial-nb-rows=25
+                                                infinite-scrolling-additional-nb-rows=100
+                                                table={tableData.object.limits}></c-orgcheck-extended-datatable>
+                                            <br /><br />
+                                        </template>
+                                        <template lwc:if={tableData.object.validationRules.hasData}>
+                                            <a id="validationRules"></a>
+                                            <h1 class="slds-text-heading_medium">Validation Rules</h1>
+                                            <c-orgcheck-extended-datatable
+                                                dont-use-all-space 
+                                                onviewscore={handleViewScore} 
+                                                show-search
+                                                show-statistics
+                                                is-infinite-scrolling
+                                                infinite-scrolling-initial-nb-rows=25
+                                                infinite-scrolling-additional-nb-rows=100
+                                                table={tableData.object.validationRules}></c-orgcheck-extended-datatable>
+                                            <br /><br />
+                                        </template>
+                                        <template lwc:if={tableData.object.webLinks.hasData}>
+                                            <a id="webLinks"></a>
+                                            <h1 class="slds-text-heading_medium">Web Links</h1>
+                                            <c-orgcheck-extended-datatable
+                                                dont-use-all-space 
+                                                onviewscore={handleViewScore} 
+                                                show-search
+                                                show-statistics
+                                                is-infinite-scrolling
+                                                infinite-scrolling-initial-nb-rows=25
+                                                infinite-scrolling-additional-nb-rows=100
+                                                table={tableData.object.webLinks}></c-orgcheck-extended-datatable>
+                                            <br /><br />
+                                        </template>
+                                        <template lwc:if={tableData.object.customFields.hasData}>
+                                            <a id="customFields"></a>
+                                            <h1 class="slds-text-heading_medium">Custom Fields</h1>
+                                            <c-orgcheck-extended-datatable
+                                                dont-use-all-space 
+                                                onviewscore={handleViewScore} 
+                                                show-search
+                                                show-statistics
+                                                is-infinite-scrolling
+                                                infinite-scrolling-initial-nb-rows=25
+                                                infinite-scrolling-additional-nb-rows=100
+                                                table={tableData.object.customFields}></c-orgcheck-extended-datatable>
+                                            <br /><br />
+                                        </template>
+                                        <template lwc:if={tableData.object.standardFields.hasData}>
+                                            <a id="standardFields"></a>
+                                            <h1 class="slds-text-heading_medium">Standard Fields</h1>
+                                            <c-orgcheck-extended-datatable
+                                                dont-use-all-space 
+                                                onviewscore={handleViewScore} 
+                                                show-search
+                                                show-statistics
+                                                is-infinite-scrolling
+                                                infinite-scrolling-initial-nb-rows=25
+                                                infinite-scrolling-additional-nb-rows=100
+                                                table={tableData.object.standardFields}></c-orgcheck-extended-datatable>
+                                            <br /><br />
+                                        </template>
+                                        <template lwc:if={tableData.object.recordTypes.hasData}>
+                                            <a id="recordTypes"></a>
+                                            <h1 class="slds-text-heading_medium">Record Types</h1>
+                                            <c-orgcheck-extended-datatable
+                                                dont-use-all-space 
+                                                onviewscore={handleViewScore} 
+                                                show-search
+                                                show-statistics
+                                                is-infinite-scrolling
+                                                infinite-scrolling-initial-nb-rows=25
+                                                infinite-scrolling-additional-nb-rows=100
+                                                table={tableData.object.recordTypes}></c-orgcheck-extended-datatable>
+                                            <br /><br />
+                                        </template>
+                                        <template lwc:if={tableData.object.relationships.hasData}>
+                                            <a id="relationships"></a>
+                                            <h1 class="slds-text-heading_medium">Relationships</h1>
+                                            <c-orgcheck-extended-datatable
+                                                dont-use-all-space 
+                                                onviewscore={handleViewScore} 
+                                                show-search
+                                                show-statistics
+                                                is-infinite-scrolling
+                                                infinite-scrolling-initial-nb-rows=25
+                                                infinite-scrolling-additional-nb-rows=100
+                                                table={tableData.object.relationships}></c-orgcheck-extended-datatable>
+                                            <br /><br />
+                                        </template>
+                                    </template>                        
+                                </template>
+                                <template lwc:else>
+                                    There is no specific object set in the global filter above. <br />
+                                    <br />
+                                    Please set the <b>SObject</b> value in the global filter and hit <b>☑️</b> button to see something here.<br />
+                                    <br />
+                                    Thank you!
+                                </template>
+                            </div>
+                            <div data-key="07" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no object to show." 
+                                    show-search 
+                                    show-statistics 
+                                    onviewscore={handleViewScore} 
+                                    is-sticky-headers 
+                                    is-infinite-scrolling 
+                                    infinite-scrolling-initial-nb-rows=25 
+                                    infinite-scrolling-additional-nb-rows=100 
+                                    table={tableData.objects} 
+                                    show-export-button 
+                                    export-source={exports.objects}
+                                    export-basename="Objects"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="08" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no custom field to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.customfields}
+                                    show-export-button  
+                                    export-source={exports.customfields} 
+                                    export-basename="CustomFields"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="09" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no page layouts to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.pagelayouts}
+                                    show-export-button  
+                                    export-source={exports.pagelayouts} 
+                                    export-basename="PageLayouts"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="0A" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no validation rule to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.validationrules}
+                                    show-export-button  
+                                    export-source={exports.validationrules} 
+                                    export-basename="ValidationRules"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="0B" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no record type to show" show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.recordtypes}
+                                    show-export-button  
+                                    export-source={exports.recordtypes} 
+                                    export-basename="RecordTypes"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="0C" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no web links to show" show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.weblinks}
+                                    show-export-button  
+                                    export-source={exports.weblinks} 
+                                    export-basename="WebLinks"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="0D" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no active internal user to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.internalactiveusers}
+                                    show-export-button  
+                                    export-source={exports.internalactiveusers} 
+                                    export-basename="Users"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="0E" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no profile to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.profiles}
+                                    show-export-button  
+                                    export-source={exports.profiles} 
+                                    export-basename="Profiles"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="0F" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no permission to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.permissionsets}
+                                    show-export-button  
+                                    export-source={exports.permissionsets} 
+                                    export-basename="PermissionSets"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="10" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no permission to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.permissionsetlicenses}
+                                    show-export-button  
+                                    export-source={exports.permissionsetlicenses} 
+                                    export-basename="PermissionSetLicenses"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="11" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no profile restriction to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.profilerestrictions}
+                                    show-export-button  
+                                    export-source={exports.profilerestrictions} 
+                                    export-basename="ProfileRestrictions"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="12" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no profile password policy to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.profilepasswordpolicies}
+                                    show-export-button  
+                                    export-source={exports.profilepasswordpolicies} 
+                                    export-basename="ProfilePasswordPolicies"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="13" class="slds-hide slds-var-p-horizontal_small">
+                                <div style="text-align: right;">
+                                    <b>Legend:</b> C means <i>Create</i>, R means <i>Read</i>, U means <i>Update/Modify</i>, D means <i>Delete</i>, v means <i>View All</i> and m means <i>Modify All</i>.
+                                </div>
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no object permission to show."
+                                    show-search 
+                                    show-statistics 
+                                    is-sticky-headers 
+                                    is-infinite-scrolling 
+                                    infinite-scrolling-initial-nb-rows=25 
+                                    infinite-scrolling-additional-nb-rows=100 
+                                    table={tableData.objectpermissions}
+                                    show-export-button  
+                                    export-source={exports.objectpermissions} 
+                                    export-basename="ObjectPermissions"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="14" class="slds-hide slds-var-p-horizontal_small">
+                                <template lwc:if={isObjectSpecified}>
+                                    <h1 class="slds-text-heading_large">{object}</h1>
+                                    <br /><br />
+                                    <div style="text-align: right;">
+                                        <b>Legend:</b> R means <i>field can be read</i>, U means <i>field can be updated</i>.
+                                    </div>
+                                    <c-orgcheck-extended-datatable 
+                                    empty-message="There is no field permission to show."
+                                    show-search 
+                                    show-statistics 
+                                    is-sticky-headers 
+                                    is-infinite-scrolling 
+                                    infinite-scrolling-initial-nb-rows=25 
+                                    infinite-scrolling-additional-nb-rows=100 
+                                    table={tableData.fieldpermissions}
+                                    show-export-button  
+                                    export-source={exports.fieldpermissions} 
+                                    export-basename="FieldPermissions"></c-orgcheck-extended-datatable>
+                                </template>
+                                <template lwc:else>
+                                    There is no specific object set in the global filter above. <br />
+                                    <br />
+                                    Please set the <b>SObject</b> value in the global filter and hit <b>'Apply'</b> button to see something here.<br />
+                                    <br />
+                                    Thank you!
+                                </template>
+                            </div>
+                            <div data-key="15" class="slds-hide slds-var-p-horizontal_small">
+                                <div style="text-align: right;">
+                                    <b>Legend:</b> A means <i>Accessible</i> and V means <i>Visible</i>.
+                                </div>
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no application permission to show."
+                                    show-search show-statistics 
+                                    is-sticky-headers 
+                                    is-infinite-scrolling 
+                                    infinite-scrolling-initial-nb-rows=25 
+                                    infinite-scrolling-additional-nb-rows=100 
+                                    table={tableData.apppermissions}
+                                    show-export-button  
+                                    export-source={exports.apppermissions} 
+                                    export-basename="AppPermissions"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="16" class="slds-hide slds-var-p-horizontal_small">
+                                If you are interested in the login history details, please go to <a href="/lightning/setup/OrgLoginHistory/home" target="_blank" rel="external noopener noreferrer">the Login History setup page</a> where you can download the last six months of login history (including user information and the browser that was used).<br /><br />
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no browser to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.browsers}
+                                    show-export-button  
+                                    export-source={exports.browsers} 
+                                    export-basename="Browsers"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="17" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-graphics 
+                                    type="hierarchy" 
+                                    name="Internal Role Hierarchy" 
+                                    hierarchy-box-color-legend={roleBoxColorsLegend} 
+                                    hierarchy-box-color-decorator={roleBoxColorsDecorator} 
+                                    hierarchy-box-inner-html-decorator={roleBoxInnerHtmlDecorator} 
+                                    hierarchy-box-on-click-decorator={roleBoxOnClickDecorator} 
+                                    hierarchy-show-level 
+                                    source={tableData.userrolestree}></c-orgcheck-graphics>
+                            </div>
+                            <div data-key="18" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no role to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.userroles}
+                                    show-export-button  
+                                    export-source={exports.userroles} 
+                                    export-basename="Roles"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="19" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no public group to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.publicgroups}
+                                    show-export-button  
+                                    export-source={exports.publicgroups} 
+                                    export-basename="PublicGroups"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="1A" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no queue to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.queues}
+                                    show-export-button  
+                                    export-source={exports.queues} 
+                                    export-basename="Queues"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="1B" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no chatter group to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.chatterroups}
+                                    show-export-button  
+                                    export-source={exports.chatterroups} 
+                                    export-basename="ChatterGroups"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="1C" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no flow to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.flows}
+                                    show-export-button  
+                                    export-source={exports.flows} 
+                                    export-basename="Flows"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="1D" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no process builder to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.processbuilders}
+                                    show-export-button  
+                                    export-source={exports.processbuilders} 
+                                    export-basename="ProcessBuilders"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="1E" class="slds-hide slds-var-p-horizontal_small">
+                                Salesforce provides a <a href="/lightning/setup/MigrateToFlowTool/home" target="_blank" rel="external noopener noreferrer">migration tool</a> for your workflows<br /><br />
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no workflow to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.workflows}
+                                    show-export-button  
+                                    export-source={exports.workflows} 
+                                    export-basename="Workflows"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="1F" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no custom label to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.customlabels}
+                                    show-export-button  
+                                    export-source={exports.customlabels} 
+                                    export-basename="CustomLabels"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="20" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no document to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.documents}
+                                    show-export-button  
+                                    export-source={exports.documents} 
+                                    export-basename="Documents"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="21" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no email template to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.emailtemplates}
+                                    show-export-button  
+                                    export-source={exports.emailtemplates} 
+                                    export-basename="EmailTemplates"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="22" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no knowledge article to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.knowledgearticles}
+                                    show-export-button  
+                                    export-source={exports.knowledgearticles} 
+                                    export-basename="KnowledgeArticles"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="23" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no static resource to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.staticresources}
+                                    show-export-button  
+                                    export-source={exports.staticresources} 
+                                    export-basename="StaticResources"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="24" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no visual force page to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.visualforcepages}
+                                    show-export-button  
+                                    export-source={exports.visualforcepages} 
+                                    export-basename="VisualForcePages"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="25" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no visual force component to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.visualforcecomponents}
+                                    show-export-button  
+                                    export-source={exports.visualforcecomponents} 
+                                    export-basename="VisualForceComponents"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="26" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no Lightning Page to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.lightningpages}
+                                    show-export-button  
+                                    export-source={exports.lightningpages} 
+                                    export-basename="LightningPages"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="27" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no Lightning Aura Component to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.lightningauracomponents}
+                                    show-export-button  
+                                    export-source={exports.lightningauracomponents} 
+                                    export-basename="LightningAuraComponents"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="28" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no Lightning Web Component to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.lightningwebcomponents}
+                                    show-export-button  
+                                    export-source={exports.lightningwebcomponents} 
+                                    export-basename="LightningWebComponents"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="29" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no Home Page Component to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.homepages}
+                                    show-export-button  
+                                    export-source={exports.homepages} 
+                                    export-basename="HomePageComponents"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="2A" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no Custom Tab to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.customtabs}
+                                    show-export-button  
+                                    export-source={exports.customtabs} 
+                                    export-basename="CustomTabs"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="2B" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no Apex Class to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.apexclasses}
+                                    show-export-button  
+                                    export-source={exports.apexclasses} 
+                                    export-basename="ApexClasses"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="2C" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no Apex Uncompiled Class to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.apexuncompiled}
+                                    show-export-button  
+                                    export-source={exports.apexuncompiled} 
+                                    export-basename="ApexClassesNeedCompilation">
+                                        <template lwc:if={tableData.apexuncompiled}>
+                                            <li class="slds-button-group-item">
+                                                <lightning-button 
+                                                    label="Recompile" 
+                                                    title="Recompile"
+                                                    variant="border-filled" 
+                                                    class="slds-var-m-left_x-small" 
+                                                    icon-name="utility:tour_check" 
+                                                    onclick={handleClickRecompile}></lightning-button>                    
+                                            </li>
+                                        </template>
+                                </c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="2D" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no Apex Trigger to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.apextriggers}
+                                    show-export-button  
+                                    export-source={exports.apextriggers} 
+                                    export-basename="ApexTriggers"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="2E" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no Apex Unit Test to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.apextests}
+                                    show-export-button  
+                                    export-source={exports.apextests} 
+                                    export-basename="ApexUnitTests"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="2F" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no Report to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.reports}
+                                    show-export-button  
+                                    export-source={exports.reports} 
+                                    export-basename="Reports"></c-orgcheck-extended-datatable>
+                            </div>
+                            <div data-key="30" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no Dashboard to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.dashboards}
+                                    show-export-button  
+                                    export-source={exports.dashboards} 
+                                    export-basename="Dashboards"></c-orgcheck-extended-datatable>
+                            </div>
+                        </div>
+                    </lightning-card>
+                </lightning-layout-item>
+            </lightning-layout>
+        </div>
+    </div>
+</template>

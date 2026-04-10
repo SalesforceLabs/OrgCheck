@@ -1,0 +1,41 @@
+{
+    "name": "@orgcheck/api",
+    "version": "8.0.0",
+    "license": "MIT",
+    "private": false,
+    "devDependencies": {
+        "@babel/preset-env": "^7.29.0",
+        "@eslint/js": "^10.0.1",
+        "@jest/globals": "^30.2.0",
+        "@rollup/plugin-commonjs": "^29.0.0",
+        "@rollup/plugin-node-resolve": "^16.0.3",
+        "@rollup/plugin-terser": "^1.0.0",
+        "@rollup/plugin-typescript": "^12.3.0",
+        "@types/jest": "^30.0.0",
+        "babel-jest": "^30.2.0",
+        "eslint": "^10.0.0",
+        "fflate": "^0.8.2",
+        "jest": "^30.2.0",
+        "rollup": "^4.57.1",
+        "rollup-plugin-dts": "^6.3.0",
+        "rollup-plugin-typescript2": "^0.37.0",
+        "ts-jest": "^29.4.6",
+        "tslib": "^2.8.1",
+        "typescript": "^6.0.2",
+        "typescript-eslint": "^8.56.0"
+    },
+    "scripts": {
+        "lint": "eslint",
+        "scan": "sf code-analyzer run --target ./src --output-file /tmp/orgcheck-api-scan.html; open /tmp/orgcheck-api-scan.html",
+        "test": "jest \".*unit.*\" ",
+        "build": "rollup -c rollup.config.mjs && yarn jest \".*bundled.*\" "
+    },
+    "main": "./dist/orgcheck.js",
+    "types": "./dist/orgcheck.d.ts",
+    "files": [ "dist" ],
+    "dependencies": {
+        "fflate": "^0.8.2",
+        "jsforce": "^3.10.14",
+        "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+    }
+}

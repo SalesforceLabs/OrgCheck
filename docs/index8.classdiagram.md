@@ -11,58 +11,68 @@ mermaid: true
 
 ```mermaid
 classDiagram
+ApiSetup --> LoggerSetup : logSettings
+ApiSetup --> SalesforceManagerSetup : salesforce
+ApiSetup --> StorageSetup : storage
+
 API *-- RecipeManagerIntf : composition
 API *-- DatasetManagerIntf : composition
 API *-- SalesforceManagerIntf : composition
 API *-- DataCacheManagerIntf : composition
 API *-- LoggerIntf : composition
+
+Logger --|> LoggerIntf : implements
+SalesforceManager --|> SalesforceManagerIntf : implements
+DatasetManager --|> DatasetManagerIntf : implements
+RecipeManager --|> RecipeManagerIntf : implements
+
 DataCacheManager --|> DataCacheManagerIntf : implements
-DataCacheManagerIntf --> DataCacheItem : uses
+DataCacheManagerIntf --> CacheItem : uses
 Compressor --|> CompressorIntf : implements
+Storage --|> StorageIntf : implements
 DataCacheManagerIntf --> CompressorIntf : uses
 DataCacheManagerIntf --> StorageIntf : uses
+
 DataWithDependencies --|> Data : implements
 DataFactory --|> DataFactoryIntf : implements
 DataFactoryInstance --|> DataFactoryInstanceIntf : implements
-DatasetManager --|> DatasetManagerIntf : implements
-Logger --|> LoggerIntf : implements
-LoggerIntf --|> BasicLoggerIntf : implements
-RecipeManager --|> RecipeManagerIntf : implements
-SalesforceManager --|> SalesforceManagerIntf : implements
 SalesforceError --|> Error : implements
-Storage --|> StorageIntf : implements
 ```
 
 ## Starting point: the API class!
 
-The starting point in the Org Check api is the `API` class (how original!) located in the 
-file build/src/api/orgcheck-api.js
+The starting point in the Org Check API is the `API` class (in `packages/orgcheck-api/src/api/orgcheck-api-impl.ts`), 
+built and exported as `packages/orgcheck-api/dist/orgcheck.js`.
 
 ### Diagram of the API class
 
 ```mermaid
 classDiagram
     class API {
-        +version() string
-        +salesforceApiVersion() number
-        +removeAllFromCache()
-        +getCacheInformation() Array~DataCacheItem~
-        +getCacheData(string itemName) any
-        +getAllScoreRulesAsDataMatrix() DataMatrix
-        +dailyApiRequestLimitInformation() SalesforceUsageInformation
-        +runAllTestsAsync() string
-        +compileClasses(Array~string~ apexClassIds) Map~string, any~
-        +getOrganizationInformation() SFDC_Organization
-        +checkUsageTerms() boolean
+        +version string
+        +salesforceApiVersion number
+        +orgId string
+        +clearCache() void
+        +listCacheItems() Array~CacheItem~
+        +getCacheItem(string itemName) any
+        +dailyApiRequestLimitInformation SalesforceUsageInformationIntf
+        +getOrganizationInformation() Promise~SfdcOrganization~
+        +checkCurrentUserPermissions() Promise~boolean~
+        +runAllTestsAsync() Promise~string~
+        +compileClasses(Array~string~ apexClassIds) Promise~Map~
+        +checkUsageTerms() Promise~boolean~
         +wereUsageTermsAcceptedManually() boolean
-        +acceptUsageTermsManually()
-        +checkCurrentUserPermissions() boolean
-        +getPackages() Array~SFDC_Package~
-        +removeAllPackagesFromCache()
-        +getPageLayouts(string namespace, string sobjectType, string sobject) Array~SFDC_PageLayout~
-        +removeAllPageLayoutsFromCache()
-        +get...()
-        +removeAll...FromCache()
+        +acceptUsageTermsManually() void
+        +getPackages() Promise~Array~SfdcPackage~~
+        +getObjectTypes() Promise~Array~SfdcObjectType~~
+        +getObjects(string namespace, string sobjectType) Promise~Array~SfdcObject~~
+        +getRolesAsTree() Promise~SfdcUserRole~
+        +cachestampData(alias, namespace, sobjectType, sobject) string
+        +prepareData(alias, namespace, sobjectType, sobject) Promise~Data|Data[]|DataMatrixIntf|Map|Stats[]~
+        +serveData(alias, mixture) Promise~Table|SfdcObjectAsTable|Table[]~
+        +exportData(alias, plate) Promise~ExportedTable|ExportedTable[]~
+        +titlesForAllData() Map~RecipeAliases, string~
+        +cleanData(alias, namespace, sobjectType, sobject) void
     }
 
 API *-- RecipeManagerIntf : composition
@@ -76,33 +86,37 @@ API *-- LoggerIntf : composition
 
 To create an instance of the Org Check API you would do:
 ```
-const api = new API({
+const api = ApiFactory.create({
     salesforce: {
-        authentication: { accessToken: '........' },
-        connection: { useJsForce: true }
+        authenticationOptions: { accessToken: '........' },
+        connection: connection  // optional: jsforce Connection instance
     },
     storage: { 
-        localImpl: this.localStorage,
-        compression: { useFflate: true },
-        encoding: { useFflate: true }
+        setItem: (key, value) => { ... },
+        getItem: (key) => { ... },
+        removeItem: (key) => { ... },
+        key: (n) => { ... },
+        length: () => { ... }
     },
     logSettings: {
-        isConsoleFallback: () => { return true; },
-        log: (section, message) => { ... },
-        ended: (section, message) => { ... },
-        failed: (section, error) => { ... }
+        started: (operationName) => { ... },
+        messageLogged: (operationName, message) => { ... },
+        endedWithError: (operationName, error) => { ... },
+        endedSuccessfully: (operationName, message) => { ... },
+        stopped: (operationName) => { ... }
     }
 });
 ```
 
-At this point we get only an access token to connect to a Salesforce org. We are actively working 
-on implementing the authentication with a connected app/external app approach.
+The `salesforce` setup accepts either `authenticationOptions` (with `accessToken`) or a `connection` 
+(jsforce Connection instance) to connect to a Salesforce org.
 
-The api will store as much as it can in a local storage. As of now the implementation that is used 
-is the one from the browser. Using the third party fflate help us reducing the size of the data 
-being stored. Note: it does not encrypt the data!
+The `storage` setup provides key-value persistence with `setItem`, `getItem`, `removeItem`, `key`, and 
+`length`. The browser app uses `localStorage`; the fflate library is used for compression when storing 
+data. Note: it does not encrypt the data!
 
-Finally, the api will use a set of methods to notify the user about how is the process going. 
+The `logSettings` setup provides callbacks for progress tracking: `started`, `messageLogged`, 
+`endedWithError`, `endedSuccessfully`, and `stopped`. 
 
 Once initialiazed, and before processing further, you should check if the terms of conditions are 
 auto-approved (non production environment) or need to be approved manually (production environment) 
@@ -111,62 +125,23 @@ the term by calling api.acceptUsageTermsManually().
 
 ### Retrieve data from the org via the API class
 
-Multiple methods are accessible to retrieve data from the org that is scored by Org Check. 
-This data is a result of the Recipe process discussed later.
-All these methods are `async`.
+The current API exposes a generic data pipeline. You choose a `RecipeAliases` value, then:
+- use `prepareData(...)` to load and score data,
+- use `serveData(...)` to format data as UI tables,
+- use `exportData(...)` to format export payloads.
+
+Most retrieval/processing methods are `async`.
 
 ```mermaid
 classDiagram
     class API {
-        +getOrganizationInformation() SFDC_Organization
-        +getPackages() Array~SFDC_Package~
-        +getPageLayouts(namespace, sobjectType, sobject) Array~SFDC_PageLayout~
-        +getObjectTypes() Array~SFDC_ObjectType~
-        +getObjects(namespace, sobjectType) Array~SFDC_Object~
-        +getObject(sobject) SFDC_Object
-        +getObjectPermissionsPerParent(namespace) DataMatrix
-        +getApplicationPermissionsPerParent(namespace) DataMatrix
-        +getKnowledgeArticles() Array~SFDC_KnowledgeArticle~
-        +getChatterGroups() Array~SFDC_CollaborationGroup~
-        +getCustomFields(namespace, sobjectType, sobject) Array~SFDC_Fiel~
-        +getPermissionSets(namespace) Array~SFDC_PermissionSet~
-        +getPermissionSetLicenses() Array~SFDC_PermissionSetLicense~
-        +getProfiles(namespace) Array~SFDC_Profile~
-        +getProfileRestrictions(namespace) Array~SFDC_ProfileRestrictions~
-        +getProfilePasswordPolicies() Array~SFDC_ProfilePasswordPolicy~
-        +getActiveUsers() Array~SFDC_User~
-        +getBrowsers() Array~SFDC_Browser~
-        +getCustomLabels(namespace) Array~SFDC_CustomLabel~
-        +getCustomTabs(namespace) Array~SFDC_CustomTab~
-        +getDocuments(namespace) Array~SFDC_Document~
-        +getLightningWebComponents(namespace) Array~SFDC_LightningWebComponent~
-        +getLightningAuraComponents(namespace) Array~SFDC_LightningAuraComponent~
-        +getLightningPages(namespace) Array~SFDC_LightningPage~
-        +getVisualForceComponents(namespace) Array~SFDC_VisualForceComponent~
-        +getVisualForcePages(namespace) Array~SFDC_VisualForcePage~
-        +getPublicGroups() Array~SFDC_Group~
-        +getQueues() Array~SFDC_Group~
-        +getApexClasses(namespace) Array~SFDC_ApexClass~
-        +getApexTests(namespace) Array~SFDC_ApexClass~
-        +getApexUncompiled(namespace) Array~SFDC_ApexClass~
-        +getApexTriggers(namespace) Array~SFDC_ApexTrigger~
-        +getRoles() Array~SFDC_UserRole~
-        +getRolesTree() SFDC_UserRole
-        +getStaticResources(namespace) Array~SFDC_StaticResource~
-        +getWeblinks(namespace, sobjectType, sobject) Array~SFDC_WebLink~
-        +getWorkflows() Array~SFDC_Workflow~
-        +getRecordTypes(namespace, sobjectType, sobject) Array~SFDC_RecordType~
-        +getFieldPermissionsPerParent(sobject, namespace) DataMatrix
-        +getFlows() Array~SFDC_Flow~
-        +getEmailTemplates(namespace) Array~SFDC_EmailTemplate~
-        +getHomePageComponents() Array~SFDC_HomePageComponent~
-        +getProcessBuilders() Array~SFDC_Flow~
-        +getValidationRules(namespace, sobjectType, sobject) Array~SFDC_ValidationRule~
-        +getDashboards() Array~SFDC_Dashboard~
-        +getReports() Array~SFDC_Report~
-        +getGlobalView() Map~string, DataCollectionStatistics~
-        +getHardcodedURLsView() Map~string, DataCollectionStatistics~
-}
+        +prepareData(alias, namespace, sobjectType, sobject) Promise~Mixture~
+        +serveData(alias, mixture) Promise~Plate~
+        +exportData(alias, plate) Promise~Go~
+        +cachestampData(alias, namespace, sobjectType, sobject) string
+        +cleanData(alias, namespace, sobjectType, sobject) void
+        +titlesForAllData() Map~RecipeAliases, string~
+    }
 ```
 
 ## Recipes
@@ -186,9 +161,9 @@ The `Recipe` is not the place to calculate or modify the score of the data, this
 A `Dataset` can be defined as a data retriever.
 
 Most of the time, the dataset will use the salesforce manager to read information from the org (SOQL, 
-SOSL, Tooling, Describe, etc.) and then will map that data into the corresponding `SFDC_*` object.
+SOSL, Tooling, Describe, etc.) and then will map that data into the corresponding `Sfdc*` object.
 
-Data factories are used to create the `SFDC_*` objects and also to compute the objects' scores.
+Data factories are used to create the `Sfdc*` objects and also to compute the objects' scores.
 
 Scores are calculated based on the `SecretSauce` class.
 

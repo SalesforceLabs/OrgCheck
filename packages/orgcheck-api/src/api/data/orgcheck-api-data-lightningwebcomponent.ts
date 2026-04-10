@@ -1,0 +1,50 @@
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
+import { DataWithScoreAndDependencies } from 'src/api/core/data/orgcheck-api-data';
+
+/**
+ * @description Representation of a Lightning Web Component in Org Check
+ */
+export interface SfdcLightningWebComponent extends DataWithScoreAndDependencies {
+    
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
+     * @public
+     */
+    dataType: DataAliases.SfdcLightningWebComponent;
+    
+    /**
+     * @description API Version (as a number) set in the metadata for this item.
+     * @type {number}
+     * @public
+     */
+    apiVersion: number;
+    
+    /**
+     * @description Name of the potential namespace/package where this item comes from. Empty string if none.
+     * @type {string}
+     * @public
+     */
+    package: string;
+    
+    /**
+     * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    createdDate: number;
+    
+    /**
+     * @description Date/Time when this item was last modified in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    lastModifiedDate: number;
+
+    /**
+     * @description Full description of that item
+     * @type {string}
+     * @public
+     */
+    description: string;
+}

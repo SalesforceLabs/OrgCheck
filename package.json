@@ -1,62 +1,27 @@
 {
-  "name": "orgcheck",
-  "version": "Nitrogen",
-  "description": "Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt.",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs"
-  },
-  "scripts": {
-    "lint:api": "eslint build/src/api",
-    "lint:ui": "eslint build/src/ui",
-    "lint:lwc": "eslint force-app/main/default/lwc",
-    "lint:test": "eslint build/test",
-    "build:js": "rollup --config && rollup --config",
-    "build:lwc:app": "sf project deploy start --metadata LightningComponentBundle:orgcheckApp",
-    "build:lwc:all": "sf project deploy start --metadata LightningComponentBundle",
-    "build:sr": "node ./build/build-static-resource.js",
-    "scan:api": "sf code-analyzer run --target ./build/src/api --output-file /tmp/orgcheck-api-scan.html; open /tmp/orgcheck-api-scan.html",
-    "scan:ui": "sf code-analyzer run --target ./build/src/ui --output-file /tmp/orgcheck-ui-scan.html; open /tmp/orgcheck-ui-scan.html",
-    "scan:lwc": "sf code-analyzer run --target './force-app/main/default/lwc/*/*.js' --output-file /tmp/orgcheck-lwc-scan.html; open /tmp/orgcheck-lwc-scan.html",
-    "scan:securityreview": "sf code-analyzer run --rule-selector AppExchange --rule-selector Recommended:Security --output-file /tmp/orgcheck-security-scan.html; open /tmp/orgcheck-security-scan.html",
-    "sf:open": "sf force org open",
-    "sf:clean": "sf project deploy start --metadata-dir manifest/destructive",
-    "git:clean": "git remote update origin --prune; git branch -vv | grep 'gone]' | awk '{print $1}' | xargs git branch -D ",
-    "test:coverage": "sfdx-lwc-jest --coverage",
-    "test:unit": "sfdx-lwc-jest",
-    "test:unit:debug": "sfdx-lwc-jest --debug",
-    "test:unit:watch": "sfdx-lwc-jest --watch",
-    "sanity:check": "yarn lint:api && yarn lint:ui && yarn lint:lwc && yarn test:unit && yarn scan:api && yarn scan:ui && yarn scan:lwc"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/SalesforceLabs/OrgCheck.git"
-  },
-  "author": "Vincent FINET",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/SalesforceLabs/OrgCheck/issues"
-  },
-  "homepage": "https://sfdc.co/OrgCheck",
-  "devDependencies": {
-    "@lwc/eslint-plugin-lwc": "^3.4.0",
-    "@rollup/plugin-terser": "^1.0.0",
-    "@sa11y/jest": "^8.0.27",
-    "@salesforce/eslint-config-lwc": "^4.1.2",
-    "@salesforce/eslint-plugin-lightning": "^2.0.0",
-    "@salesforce/sfdx-lwc-jest": "^7.0.1",
-    "baseline-browser-mapping": "^2.10.10",
-    "eslint": "^9.24.0",
-    "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-jest": "^29.15.0",
-    "eslint-plugin-jsdoc": "^62.8.0",
-    "fflate": "^0.8.2",
-    "glob": "^13.0.6",
-    "jest": "^30.3.0",
-    "js-yaml": "^4.1.1",
-    "rollup": "^4.60.0",
-    "rollup-plugin-copy": "^3.5.0",
-    "rollup-plugin-delete": "^3.0.2",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
-  }
+    "name": "orgcheck",
+    "resolutions": {
+        "@typescript-eslint/parser": "^8.57.2",
+        "@typescript-eslint/scope-manager": "^8.57.2",
+        "@typescript-eslint/eslint-plugin": "^8.57.2"
+    },
+    "description": "Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt.",
+    "version": "8.0.0",
+    "author": "VinceFINET",
+    "bugs": "https://github.com/SalesforceLabs/OrgCheck/issues",
+    "homepage": "https://github.com/SalesforceLabs/OrgCheck",
+    "license": "MIT",
+    "private": true,
+    "workspaces": [
+        "packages/*"
+    ],
+    "devDependencies": {
+        "eslint-config-prettier": "^9.1.0",
+        "lerna": "^9.0.7"
+    },
+    "dependencies": {
+        "@typescript-eslint/eslint-plugin": "^8.57.2",
+        "@typescript-eslint/parser": "^8.57.2",
+        "@typescript-eslint/scope-manager": "^8.57.2"
+    }
 }

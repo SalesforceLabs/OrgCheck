@@ -1,0 +1,76 @@
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
+import { DataWithScore } from 'src/api/core/data/orgcheck-api-data';
+import { SfdcObject } from 'src/api/data/orgcheck-api-data-object';
+
+export interface SfdcValidationRule extends DataWithScore {
+    
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
+     * @public
+     */
+    dataType: DataAliases.SfdcValidationRule;
+    
+    /**
+     * @description Is this item active or not?
+     * @type {boolean}
+     * @public
+     */
+    isActive: boolean;
+    
+    /**
+     * @description Full description of that item
+     * @type {string}
+     * @public
+     */
+    description: string;
+
+    /**
+     * @description Field where to show the error message if any
+     * @type {string}
+     * @public
+     */
+    errorDisplayField: string;
+
+    /**
+     * @description Error message
+     * @type {string}
+     * @public
+     */
+    errorMessage: string;
+    
+    /**
+     * @description Salesforce Id of the sObject where this field is defined
+     * @type {string}
+     * @public
+     */
+    objectId: string; 
+
+    /**
+     * @description Reference of the object for this rule
+     * @type {SfdcObject}
+     * @public
+     */
+    objectRef: SfdcObject;
+
+    /**
+     * @description Name of the potential namespace/package where this item comes from. Empty string if none.
+     * @type {string}
+     * @public
+     */
+    package: string;
+
+    /**
+     * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    createdDate: number;
+    
+    /**
+     * @description Date/Time when this item was last modified in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    lastModifiedDate: number;
+}

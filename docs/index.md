@@ -54,6 +54,19 @@ You will need org Check to verify some things in your organisation like:
 - Any issues installing the application? Please, visit our [FAQ](faq)!
 
 
+## Can I run Org Check from CLI?
+
+Yes. Since release v8, Org Check also ships a Salesforce CLI plugin package named `@orgcheck/sfdx-plugin`.
+
+- This plugin runs checks directly from the command line using the same API engine.
+- Current commands include:
+  - `sf check apex-classes`
+  - `sf check hardcoded-urls`
+  - `sf check global-view`
+- Output can be exported as `.csv`, `.json`, or `.xlsx`.
+- In production orgs, usage terms may require explicit acceptance using the command flag `--accept-the-terms`.
+
+
 ## How to get help and support?
 - Join us on the Trailblazer Community at: [sfdc.co/OrgCheck-Community](https://sfdc.co/OrgCheck-Community)
 - Join us on LinkedIn at: [@OrgCheckSFDC](https://www.linkedin.com/company/orgchecksfdc)

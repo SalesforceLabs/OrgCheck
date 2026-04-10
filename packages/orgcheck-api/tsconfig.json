@@ -1,0 +1,30 @@
+{
+    "compilerOptions": {
+        "allowSyntheticDefaultImports": true,
+        "module": "ESNext",
+        "noImplicitAny": false, // to switch to true asap
+        "noImplicitReturns": true,
+        "noUnusedLocals": true,
+        "pretty": true,
+        "target": "es2015",
+        "esModuleInterop": true,
+        "strictNullChecks": true,
+        "strictPropertyInitialization": true,
+        "useUnknownInCatchVariables": false,
+        "lib": [
+            "ES2021",
+            "DOM"
+        ],
+        "paths": {
+            "tslib" :   [ "./node_modules/tslib/tslib.d.ts" ],
+            "src/*":    [ "./src/*" ],
+            "tests/*":  [ "./tests/*" ]
+        }
+    },
+    "include": [
+        "src/**/*.ts"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}

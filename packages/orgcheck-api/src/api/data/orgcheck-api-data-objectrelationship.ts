@@ -1,0 +1,40 @@
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
+import { DataWithoutScore } from 'src/api/core/data/orgcheck-api-data';
+
+export interface SfdcObjectRelationShip extends DataWithoutScore {
+    
+    /**
+     * @description Identifier of what this interface represents
+     * @type {DataAliases}
+     * @public
+     */
+    dataType: DataAliases.SfdcObjectRelationShip;
+    
+    /**
+     * @description Child object
+     * @type {string}
+     * @public
+     */
+    childObject: string;
+
+    /**
+     * @description Field that support the lookup in the parent object
+     * @type {string}
+     * @public
+     */
+    fieldName: string;
+
+    /**
+     * @description Is cascade delete enabled?
+     * @type {boolean}
+     * @public
+     */
+    isCascadeDelete: boolean;
+
+    /**
+     * @description Is restricted delete enabled?
+     * @type {boolean}
+     * @public
+     */
+    isRestrictedDelete: boolean;
+}

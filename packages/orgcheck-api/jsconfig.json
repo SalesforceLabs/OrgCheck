@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es2015",
+        "paths": {
+            "src/*":    [ "./src/*" ],
+            "tests/*":  [ "./tests/*" ],
+            "dist/*":   [ "./dist/*" ]
+        }
+    },
+    "include": [
+        "src/**/*.js",
+        "tests/**/*.js"
+, "src/ui/tabledefinitions/tableDefinitions.ts", "tests/unit/orgcheck-api.test.ts"    ],
+    "exclude": [
+        "node_modules"
+    ]
+}

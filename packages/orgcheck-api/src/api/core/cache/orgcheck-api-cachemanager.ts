@@ -1,0 +1,80 @@
+import { CacheItem } from 'src/api/data/orgcheck-api-data-cacheitem';
+
+/**
+ * @description Global information stored in cache (both for data and metdata!)
+ */ 
+export interface ItemInCache {
+
+    /** 
+     * @type {number}
+     */
+    created: number;
+}
+
+/**
+ * @description Data information stored in cache (not the metadata!)
+ */ 
+export interface DataItemInCache extends ItemInCache {
+
+    /** 
+     * @type {any[]}
+     */
+    content: any[];
+}
+
+/**
+ * @description Metadata information stored in cache (not the data!)
+ */ 
+export interface MetadataItemInCache extends ItemInCache {
+
+    /** 
+     * @type {string}
+     */
+    type: string;
+
+    /** 
+     * @type {number}
+     */
+    length: number;
+}
+
+/** 
+ * @description Cache Manager interface
+ */
+export interface DataCacheManagerIntf {
+
+    /**
+     * @description Get the entry from the cache
+     * @param {string} key - the key of the entry to get
+     * @returns {any} the value of the entry in the cache
+     * @public
+     */
+    get(key: string): any;
+
+    /**
+     * @description Set an entry into the cache with a given key
+     * @param {string} key - the key of the entry to set
+     * @param {any} value - the value of the entry to set
+     * @public
+     */
+    set(key: string, value: any): void;
+
+    /**
+     * @description Get details of the cache.
+     * @returns {CacheItem[] | undefined} an array of objects that contains the name, the type, the size and the creation date of each entry.
+     */
+    details(): CacheItem[]
+
+    /**
+     * @description Remove an entry of the cache.
+     * @param {string} key - the key of the entry to remove
+     * @public
+     */
+    remove(key: string): void;
+
+    /**
+     * @description Remove all entries in the cache.
+     * @public
+     */
+    clear(): void;
+}

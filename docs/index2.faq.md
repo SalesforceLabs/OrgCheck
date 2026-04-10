@@ -38,6 +38,8 @@ permalink: /faq/
  - Did you install the package for a specific set of profiles and maybe you are not part of these ones? (remember we recommended to install the package for admins only...)
  - Assign your user to the included permission set called "**Org Check Users**"
  - You should see the application definitly!
+ - If not, try to enable the App visibility in Launcher (see Setup > App Menu > Visible in App Launcher)
+
 
 
 ## Question 4: I have the same error on EVERY tabs when the tool is accessing the API: INVALID_SESSION_ID: This session is not valid for use with the REST API 
@@ -80,4 +82,15 @@ For more information, you can check that closed issue: https://github.com/Salesf
 <a href="https://sfdc.co/OrgCheck-InstallToday-SDB"><img src="../assets/pngs/Install-SDBX.png" alt="Installation on sandbox" style="max-width: 300px; min-width: 200px;" width="100%" /></a><br />
 <a href="https://sfdc.co/OrgCheck-InstallToday-DE"><img src="../assets/pngs/Install-DevEdition.png" alt="Installation on dev edition" style="max-width: 300px; min-width: 200px;" width="100%" /></a><br />
 
+
+## Question 8: Can I run Org Check from Salesforce CLI?
+- Yes. Org Check includes an `sf` plugin package named `@orgcheck/sfdx-plugin`.
+- You can install it with:
+  - `sf plugins install @orgcheck/sfdx-plugin`
+- Current commands:
+  - `sf check apex-classes --target-org MyOrg`
+  - `sf check hardcoded-urls --target-org MyOrg`
+  - `sf check global-view --target-org MyOrg`
+- You can export results to files with flags like `--csv-file`, `--json-file`, and `--xlsx-file`.
+- In production orgs, you might need to explicitly accept terms by adding `--accept-the-terms`.
 

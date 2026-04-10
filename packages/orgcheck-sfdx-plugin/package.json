@@ -1,0 +1,81 @@
+{
+  "name": "@orgcheck/sfdx-plugin",
+  "description": "Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt.",
+  "version": "8.0.2",
+  "private": false,
+  "dependencies": {
+    "@oclif/core": "^4",
+    "@orgcheck/api": "8.0.0",
+    "@salesforce/core": "^8.2.7",
+    "@salesforce/sf-plugins-core": "^12",
+    "fflate": "^0.8.2",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@oclif/plugin-command-snapshot": "^5.2.3",
+    "@salesforce/cli-plugins-testkit": "^5.3.20",
+    "@salesforce/dev-scripts": "^11",
+    "@types/jest": "^30.0.0",
+    "eslint": "^10.1.0",
+    "eslint-plugin-sf-plugin": "^1.18.8",
+    "jest": "^30.3.0",
+    "oclif": "^4.23.0",
+    "prettier": "^3.4.2",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "/lib",
+    "/messages",
+    "/oclif.manifest.json"
+  ],
+  "keywords": [
+    "force",
+    "salesforce",
+    "salesforcedx",
+    "sf",
+    "sf-plugin",
+    "sfdx",
+    "sfdx-plugin"
+  ],
+  "license": "MIT",
+  "oclif": {
+    "commands": "./lib/commands",
+    "bin": "sf",
+    "topicSeparator": " ",
+    "devPlugins": [
+      "@oclif/plugin-help"
+    ],
+    "flexibleTaxonomy": true
+  },
+  "scripts": {
+    "lint": "eslint \"src/**/*.ts\" \"tests/**/*.ts\" --color --cache --cache-location .eslintcache --no-error-on-unmatched-pattern",
+    "clean": "rm -rf lib tsconfig.tsbuildinfo && sf-clean all",
+    "compile": "yarn clean && tsc -p tsconfig.json --pretty",
+    "build": "yarn compile && yarn lint && yarn oclif manifest && npm pack --ignore-scripts",
+    "publish": "yarn build && npm publish --access public --ignore-scripts",
+    "docs": "sf-docs",
+    "format": "prettier --write \"+(src|test|schemas)/**/*.+(ts|js|json)|command-snapshot.json\"",
+    "link-check": "node -e \"process.exit(process.env.CI ? 0 : 1)\" || linkinator \"**/*.md\" --skip \"CHANGELOG.md|node_modules|tests/|confluence.internal.salesforce.com|my.salesforce.com|localhost|%s\" --markdown --retry --directory-listing --verbosity error",
+    "postpack": "sf-clean --ignore-signing-artifacts",
+    "prepack": "yarn build && oclif manifest",
+    "test": "yarn test:compile && yarn lint && yarn test:nut",
+    "test:compile": "tsc -p \"./tests\" --pretty",
+    "test:nut": "yarn compile && jest",
+    "test:command-reference": "node --loader ts-node/esm --no-warnings=ExperimentalWarning \"./bin/dev.js\" commandreference:generate --erroronwarnings",
+    "test:deprecation-policy": "yarn compile && node --loader ts-node/esm --no-warnings=ExperimentalWarning \"./bin/dev.js\" snapshot:compare",
+    "test:json-schema": "node --loader ts-node/esm --no-warnings=ExperimentalWarning \"./bin/dev.js\" schema:compare",
+    "version": "oclif readme"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": "./lib/index.js",
+  "type": "module",
+  "author": "Vincent FINET"
+}
