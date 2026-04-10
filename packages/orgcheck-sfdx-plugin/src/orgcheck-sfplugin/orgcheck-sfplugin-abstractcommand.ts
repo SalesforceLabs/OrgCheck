@@ -10,7 +10,7 @@ import { OrgCheckSfPluginStorageSetup } from './orgcheck-sfplugin-storage-setup.
  * @description Import messages directory from meta URL and load them
  */
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('orgcheck-sfdx-plugin', 'global');
+const messages = Messages.loadMessages('@orgcheck/sfdx-plugin', 'global');
 
 /**
  * @description Load third parties

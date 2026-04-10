@@ -2,7 +2,7 @@
     "name": "@orgcheck/api",
     "version": "8.0.0",
     "license": "MIT",
-    "private": true,
+    "private": false,
     "devDependencies": {
         "@babel/preset-env": "^7.29.0",
         "@eslint/js": "^10.0.1",
@@ -32,6 +32,7 @@
     },
     "main": "./dist/orgcheck.js",
     "types": "./dist/orgcheck.d.ts",
+    "files": [ "dist" ],
     "dependencies": {
         "fflate": "^0.8.2",
         "jsforce": "^3.10.14",

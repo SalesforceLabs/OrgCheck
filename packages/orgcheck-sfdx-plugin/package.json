@@ -1,8 +1,8 @@
 {
-  "name": "orgcheck-sfdx-plugin",
+  "name": "@orgcheck/sfdx-plugin",
   "description": "Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt.",
-  "version": "8.0.0",
-  "private": true,
+  "version": "8.0.2",
+  "private": false,
   "dependencies": {
     "@oclif/core": "^4",
     "@orgcheck/api": "8.0.0",
@@ -13,14 +13,14 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/jest": "^30.0.0",
     "@oclif/plugin-command-snapshot": "^5.2.3",
     "@salesforce/cli-plugins-testkit": "^5.3.20",
     "@salesforce/dev-scripts": "^11",
+    "@types/jest": "^30.0.0",
     "eslint": "^10.1.0",
     "eslint-plugin-sf-plugin": "^1.18.8",
     "jest": "^30.3.0",
-    "oclif": "^4.14.0",
+    "oclif": "^4.23.0",
     "prettier": "^3.4.2",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
@@ -32,8 +32,7 @@
   "files": [
     "/lib",
     "/messages",
-    "/oclif.manifest.json",
-    "/oclif.lock"
+    "/oclif.manifest.json"
   ],
   "keywords": [
     "force",
@@ -55,16 +54,16 @@
     "flexibleTaxonomy": true
   },
   "scripts": {
-    "build": "yarn compile && yarn lint",
-    "clean": "sf-clean",
-    "clean-all": "sf-clean all",
-    "compile": "tsc -p . --pretty --incremental",
+    "lint": "eslint \"src/**/*.ts\" \"tests/**/*.ts\" --color --cache --cache-location .eslintcache --no-error-on-unmatched-pattern",
+    "clean": "rm -rf lib tsconfig.tsbuildinfo && sf-clean all",
+    "compile": "yarn clean && tsc -p tsconfig.json --pretty",
+    "build": "yarn compile && yarn lint && yarn oclif manifest && npm pack --ignore-scripts",
+    "publish": "yarn build && npm publish --access public --ignore-scripts",
     "docs": "sf-docs",
     "format": "prettier --write \"+(src|test|schemas)/**/*.+(ts|js|json)|command-snapshot.json\"",
     "link-check": "node -e \"process.exit(process.env.CI ? 0 : 1)\" || linkinator \"**/*.md\" --skip \"CHANGELOG.md|node_modules|tests/|confluence.internal.salesforce.com|my.salesforce.com|localhost|%s\" --markdown --retry --directory-listing --verbosity error",
-    "lint": "eslint \"src/**/*.ts\" \"tests/**/*.ts\" --color --cache --cache-location .eslintcache --no-error-on-unmatched-pattern",
     "postpack": "sf-clean --ignore-signing-artifacts",
-    "prepack": "sf-prepack",
+    "prepack": "yarn build && oclif manifest",
     "test": "yarn test:compile && yarn lint && yarn test:nut",
     "test:compile": "tsc -p \"./tests\" --pretty",
     "test:nut": "yarn compile && jest",
