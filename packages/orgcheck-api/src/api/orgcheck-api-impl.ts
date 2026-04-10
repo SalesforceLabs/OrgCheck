@@ -19,7 +19,7 @@ import { Storage } from 'src/api/core/cache/orgcheck-api-storage-impl';
 import { Compressor } from 'src/api/core/cache/orgcheck-api-compressor-impl';
 import { ApiSetup, ApiIntf } from 'src/api/orgcheck-api';
 import { SfdcObjectAsTable } from 'src/api/recipe/orgcheck-api-recipe-object';
-import { Data, DataMatrixIntf } from 'src/orgcheck';
+import { Data, DataMatrixIntf, SfdcUserRole } from 'src/orgcheck';
 import { DataCollectionStatisticsIntf } from 'src/api/core/data/orgcheck-api-data-datacollectionstats';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { CacheItem } from 'src/api/data/orgcheck-api-data-cacheitem';
@@ -440,6 +440,61 @@ export class API implements ApiIntf {
         try {
             if (log?.isDebugEnabled()) log?.debug(`Calling the clean method for recipe: ${RecipeAliases.PACKAGES}`);
             this._recipeManager.clean(RecipeAliases.PACKAGES);
+        } catch (error) {
+            if (log?.isDebugEnabled()) log?.debug(`Error occurred: message: ${error.message}, stack: ${error.stack}`);
+            throw error;
+        }
+    }
+
+    /**
+     * @description Get information about User Roles in a tree view
+     * @returns {Promise<SfdcUserRole>} Tree
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
+    public async getRolesAsTree(): Promise<SfdcUserRole> {
+        const log = this._logger?.toSimpleLogger('Get Roles as tree');
+        try {
+            if (log?.isDebugEnabled()) log?.debug('Getting roles...');
+            // Check if usage terms were accepted
+            if (log?.isDebugEnabled()) log?.debug('Checking if usage terms were accepted...');
+            await this._throwExceptionIfUsageTermsNotAccepted();
+            if (log?.isDebugEnabled()) log?.debug('Passed the terms checking!');
+            if (log?.isDebugEnabled()) log?.debug(`Calling the prepare method for recipe: ${RecipeAliases.USER_ROLES}`);
+            // @ts-ignore
+            const allRoles: Map<string, SfdcUserRole> = (await this._recipeManager.prepare(RecipeAliases.USER_ROLES));
+            // Key for artificial ROOT
+            const ROOT_KEY = '__i am root__';
+            // Create a map that stores all nodes with children references
+            // Where:
+            //   - key is the id of the node (string)
+            //   - value is the node with properties: 
+            //        * 'id' (mandatory string), 
+            //        * 'children' (optional array), and,
+            //        * 'record' (undefined for root, mandatory for other than root -- of type: SfdcUserRole)
+            const allNodes = new Map();
+            allRoles.forEach((role) => { 
+                // is this node already registered? if false create (with no children!) and set in the map
+                if (allNodes.has(role.id) === false) { allNodes.set(role.id, { id: role.id }) }
+                // get a reference to this node
+                const node = allNodes.get(role.id);
+                // if that node just got registered, it has no 'record' yet
+                // if that node was previously a parent (and got registered at that time), it has no 'record' yet
+                if (!node.record) node.record = role; // for this reasons, we set the record property if not set
+                // get the id of its parent (if no parent using the artificial 'root' node)
+                const parentId = role.hasParent === true ? role.parentId : ROOT_KEY;
+                // is the parent already registered? if false create (with no record!) and set in the map
+                if (allNodes.has(parentId) === false) { allNodes.set(parentId, { id: parentId }) }
+                // get a reference to this parent node
+                const parentNode = allNodes.get(parentId);
+                // if that parent just got registered, it has no 'children' yet
+                // if that parent was previously a child (and got registered at that time), it has no 'children' yet
+                if (!parentNode.children) parentNode.children = []; // for this reasons, we set the children property if not set
+                parentNode.children.push(node);
+            });
+            // Return the root node
+            return allNodes.get(ROOT_KEY);
         } catch (error) {
             if (log?.isDebugEnabled()) log?.debug(`Error occurred: message: ${error.message}, stack: ${error.stack}`);
             throw error;

@@ -13,6 +13,7 @@ import { Data } from 'src/api/core/data/orgcheck-api-data';
 import { DataCollectionStatisticsIntf } from 'src/api/core/data/orgcheck-api-data-datacollectionstats';
 import { DataMatrixIntf } from 'src/api/core/data/orgcheck-api-data-matrix';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
+import { SfdcUserRole } from 'src/orgcheck';
 
 export interface ApiSetup { 
     
@@ -207,6 +208,15 @@ export interface ApiIntf {
      * @public
      */
     clearPackages(): void;
+
+    /**
+     * @description Get information about User Roles in a tree view
+     * @returns {Promise<SfdcUserRole>} Tree
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
+    getRolesAsTree(): Promise<SfdcUserRole>;
 
     // -----------------------
     // GENERIC DATA RETRIEVER

@@ -398,7 +398,7 @@ export default class OrgcheckApp extends LightningElement {
                 key: 'E', 
                 title: '🐇 Boxes',
                 items: { 
-                    ROLES_GRAPH:   { key: '17', data: 'userrolestree', recipe: Recipes.USER_ROLES_TREE }, //???
+                    ROLES_GRAPH:   { key: '17', data: 'userrolestree', action: async (api) => await api.getRolesAsTree(), title: '🐙 Internal Role Explorer' },
                     ROLES:         { key: '18', data: 'userroles', recipe: Recipes.USER_ROLES },
                     PGS:           { key: '19', data: 'publicgroups', recipe: Recipes.PUBLIC_GROUPS },
                     QUEUES:        { key: '1A', data: 'queues', recipe: Recipes.QUEUES },
@@ -443,7 +443,7 @@ export default class OrgcheckApp extends LightningElement {
                 title: '🔥 Programmatic',
                 items: {
                     CLASSES:       { key: '2B', data: 'apexclasses', recipe: Recipes.APEX_CLASSES },
-                    UNCOMPILEDS:   { key: '2C', data: 'apexuncompiled', recipe: Recipes.APEX_UNCOMPILED },
+                    UNCOMPILEDS:   { key: '2C', data: 'apexuncompiled', recipe: Recipes.APEX_UNCOMPILED, storeData: true },
                     TRIGGERS:      { key: '2D', data: 'apextriggers', recipe: Recipes.APEX_TRIGGERS },
                     TESTS:         { key: '2E', data: 'apextests', recipe: Recipes.APEX_TESTS },
                 }
@@ -596,7 +596,7 @@ export default class OrgcheckApp extends LightningElement {
             this.showRefreshButton = appNavItem.refreshButtonVisible !== false; 
 
             if (appNavItem.action) {
-                this.tableData[appNavItem.data] = appNavItem.action(this._private_properties.api);
+                this.tableData[appNavItem.data] = await appNavItem.action(this._private_properties.api);
             }
 
             if (appNavItem.recipe) {
@@ -632,7 +632,9 @@ export default class OrgcheckApp extends LightningElement {
                         /** @type ExportedTable | ExportedTable[] */
                         const doggyBag = await this._private_properties.api.exportData(appNavItem.recipe, plate);
                         // Save the mixture, the plate and doggybag
-                        this.data[appNavItem.data] = mixture;
+                        if (appNavItem.storeData === true) {
+                            this.data[appNavItem.data] = mixture;
+                        }
                         this.tableData[appNavItem.data] = plate;
                         this.exports[appNavItem.data] = doggyBag;
                     }                
