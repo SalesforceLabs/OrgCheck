@@ -16,51 +16,12 @@
 
 ## The same logic across a Salesforce App and a sf plugin
 
-```mermaid
-flowchart TD
-
-api["`**Org Check API package**
-@orgcheck/api`"]
-style api fill:#635363,color:#fff,stroke:#333,stroke-width:4px
-
-app["`**Org Check Salesforce App**
-@orgcheck/salesforce-app`"]
-style app fill:#D66D63,color:#fff,stroke:#333,stroke-width:4px
-
-plugin["`**Org Check sfdx plugin**
-@orgcheck/sfdx-plugin`"]
-style plugin fill:#4395A5,color:#fff,stroke:#333,stroke-width:4px
-
-lfs(["`**Lightning Flow Scanner**
-lightningflowscanner`"])
-style lfs stroke:#333,stroke-width:2px
-
-xlsx(["`**Generate XLSX files**
-SheetJS/XLSX`"])
-style xlsx stroke:#333,stroke-width:2px
-
-fflate(["`**Binary Compression**
-101arrowz/fflate`"])
-style fflate stroke:#333,stroke-width:2px
-
-jsforce(["`**Salesforce API access**
-jsforce`"])
-style jsforce stroke:#333,stroke-width:2px
-
-app <--> api
-plugin <--> api
-api --> jsforce
-api --> fflate
-api --> xlsx
-api --> lfs
-```
-
-## Org Check Salesforce App
+### Org Check Salesforce App
 - The app is available from the AppExchange
 - You need to install the app in the org you want to analyze
 - The app has a nice UI allowing to see and export the result of the analysis
 
-## Org Check sf plugin
+### Org Check sf plugin
 - The plugin is published on npmjs (as any sf plugins)
 - You need to install the plugin in your local machine via `sf plugins install @orgcheck/sfdx-plugin`
 - From there, you can run analysis on multiple orgs providing you have access to them via the flag `--target-org`in the sf CLI
