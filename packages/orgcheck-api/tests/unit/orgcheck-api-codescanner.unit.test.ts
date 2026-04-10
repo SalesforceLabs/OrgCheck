@@ -32,7 +32,6 @@ describe('tests.api.unit.CodeScanner', () => {
   });
 
   describe('Test the feature "IsInterface"', () => {
-
     it('checks if the source code is an interface', () => {
       expect(CodeScanner.IsInterfaceFromApexCode('public interface MyInterface {')).toBe(true);
       expect(CodeScanner.IsInterfaceFromApexCode('global interface MyInterface {')).toBe(true);
@@ -46,7 +45,6 @@ describe('tests.api.unit.CodeScanner', () => {
   });
 
   describe('Test the feature "IsEnum"', () => {
-
     it('checks if the source code is an enum', () => {
       expect(CodeScanner.IsEnumFromApexCode('public enum MyEnum {')).toBe(true);
       expect(CodeScanner.IsEnumFromApexCode('global enum MyEnum {')).toBe(true);
