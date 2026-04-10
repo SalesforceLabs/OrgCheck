@@ -4,6 +4,6 @@ plugins:
 - jekyll-mermaid 
 
 title: Org Check
-description: Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt.
+description: Org Check is an easy-to-install and easy-to-use Salesforce application and sf plugin in order to quickly analyze your org and its technical debt.
 logo: /assets/pngs/Logo+Mascot-v3.png
 show_downloads: false
