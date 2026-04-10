@@ -1,3 +1,14 @@
+# check.summary
+Welcome in Org Check CLI plugin!
+
+# check.description
+Welcome in Org Check CLI plugin!
+
+# check.examples
+Welcome in Org Check CLI plugin!
+
+
+
 # flags.action.summary
 Name of the check (or action) you would like to perform on this org 
 

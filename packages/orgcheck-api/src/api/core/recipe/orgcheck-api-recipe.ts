@@ -47,7 +47,7 @@ export interface Recipe<T> {
 /**
  * @description The ServedRecipe interface represents a Recipe that Org Check can:
  *                  - serve to the table (use as a table view in the UI)
- *                  - serve to go (use as an exported table view to generate Xslx etc.).
+ *                  - serve to go (use as an exported table view to generate XLSX etc.).
  */
 export interface ServedRecipe<Mixture, Plate> extends Recipe<Mixture> {
 
