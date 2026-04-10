@@ -10,33 +10,23 @@ description: Let's have an application in Salesforce to monitor and help continu
 Let administrators, developers, customers and partners have an application within 
 their Salesforce org to monitor and help **continuously reduce their technical debt**.
 
-![Home Page tab screenshot](./images/screenshots/OrgCheck-Screenshot-Home.png)
+**Org Check** comes into two flavours:
+- a Salesforce application, including a nice UI -- suitable for regular users
+- a sf CLI plugin, unix command like tool -- ideal for automation and multi-org scenario
 
-
-## Why would you need this application in your org?
-
-Make sure your Salesforce organisation is under control in terms of **technical debt reduction**.
-
-You will need org Check to verify some things in your organisation like:
-- Well Described Data Model
-- Useful and meaningful Profiles and Permission Sets
-- Efficent Role Hierarchy
-- Active Users
-- Useful Public Groups and Queues
-- UI and Apex Componants respecting best practices
-- Better Automations
-- etc.
-
-
-## My Vision of the application
-
-- This application is **easy to install and easy to use**.
+Either way, Org Check is meant to be **easy to install and easy to use**:
 - It requires no additional software or platform whatsoever. 
-- All you need is to install the application in your org from the AppExchange.
-- No custom object will be added, no external connection, all stays in your browser and your org.
-- The app is free of use: open sourced and available on the AppExchange (thanks to the great program called **Salesforce Labs** at Salesforce).
+- If you want to use the app: you just need to install the package from the AppExchange in your org
+- If you want to use the sf plugin: you just need to install the plugin from your sf CLI locally
+- No custom object will be added, no external connection, all stays in your computer (browser or terminal) and your org.
+- Org Check is free of use: open sourced, available on the AppExchange (thanks to the great program called **Salesforce Labs** at Salesforce) and on the NPMjs website.
 - Please use [this deck](http://sfdc.co/OrgCheck-Presentation) with your colleagues, company or customers to present the application before installing it and using it for your org.
 - Keep in mind that Org Check is not a Salesforce product. It has not been officially tested or documented by Salesforce. Also Salesforce support is not available for Org Check. Support is based on open source participation and requests are managed (as we can) via GitHub at (https://github.com/SalesforceLabs/OrgCheck/issues).
+
+
+## Show me the app!
+
+![Home Page tab screenshot](./images/screenshots/OrgCheck-Screenshot-Home.png)
 
 
 ## Frequently Asked Question by Security
@@ -45,7 +35,7 @@ You will need org Check to verify some things in your organisation like:
 - But we got you covered with this [Security FAQ](security)!
 
 
-## How do I install this application?
+## How do I install the Org Check salesforce application?
 
 <a href="https://sfdc.co/OrgCheck-InstallToday-AppExchange" target="_blank"><img width="300" src="./assets/pngs/Install-AppExchange.png" alt="Deploy Org Check from AppExchange"></a><br />
 
@@ -54,9 +44,9 @@ You will need org Check to verify some things in your organisation like:
 - Any issues installing the application? Please, visit our [FAQ](faq)!
 
 
-## Can I run Org Check from CLI?
+## How do I install the Org Check sf plugin?
 
-Yes. Since release v8, Org Check also ships a Salesforce CLI plugin package named `@orgcheck/sfdx-plugin`.
+Since release v8, Org Check also ships a Salesforce CLI plugin package named `@orgcheck/sfdx-plugin`.
 
 - This plugin runs checks directly from the command line using the same API engine.
 - Current commands include:
