@@ -1,0 +1,18 @@
+---
+name: Bug report about the SFDX plugin
+about: Create a report to help us improve our SFDX plugin
+title: 'sf plugin: '
+labels: bug, sfdx-plugin
+assignees: VinceFINET
+---
+
+**Describe the bug**
+A clear and concise description of what the bug is.
+Please include the command line you are typing and the result in the console.
+
+**Describe your environment**
+Copy and past the result of the following commands:
+- What is the version of the `sf` command you are using? `$ sf version`
+- What is the version of the 'orgcheck-sfdx-plugin' plugin you are using `$ sf plugins`
+
+
