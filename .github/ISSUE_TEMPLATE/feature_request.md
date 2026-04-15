@@ -1,6 +1,6 @@
 ---
-name: Feature request
-about: Suggest an idea for this project
+name: Global feature request
+about: Suggest an idea for this project (not specific to the salesforce app nor the sf plugin)
 title: ''
 labels: enhancement
 assignees: VinceFINET
