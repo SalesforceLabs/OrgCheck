@@ -20,7 +20,7 @@ import { RecipeDocuments } from 'src/api/recipe/orgcheck-api-recipe-documents';
 import { RecipeEmailTemplates } from 'src/api/recipe/orgcheck-api-recipe-emailtemplates';
 import { RecipeFieldPermissions } from 'src/api/recipe/orgcheck-api-recipe-fieldpermissions';
 import { RecipeFlows } from 'src/api/recipe/orgcheck-api-recipe-flows';
-import { RecipeGlobalView } from 'src/api/recipecollection/orgcheck-api-recipe-globalview';
+import { GlobalViewAsTable, RecipeGlobalView } from 'src/api/recipecollection/orgcheck-api-recipe-globalview';
 import { RecipeHardcodedURLsView } from 'src/api/recipecollection/orgcheck-api-recipe-hardcodedurlsview';
 import { RecipeHomePageComponents } from 'src/api/recipe/orgcheck-api-recipe-homepagecomponents';
 import { RecipeInternalActiveUsers } from 'src/api/recipe/orgcheck-api-recipe-internalactiveusers';
@@ -100,7 +100,7 @@ export class RecipeManager implements RecipeManagerIntf {
 
         this._datasetManager = datasetManager;
         this._logger = logger;
-        this._recipes = new Map<RecipeAliases, Recipe<Data | Data[] | DataMatrixIntf | Map<string, boolean>>>();
+        this._recipes = new Map<RecipeAliases, Recipe<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean>>>();
         this._recipeCollections = new Map<RecipeAliases, RecipeCollection>();
 
         // Recipes
@@ -165,12 +165,12 @@ export class RecipeManager implements RecipeManagerIntf {
      *   - Step 4. Return the mixture
      * @param {RecipeAliases} alias -String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map<string, any>} [parameters] - List of values to pass to the recipe
-     * @returns {Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]>} Returns the mixture
+     * @returns {Promise<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]>} Returns the mixture
      * @throws {RecipeManagerError}
      * @async
      * @public
      */
-    public async prepare(alias: RecipeAliases, parameters: Map<string, any>): Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]> {
+    public async prepare(alias: RecipeAliases, parameters: Map<string, any>): Promise<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]> {
         if (this._recipes.has(alias)) {
             return await this._prepareRecipe(alias, parameters);
         } else if (this._recipeCollections.has(alias)) {
@@ -183,13 +183,13 @@ export class RecipeManager implements RecipeManagerIntf {
     /**
      * @description Serve the mixture from a designated recipe to a table
      * @param {RecipeAliases} alias -String representation of a recipe
-     * @param {Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]} [mixture] - The mixture
-     * @returns {Promise<Table | SfdcObjectAsTable | Table[]>} Returns the mixture as a table
+     * @param {DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]} [mixture] - The mixture
+     * @returns {Promise<Table | SfdcObjectAsTable | GlobalViewAsTable | Table[]>} Returns the mixture as a table
      * @throws {RecipeManagerError}
      * @async
      * @public
      */
-    public async serveToTable(alias: RecipeAliases, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<Table | SfdcObjectAsTable | Table[]> {
+    public async serveToTable(alias: RecipeAliases, mixture: DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<Table | SfdcObjectAsTable | GlobalViewAsTable | Table[]> {
         const recipe = this._recipes.get(alias) ?? this._recipeCollections.get(alias);
         if (recipe) {
             try {
@@ -277,11 +277,11 @@ export class RecipeManager implements RecipeManagerIntf {
      *   - Step 3. Transform the retrieved data and return the final result as a Map
      * @param {RecipeAliases} alias -String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map<string, any>} [parameters] List of values to pass to the recipe
-     * @returns {Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean>>} Returns the value from the recipe or undefined if something bad happens
+     * @returns {Promise<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean>>} Returns the value from the recipe or undefined if something bad happens
      * @throws {RecipeManagerError}
      * @async
      */
-    private async _prepareRecipe(alias: RecipeAliases, parameters: Map<string, any>): Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean>> {
+    private async _prepareRecipe(alias: RecipeAliases, parameters: Map<string, any>): Promise<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean>> {
 
         const section = `Run recipe "${alias}"`;
         const recipe = this._recipes.get(alias);
@@ -316,7 +316,7 @@ export class RecipeManager implements RecipeManagerIntf {
         // STEP 3. Transform
         // -------------------
         this._logger.log(section, 'This recipe will now transform all this information...');
-        let finalData: Data[] | DataMatrixIntf | Data | Map<string, any>;
+        let finalData: DataWithScore[] | DataMatrixIntf | DataWithScore | Map<string, any>;
         try {
             finalData = await recipe.mix(data, this._logger.toSimpleLogger(section), parameters);
         } catch(error) {
@@ -415,7 +415,7 @@ export class RecipeManager implements RecipeManagerIntf {
                 });
                 const countOfBadRecordsPerRuleId = new Map<number, number>();
                 const badValues = new Set<string>();
-                const badItems = new Map<string, { id: string, name: string, url: string }>();
+                const badItems = new Map<string, DataWithScore>();
                 onlyBadRecords?.forEach((d) => {  // for each bad record...
                     d.badReasonIds.filter(id => { // only for the badReason that are part of the rules we want
                         return isRuleFilterOn === true ? listRuleIds.includes(id) : true;
@@ -428,16 +428,16 @@ export class RecipeManager implements RecipeManagerIntf {
                             badValues.add(d[rule.badField]);
                         }
                         // add a reference to this item
-                        if (badItems.has(d.id) === false) badItems.set(d.id, { id: d.id, name: d.name, url: d.url });
+                        if (badItems.has(d.id) === false) badItems.set(d.id, d);
                     });
                 });
                 const listRulesFound = Array.from(countOfBadRecordsPerRuleId.keys()).map((ruleId) => SecretSauce.GetScoreRule(ruleId));
                 finalData.push(new DataCollectionStatisticsOK(
-                    recipe,
-                    this._recipes.get(recipe)?.title ?? recipe,
-                    (records?.length ?? 0),
-                    (onlyBadRecords?.length ?? 0),
-                    listRulesFound.map((rule) => {
+                    /* recipeAlias: string */ recipe,
+                    /* recipeTitle: string */ this._recipes.get(recipe)?.title ?? recipe,
+                    /* countAll: number */ (records?.length ?? 0),
+                    /* countBad: number */ (onlyBadRecords?.length ?? 0), 
+                    /* countBadByRule: {ruleId;ruleName;count}[] */ listRulesFound.map((rule) => { 
                         return {
                             ruleId: rule.id,
                             ruleName: rule.description,
@@ -446,9 +446,9 @@ export class RecipeManager implements RecipeManagerIntf {
                     })?.sort((a, b) => { // sort by count to have the biggest first
                         return a.count > b.count ? -1 : 1; 
                     }),
-                    Array.from(badValues),
-                    Array.from(badItems.values()),
-                    onlyBadRecords
+                    /* distinctBadValues: any[] */ Array.from(badValues), 
+                    /* badItems: {id;name;url}[] */ Array.from(badItems.values()), 
+                    /* data: Data[] */ onlyBadRecords
                 ));
             });
 

@@ -11,8 +11,8 @@ export class DashboardsTableDefinition implements TableDefinition {
      */
     columns: TableColumn[] = [
         { label: '#',               type: ColumnType.IDX },
-        { label: 'Score',           type: ColumnType.SCR, data: { value: 'score', id: 'id', name: 'title' }},
-        { label: 'Title',           type: ColumnType.URL, data: { value: 'url', label: 'title' }},
+        { label: 'Score',           type: ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+        { label: 'Title',           type: ColumnType.URL, data: { value: 'url', label: 'name' }},
         { label: 'Developer Name',  type: ColumnType.TXT, data: { value: 'developerName' }},
         { label: 'Package',         type: ColumnType.TXT, data: { value: 'package' }},
         { label: 'Type',            type: ColumnType.TXT, data: { value: 'type' }},

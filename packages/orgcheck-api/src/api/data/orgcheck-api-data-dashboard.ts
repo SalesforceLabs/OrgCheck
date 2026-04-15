@@ -12,13 +12,6 @@ export interface SfdcDashboard extends DataWithScore {
     dataType: DataAliases.SfdcDashboard;
 
     /**
-     * @description Title of the dashboard.
-     * @type {string}
-     * @public
-     */
-    title: string;
-
-    /**
      * @description Developer name of the dashboard.
      * @type {string}
      * @public

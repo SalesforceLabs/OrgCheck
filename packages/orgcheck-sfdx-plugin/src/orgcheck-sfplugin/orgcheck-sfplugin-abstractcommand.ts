@@ -28,8 +28,8 @@ interface CheckResult {
   dateCheck: string;
   action: string;
   result:
-    | orgcheck.Data
-    | orgcheck.Data[]
+    | orgcheck.DataWithScore
+    | orgcheck.DataWithScore[]
     | orgcheck.DataMatrixIntf
     | Map<string, boolean>
     | orgcheck.DataCollectionStatisticsIntf[];
@@ -55,6 +55,49 @@ export abstract class OrgCheckSfPluginAbstractCommand extends SfCommand<CheckRes
    * @protected
    */
   protected abstract getRecipe(): orgcheck.RecipeAliases;
+
+  /**
+   * @description By default this method is showing results of DataWithScore[] mixture and Table plate
+   * @param { orgcheck.DataWithScore | orgcheck.DataWithScore[] | orgcheck.DataMatrixIntf | Map<string, boolean> | orgcheck.DataCollectionStatisticsIntf[] } mixture The mixture to use for display
+   * @param { orgcheck.Table | orgcheck.SfdcObjectAsTable | orgcheck.GlobalViewAsTable | orgcheck.Table[] } plate The data to use for display
+   * @protected
+   */
+  protected showResultsInConsole(
+      mixture: orgcheck.DataWithScore | orgcheck.DataWithScore[] | orgcheck.DataMatrixIntf | Map<string, boolean> | orgcheck.DataCollectionStatisticsIntf[], 
+      plate: orgcheck.Table | orgcheck.SfdcObjectAsTable | orgcheck.GlobalViewAsTable | orgcheck.Table[]): void {
+
+    const defaultMixture = mixture as orgcheck.DataWithScore[];
+    const defaultPlate = plate as orgcheck.Table;
+    this.logSuccess(defaultPlate.name);
+    this.log();
+    this.log('Some statistics:')
+    this.log(` * number of items: ${defaultPlate.nbAllRows}`);
+    this.log(` * number of good items: ${defaultPlate.nbAllRows - defaultPlate.nbBadRows}`);
+    this.log(` * number of bad items: ${defaultPlate.nbBadRows}`);
+    this.log();
+    if (defaultPlate.nbBadRows > 0) {
+      this.log('Detail of the bad items (sorted by score desc):');
+      this.table({
+        columns: [
+          { name: 'Score (*)', key: 'score' },
+          { name: 'Name', key: 'name' },
+          { name: 'Salesforce Id', key: 'id' },
+          { name: 'Why this score?', key: 'badReasons' }
+        ],
+        data: defaultMixture.filter((item) => item.score > 0)
+                            .sort((a, b) => b.score - a.score)
+                            .map((item) => ({ 
+                              id: item.id,
+                              name: item.name, 
+                              score: item.score, 
+                              badReasons: item.badReasonIds.map((i) => { 
+                                  const rule = orgcheck.Rules.get(i); 
+                                  return `${rule?.description}`; }
+                                ).join(', ')
+                            })) as any[],
+      });
+    }
+  }
 
   /**
    * @description Get summary message
@@ -110,6 +153,11 @@ export abstract class OrgCheckSfPluginAbstractCommand extends SfCommand<CheckRes
       char: 'x',
       required: false,
       summary: messages.getMessage('flags.xlsx-file.summary'),
+    }),
+    'csv-file': Flags.file({
+      char: 'c',
+      required: false,
+      summary: messages.getMessage('flags.csv-file.summary'),
     }),
     package: Flags.string({
       char: 'p',
@@ -199,24 +247,52 @@ export abstract class OrgCheckSfPluginAbstractCommand extends SfCommand<CheckRes
     };
 
     if (flags['json-file'] !== undefined) {
-      writeFileSync(flags['json-file'], JSON.stringify(json), { flag: 'w' });
+      try {
+        writeFileSync(flags['json-file'], JSON.stringify(json), { flag: 'w' });
+        this.logSuccess(`File ${flags['json-file']} created successfully with JSON format.`);
+      } catch (error) {
+        this.logToStderr(`File ${flags['json-file']} not created due to the following error: ${error}`)
+      }
     }
 
     if (flags['xlsx-file'] !== undefined) {
-      // Export XLSX logic here
-      writeFileSync(flags['xlsx-file'], Buffer.from(orgcheck.TableUtils.exportAsXls(doggyBag)), { flag: 'w' });
+      try {
+        // Export XLSX logic here
+        writeFileSync(flags['xlsx-file'], Buffer.from(orgcheck.TableUtils.exportAsXls(doggyBag)), { flag: 'w' });
+        this.logSuccess(`File ${flags['xlsx-file']} created successfully with XLSX format.`);
+      } catch (error) {
+        this.logToStderr(`File ${flags['xlsx-file']} not created due to the following error: ${error}`)
+      }
     }
 
-    if (this.jsonEnabled() === false) {
-      const exportedTables = Array.isArray(doggyBag) ? doggyBag : [doggyBag];
-      exportedTables.forEach((exportedTable) => {
-        this.log(`Table: ${exportedTable.label}`);
-        this.log(csvJoiner(exportedTable.columns));
-        exportedTable.rows.forEach((row) => {
-          this.log(csvJoiner(row));
+    if (flags['csv-file'] !== undefined) {
+      try {
+        // create the file with empty content at first
+        writeFileSync(flags['csv-file'], '', { flag: 'w' });
+        const exportedTables = Array.isArray(doggyBag) ? doggyBag : [doggyBag];
+        exportedTables.forEach((exportedTable) => {
+          // Write the Table name first (note the a flag to append the content!)
+          writeFileSync(flags['csv-file'], `Table: ${exportedTable.label}`, { flag: 'a' });
+          // Write the columns headers
+          writeFileSync(flags['csv-file'], csvJoiner(exportedTable.columns), { flag: 'a' });
+          // Write the rows
+          exportedTable.rows.forEach((row) => {
+            writeFileSync(flags['csv-file'], csvJoiner(row), { flag: 'a' });
+          });
+          // Write a new line
+          writeFileSync(flags['csv-file'], '', { flag: 'a' })
         });
-        this.log();
-      });
+        this.logSuccess(`File ${flags['csv-file']} created successfully with CSV format.`);
+      } catch (error) {
+        this.logToStderr(`File ${flags['csv-file']} not created due to the following error: ${error}`)
+      }
+    }
+
+    if ((flags['json-file'] === undefined && flags['xlsx-file'] === undefined && flags['csv-file'] === undefined && this.jsonEnabled() === false)) {
+      this.showResultsInConsole(mixture, plate);
+      this.log();
+      this.log('---');
+      this.log(`For more information, you can export the data as ${Array.isArray(doggyBag) ? doggyBag.length : 1} table(s) in CSV, XLSX or JSON format from the command line. See help.`);
     }
 
     return json;

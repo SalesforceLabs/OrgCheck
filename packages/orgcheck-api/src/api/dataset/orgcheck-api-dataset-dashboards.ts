@@ -46,7 +46,7 @@ export class DatasetDashboards implements Dataset {
                     id: id,
                     folderName: record.FolderName, 
                     folderId: record.FolderId, 
-                    title: record.Title, 
+                    name: record.Title, 
                     developerName: record.DeveloperName, 
                     package: (record.NamespacePrefix || ''),
                     description: record.Description, 

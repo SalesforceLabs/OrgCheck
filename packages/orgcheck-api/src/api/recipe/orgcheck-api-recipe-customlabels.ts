@@ -16,7 +16,7 @@ export class RecipeCustomLabels implements ServedRecipe<SfdcCustomLabel[], Table
      * @type {string}
      * @public
      */
-    public readonly title: string = '🏷️ Custom Labels';
+    public readonly title: string = '🥡 Custom Labels';
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe

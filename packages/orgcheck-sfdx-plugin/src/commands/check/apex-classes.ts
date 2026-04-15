@@ -1,4 +1,3 @@
-import { RecipeAliases } from '@orgcheck/api';
 import { OrgCheckSfPluginAbstractCommand } from '../../orgcheck-sfplugin/orgcheck-sfplugin-abstractcommand.js';
 import orgcheck from '@orgcheck/api';
 
@@ -41,10 +40,10 @@ export class CheckApexClasses extends OrgCheckSfPluginAbstractCommand {
 
   /**
    * @description Get recipe
-   * @returns {RecipeAliases}
+   * @returns {orgcheck.RecipeAliases}
    * @public
    */
-  protected getRecipe(): RecipeAliases {
+  protected getRecipe(): orgcheck.RecipeAliases {
     return orgcheck.Recipes.APEX_CLASSES;
   }
 }

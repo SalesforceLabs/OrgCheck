@@ -9,11 +9,12 @@ import { SfdcPackage } from 'src/api/data/orgcheck-api-data-package';
 import { CacheItem } from 'src/api/data/orgcheck-api-data-cacheitem';
 import { SfdcObjectAsTable } from 'src/api/recipe/orgcheck-api-recipe-object';
 import { RecipeAliases } from 'src/api/core/recipe/orgcheck-api-recipes-aliases';
-import { Data } from 'src/api/core/data/orgcheck-api-data';
+import { DataWithScore } from 'src/api/core/data/orgcheck-api-data';
 import { DataCollectionStatisticsIntf } from 'src/api/core/data/orgcheck-api-data-datacollectionstats';
 import { DataMatrixIntf } from 'src/api/core/data/orgcheck-api-data-matrix';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
-import { SfdcUserRole } from 'src/orgcheck';
+import { GlobalViewAsTable } from 'src/api/recipecollection/orgcheck-api-recipe-globalview';
+import { SfdcUserRole } from 'src/api/data/orgcheck-api-data-userrole';
 
 export interface ApiSetup { 
     
@@ -242,34 +243,34 @@ export interface ApiIntf {
      * @param namespace 
      * @param sobjectType 
      * @param sobject 
-     * @returns {Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]>} data prepared for the UI
+     * @returns {Promise<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]>} data prepared for the UI
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    prepareData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string): Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]>;
+    prepareData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string): Promise<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]>;
 
     /**
      * @description Serve data for a specific recipe. This method will format the data in a way that can be used by the UI.
      * @param {RecipeAliases} alias - name of the data you want to get
-     * @param mixture 
-     * @returns {Promise<Table | SfdcObjectAsTable | Table[]>} data formatted for the UI
+     * @param {DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]} mixture 
+     * @returns {Promise<Table | SfdcObjectAsTable | GlobalViewAsTable | Table[]>} data formatted for the UI
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    serveData(alias: RecipeAliases, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<Table | SfdcObjectAsTable | Table[]>;
+    serveData(alias: RecipeAliases, mixture: DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<Table | SfdcObjectAsTable | GlobalViewAsTable | Table[]>;
     
     /**
      * @description Export data for a specific recipe. This method will format the data in a way that can be used for export.
      * @param {RecipeAliases} alias - name of the data you want to get
-     * @param plate 
+     * @param {Table | SfdcObjectAsTable | GlobalViewAsTable | Table[]} plate 
      * @returns {Promise<ExportedTable | ExportedTable[]>} data formatted for export
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    exportData(alias: RecipeAliases, plate: Table | SfdcObjectAsTable | Table[]): Promise<ExportedTable | ExportedTable[]>;
+    exportData(alias: RecipeAliases, plate: Table | SfdcObjectAsTable | GlobalViewAsTable | Table[]): Promise<ExportedTable | ExportedTable[]>;
 
     /**
      * @description Get the titles for all available data

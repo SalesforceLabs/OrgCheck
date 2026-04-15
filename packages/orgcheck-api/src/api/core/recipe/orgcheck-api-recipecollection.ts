@@ -1,5 +1,5 @@
 import { DataCollectionStatisticsIntf } from 'src/api/core/data/orgcheck-api-data-datacollectionstats';
-import { Data } from 'src/api/core/data/orgcheck-api-data';
+import { DataWithScore } from 'src/api/core/data/orgcheck-api-data';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { ScoreRule } from 'src/api/core/orgcheck-api-data-scorerule';
 import { RecipeAliases } from 'src/api/core/recipe/orgcheck-api-recipes-aliases';
@@ -66,20 +66,20 @@ export class DataCollectionStatisticsOK implements DataCollectionStatisticsIntf 
     
     /**
      * @description Constructor
-     * @param recipeAlias Alias of the corresponding recipe
-     * @param recipeTitle Title of the corresponding recipe
-     * @param countAll Number of all records
-     * @param countBad Number of records that are considered "bad" (i.e. at least one bad reason id)
-     * @param countBadByRule Number of bad records by rule
-     * @param distinctBadValues List of distinct values automatically computed based on the rule description
-     * @param badItems List of bad items
-     * @param data List of all data items that are part of this collection
+     * @param {string} recipeAlias Alias of the corresponding recipe
+     * @param {string} recipeTitle Title of the corresponding recipe
+     * @param {number} countAll Number of all records
+     * @param {number} countBad Number of records that are considered "bad" (i.e. at least one bad reason id)
+     * @param {number} countBadByRule Number of bad records by rule
+     * @param {any[]} distinctBadValues List of distinct values automatically computed based on the rule description
+     * @param {DataWithScore[]} badItems List of bad items
+     * @param {DataWithScore[]} allData List of all data items that are part of this collection
      */
     constructor(public readonly recipeAlias: string, public readonly recipeTitle: string, 
         public readonly countAll: number, public readonly countBad: number, 
         public readonly countBadByRule: { ruleId: number; ruleName: string; count: number; }[], 
-        public readonly distinctBadValues: any[], public readonly badItems: { id: string, name: string, url: string }[] , 
-        public readonly data: Data[]) {
+        public readonly distinctBadValues: any[], public readonly badItems: DataWithScore[] , 
+        public readonly allData: DataWithScore[]) {
         this.countGood = countAll - countBad;
     }
 
@@ -146,7 +146,6 @@ export class DataCollectionStatisticsWithError implements DataCollectionStatisti
     /**
      * @description Number of bad records by rule
      * @type {{ruleId: number, ruleName: string, count: number}[]}
-     * @default []
      * @public
      */
     public readonly countBadByRule: { ruleId: number; ruleName: string; count: number; }[] = [];
@@ -160,16 +159,15 @@ export class DataCollectionStatisticsWithError implements DataCollectionStatisti
 
     /**
      * @description List of bad items id, name and url
-     * @type {{ id: string, name: string, url: string }[]}
+     * @type {DataWithScore[]}
      * @public
      */
-    public readonly badItems: { id: string, name: string, url: string }[] = [];
+    public readonly badItems: DataWithScore[] = [];
 
     /**
      * @description List of all data items that are part of this collection
-     * @type {Data[]}
-     * @default []
+     * @type {DataWithScore[]}
      * @public
      */ 
-    public readonly data: Data[] = [];
+    public readonly allData: DataWithScore[] = [];
 }

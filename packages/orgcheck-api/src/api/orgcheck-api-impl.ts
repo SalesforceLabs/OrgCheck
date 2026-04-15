@@ -19,7 +19,7 @@ import { Storage } from 'src/api/core/cache/orgcheck-api-storage-impl';
 import { Compressor } from 'src/api/core/cache/orgcheck-api-compressor-impl';
 import { ApiSetup, ApiIntf } from 'src/api/orgcheck-api';
 import { SfdcObjectAsTable } from 'src/api/recipe/orgcheck-api-recipe-object';
-import { Data, DataMatrixIntf, SfdcUserRole } from 'src/orgcheck';
+import { DataMatrixIntf, DataWithScore, GlobalViewAsTable, SfdcUserRole } from 'src/orgcheck';
 import { DataCollectionStatisticsIntf } from 'src/api/core/data/orgcheck-api-data-datacollectionstats';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { CacheItem } from 'src/api/data/orgcheck-api-data-cacheitem';
@@ -538,12 +538,12 @@ export class API implements ApiIntf {
      * @param namespace 
      * @param sobjectType 
      * @param sobject 
-     * @returns {Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]>} data prepared for the UI
+     * @returns {Promise<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]>} data prepared for the UI
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async prepareData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string): Promise<Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]> {
+    public async prepareData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string): Promise<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]> {
         const log = this._logger?.toSimpleLogger('Prepare Data');
         try {
             // Check if usage terms were accepted
@@ -566,13 +566,13 @@ export class API implements ApiIntf {
     /**
      * @description Serve data for a specific recipe. This method will format the data in a way that can be used by the UI.
      * @param {RecipeAliases} alias - name of the data you want to get
-     * @param mixture 
-     * @returns {Promise<Table | SfdcObjectAsTable | Table[]>} data formatted for the UI
+     * @param {DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]} mixture 
+     * @returns {Promise<Table | SfdcObjectAsTable | GlobalViewAsTable | Table[]>} data formatted for the UI
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async serveData(alias: RecipeAliases, mixture: Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<Table | SfdcObjectAsTable | Table[]> {
+    public async serveData(alias: RecipeAliases, mixture: DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<Table | SfdcObjectAsTable | GlobalViewAsTable | Table[]> {
         const log = this._logger?.toSimpleLogger('Serve Data');
         try {
             // Check if usage terms were accepted
@@ -591,13 +591,13 @@ export class API implements ApiIntf {
     /**
      * @description Export data for a specific recipe. This method will format the data in a way that can be used for export.
      * @param {RecipeAliases} alias - name of the data you want to get
-     * @param plate 
+     * @param {Table | SfdcObjectAsTable | GlobalViewAsTable | Table[]} plate 
      * @returns {Promise<ExportedTable | ExportedTable[]>} data formatted for export
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    public async exportData(alias: RecipeAliases, plate: Table | SfdcObjectAsTable | Table[]): Promise<ExportedTable | ExportedTable[]> {
+    public async exportData(alias: RecipeAliases, plate: Table | SfdcObjectAsTable | GlobalViewAsTable | Table[]): Promise<ExportedTable | ExportedTable[]> {
         const log = this._logger?.toSimpleLogger('Export Data');
         try {
             // Export the data

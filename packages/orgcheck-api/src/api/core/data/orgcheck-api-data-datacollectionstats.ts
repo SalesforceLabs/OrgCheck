@@ -1,4 +1,4 @@
-import { Data } from 'src/api/core/data/orgcheck-api-data';
+import { DataWithScore } from 'src/api/core/data/orgcheck-api-data';
 
 export interface DataCollectionStatisticsIntf {
 
@@ -68,16 +68,16 @@ export interface DataCollectionStatisticsIntf {
 
     /**
      * @description List of bad items id, name and url
-     * @type {{ id: string, name: string, url: string }[]}
+     * @type {DataWithScore[]}
      * @public
      */
-    badItems: { id: string, name: string, url: string }[];
+    badItems: DataWithScore[];
 
     /**
      * @description List of all data items that are part of this collection
-     * @type {Data[]}
+     * @type {DataWithScore[]}
      * @default []
      * @public
      */ 
-    data: Data[];
+    allData: DataWithScore[];
 }

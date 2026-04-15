@@ -8,7 +8,26 @@ import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
 import { GlobalViewGlobalTableDefinition, GlobalViewPerRuleTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-globalview';
 
 export interface GlobalViewAsTable {
+
+    /**
+     * @description Name of the exported table (like a title)
+     * @type {string}
+     * @public
+     */
+    name: string;
+
+    /**
+     * @description Table representing the statistics of good and bad items per type
+     * @type {Table}
+     * @public
+     */
     statisticsGoodAndBad: Table;
+
+    /**
+     * @description Table representing the statistics of bad items by reasons (aka rules) and type
+     * @type {Table}
+     * @public
+     */
     statisticsReasons: Table;
 }
 
@@ -105,6 +124,7 @@ export class RecipeGlobalView implements RecipeCollection {
             });
         });
         return {
+            name: this.title,
             statisticsGoodAndBad: TableFactory.create('Statistics (Good and Bad)', new GlobalViewGlobalTableDefinition(), statsGlobal),
             statisticsReasons: TableFactory.create('Statistics (Reasons)', new GlobalViewPerRuleTableDefinition(), statsByRecipeAndRule)
         }

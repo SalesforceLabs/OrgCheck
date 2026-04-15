@@ -12,13 +12,15 @@ export type { ApiIntf, ApiSetup } from 'src/api/orgcheck-api';
 export type { LoggerSetup } from 'src/api/core/setup/orgcheck-api-setup-logger';
 export type { StorageSetup } from 'src/api/core/setup/orgcheck-api-setup-storage';
 export type { SalesforceManagerSetup, SalesforceAuthenticationOptions } from 'src/api/core/setup/orgcheck-api-setup-salesforcemanager';
-export type { Data } from 'src/api/core/data/orgcheck-api-data';
+export type { Data, DataWithScore } from 'src/api/core/data/orgcheck-api-data';
 export type { DataMatrixIntf } from 'src/api/core/data/orgcheck-api-data-matrix';
 export type { DataCollectionStatisticsIntf } from 'src/api/core/data/orgcheck-api-data-datacollectionstats';
 export type { SalesforceUsageInformationIntf } from 'src/api/core/salesforce/orgcheck-api-limit-usageinformation';
 export type { RecipeAliases } from 'src/api/core/recipe/orgcheck-api-recipes-aliases';
 export type { SortOrder } from 'src/ui/table/orgcheck-ui-table-sortorder';
 export type { Table, ExportedTable } from 'src/ui/table/orgcheck-ui-table';
+export type { SfdcObjectAsTable } from 'src/api/recipe/orgcheck-api-recipe-object';
+export type { GlobalViewAsTable } from 'src/api/recipecollection/orgcheck-api-recipe-globalview';
 
 export type { ScoreRule } from 'src/api/core/orgcheck-api-data-scorerule';
 export type { SfdcApexClass } from 'src/api/data/orgcheck-api-data-apexclass';

@@ -105,7 +105,7 @@ export class RecipeApexClasses extends AbstractRecipeApexClasses {
      * @public
      */ 
     public constructor() {
-        super('❤️‍🔥 Apex Classes', (ac: SfdcApexClass) => ac.isTest === false && ac.needsRecompilation === false);
+        super('🎇 Apex Classes', (ac: SfdcApexClass) => ac.isTest === false && ac.needsRecompilation === false);
     }
 
     /**
