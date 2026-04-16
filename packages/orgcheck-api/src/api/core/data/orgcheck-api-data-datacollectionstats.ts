@@ -67,11 +67,11 @@ export interface DataCollectionStatisticsIntf {
     distinctBadValues: any[];
 
     /**
-     * @description List of bad items id, name and url
-     * @type {DataWithScore[]}
+     * @description List of bad items and their bad values
+     * @type {{data: DataWithScore, badValues: string[]}[]}
      * @public
      */
-    badItems: DataWithScore[];
+    badItems: {data: DataWithScore, badValues: string[]}[];
 
     /**
      * @description List of all data items that are part of this collection

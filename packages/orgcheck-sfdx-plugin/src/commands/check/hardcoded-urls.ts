@@ -39,11 +39,11 @@ export class CheckHardcodedUrls extends OrgCheckSfPluginAbstractCommand {
   }
 
   /**
-   * @description Get recipe
-   * @returns {orgcheck.RecipeAliases}
-   * @public
-   */
-  protected getRecipe(): orgcheck.RecipeAliases {
+  * @description Get recipe
+  * @returns {orgcheck.RecipeAliases | undefined}
+  * @public
+  */
+  protected getRecipe(): orgcheck.RecipeAliases | undefined {
     return orgcheck.Recipes.HARDCODED_URLS_VIEW;
   }
   
@@ -61,34 +61,39 @@ export class CheckHardcodedUrls extends OrgCheckSfPluginAbstractCommand {
     this.log('Some statistics:');
     this.table({
       columns: [
-        { name: 'Type of items ', key: 'recipeTitle' },
-        { name: 'Salesforce Hardcoded URLs detected', key: 'distinctBadValues' },
-        { name: 'Items to check (*)', key: 'countBad' },
-        { name: 'Items with no issue', key: 'countGood' },
-        { name: 'Total number of items scanned', key: 'countAll' },
+        { name: 'Type of items ', key: 'type' },
+        { name: 'Salesforce Hardcoded URLs detected', key: 'urls' },
+        { name: 'Items to check (*)', key: 'bad' },
+        { name: 'Items with no issue', key: 'good' },
+        { name: 'Total number of items scanned', key: 'all' },
       ],
-      data: mixture as any[]
+      data: mixture.filter((m) => m.countAll > 0)
+                   .sort((a, b) => b.countBad !== a.countBad ? b.countBad - a.countBad : b.countAll - a.countAll)
+                   .map((m) => ({
+                      type: m.recipeTitle,
+                      urls: m.distinctBadValues.join(', '),
+                      bad: m.countBad,
+                      good: m.countGood,
+                      all: m.countAll
+                   })) as any[]
     });
 
-    this.log('Items to check:')
+    this.log('Items to check (max 100 items):')
     this.table({
       columns: [
-        { name: 'Score (*)', key: 'score' },
         { name: 'Name', key: 'name' },
         { name: 'Salesforce Id', key: 'id' },
         { name: 'Type', key: 'type' },
-        { name: 'Why this score?', key: 'reasons' }
+        { name: 'Salesforce Hardcoded URLs detected', key: 'badUrls' }
       ],
       data: mixture.map(m => (
-        m.badItems.filter((item) => item.score > 0)
-                  .map(item => ({ 
+        m.badItems.map(item => ({ 
                     type: m.recipeTitle, 
-                    id: item.id, 
-                    name: item.name, 
-                    score: item.score,
-                    reasons: item.badReasonIds.map((i) => orgcheck.Rules.get(i)?.description).join(', ')
+                    id: item.data.id, 
+                    name: item.data.name,
+                    badUrls: item.badValues
                   }))
-        )).flat().sort((a, b) => b.score - a.score),
+        )).flat().filter((_item, i) => i < 100)
     });
   }
 }

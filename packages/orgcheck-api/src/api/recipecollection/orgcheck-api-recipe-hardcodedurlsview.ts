@@ -77,7 +77,7 @@ export class RecipeHardcodedURLsView implements RecipeCollection {
                 countBad: item.countBad, 
                 countGood: item.countGood, 
                 badItems: item.badItems, 
-                badValues: item.distinctBadValues ?? [] 
+                distinctBadValues: item.distinctBadValues ?? [] 
             })) ?? []
         );
     }

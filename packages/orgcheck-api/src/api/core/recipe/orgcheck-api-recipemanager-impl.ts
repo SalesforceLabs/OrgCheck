@@ -415,7 +415,7 @@ export class RecipeManager implements RecipeManagerIntf {
                 });
                 const countOfBadRecordsPerRuleId = new Map<number, number>();
                 const badValues = new Set<string>();
-                const badItems = new Map<string, DataWithScore>();
+                const badItems = new Map<string, { data: DataWithScore, badValues: string[]}>();
                 onlyBadRecords?.forEach((d) => {  // for each bad record...
                     d.badReasonIds.filter(id => { // only for the badReason that are part of the rules we want
                         return isRuleFilterOn === true ? listRuleIds.includes(id) : true;
@@ -424,11 +424,12 @@ export class RecipeManager implements RecipeManagerIntf {
                         countOfBadRecordsPerRuleId.set(id, (countOfBadRecordsPerRuleId.get(id) ?? 0) + 1);
                         // add the bad values in a set
                         const rule = SecretSauce.GetScoreRule(id);
+                        const badValue = d[rule.badField];
                         if (rule) {
-                            badValues.add(d[rule.badField]);
+                            badValues.add(badValue);
                         }
                         // add a reference to this item
-                        if (badItems.has(d.id) === false) badItems.set(d.id, d);
+                        if (badItems.has(d.id) === false) badItems.set(d.id, { data: d, badValues: badValue });
                     });
                 });
                 const listRulesFound = Array.from(countOfBadRecordsPerRuleId.keys()).map((ruleId) => SecretSauce.GetScoreRule(ruleId));
@@ -447,8 +448,8 @@ export class RecipeManager implements RecipeManagerIntf {
                         return a.count > b.count ? -1 : 1; 
                     }),
                     /* distinctBadValues: any[] */ Array.from(badValues), 
-                    /* badItems: {id;name;url}[] */ Array.from(badItems.values()), 
-                    /* data: Data[] */ onlyBadRecords
+                    /* badItems: DataWithScore[] */ Array.from(badItems.values()), 
+                    /* allData: DataWithScore[] */ records
                 ));
             });
 

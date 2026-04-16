@@ -203,10 +203,12 @@
                                 </lightning-layout>
                                 <br /><br />
                                 
-                                <h1 class="slds-text-heading_large">And Now for Something Completely Different...</h1> 
-                                <template for:each={jokes} for:item="joke" for:>
-                                    <p key={joke.question}><b>{joke.question}...</b> &nbsp;&nbsp; <i>{joke.answer}</i></p>
-                                </template>
+                                <h1 class="slds-text-heading_large">And now, for something completely different... 🏰🐇⚔️🧙🏼‍♂️🕊️</h1> 
+                                <ul class="slds-list_dotted">
+                                    <template for:each={jokes} for:item="joke" for:>
+                                        <li key={joke.question}><b>{joke.question}...</b> &nbsp;&nbsp; <i>{joke.answer}</i></li>
+                                    </template>
+                                </ul>
                             </div>
                             <div data-key="03" class="slds-hide slds-var-p-horizontal_small">
                                 <p>
@@ -1058,7 +1060,19 @@
                                     table={tableData.apexclasses}
                                     show-export-button  
                                     export-source={exports.apexclasses} 
-                                    export-basename="ApexClasses"></c-orgcheck-extended-datatable>
+                                    export-basename="ApexClasses">
+                                        <template lwc:if={tableData.apexclasses}>
+                                            <li class="slds-button-group-item">
+                                                <lightning-button 
+                                                    label="Run All Tests" 
+                                                    title="Run All Tests"
+                                                    variant="border-filled" 
+                                                    class="slds-var-m-left_x-small" 
+                                                    icon-name="utility:tour_check" 
+                                                    onclick={handleClickRunAllTests}></lightning-button>                    
+                                            </li>
+                                        </template>
+                                </c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="2C" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 

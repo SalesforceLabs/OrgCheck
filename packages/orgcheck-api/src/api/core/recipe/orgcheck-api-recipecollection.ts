@@ -72,13 +72,13 @@ export class DataCollectionStatisticsOK implements DataCollectionStatisticsIntf 
      * @param {number} countBad Number of records that are considered "bad" (i.e. at least one bad reason id)
      * @param {number} countBadByRule Number of bad records by rule
      * @param {any[]} distinctBadValues List of distinct values automatically computed based on the rule description
-     * @param {DataWithScore[]} badItems List of bad items
+     * @param {{data: DataWithScore, badValues: string[]}} badItems List of bad items
      * @param {DataWithScore[]} allData List of all data items that are part of this collection
      */
     constructor(public readonly recipeAlias: string, public readonly recipeTitle: string, 
         public readonly countAll: number, public readonly countBad: number, 
         public readonly countBadByRule: { ruleId: number; ruleName: string; count: number; }[], 
-        public readonly distinctBadValues: any[], public readonly badItems: DataWithScore[] , 
+        public readonly distinctBadValues: any[], public readonly badItems: {data: DataWithScore, badValues: string[]}[] , 
         public readonly allData: DataWithScore[]) {
         this.countGood = countAll - countBad;
     }
@@ -158,11 +158,11 @@ export class DataCollectionStatisticsWithError implements DataCollectionStatisti
     public readonly distinctBadValues: any[] = [];
 
     /**
-     * @description List of bad items id, name and url
-     * @type {DataWithScore[]}
+     * @description List of bad items and their bad values
+     * @type {{data: DataWithScore, badValues: string[]}[]}
      * @public
      */
-    public readonly badItems: DataWithScore[] = [];
+    public readonly badItems: {data: DataWithScore, badValues: string[]}[] = [];
 
     /**
      * @description List of all data items that are part of this collection

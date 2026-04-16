@@ -33,6 +33,12 @@ Filename of the JSON ouput
 # flags.xlsx-file.summary
 Filename of the XLSX output
 
+# flags.invalidate-cache.summary
+Make sure the entries you need from the cache are flushed before start!ng
+
+
+
+
 
 
 # check.apex-classes.summary
@@ -91,3 +97,33 @@ Analyze all the metadata that Org Check can scan at once and get some stats and 
   sf check global-view --target-org MyOrg --csv-file /tmp/results.csv
 - Check the Global View of the org and export the result as a JSON file
   sf check global-view --target-org MyOrg --json-file /tmp/results.json
+
+
+
+
+
+
+# check.run-all-tests.summary
+Run all tests in the org using Org Check command line
+
+# check.run-all-tests.description
+Run all tests in the org using Org Check command line before calling `check apex-classes`
+
+# check.run-all-tests.examples
+- Run all tests in the org
+  sf check run-all-tests --target-org MyOrg
+
+
+
+
+
+
+# check.clear-all-cache.summary
+Clear all local cache items for this org
+
+# check.clear-all-cache.description
+Clear all local cache items for this org
+
+# check.clear-all-cache.examples
+- Clear all cache items for this org
+  sf check clear--all-cache --target-org MyOrg

@@ -40,10 +40,10 @@ export class CheckGlobalView extends OrgCheckSfPluginAbstractCommand {
 
   /**
    * @description Get recipe
-   * @returns {orgcheck.RecipeAliases}
+   * @returns {orgcheck.RecipeAliases | undefined}
    * @public
    */
-  protected getRecipe(): orgcheck.RecipeAliases {
+  protected getRecipe(): orgcheck.RecipeAliases | undefined {
     return orgcheck.Recipes.GLOBAL_VIEW;
   }
 
@@ -69,7 +69,7 @@ export class CheckGlobalView extends OrgCheckSfPluginAbstractCommand {
       data: mixture as any[]
     });
 
-    this.log('Items to check:')
+    this.log('Items to check (max 100 items):')
     this.table({
       columns: [
         { name: 'Score (*)', key: 'score' },
@@ -79,15 +79,14 @@ export class CheckGlobalView extends OrgCheckSfPluginAbstractCommand {
         { name: 'Why this score?', key: 'reasons' }
       ],
       data: mixture.map(m => (
-        m.badItems.filter((item) => item.score > 0)
-                  .map(item => ({ 
+        m.badItems.map(item => ({ 
                     type: m.recipeTitle, 
-                    id: item.id, 
-                    name: item.name, 
-                    score: item.score,
-                    reasons: item.badReasonIds.map((i) => orgcheck.Rules.get(i)?.description).join(', ')
+                    id: item.data.id, 
+                    name: item.data.name, 
+                    score: item.data.score,
+                    reasons: item.data.badReasonIds.map((i) => orgcheck.Rules.get(i)?.description).join(', ')
                   }))
-        )).flat().sort((a, b) => b.score - a.score),
+        )).flat().filter((_item, i) => i < 100)
     });
   }
 }

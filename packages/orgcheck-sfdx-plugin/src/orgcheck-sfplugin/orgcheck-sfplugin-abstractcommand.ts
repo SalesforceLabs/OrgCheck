@@ -50,11 +50,22 @@ export abstract class OrgCheckSfPluginAbstractCommand extends SfCommand<CheckRes
   protected abstract parseFlags(): Promise<{ flags: Record<string, any> }>;
 
   /**
-   * @description Get recipe
-   * @returns {orgcheck.RecipeAliases}
-   * @protected
+  * @description Get recipe
+  * @returns {orgcheck.RecipeAliases | undefined}
+  * @public
+  */
+  protected abstract getRecipe(): orgcheck.RecipeAliases | undefined;
+
+  /**
+   * @description Do some special thing with API when no recipe is returned from "getRecipe"
+   * @param {orgcheck.ApiIntf} orgcheckApi 
+   * @returns {string} Nale of the action
+   * @async
    */
-  protected abstract getRecipe(): orgcheck.RecipeAliases;
+  protected async doSpecialThingWithApi(orgcheckApi: orgcheck.ApiIntf): Promise<string> {
+    void orgcheckApi;
+    return '';
+  }
 
   /**
    * @description By default this method is showing results of DataWithScore[] mixture and Table plate
@@ -174,6 +185,11 @@ export abstract class OrgCheckSfPluginAbstractCommand extends SfCommand<CheckRes
       required: false,
       summary: messages.getMessage('flags.sobject.summary'),
     }),
+    'invalidate-cache': Flags.boolean({
+      char: 'i',
+      required: false,
+      summary: messages.getMessage('flags.invalidate-cache.summary')
+    })
   };
 
   /**
@@ -184,22 +200,37 @@ export abstract class OrgCheckSfPluginAbstractCommand extends SfCommand<CheckRes
   public async run(): Promise<CheckResult> {
     const { flags } = await this.parseFlags();
 
+    // Initialize some variables
     const connection: Connection = flags['target-org'].getConnection(undefined);
-    const storageSetup: OrgCheckSfPluginStorageSetup = new OrgCheckSfPluginStorageSetup();
+    const orgId: string = connection.getAuthInfoFields().orgId ?? 'unknown-org';
+    const storageSetup: OrgCheckSfPluginStorageSetup = new OrgCheckSfPluginStorageSetup(orgId);
     const loggerSetup: OrgCheckSfPluginLoggerSetup = new OrgCheckSfPluginLoggerSetup(
       await Logger.child('OrgCheckSfPluginCommand'),
+      this.spinner
     );
+    
+    // Create the Org Check API
     const orgcheckApi = orgcheck.ApiFactory.create({
       salesforce: { connection },
       storage: storageSetup,
       logSettings: loggerSetup,
     });
 
+    // First thing, we want to check if usage terms need to be accepted
     if ((await orgcheckApi.checkUsageTerms()) === false) {
+
+      // The usage terms need to be accepted
+      // In this case, we need the flag "accept-the-terms" to be specified
       if (flags['accept-the-terms'] === true) {
+
+        // User specified the flag to manually accept the usage terms
         orgcheckApi.acceptUsageTermsManually();
+
       } else {
-        this.warn(`Accepting the Org Check usage terms is mandatory for Salesforce OrgId: ${orgcheckApi.orgId}`);
+
+        // User did not specify anything but we need it.
+        // Let's show these terms that we need to accept.
+        this.warn(`Accepting the Org Check usage terms is mandatory for Salesforce OrgId: ${orgId}`);
         this.log();
         this.logSuccess('Just to let you know...');
         this.log('Using **Org Check** in this Salesforce organization **will** increase its **API Request limit**.');
@@ -223,82 +254,156 @@ export abstract class OrgCheckSfPluginAbstractCommand extends SfCommand<CheckRes
         this.log('Production. Even if we put in place a control about this limit, we remind you that Salesforce ');
         this.log('Labs applications (like Org Check) have no warranty of any sort (as described in our AppExchange');
         this.log('listing');
+
+        // Throw an error!
         throw new Error(`You need to accept the terms before (using the 'accept-the-terms' flag)`);
       }
     }
 
-    const recipe = this.getRecipe();
+    // Start the spinner
+    this.spinner.start('Org Check');
 
-    const mixture = await orgcheckApi.prepareData(
-      recipe,
-      flags['package'] ?? '',
-      flags['sobject-type'] ?? '',
-      flags['sobject'] ?? '',
-    );
-    const plate = await orgcheckApi.serveData(recipe, mixture);
-    const doggyBag = await orgcheckApi.exportData(recipe, plate);
-
-    const json = {
+    // Set the output envelop here
+    const output: CheckResult = {
       orgCheckVersion: orgcheckApi.version,
-      salesforceOrgId: orgcheckApi.orgId ?? '<unknown>',
+      salesforceOrgId: orgId,
       dateCheck: new Date().toISOString(),
-      action: recipe,
-      result: mixture,
+      action: '',
+      result: [],
     };
 
-    if (flags['json-file'] !== undefined) {
+    // Recipe is set by implementation classes
+    const recipe = this.getRecipe();
+
+    if (recipe === undefined) {
+      // if (the returned recipe is undefined) then 
+      //   the implementation class needs to implement method doSpecialThingWithApi
+      
+      this.spinner.status = 'Running a dedicated action here...';
+      output.action = await this.doSpecialThingWithApi(orgcheckApi);
+      output.result = [];
+    
+    } else {
+      // else just call the generic receipe from API
+
+      if (flags['invalidate-cache']) {
+        this.spinner.status = 'Running cache invalitation...';
+        orgcheckApi.cleanData(
+          recipe,
+          flags['package'] ?? '',
+          flags['sobject-type'] ?? '',
+          flags['sobject'] ?? ''
+        );
+      }
+
+      this.spinner.status = 'Running data preparation...';
+      const mixture = await orgcheckApi.prepareData(
+        recipe,
+        flags['package'] ?? '',
+        flags['sobject-type'] ?? '',
+        flags['sobject'] ?? ''
+      );
+      
+      output.action = recipe;
+      output.result = mixture;
+    }
+
+    const isJsonFileSpecified = flags['json-file'] !== undefined;
+    const isXlsxFileSpecified = flags['xlsx-file'] !== undefined;
+    const isCsvFileSpecified  = flags['csv-file'] !== undefined;
+    const isNoFileSpecified = !isJsonFileSpecified && !isXlsxFileSpecified && !isCsvFileSpecified;
+
+    // Here we are asked to output the JSON into a file
+    if (isJsonFileSpecified) {
+      const jsonFilename = flags['json-file'];
       try {
-        writeFileSync(flags['json-file'], JSON.stringify(json), { flag: 'w' });
-        this.logSuccess(`File ${flags['json-file']} created successfully with JSON format.`);
+        // Export JSON file
+        createFile(jsonFilename, JSON.stringify(output));
+        // Log the success
+        this.logSuccess(`File ${jsonFilename} created successfully with JSON format.`);
       } catch (error) {
-        this.logToStderr(`File ${flags['json-file']} not created due to the following error: ${error}`)
+        // Log the error if any
+        this.logToStderr(`File ${jsonFilename} not created due to the following error: ${error}`)
       }
     }
 
-    if (flags['xlsx-file'] !== undefined) {
-      try {
-        // Export XLSX logic here
-        writeFileSync(flags['xlsx-file'], Buffer.from(orgcheck.TableUtils.exportAsXls(doggyBag)), { flag: 'w' });
-        this.logSuccess(`File ${flags['xlsx-file']} created successfully with XLSX format.`);
-      } catch (error) {
-        this.logToStderr(`File ${flags['xlsx-file']} not created due to the following error: ${error}`)
-      }
-    }
+    // IF: 
+    // - you asked for a XLSX or CSV export and recipe is defined, we need to get the plate and the doggyBag to generate te files (JSON export does not need them)
+    // - you asked for no file export at all and did not specified the '--json' flag, then we also need to get the plate and doggybag to output something in the console
+    if (recipe !== undefined && (isXlsxFileSpecified || isCsvFileSpecified || (isNoFileSpecified && this.jsonEnabled() === false))) {
 
-    if (flags['csv-file'] !== undefined) {
-      try {
-        // create the file with empty content at first
-        writeFileSync(flags['csv-file'], '', { flag: 'w' });
-        const exportedTables = Array.isArray(doggyBag) ? doggyBag : [doggyBag];
-        exportedTables.forEach((exportedTable) => {
-          // Write the Table name first (note the a flag to append the content!)
-          writeFileSync(flags['csv-file'], `Table: ${exportedTable.label}`, { flag: 'a' });
-          // Write the columns headers
-          writeFileSync(flags['csv-file'], csvJoiner(exportedTable.columns), { flag: 'a' });
-          // Write the rows
-          exportedTable.rows.forEach((row) => {
-            writeFileSync(flags['csv-file'], csvJoiner(row), { flag: 'a' });
+      this.spinner.status = 'Running data service...';
+      const plate = await orgcheckApi.serveData(recipe, output.result);
+
+      this.spinner.status = 'Running data exporting...';
+      const doggyBag = await orgcheckApi.exportData(recipe, plate);
+
+      if (isXlsxFileSpecified) {
+        const xlsxFilename = flags['xlsx-file'];
+        try {
+          // Export XLSX file
+          createFile(xlsxFilename, Buffer.from(orgcheck.TableUtils.exportAsXls(doggyBag)));
+          // Log the success
+          this.logSuccess(`File ${xlsxFilename} created successfully with XLSX format.`);
+        } catch (error) {
+          // Log the error if any
+          this.logToStderr(`File ${xlsxFilename} not created due to the following error: ${error}`)
+        }
+      }
+
+      if (isCsvFileSpecified) {
+        const csvFilename = flags['csv-file'];
+        try {
+          // create the file with empty content at first
+          createEmptyFile(csvFilename);
+          const exportedTables = Array.isArray(doggyBag) ? doggyBag : [doggyBag];
+          exportedTables.forEach((exportedTable) => {
+            // Write the Table name first (note the a flag to append the content!)
+            appendLineInFile(csvFilename, `Table: ${exportedTable.label}`);
+            appendLineInFile(csvFilename, '');
+            // Write the columns headers
+            appendLineInFile(csvFilename, csvJoiner(exportedTable.columns));
+            // Write the rows
+            exportedTable.rows.forEach((row) => {
+              appendLineInFile(csvFilename, csvJoiner(row));
+            });
+            // Write a new line
+            appendLineInFile(csvFilename, '')
           });
-          // Write a new line
-          writeFileSync(flags['csv-file'], '', { flag: 'a' })
-        });
-        this.logSuccess(`File ${flags['csv-file']} created successfully with CSV format.`);
-      } catch (error) {
-        this.logToStderr(`File ${flags['csv-file']} not created due to the following error: ${error}`)
+          // Log the success
+          this.logSuccess(`File ${csvFilename} created successfully with CSV format.`);
+        } catch (error) {
+          // Log the error if any
+          this.logToStderr(`File ${csvFilename} not created due to the following error: ${error}`)
+        }
+      }
+
+      if (isNoFileSpecified && this.jsonEnabled() === false) {
+        this.showResultsInConsole(output.result, plate);
+        this.log();
+        this.log('---');
+        this.log(`For more information, you can export the data as CSV, XLSX or JSON format from the command line. See help.`);
       }
     }
 
-    if ((flags['json-file'] === undefined && flags['xlsx-file'] === undefined && flags['csv-file'] === undefined && this.jsonEnabled() === false)) {
-      this.showResultsInConsole(mixture, plate);
-      this.log();
-      this.log('---');
-      this.log(`For more information, you can export the data as ${Array.isArray(doggyBag) ? doggyBag.length : 1} table(s) in CSV, XLSX or JSON format from the command line. See help.`);
-    }
+    this.spinner.stop();
 
-    return json;
+    return output;
   }
+}
+
+const createFile = (filename: string, content: string | Buffer) => {
+  writeFileSync(filename, content, { flag: 'w' });
+}
+
+const createEmptyFile = (filename: string) => {
+  writeFileSync(filename, '', { flag: 'w' });
+}
+
+const appendLineInFile = (filename: string, line: string) => {
+  writeFileSync(filename, `${line}\n`, { flag: 'a' });
 }
 
 const csvJoiner = (row: string[]): string => {
   return `"${row.map((value) => value.replaceAll('"', '""')).join('","')}"`;
-};
+}
