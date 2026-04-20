@@ -6,6 +6,45 @@ import { DataCollectionStatisticsIntf } from '../core/data/orgcheck-api-data-dat
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
 import { GlobalViewGlobalTableDefinition, GlobalViewPerRuleTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-globalview';
+import { TableDefinition } from 'src/ui/table/orgcheck-ui-table-definition';
+import { ApexTestsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-apextests';
+import { ApexClassesTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-apexclasses';
+import { ApexTriggersTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-apextriggers';
+import { ApexUncompiledTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-apexuncompiled';
+import { BrowsersTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-browsers';
+import { ChatterGroupsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-chattergroups';
+import { CustomFieldsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-customfields';
+import { CustomLabelsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-customlabels';
+import { CustomTabsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-customtabs';
+import { DashboardsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-dashboards';
+import { DocumentsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-documents';
+import { EmailTemplatesTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-emailtemplates';
+import { FlowsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-flows';
+import { HomePageComponentsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-homepagecomponents';
+import { UsersTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-users';
+import { KnowledgeArticlesTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-knowledgearticles';
+import { AuraComponentsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-auracomponents';
+import { FlexiPagesTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-flexipages';
+import { LightningWebComponentsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-lightningwebcomponents';
+import { ObjectsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-objects';
+import { PageLayoutsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-pagelayouts';
+import { PermissionSetsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-permissionsets';
+import { PermissionSetLicensesTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-permissionsetlicenses';
+import { ProcessBuildersTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-processbuilders';
+import { ProfilePasswordPoliciesTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-profilepwdpolicies';
+import { ProfileRestrictionsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-profilerestrictions';
+import { ProfilesTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-profiles';
+import { PublicGroupsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-publicgroups';
+import { QueuesTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-queues';
+import { RecordTypesTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-recordtypes';
+import { ReportsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-reports';
+import { StaticResourcesTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-staticresources';
+import { RolesTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-roles';
+import { ValidationRulesTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-validationrules';
+import { VisualForceComponentsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-visualforcecomponents';
+import { VisualForcePagesTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-visualforcepages';
+import { WebLinksTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-weblinks';
+import { WorkflowsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-workflows';
 
 export interface GlobalViewAsTable {
 
@@ -29,6 +68,13 @@ export interface GlobalViewAsTable {
      * @public
      */
     statisticsReasons: Table;
+
+    /**
+     * @description Details in shape of Table list
+     * @type {Table[]}
+     * @public
+     */
+    details: Table[];
 }
 
 export class RecipeGlobalView implements RecipeCollection {
@@ -123,10 +169,52 @@ export class RecipeGlobalView implements RecipeCollection {
                 statsByRecipeAndRule.push({ name: item.recipeTitle, ruleName: c.ruleName, countBad: c.count });
             });
         });
+        const allTableDefinitions: TableDefinition[] = [
+            // keep the same order than table returned by ingredients()!
+            new ApexClassesTableDefinition(),
+            new ApexTestsTableDefinition(),
+            new ApexTriggersTableDefinition(),
+            new ApexUncompiledTableDefinition(),
+            new BrowsersTableDefinition(),
+            new ChatterGroupsTableDefinition(),
+            new CustomFieldsTableDefinition(),
+            new CustomLabelsTableDefinition(),
+            new CustomTabsTableDefinition(),
+            new DashboardsTableDefinition(),
+            new DocumentsTableDefinition(),
+            new EmailTemplatesTableDefinition(),
+            new FlowsTableDefinition(),
+            new HomePageComponentsTableDefinition(),
+            new UsersTableDefinition(),
+            new KnowledgeArticlesTableDefinition(),
+            new AuraComponentsTableDefinition(),
+            new FlexiPagesTableDefinition(),
+            new LightningWebComponentsTableDefinition(),
+            new ObjectsTableDefinition(),
+            new PageLayoutsTableDefinition(),
+            new PermissionSetsTableDefinition(),
+            new PermissionSetLicensesTableDefinition(),
+            new ProcessBuildersTableDefinition(),
+            new ProfilePasswordPoliciesTableDefinition(),
+            new ProfileRestrictionsTableDefinition(),
+            new ProfilesTableDefinition(),
+            new PublicGroupsTableDefinition(),
+            new QueuesTableDefinition(),
+            new RecordTypesTableDefinition(),
+            new ReportsTableDefinition(),
+            new StaticResourcesTableDefinition(),
+            new RolesTableDefinition(),
+            new ValidationRulesTableDefinition(),
+            new VisualForceComponentsTableDefinition(),
+            new VisualForcePagesTableDefinition(),
+            new WebLinksTableDefinition(),
+            new WorkflowsTableDefinition()
+        ];
         return {
             name: this.title,
             statisticsGoodAndBad: TableFactory.create('Statistics (Good and Bad)', new GlobalViewGlobalTableDefinition(), statsGlobal),
-            statisticsReasons: TableFactory.create('Statistics (Reasons)', new GlobalViewPerRuleTableDefinition(), statsByRecipeAndRule)
+            statisticsReasons: TableFactory.create('Statistics (Reasons)', new GlobalViewPerRuleTableDefinition(), statsByRecipeAndRule),
+            details: mixture.map((m, i) => (m.hadError === false) ? TableFactory.create(m.recipeTitle, allTableDefinitions[i], m.allData) : undefined).filter(m => m !== undefined)
         }
     }
     
@@ -138,9 +226,12 @@ export class RecipeGlobalView implements RecipeCollection {
      * @public
      */
     public async serveToGo(plate: GlobalViewAsTable): Promise<ExportedTable[]> {
-        return [
+        const tables = [
             TableFactory.export(plate.statisticsGoodAndBad),
             TableFactory.export(plate.statisticsReasons)
         ];
+        // Add as many tabs as details, ordered by the number of bad rows!
+        plate.details.sort((a, b) => b.nbBadRows - a.nbBadRows).forEach(detail => tables.push(TableFactory.export(detail)));
+        return tables;
     }
 }
