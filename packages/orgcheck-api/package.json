@@ -1,6 +1,6 @@
 {
     "name": "@orgcheck/api",
-    "version": "8.0.0",
+    "version": "8.0.1",
     "license": "MIT",
     "private": false,
     "devDependencies": {
@@ -28,11 +28,16 @@
         "lint": "eslint",
         "scan": "sf code-analyzer run --target ./src --output-file /tmp/orgcheck-api-scan.html; open /tmp/orgcheck-api-scan.html",
         "test": "jest \".*unit.*\" ",
-        "build": "rollup -c rollup.config.mjs && yarn jest \".*bundled.*\" "
+        "npm:build": "npm pack --ignore-scripts",
+        "js:build": "rollup -c rollup.config.mjs && jest \".*bundled.*\" ",
+        "npm:publish": "yarn npm:build && yarn version --pack && publish --access public --ignore-scripts",
+        "build": "yarn js:build && yarn npm:build"
     },
     "main": "./dist/orgcheck.js",
     "types": "./dist/orgcheck.d.ts",
-    "files": [ "dist" ],
+    "files": [
+        "dist"
+    ],
     "dependencies": {
         "fflate": "^0.8.2",
         "jsforce": "^3.10.14",
