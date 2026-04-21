@@ -23,5 +23,5 @@ pre {
 }
 
 .li-ended {
-    color: rgb(84, 165, 84);
+    display: none !important;
 }

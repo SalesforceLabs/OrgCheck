@@ -115,6 +115,7 @@ export default class OrgcheckSpinner extends LightningElement {
       this._init();
       this._openSince = Date.now();
       const updateWaitingTime = () => {
+        // Update the timer
         this.waitingTime = (Date.now() - this._openSince) / 1000;
       };
       clearInterval(this._intervalId);

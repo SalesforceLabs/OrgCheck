@@ -4,6 +4,21 @@ import { loadScript } from 'lightning/platformResourceLoader';
 
 export default class OrgcheckApp extends LightningElement {
 
+    /** 
+     * @deprecated
+     */
+    @api textEncoder;
+
+    /** 
+     * @deprecated
+     */
+    @api textDecoder;
+
+    /** 
+     * @deprecated
+     */
+    @api userId;
+
     /**
      * @description Verbose mode for the logs (false by default) -- if true, we copy all the logs (and debugà in the console of the borwser
      * @type {boolean}
