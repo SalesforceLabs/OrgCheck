@@ -50,7 +50,6 @@ export class LFSScanner {
                 // Convert flow records to LFS format
                 const lfsFlows = flowRecords.filter(record => record.Metadata) // only if flows have metadata!
                     .map(record => {
-                        /** @type {string} */
                         const id15: string = CaseSafeId(record.Id);
                         return {
                             uri: id15,
@@ -80,8 +79,8 @@ export class LFSScanner {
         const violationsMap = new Map();
         for (const result of scanResults) {
             const violations = result.ruleResults
-                .filter((/** @type {any} */ ruleResult: any) => ruleResult.occurs === true)
-                .map((/** @type {any} */ ruleResult: any) => ruleResult.ruleName);
+                .filter((ruleResult: any) => ruleResult.occurs === true)
+                .map((ruleResult: any) => ruleResult.ruleName);
             if (violations?.length > 0) {
                 violationsMap.set(result.flow.uri, violations);
             }

@@ -2,7 +2,7 @@ import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
 import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcPackage } from 'src/api/data/orgcheck-api-data-package';
 
@@ -33,13 +33,12 @@ export class DatasetPackages implements Dataset {
         // Create the map
         const packageRecords = results[0];
         logger?.log(`Parsing ${packageRecords?.length} installed packages...`);
-        const packages: Map<string, SfdcPackage> = new Map(await Processor.map(packageRecords, (/** @type {any} */ record: any) => {
+        const packages: Map<string, SfdcPackage> = new Map(await MediumProcessor.map(packageRecords, (record: any) => {
 
             // Get the ID15 of this custom field
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            /** @type {SfdcPackage} */
             const installedPackage: SfdcPackage = packageDataFactory.create({
                 properties: {
                     id: id,
@@ -65,7 +64,6 @@ export class DatasetPackages implements Dataset {
             logger?.log(`Adding your local package ${localPackage}...`);
             packages.set(
                 localPackage, 
-                /** @type {SfdcPackage} */
                 packageDataFactory.create({
                     properties: {
                         id: localPackage, 

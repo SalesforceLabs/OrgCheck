@@ -31,7 +31,6 @@ export class DataDependenciesFactory {
                 url: n.refUrl
             }; 
         });
-        /** @type {any} */
         const refByTypes = {};
         // WhatID is referenced where? -- Here we are getting the dependencies where the REFID is in the whatIds list
         const referenced = data.records.filter((e: any) => whatIds.includes(e.refId)).map((n: any) => {

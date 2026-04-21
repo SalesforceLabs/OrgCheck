@@ -2,7 +2,7 @@ import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
 import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcPermissionSet } from 'src/api/data/orgcheck-api-data-permissionset';
@@ -73,7 +73,7 @@ export class DatasetPermissionSets implements Dataset {
 
         // Create the map of permission sets
         logger?.log(`Parsing ${permissionSetRecords?.length} permission sets...`);
-        const permissionSets: Map<string, SfdcPermissionSet> = new Map(await Processor.map(permissionSetRecords, (/** @type {any} */ record: any) => {
+        const permissionSets: Map<string, SfdcPermissionSet> = new Map(await MediumProcessor.map(permissionSetRecords, (record: any) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
@@ -82,7 +82,6 @@ export class DatasetPermissionSets implements Dataset {
             const isPermissionSetGroup = (record.Type === 'Group'); // other values can be 'Regular', 'Standard', 'Session'
 
             // Create the instance
-            /** @type {SfdcPermissionSet} */
             const permissionSet: SfdcPermissionSet = permissionSetDataFactory.create({
                 properties: {
                     id: id,
@@ -126,7 +125,7 @@ export class DatasetPermissionSets implements Dataset {
         logger?.log(`Parsing ${permissionSetGroupRecords?.length} permission set groups, ${objectPermissionRecords?.length} object permissions and ${fieldPermissionRecords?.length} field permissions...`);
         const psgToPsIds = new Map();
         await Promise.all([
-            Processor.forEach(permissionSetGroupRecords, async (/** @type {any} */ record: any) => {
+            MediumProcessor.forEach(permissionSetGroupRecords, async (record: any) => {
                 const permissionSetId = sfdcManager.caseSafeId(record.Id);
                 const permissionSetGroupId = sfdcManager.caseSafeId(record.PermissionSetGroupId);
                 const permissionSet = permissionSets.get(permissionSetId);
@@ -138,21 +137,21 @@ export class DatasetPermissionSets implements Dataset {
                     psgToPsIds.set(permissionSetGroupId, permissionSetId);
                 }
             }),
-            Processor.forEach(objectPermissionRecords, async (/** @type {any} */ record: any) => {
+            MediumProcessor.forEach(objectPermissionRecords, async (record: any) => {
                 const permissionSetId = sfdcManager.caseSafeId(record.ParentId);
                 const permissionSet = permissionSets.get(permissionSetId);
                 if (permissionSet) {
                     permissionSet.nbObjectPermissions += record.CountObject;
                 }
             }),
-            Processor.forEach(fieldPermissionRecords, async (/** @type {any} */ record: any) => {
+            MediumProcessor.forEach(fieldPermissionRecords, async (record: any) => {
                 const permissionSetId = sfdcManager.caseSafeId(record.ParentId);
                 const permissionSet = permissionSets.get(permissionSetId);
                 if (permissionSet) {
                     permissionSet.nbFieldPermissions += record.CountField;    
                 }
             }),
-            Processor.forEach(userAssignmentRecords, async (/** @type {any} */ record: any) => {
+            MediumProcessor.forEach(userAssignmentRecords, async (record: any) => {
                 const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId);
                 const permissionSet = permissionSets.get(permissionSetId);
                 if (permissionSet) {
@@ -164,7 +163,7 @@ export class DatasetPermissionSets implements Dataset {
         // Once all the ps and psg are in the map we can check the following:
         logger?.log(`Checking the ${psAssignmentRecords?.length} Permission Set assignments to Permission Set Groups...`);
         const psgMemberCountSumByPermissionSetId = new Map();        
-        await Processor.forEach(psAssignmentRecords, async (/** @type {any} */ record: any) => {
+        await MediumProcessor.forEach(psAssignmentRecords, async (record: any) => {
             const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId);
             const permissionSetGroupId = sfdcManager.caseSafeId(record.PermissionSetGroupId);
             const permissionSetGroup_psId = psgToPsIds.get(permissionSetGroupId);
@@ -179,7 +178,7 @@ export class DatasetPermissionSets implements Dataset {
 
         // Compute scores for all permission sets
         logger?.log(`Computing the score for ${permissionSets.size} permission sets...`);
-        await Processor.forEach(permissionSets, async (/** @type {SfdcPermissionSet} */ permissionSet: SfdcPermissionSet) => {
+        await MediumProcessor.forEach(permissionSets, async (permissionSet: SfdcPermissionSet) => {
             if (psgMemberCountSumByPermissionSetId.get(permissionSet.id) === 0) {
                 permissionSet.allIncludingGroupsAreEmpty = true;
             }

@@ -2,7 +2,7 @@ import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
 import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcProfile } from 'src/api/data/orgcheck-api-data-profile';
@@ -60,13 +60,12 @@ export class DatasetProfiles implements Dataset {
 
         // Create the map of profiles
         logger?.log(`Parsing ${profileRecords?.length} profiles...`);
-        const profiles: Map<string, SfdcProfile> = new Map(await Processor.map(profileRecords, (/** @type {any} */ record: any) => {
+        const profiles: Map<string, SfdcProfile> = new Map(await MediumProcessor.map(profileRecords, (record: any) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.ProfileId);
 
             // Create the instance
-            /** @type {SfdcProfile} */
             const profile: SfdcProfile = profileDataFactory.create({
                 properties: {
                     id: id,
@@ -105,21 +104,21 @@ export class DatasetProfiles implements Dataset {
 
         logger?.log(`Parsing ${objectPermissionRecords?.length} object permissions, ${fieldPermissionRecords?.length} field permissions and ${assignmentRecords?.length} assignments...`);
         await Promise.all([
-            Processor.forEach(objectPermissionRecords, async (/** @type {any} */ record: any) => {
+            MediumProcessor.forEach(objectPermissionRecords, async (record: any) => {
                 const profileId = sfdcManager.caseSafeId(record.ProfileId); // see warning in the SOQL query (this is not a bug we use ProfileId instead of Parent.ProfileId)
                 const profile = profiles.get(profileId);
                 if (profile) {
                     profile.nbObjectPermissions += record.CountObject;
                 }
             }),
-            Processor.forEach(fieldPermissionRecords, async (/** @type {any} */ record: any) => {
+            MediumProcessor.forEach(fieldPermissionRecords, async (record: any) => {
                 const profileId = sfdcManager.caseSafeId(record.ProfileId); // see warning in the SOQL query (this is not a bug we use ProfileId instead of Parent.ProfileId)
                 const profile = profiles.get(profileId);
                 if (profile) {
                     profile.nbFieldPermissions += record.CountField;    
                 }
             }),
-            Processor.forEach(assignmentRecords, async (/** @type {any} */ record: any) => {
+            MediumProcessor.forEach(assignmentRecords, async (record: any) => {
                 const profileId = sfdcManager.caseSafeId(record.ProfileId); // see warning in the SOQL query (this is not a bug we use ProfileId instead of PermissionSet.ProfileId)
                 const profile = profiles.get(profileId);
                 if (profile) {
@@ -130,7 +129,7 @@ export class DatasetProfiles implements Dataset {
 
         // Compute scores for all permission sets
         logger?.log(`Computing the score for ${profiles.size} profiles...`);
-        await Processor.forEach(profiles, async (/** @type {SfdcProfile} */ profile: SfdcProfile) => {
+        await MediumProcessor.forEach(profiles, async (profile: SfdcProfile) => {
             profileDataFactory.computeScore(profile);
         });
 

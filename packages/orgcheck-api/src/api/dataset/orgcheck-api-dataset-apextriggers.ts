@@ -3,7 +3,7 @@ import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
 import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcApexTrigger } from 'src/api/data/orgcheck-api-data-apextrigger';
@@ -43,21 +43,20 @@ export class DatasetApexTriggers implements Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${apexTriggerRecords?.length} apex triggers...`);
         const apexTriggersDependencies = await sfdcManager.dependenciesQuery(
-            await Processor.map(apexTriggerRecords, (/** @type {any} */ record: any) => sfdcManager.caseSafeId(record.Id)), 
+            await MediumProcessor.map(apexTriggerRecords, (record: any) => sfdcManager.caseSafeId(record.Id)), 
             logger
         );
 
         // Create the map
         logger?.log(`Parsing ${apexTriggerRecords?.length} apex triggers...`);
-        const apexTriggers: Map<string, SfdcApexTrigger> = new Map(await Processor.map(
+        const apexTriggers: Map<string, SfdcApexTrigger> = new Map(await MediumProcessor.map(
             apexTriggerRecords,
-            (/** @type {any} */ record: any) => {
+            (record: any) => {
 
                 // Get the ID15
                 const id = sfdcManager.caseSafeId(record.Id);
 
                 // Create the instance
-                /** @type {SfdcApexTrigger} */
                 const apexTrigger: SfdcApexTrigger = apexTriggerDataFactory.create({
                     properties: {
                         id: id,
@@ -98,7 +97,7 @@ export class DatasetApexTriggers implements Dataset {
                 // Add it to the map  
                 return [ apexTrigger.id, apexTrigger ];
             },
-            (/** @type {any} */ record: any)=> (record.EntityDefinition ? true : false)
+            (record: any)=> (record.EntityDefinition ? true : false)
         ));
 
         // Return data as map

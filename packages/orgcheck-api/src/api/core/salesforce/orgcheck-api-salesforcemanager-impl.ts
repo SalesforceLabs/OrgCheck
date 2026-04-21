@@ -5,6 +5,7 @@ import { SalesforceWatchDog, SalesforceUsageInformation } from 'src/api/core/sal
 import { SalesforceError, SalesforceManagerIntf, SalesforceMetadataRequest, SalesforceQueryRequest } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SecretSauce } from 'src/api/core/orgcheck-api-secretsauce';
 import { SalesforceManagerSetup } from 'src/api/core/setup/orgcheck-api-setup-salesforcemanager';
+import { LargeProcessor } from 'src/api/core/orgcheck-api-processor';
 
 /**
  * @description Maximum number of Ids that is contained per DAPI query
@@ -379,7 +380,6 @@ export class SalesforceManager implements SalesforceManagerIntf {
         // Each query can use the tooling or not, se based on that flag we'll use the right JsForce connection
         const conn = useTooling === true ? this._connection.tooling : this._connection;
         // the records to return
-        /** @type {any[]} */
         const allRecords: any[] = [];
         const indexOfFromStatment = query.indexOf(' FROM ');
         const indexOfGroupByStatment = query.indexOf(' GROUP BY ');
@@ -488,20 +488,22 @@ export class SalesforceManager implements SalesforceManagerIntf {
     public async soqlQuery(queries: SalesforceQueryRequest[], logger: SimpleLoggerIntf): Promise<Array<Array<any>>> {
         // Now we can start, log some message
         logger?.log(`Preparing ${queries?.length} SOQL ${queries?.length>1?'queries':'query'}...`);
+        const debugEnabled = logger?.isDebugEnabled?.() ?? false;
         let nbRecords = 0, nbQueryMore = 0;
         const pendingEntities: string[] = [], 
               doneEntities: string[] = [], 
               errorEntities: string[] = [];
         const errors: Error[] = [];
         const updateLogInformation = () => {
-            logger?.log(
-                `Processing ${queries?.length} SOQL ${queries?.length>1?'queries':'query'}... `+
-                `🎥 Records retrieved: ${nbRecords}, `+
-                `🙌 Number of QueryMore calls done: ${nbQueryMore}, `+
-                `⏳ Pending: (${pendingEntities?.length}) on [${pendingEntities.join(', ')}], `+
-                `✅ Done: (${doneEntities?.length}) on [${doneEntities.join(', ')}], `+
-                `❌ Error: (${errorEntities?.length}) on [${errorEntities.join(', ')}]`
-            );
+            if (debugEnabled) {
+                logger?.debug(
+                    `Processing ${queries?.length} SOQL ${queries?.length>1?'queries':'query'}... `+
+                    `records=${nbRecords}, queryMoreCalls=${nbQueryMore}, `+
+                    `pending=(${pendingEntities?.length}) [${pendingEntities.join(', ')}], `+
+                    `done=(${doneEntities?.length}) [${doneEntities.join(', ')}], `+
+                    `error=(${errorEntities?.length}) [${errorEntities.join(', ')}]`
+                );
+            }
         }
         const updateLogInformationOnQuery = (nbRec: number) => {
             nbQueryMore++; 
@@ -540,7 +542,10 @@ export class SalesforceManager implements SalesforceManagerIntf {
         logger?.log(`Done running ${queries?.length} SOQL ${queries?.length>1?'queries':'query'}.`);
         // if errors has at least one item, it means one of the Promises failed
         if (errors?.length > 0) {
-            logger?.log(`We had ${errors.length} errors during soqlQuery: ${errors.map((e,i) => (`${i}: ${e?.message}`)).join(', ')}`);
+            logger?.log(`We had ${errors.length} errors during soqlQuery.`);
+            if (debugEnabled) {
+                logger?.debug(`soqlQuery errors: ${errors.map((e,i) => (`${i}: ${e?.message}`)).join(', ')}`);
+            }
             throw errors[0];
         }
         // at this point all promises have been settled (or 'successful' if you)
@@ -607,6 +612,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         // Now we can start, log some message
         logger?.log(`Starting to call Tooling API for dependency API call of ${ids?.length ?? 0} item(s)...`);
+        const debugEnabled = logger?.isDebugEnabled?.() ?? false;
         // if no ids then just return empty structure and basta!
         if ((ids?.length ?? 0) === 0) return { records: [], errors: [] };
         // Let's start with ids
@@ -634,7 +640,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
         for (let i = 0; i < bodies?.length; i += MAX_DAPI_TOOLING_BATCH_SIZE) {
             const bodiesInBatch = bodies.slice(i, i + MAX_DAPI_TOOLING_BATCH_SIZE);
             batchCount++;
-            const results: any[] = await Promise.all(bodiesInBatch.map(async (body) => {
+            const results: any[] = await LargeProcessor.runAll<any>(bodiesInBatch.map((body) => async () => {
                 try {
                     // Call the tooling composite request
                     const results = await this._connection.tooling.request({
@@ -650,7 +656,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
                     // Returning this results
                     return results;
                 } catch (error) {
-                    logger.log(`Error here: ${error}`);
+                    if (debugEnabled) logger?.debug(`dependenciesQuery batch error: ${JSON.stringify(error ?? {})}`);
                     // Update the stats
                     nbErrors++;
                     // Returning undefined (it will be filtered out afterwards)
@@ -658,29 +664,26 @@ export class SalesforceManager implements SalesforceManagerIntf {
                 } finally {
                     // Update the stats
                     nbPending--;
-                    logger?.log(
-                        `Processing ${bodies?.length} Tooling composite ${bodies?.length>1?'queries':'query'}... `+
-                        `🙌 Number of batch done: ${batchCount}, `+
-                        `⏳ Pending: (${nbPending}), `+
-                        `✅ Done: (${nbDone}), `+
-                        `❌ Error: (${nbErrors})`
-                    );
+                    if (debugEnabled) {
+                        logger?.debug(
+                            `dependenciesQuery progress: total=${bodies?.length}, batchesDone=${batchCount}, `+
+                            `pending=${nbPending}, done=${nbDone}, errors=${nbErrors}`
+                        );
+                    }
                 }
             }));
             allResults.push(... results.filter((result) => result !== undefined));
         }
         logger?.log(`Got all the results`);
-        /** @type {any[]} */
         const dependenciesRecords: any[] = []; // dependencies records
-        /** @type {string[]} */
         const idsInError: string[] = []; // ids contained in a batch that has an error
         const duplicateCheck = new Set(); // Using a set to filter duplicates
         allResults.forEach((result) => {
             result.compositeResponse.forEach((response: any) => {
                 if (response.httpStatusCode === 200) {
-                    logger?.log(`This response had a code: 200 so we add the ${response?.body?.records?.length} records`);
+                    if (debugEnabled) logger?.debug(`dependenciesQuery status=200 records=${response?.body?.records?.length ?? 0}`);
                     dependenciesRecords.push(... response.body.records // multiple response in one batch
-                        .map((/** @type {any} */r: any) => { // Duplicates will be "null" and will get removed in further filter() call 
+                        .map((r: any) => { // Duplicates will be "null" and will get removed in further filter() call 
                             const id = this.caseSafeId(r.MetadataComponentId);
                             const refId = this.caseSafeId(r.RefMetadataComponentId);
                             const key = `${id}-${refId}`;
@@ -739,24 +742,25 @@ export class SalesforceManager implements SalesforceManagerIntf {
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         // Now we can start, log some message
         logger?.log(`Starting to call Metadata API for ${metadatas?.length} types...`);
+        const debugEnabled = logger?.isDebugEnabled?.() ?? false;
         // First, if the metadatas contains an item with member='*' we want to list for this type and substitute the '*' with the fullNames
-        await Promise.all(
+        await LargeProcessor.runAll<void>(
             // only get the types that have at least '*' once
             metadatas.filter((m) => m.members?.includes('*'))
             // then turn this filtered list into a list of promises
-            .map(async (metadata) => { // using async as we just want to run parallel processes without manipulating their return values
+            .map((metadata) => async () => { // using async as we just want to run parallel processes without manipulating their return values
                 try {
                     // each promise will call the List metadata api operation for a specific type
                     const members = await this._connection.metadata.list([{ type: metadata.type }]);
                     // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
                     this._watchDog?.afterRequest(); // if limit has been reached, we reject the promise with a specific error and stop the process
                     // clear the members (remove the stars)
-                    metadata.members = metadata.members.filter((/** @type {string} */ b: string) => b !== '*'); // 'metadatas' will be altered!
+                    metadata.members = metadata.members.filter((b: string) => b !== '*'); // 'metadatas' will be altered!
                     // Add the rerieved fullNames to the members array
                     MAKE_IT_AN_ARRAY(members).forEach(f => { metadata.members.push(f.fullName); }); 
                     // don't return anything we are just altering the metadata.members.
                 } catch (error) {
-                    logger?.log(`The method metadata.list returned an error: ${JSON.stringify(error)}`);
+                    if (debugEnabled) logger?.debug(`metadata.list error: ${JSON.stringify(error ?? {})}`);
                     // We reject the promise with the current error and additional context information
                     // Throw the error
                     throw new SalesforceError(
@@ -775,33 +779,30 @@ export class SalesforceManager implements SalesforceManagerIntf {
         // All the promises to list the types have been done and potentially altered the 'metadatas' array
         // At this point, no more wildcard, only types and legitime member values in 'metadatas'.
         // Second, we want to read the metatda for these types and members
-        /** @type {Promise<void>[]} */
-        const promises: Promise<void>[] = [];
+        const tasks: Array<() => Promise<void>> = [];
         const response = new Map(); 
         metadatas.forEach((metadata) => {
             // Init the response array for this type 
-            logger?.log(`Init the response array for this type: ${metadata.type}`);
+            if (debugEnabled) logger?.debug(`Init response array for type=${metadata.type}`);
             response.set(metadata.type, []);
             // The API call to Metadata.Read will be done in slice, if for one type we have more than a certain amount 
             // of members we will do more queries
-            logger?.log(`Starting looping for type ${metadata.type} and metadata.members?.length=${metadata.members?.length}`);
+            if (debugEnabled) logger?.debug(`Looping type=${metadata.type} members=${metadata.members?.length ?? 0}`);
             while (metadata.members?.length > 0) {
                 // Slice the members in batch of MAX_MEMBERS_IN_METADATAAPI_REQUEST_SIZE
                 const currentMembers = metadata.members.splice(0, MAX_MEMBERS_IN_METADATAAPI_REQUEST_SIZE); // get the first members
                 // These first members have been removed from metadata.members (so next time we don't see them anymore
-                promises.push(new Promise((resolve, reject) => {
-                    logger?.log(`Try to call metadata read for type ${metadata.type} and currentMembers=${currentMembers}`);
-                    this._connection.metadata.read(metadata.type, currentMembers).then((/** @type {any} */ members: any) => {
+                tasks.push(async () => {
+                    if (debugEnabled) logger?.debug(`metadata.read type=${metadata.type} members=${currentMembers.length}`);
+                    try {
+                        const members = await this._connection.metadata.read(metadata.type, currentMembers);
                         // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
                         this._watchDog?.afterRequest(); // if limit has been reached, we reject the promise with a specific error and stop the process
                         // Add the received member to the global response (there might be another batch with the same type!)
                         response.get(metadata.type).push(... MAKE_IT_AN_ARRAY(members));
-                        resolve();
-                    }).catch((/** @type {Error} */ error: Error) => {
-                        logger?.log(`The method metadata.read returned an error: ${JSON.stringify(error)}`);
-                        // We reject the promise with the current error and additional context information
-                        // Throw the error
-                        reject(new SalesforceError(
+                    } catch (error) {
+                        if (debugEnabled) logger?.debug(`metadata.read error: ${JSON.stringify(error ?? {})}`);
+                        throw new SalesforceError(
                             `There was an error while calling Metadata API to read a list of metadata.`,
                             'METADATA_READ',
                             { 
@@ -811,14 +812,17 @@ export class SalesforceManager implements SalesforceManagerIntf {
                                 'Cause': JSON.stringify(error ?? {}) || 'N/A',
                                 'Where': 'SalesforceManagerImpl.readMetadata'
                             }
-                        ));
-                    });
-                }));
+                        );
+                    }
+                });
             }
         }); // Promises are ready to be run
-        logger?.log(`Calling all promises: ${promises?.length}`);
-        await Promise.all(promises); // response will be updated in the promises
-        logger?.log(`All promises ended and response is like: ${JSON.stringify(Array.from(response.entries()))}`);
+        if (debugEnabled) logger?.debug(`Calling metadata.read promises count=${tasks?.length}`);
+        await LargeProcessor.runAll<void>(tasks); // response will be updated in the promises
+        logger?.log(`Done calling Metadata API for ${metadatas?.length} types.`);
+        if (debugEnabled) {
+            logger?.debug(`Metadata API returned total records=${Array.from(response.values()).reduce((acc, arr) => acc + arr.length, 0)}`);
+        }
         return response;
     }
 
@@ -837,11 +841,10 @@ export class SalesforceManager implements SalesforceManagerIntf {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         logger?.log(`Reading metadata at scale for type=${type} and ${ids?.length ?? 0} id(s).`);
+        const debugEnabled = logger?.isDebugEnabled?.() ?? false;
         // if no ids then just return empty array and basta!
         if ((ids?.length ?? 0) === 0) return [];
-        /** @type {any[]} */
         const bodies: any[] = [];
-        /** @type {any} */
         let currentBody: any;
         ids.forEach((id, i) => {
             if (!currentBody || currentBody.compositeRequest?.length === MAX_COMPOSITE_REQUEST_SIZE) {
@@ -859,7 +862,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
         for (let i = 0; i < bodies?.length; i += MAX_ATSCALE_TOOLING_BATCH_SIZE) {
             const bodiesInBatch = bodies.slice(i, i + MAX_ATSCALE_TOOLING_BATCH_SIZE);
             batchCount++;
-            const results = await Promise.all(bodiesInBatch.map(async (body) => {
+            const results = await LargeProcessor.runAll<any>(bodiesInBatch.map((body) => async () => {
                 try {
                     // Call the tooling composite request
                     const results = await this._connection.tooling.request({
@@ -875,7 +878,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
                     // Returning this results
                     return results;
                 } catch (error) {
-                    logger.log(`Error here: ${error}`);
+                    if (debugEnabled) logger?.debug(`readMetadataAtScale batch error: ${JSON.stringify(error ?? {})}`);
                     // Update the stats
                     nbErrors++;
                     // In case of error we return undefined specifically
@@ -883,21 +886,19 @@ export class SalesforceManager implements SalesforceManagerIntf {
                 } finally {
                     // Update the stats
                     nbPending--;
-                    logger?.log(
-                        `Processing ${bodies?.length} Tooling composite ${bodies?.length>1?'queries':'query'}... `+
-                        `🙌 Number of batch done: ${batchCount}, `+
-                        `⏳ Pending: (${nbPending}), `+
-                        `✅ Done: (${nbDone}), `+
-                        `❌ Error: (${nbErrors})`
-                    );
+                    if (debugEnabled) {
+                        logger?.debug(
+                            `readMetadataAtScale progress: total=${bodies?.length}, batchesDone=${batchCount}, `+
+                            `pending=${nbPending}, done=${nbDone}, errors=${nbErrors}`
+                        );
+                    }
                 }
             }));
             allResults.push(... results.filter((result) => result !== undefined)); // only add the non empty results
         }
-        /** @type {any[]} */
         const records: any[] = [];
         allResults.forEach((result) => {
-            result.compositeResponse.forEach((/** @type {any} */ response: any) => {
+            result.compositeResponse.forEach((response: any) => {
                 if (response.httpStatusCode === 200) {
                     records.push(response.body); // here only one record per response 
                 } else {
@@ -1048,9 +1049,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
         // Check another time the limit
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         const timestamp = Date.now();
-        /** @type {any[]} */
         const bodies: any[] = [];
-        /** @type {any} */
         let currentBody: any;
         let countBatches = 0;
         apexClasses.filter(apexClass => apexClass.Body).forEach((apexClass) => {
@@ -1082,7 +1081,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
                 body: { MetadataContainerId: '@{container.id}', ContentEntityId: apexClass.Id, Body: apexClass.Body }
             });
         });
-        const promises = bodies.map(async (body) => {
+        const responses = await LargeProcessor.runAll<any>(bodies.map((body) => async () => {
             // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
             this._watchDog?.afterRequest(); // if limit has been reached, we reject the promise with a specific error and stop the process
             // Call the tooling composite request
@@ -1092,12 +1091,10 @@ export class SalesforceManager implements SalesforceManagerIntf {
                 body: JSON.stringify(body), 
                 headers: { 'Content-Type': 'application/json' }
             });    
-        });
-        const responses = await Promise.all(promises);
+        }));
         // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
         this._watchDog?.afterRequest(); // if limit has been reached, an error will be thrown here
         // Map the responses to finalResult
-        /** @type {Map<string, { isSuccess: boolean, reasons?: string>}[]} */
         const finalResult: Map<string, { isSuccess: boolean; reasons?: string[]; }> = new Map();
         responses?.forEach(response => 
             response.compositeResponse?.filter(compositeResponse => compositeResponse?.referenceId?.startsWith('01p'))

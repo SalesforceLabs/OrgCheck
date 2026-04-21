@@ -1,7 +1,7 @@
 import { ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
@@ -59,18 +59,18 @@ abstract class AbstractRecipeGroups implements ServedRecipe<SfdcGroup[], Table> 
         // Augment and filter data
         
         const array: SfdcGroup[] = [];
-        await Processor.forEach(groups, async (group: SfdcGroup) => {
+        await MediumProcessor.forEach(groups, async (group: SfdcGroup) => {
             // Augment data
-            group.directUserRefs = await Processor.map(
+            group.directUserRefs = (await MediumProcessor.map(
                 group.directUserIds,
                 (id: string) => users.get(id),
                 (id: string) => users.has(id)
-            );
-            group.directGroupRefs = await Processor.map(
+            ))?.filter(n => n !== undefined);
+            group.directGroupRefs = (await MediumProcessor.map(
                 group.directGroupIds,
                 (id: string) => groups.get(id),
                 (id: string) => groups.has(id)
-            );
+            ))?.filter(n => n !== undefined);
             // Filter data
             if (this.filterFunction(group) === true) {
                 array.push(group);

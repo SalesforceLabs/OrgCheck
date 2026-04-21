@@ -3,7 +3,7 @@ import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
 import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 
@@ -33,19 +33,17 @@ export class DatasetStaticResources implements Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${staticResourceRecords?.length} static resources...`);
         const staticResourceDependencies = await sfdcManager.dependenciesQuery(
-            await Processor.map(staticResourceRecords, (/** @type {any} */ record: any) => sfdcManager.caseSafeId(record.Id)), 
+            await MediumProcessor.map(staticResourceRecords, (record: any) => sfdcManager.caseSafeId(record.Id)), 
             logger
         );
 
         logger?.log(`Parsing ${staticResourceRecords?.length} static resources...`);
-        /** @type {Map<string, SfdcStaticResource>} */
-        const staticResources: Map<string, SfdcStaticResource> = new Map(await Processor.map(staticResourceRecords, async (/** @type {any} */ record: any) => {
+        const staticResources: Map<string, SfdcStaticResource> = new Map(await MediumProcessor.map(staticResourceRecords, async (record: any) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
             
             // Create the instance
-            /** @type {SfdcStaticResource} */
             const staticResource: SfdcStaticResource = staticResourceDataFactory.createWithScore({
                 properties: {
                     id: id,

@@ -6,7 +6,7 @@ import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset
 import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SfdcPermissionSetLicense }from 'src/api/data/orgcheck-api-data-permissionsetlicense';
 import { SfdcPermissionSet }from 'src/api/data/orgcheck-api-data-permissionset';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { PermissionSetLicensesTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-permissionsetlicenses';
 
 export class RecipePermissionSetLicenses implements ServedRecipe<SfdcPermissionSetLicense[], Table> {
@@ -59,12 +59,12 @@ export class RecipePermissionSetLicenses implements ServedRecipe<SfdcPermissionS
         if (!permissionSets) throw new Error(`RecipePermissionSetLicenses: Data from dataset alias 'PERMISSIONSETS' was undefined.`);
 
         // Augment data
-        await Processor.forEach(permissionSetLicenses, async (permissionSetLicense: SfdcPermissionSetLicense) => {
-            permissionSetLicense.permissionSetRefs = await Processor.map(
+        await MediumProcessor.forEach(permissionSetLicenses, async (permissionSetLicense: SfdcPermissionSetLicense) => {
+            permissionSetLicense.permissionSetRefs = (await MediumProcessor.map(
                 permissionSetLicense.permissionSetIds,
                 (id: string) => permissionSets.get(id),
                 (id: string) => permissionSets.has(id)
-            );
+            ))?.filter(n => n !== undefined);
         });
 
         // Return data

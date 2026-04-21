@@ -2,7 +2,7 @@ import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
 import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcObject } from 'src/api/data/orgcheck-api-data-object';
 
@@ -100,9 +100,9 @@ export class DatasetObjects implements Dataset {
         const nbTriggersPerEntityStatus = results[1][6];
 
         const entitiesByName = {};
-        const qualifiedApiNames = await Processor.map(
+        const qualifiedApiNames = await MediumProcessor.map(
             entities, 
-            (/** @type {any} */ record: any) => { 
+            (record: any) => { 
                 entitiesByName[record.QualifiedApiName] = record; 
                 return record.QualifiedApiName;
             }
@@ -117,26 +117,25 @@ export class DatasetObjects implements Dataset {
             }
         }
         await Promise.all([
-            Processor.forEach(nbCustomFieldsPerEntity, async (/** @type {any} */ r: any) => SetCounter(r.EntityDefinitionId, 'cf', r.NbCustomFields)),
-            Processor.forEach(nbPageLayoutsPerEntity, async (/** @type {any} */ r: any) => SetCounter(r.EntityDefinitionId, 'pl', r.NbPageLayouts)),
-            Processor.forEach(nbRecordTypesPerEntity, async (/** @type {any} */ r: any) => SetCounter(r.EntityDefinitionId, 'rt', r.NbRecordTypes)),
-            Processor.forEach(nbWorkflowRulesPerEntity, async (/** @type {any} */ r: any) => SetCounter(r.TableEnumOrId, 'wf', r.NbWorkflowRules)),
-            Processor.forEach(nbValidationRulesPerEntity, async (/** @type {any} */ r: any) => SetCounter(r.EntityDefinitionId, 'vr', r.NbValidationRules)),
-            Processor.forEach(nbTriggersPerEntityStatus, async (/** @type {any} */ r: any) => SetCounter(r.EntityDefinitionId, 'ap', r.NbTriggers))
+            MediumProcessor.forEach(nbCustomFieldsPerEntity, async (r: any) => SetCounter(r.EntityDefinitionId, 'cf', r.NbCustomFields)),
+            MediumProcessor.forEach(nbPageLayoutsPerEntity, async (r: any) => SetCounter(r.EntityDefinitionId, 'pl', r.NbPageLayouts)),
+            MediumProcessor.forEach(nbRecordTypesPerEntity, async (r: any) => SetCounter(r.EntityDefinitionId, 'rt', r.NbRecordTypes)),
+            MediumProcessor.forEach(nbWorkflowRulesPerEntity, async (r: any) => SetCounter(r.TableEnumOrId, 'wf', r.NbWorkflowRules)),
+            MediumProcessor.forEach(nbValidationRulesPerEntity, async (r: any) => SetCounter(r.EntityDefinitionId, 'vr', r.NbValidationRules)),
+            MediumProcessor.forEach(nbTriggersPerEntityStatus, async (r: any) => SetCounter(r.EntityDefinitionId, 'ap', r.NbTriggers))
         ]) 
 
         // Create the map
         logger?.log(`Parsing ${objectsDescription?.length} objects...`);
-        const objects: Map<string, SfdcObject> = new Map(await Processor.map(
+        const objects: Map<string, SfdcObject> = new Map(await MediumProcessor.map(
             objectsDescription,
-            (/** @type {any} */ object: any) => {
+            (object: any) => {
 
                 const type = sfdcManager.getObjectType(object.name, object.customSetting)
                 const entity = entitiesByName[object.name];
                 const durableId = entity.DurableId;
 
                 // Create the instance
-                /** @type {SfdcObject} */
                 const obj: SfdcObject = objectDataFactory.createWithScore({
                     properties: {
                         id: object.name,
@@ -160,7 +159,7 @@ export class DatasetObjects implements Dataset {
                 // Add it to the map  
                 return [ obj.id, obj ];
             },
-            (/** @type {any} */ object: any) => {
+            (object: any) => {
                 return qualifiedApiNames?.includes(object.name) ? true : false;
             }
         ));

@@ -4,7 +4,7 @@ import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
 import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcField } from 'src/api/data/orgcheck-api-data-field';
@@ -47,16 +47,16 @@ export class DatasetCustomFields implements Dataset {
 
         logger?.log(`Parsing ${customFieldRecords?.length} custom fields...`);        
         
-        const entityInfoByCustomFieldId: Map<string, any> = new Map(await Processor.map(
+        const entityInfoByCustomFieldId: Map<string, any> = new Map(await MediumProcessor.map(
             customFieldRecords, 
-            (/** @type {any} */ record: any) => [ 
+            (record: any) => [ 
                 sfdcManager.caseSafeId(record.Id), 
                 { 
                     qualifiedApiName: record.EntityDefinition.QualifiedApiName, 
                     isCustomSetting: record.EntityDefinition.IsCustomSetting 
                 }
             ],
-            (/** @type {any} */ record: any) => {
+            (record: any) => {
                 if (!record.EntityDefinition) return false; // ignore if no EntityDefinition linked
                 if (EXCLUDED_OBJECT_PREFIXES.includes(record.EntityDefinition.KeyPrefix)) return false; // ignore these objects
                 if (record.EntityDefinition.QualifiedApiName?.endsWith('_hd')) return false; // ignore the trending historical objects
@@ -67,7 +67,7 @@ export class DatasetCustomFields implements Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${customFieldRecords?.length} custom fields...`);
         const customFieldsDependencies = await sfdcManager.dependenciesQuery(
-            await Processor.map(customFieldRecords, (/** @type {any} */ record: any) => sfdcManager.caseSafeId(record.Id)), 
+            await MediumProcessor.map(customFieldRecords, (record: any) => sfdcManager.caseSafeId(record.Id)), 
             logger
         );
 
@@ -81,7 +81,7 @@ export class DatasetCustomFields implements Dataset {
         );
 
         // Create the map
-        const customFields: Map<string, SfdcField> = new Map(await Processor.map(records, (/** @type {any} */ record: any) => {
+        const customFields: Map<string, SfdcField> = new Map(await MediumProcessor.map(records, (record: any) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
@@ -90,7 +90,6 @@ export class DatasetCustomFields implements Dataset {
             const entityInfo = entityInfoByCustomFieldId.get(id);
 
             // Create the instance
-            /** @type {SfdcField} */
             const customField: SfdcField = fieldDataFactory.create({
                 properties: {
                     id: id,

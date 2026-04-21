@@ -3,7 +3,7 @@ import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
 import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcFieldPermission } from 'src/api/data/orgcheck-api-data-fieldpermission';
 
@@ -35,8 +35,8 @@ export class DatasetFieldPermissions implements Dataset {
 
         // Create the map
         logger?.log(`Parsing ${permissions?.length} Field Permissions...`);
-        const fieldPermissions: Map<string, SfdcFieldPermission> = new Map(await Processor.map(permissions, 
-            (/** @type {any} */ record: any) => {
+        const fieldPermissions: Map<string, SfdcFieldPermission> = new Map(await MediumProcessor.map(permissions, 
+            (record: any) => {
                 // Get the ID15 of this parent
                 const parentId = sfdcManager.caseSafeId(record.Parent.IsOwnedByProfile === true ? record.Parent.ProfileId : record.ParentId);
 
@@ -45,7 +45,6 @@ export class DatasetFieldPermissions implements Dataset {
                 const fieldName = indeOfDot === -1 ? record.Field : record.Field.substring(indeOfDot + 1);
 
                 // Create the instance
-                /** @type {SfdcFieldPermission} */
                 const fieldPermission: SfdcFieldPermission = fieldPermissionDataFactory.create({
                     properties: {
                         fieldApiName: fieldName,
@@ -58,7 +57,7 @@ export class DatasetFieldPermissions implements Dataset {
                 // Add the app in map
                 return [ `${record.Field}-${parentId}`, fieldPermission ];
             }, 
-            (/** @type {any} */ record: any) => {
+            (record: any) => {
                 // We do not want records with no Parent structure
                 if (!record.Parent) return false;
                 // We do not want records with no ParentId

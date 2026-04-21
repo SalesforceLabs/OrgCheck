@@ -2,7 +2,7 @@ import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
 import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcLightningPage } from 'src/api/data/orgcheck-api-data-lightningpage';
@@ -34,7 +34,7 @@ export class DatasetLightningPages implements Dataset {
         const pageRecords = results[0];
 
         // Get the page Ids
-        const pageIds = await Processor.map(pageRecords, (/** @type {any} */ record: any) => sfdcManager.caseSafeId(record.Id))
+        const pageIds = await MediumProcessor.map(pageRecords, (record: any) => sfdcManager.caseSafeId(record.Id))
 
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${pageRecords?.length} lightning pages...`);
@@ -42,13 +42,12 @@ export class DatasetLightningPages implements Dataset {
 
         // Create the map
         logger?.log(`Parsing ${pageRecords?.length} lightning pages...`);
-        const pages: Map<string, SfdcLightningPage> = new Map(await Processor.map(pageRecords, (/** @type {any} */ record: any) => {
+        const pages: Map<string, SfdcLightningPage> = new Map(await MediumProcessor.map(pageRecords, (record: any) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            /** @type {SfdcLightningPage} */
             const page: SfdcLightningPage = pageDataFactory.create({
                 properties: {
                     id: id,
@@ -78,7 +77,7 @@ export class DatasetLightningPages implements Dataset {
         const flexipageMetadataRecords = await sfdcManager.readMetadataAtScale('FlexiPage', pageIds, [ 'FIELD_INTEGRITY_EXCEPTION', 'UNKNOWN_EXCEPTION' ], logger);
 
         logger?.log(`Parsing ${flexipageMetadataRecords?.length} lightning pages metadata information...`);
-        await Processor.forEach(flexipageMetadataRecords, async (/** @type {any} */ metadataRecord: any) => {
+        await MediumProcessor.forEach(flexipageMetadataRecords, async (metadataRecord: any) => {
 
             // Get the ID15 of this lightning page
             const id = sfdcManager.caseSafeId(metadataRecord.Id);
@@ -120,7 +119,7 @@ export class DatasetLightningPages implements Dataset {
         });
 
         // Compute the score of all items
-        await Processor.forEach(pages, async (/** @type {SfdcLightningPage} */ page: SfdcLightningPage) => {
+        await MediumProcessor.forEach(pages, async (page: SfdcLightningPage) => {
             pageDataFactory.computeScore(page);
         });
 

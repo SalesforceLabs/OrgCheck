@@ -3,7 +3,7 @@ import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
 import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcCustomTab } from 'src/api/data/orgcheck-api-data-customtab';
@@ -38,18 +38,17 @@ export class DatasetCustomTabs implements Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${customTabRecords?.length} custom tabs...`);
         const customTabDependencies = await sfdcManager.dependenciesQuery(
-            await Processor.map(customTabRecords, (/** @type {any} */ record) => sfdcManager.caseSafeId(record.Id)), 
+            await MediumProcessor.map(customTabRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
             logger
         );
 
         logger?.log(`Parsing ${customTabRecords?.length} custom tabs...`);
-        const customTabs: Map<string, SfdcCustomTab> = new Map(await Processor.map(customTabRecords, (/** @type {any} */ record) => {
+        const customTabs: Map<string, SfdcCustomTab> = new Map(await MediumProcessor.map(customTabRecords, (record) => {
 
             // Get the ID15 of this custom field
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            /** @type {SfdcCustomTab} */
             const customTab = customTabDataFactory.createWithScore({
                 properties: {
                     id: id,

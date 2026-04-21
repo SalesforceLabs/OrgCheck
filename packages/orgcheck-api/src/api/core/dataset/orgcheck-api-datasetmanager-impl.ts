@@ -50,6 +50,7 @@ import { DatasetWeblinks } from 'src/api/dataset/orgcheck-api-dataset-weblinks';
 import { DatasetWorkflows } from 'src/api/dataset/orgcheck-api-dataset-workflows';
 import { LoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
+import { LargeProcessor } from 'src/api/core/orgcheck-api-processor';
 
 /**
  * @description Dataset manager
@@ -150,7 +151,7 @@ export class DatasetManager implements DatasetManagerIntf {
         if (datasets instanceof Array === false) {
             throw new DatasetManagerError('', `The given datasets is not an instance of Array (typeof= ${typeof datasets}).`);
         }
-        const data: any[] = await Promise.all(datasets.map(async (dataset) => {
+        const data: any[] = await LargeProcessor.runAll<any>(datasets.map((dataset) => async () => {
             const alias      = (typeof dataset === 'string' ? dataset : dataset.alias);
             const cacheKey   = (typeof dataset === 'string' ? dataset : dataset.cacheKey);
             const parameters = (typeof dataset === 'string' ? undefined : dataset.parameters);

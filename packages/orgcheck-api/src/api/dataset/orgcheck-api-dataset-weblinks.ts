@@ -3,7 +3,7 @@ import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
 import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcWebLink } from 'src/api/data/orgcheck-api-data-weblink';
@@ -38,19 +38,18 @@ export class DatasetWeblinks implements Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${webLinkRecords?.length} web links...`);
         const webLinkDependencies = await sfdcManager.dependenciesQuery(
-            await Processor.map(webLinkRecords, (/** @type {any} */ record: any) => sfdcManager.caseSafeId(record.Id)), 
+            await MediumProcessor.map(webLinkRecords, (record: any) => sfdcManager.caseSafeId(record.Id)), 
             logger
         );
 
         // Create the map
         logger?.log(`Parsing ${webLinkRecords?.length} weblinks...`);
-        const webLinks: Map<string, SfdcWebLink> = new Map(await Processor.map(webLinkRecords, async (/** @type {any} */ record: any) => {
+        const webLinks: Map<string, SfdcWebLink> = new Map(await MediumProcessor.map(webLinkRecords, async (record: any) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            /** @type {SfdcWebLink} */
             const webLink: SfdcWebLink = webLinkDataFactory.createWithScore({
                 properties: {
                     id: id,

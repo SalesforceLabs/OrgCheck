@@ -1,9 +1,9 @@
-import { Data, DataWithScore } from 'src/api/core/data/orgcheck-api-data';
+import { DataWithScore } from 'src/api/core/data/orgcheck-api-data';
 import { DataMatrixIntf } from 'src/api/core/data/orgcheck-api-data-matrix';
 import { DatasetManagerIntf } from 'src/api/core/dataset/orgcheck-api-datasetmanager';
 import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
 import { LoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { RecipeAliases } from 'src/api/core/recipe/orgcheck-api-recipes-aliases';
 import { RecipeApexClasses, RecipeApexTests, RecipeApexUncompiled } from 'src/api/recipe/orgcheck-api-recipe-apexclasses';
 import { RecipeApexTriggers } from 'src/api/recipe/orgcheck-api-recipe-apextriggers';
@@ -347,8 +347,7 @@ export class RecipeManager implements RecipeManagerIntf {
         // STEP 1. Extract recipes in the collection
         // -------------------
         this._logger.log(section, 'How many recipes this recipe collection has?');
-        /** @type {string[]}} */
-        let recipes: string[];
+        let recipes: RecipeAliases[];
         try {
             recipes = recipeCollection.ingredients(this._logger.toSimpleLogger(section), parameters);
         } catch(error) {
@@ -359,11 +358,11 @@ export class RecipeManager implements RecipeManagerIntf {
         // -------------------
         // STEP 2. Run the recipes in the collection
         // -------------------
-        const data: Map<RecipeAliases, Data[]> = new Map();
+        const data: Map<RecipeAliases, DataWithScore[]> = new Map();
         const recipesInError: Map<RecipeAliases, Error> = new Map();
         try {
             this._logger.optimisticByPass = true;
-            await Processor.forEach(recipes, async (recipe: RecipeAliases) => {
+            await MediumProcessor.forEach(recipes, async (recipe: RecipeAliases) => {
                 try {
                     const recipeData = await this._prepareRecipe(recipe, parameters);
                     if (recipeData && Array.isArray(recipeData)) {
@@ -396,7 +395,7 @@ export class RecipeManager implements RecipeManagerIntf {
         const finalData: DataCollectionStatisticsIntf[] = [];
         try {
             // Add the successful recipes and their stats in the final list
-            await Processor.forEach(data, async ( records: DataWithScore[], recipe: RecipeAliases) => {
+            await MediumProcessor.forEach(data, (records: DataWithScore[], recipe: RecipeAliases) => {
                 // We get only the bad records (with score > 0)
                 // Potentially we can be asked to filter records on certain rules only (see `listRules`)
                 //   In this scenario, bad records are filtered and their badReasonIds as well

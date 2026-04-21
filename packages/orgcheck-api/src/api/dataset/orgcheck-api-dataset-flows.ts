@@ -2,7 +2,7 @@ import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
 import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcFlow, SfdcFlowVersion } from 'src/api/data/orgcheck-api-data-flow';
@@ -56,9 +56,8 @@ export class DatasetFlows implements Dataset {
         
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${flowDefRecords?.length} flow versions...`);
-        /** @type {string[]} */ 
         const flowDependenciesIds: string[] = [];
-        await Processor.forEach(flowDefRecords, async (/** @type {any} */ record: any) => {
+        await MediumProcessor.forEach(flowDefRecords, async (record: any) => {
             // Add the ID15 of the most interesting flow version
             flowDependenciesIds.push(sfdcManager.caseSafeId(record.ActiveVersionId ?? record.LatestVersionId));
             // Add the ID15 of the flow definition
@@ -67,12 +66,11 @@ export class DatasetFlows implements Dataset {
         const flowDefinitionsDependencies = await sfdcManager.dependenciesQuery(flowDependenciesIds, logger);
         
         // List of active flows that we need to get information later (with Metadata API)
-        /** @type {string[]} */ 
         const activeFlowIds: string[] = [];
 
         // Create the map
         logger?.log(`Parsing ${flowDefRecords?.length} flow definitions...`);
-        const flowDefinitions: Map<string, SfdcFlow> = new Map(await Processor.map(flowDefRecords, (/** @type {any} */ record: any) => {
+        const flowDefinitions: Map<string, SfdcFlow> = new Map(await MediumProcessor.map(flowDefRecords, (record: any) => {
         
             // Get the ID15 of this flow definition and others
             const id = sfdcManager.caseSafeId(record.Id);
@@ -80,7 +78,6 @@ export class DatasetFlows implements Dataset {
             const latestVersionId = sfdcManager.caseSafeId(record.LatestVersionId);
 
             // Create the instance
-            /** @type {SfdcFlow} */
             const flowDefinition: SfdcFlow = flowDefinitionDataFactory.create({
                     properties: {
                     id: id,
@@ -108,7 +105,7 @@ export class DatasetFlows implements Dataset {
 
         // Add count of Flow verions (whatever they are active or not)
         logger?.log(`Parsing ${flowVersionsByDefRecords?.length} flow versions...`);
-        await Processor.forEach(flowVersionsByDefRecords, async (/** @type {any} */ record: any) => {
+        await MediumProcessor.forEach(flowVersionsByDefRecords, async (record: any) => {
                 
             // Get the ID15s of the parent flow definition
             const parentId = sfdcManager.caseSafeId(record.DefinitionId);
@@ -134,7 +131,7 @@ export class DatasetFlows implements Dataset {
 
         // Lets parse the flow versions by ourselves
         logger?.log(`Parsing ${records?.length} flow versions from Tooling API...`);
-        await Processor.forEach(records, async (/** @type {any} */ record: any)=> {
+        await MediumProcessor.forEach(records, async (record: any)=> {
 
             // Get the ID15s of this flow version and parent flow definition
             const id = sfdcManager.caseSafeId(record.Id);
@@ -142,7 +139,6 @@ export class DatasetFlows implements Dataset {
             const violations = lfsViolations.get(id) ?? [];
 
             // Create the instance
-            /** @type {SfdcFlowVersion} */
             const activeFlowVersion: SfdcFlowVersion = flowVersionDataFactory.create({
                 properties: {
                     id: id,
@@ -175,7 +171,7 @@ export class DatasetFlows implements Dataset {
                 }
             });
             if (activeFlowVersion.isProcessBuilder === true) {
-                record.Metadata.processMetadataValues?.forEach((/** @type {any} */ m: any) => {
+                record.Metadata.processMetadataValues?.forEach((m: any) => {
                     if (m.name === 'ObjectType') activeFlowVersion.sobject = m.value.stringValue;
                     if (m.name === 'TriggerType') activeFlowVersion.triggerType = m.value.stringValue;
                 });
@@ -199,7 +195,7 @@ export class DatasetFlows implements Dataset {
         });
 
         // Compute the score of all definitions
-        await Processor.forEach(flowDefinitions, async (/** @type {SfdcFlow} */ flowDefinition: SfdcFlow) => flowDefinitionDataFactory.computeScore(flowDefinition));
+        await MediumProcessor.forEach(flowDefinitions, async (flowDefinition: SfdcFlow) => flowDefinitionDataFactory.computeScore(flowDefinition));
 
         // Return data as map
         logger?.log(`Done`);

@@ -5,7 +5,7 @@ import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SfdcEmailTemplate }from 'src/api/data/orgcheck-api-data-emailtemplate';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 import { EmailTemplatesTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-emailtemplates';
 
@@ -57,7 +57,7 @@ export class RecipeEmailTemplates implements ServedRecipe<SfdcEmailTemplate[], T
 
         // Filter data
         const array: SfdcEmailTemplate[] = [];
-        await Processor.forEach(emailTemplates, async (emailTemplate: SfdcEmailTemplate) => {
+        await MediumProcessor.forEach(emailTemplates, async (emailTemplate: SfdcEmailTemplate) => {
             if (namespace === OrgCheckGlobalParameter.ALL_VALUES || emailTemplate.package === namespace) {
                 array.push(emailTemplate);
             }

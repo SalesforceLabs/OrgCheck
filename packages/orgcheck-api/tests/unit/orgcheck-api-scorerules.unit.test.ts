@@ -13,7 +13,7 @@ describe('orgcheck-api-scorerules', () => {
     it('Check if getAllScoreRulesAsDataMatrix() is returning something good', async () => {
         // const numberOfRules = SecretSauce.AllScoreRules?.length;
         const disctinctItems = new Set();
-        SecretSauce.AllScoreRules.forEach((/** @type {ScoreRule} */ rule: ScoreRule) => rule.applicable.forEach((item) => disctinctItems.add(item)));
+        SecretSauce.AllScoreRules.forEach((rule: ScoreRule) => rule.applicable.forEach((item) => disctinctItems.add(item)));
         const api = createAPIforUnitTests(false);
         const mixture = await api.prepareData(RecipeAliases.SCORE_RULES, '', '', '');
         const table = await api.serveData(RecipeAliases.SCORE_RULES, mixture);

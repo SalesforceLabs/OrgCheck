@@ -5,7 +5,7 @@ import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SfdcWebLink }from 'src/api/data/orgcheck-api-data-weblink';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SfdcObject }from 'src/api/data/orgcheck-api-data-object';
 import { SfdcObjectType }from 'src/api/data/orgcheck-api-data-objecttype';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
@@ -70,7 +70,7 @@ export class RecipeWebLinks implements ServedRecipe<SfdcWebLink[], Table> {
         // Augment and filter data
         
         const array: SfdcWebLink[] = [];
-        await Processor.forEach(weblinks, async (/** @type {SfdcWebLink} */weblink: SfdcWebLink) => {
+        await MediumProcessor.forEach(weblinks, async (weblink: SfdcWebLink) => {
             // Augment data
             const objectRef = objects.get(weblink.objectId);
             if (objectRef) {

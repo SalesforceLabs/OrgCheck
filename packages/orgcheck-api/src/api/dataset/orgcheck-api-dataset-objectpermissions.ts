@@ -2,7 +2,7 @@ import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
 import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcObjectPermission } from 'src/api/data/orgcheck-api-data-objectpermission';
 
@@ -33,11 +33,10 @@ export class DatasetObjectPermissions implements Dataset {
         // Create the map
         const permissionRecords = results[0];
         logger?.log(`Parsing ${permissionRecords?.length} object permissions...`);
-        const permissions: Map<string, SfdcObjectPermission> = new Map(await Processor.map(
+        const permissions: Map<string, SfdcObjectPermission> = new Map(await MediumProcessor.map(
             permissionRecords,
-            (/** @type {any} */ record: any) => {
+            (record: any) => {
                 // Create the instance
-                /** @type {SfdcObjectPermission} */
                 const permission: SfdcObjectPermission = permissionDataFactory.create({
                     properties: {
                         parentId: sfdcManager.caseSafeId(record.Parent.IsOwnedByProfile === true ? record.Parent.ProfileId : record.ParentId),
@@ -56,7 +55,7 @@ export class DatasetObjectPermissions implements Dataset {
                 // Add it to the map  
                 return [ `${permission.parentId}_${permission.objectType}`, permission ];
             },
-            (/** @type {any} */ record: any) => record.Parent !== null // in some orgs, 'ParentId' is set to a value, BUT 'Parent' is null (because id can't be found!),
+            (record: any) => record.Parent !== null // in some orgs, 'ParentId' is set to a value, BUT 'Parent' is null (because id can't be found!),
         ));
 
         // Return data as map

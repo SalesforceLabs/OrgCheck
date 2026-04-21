@@ -1,7 +1,7 @@
 import { ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
@@ -62,7 +62,7 @@ export class RecipeObjects implements ServedRecipe<SfdcObject[], Table> {
         // Augment and Filter data
         
         const array: SfdcObject[] = [];
-        await Processor.forEach(objects, async (object: SfdcObject) => {
+        await MediumProcessor.forEach(objects, async (object: SfdcObject) => {
             // Augment data
             const typeRef = types.get(object.typeId);
             if (typeRef) {

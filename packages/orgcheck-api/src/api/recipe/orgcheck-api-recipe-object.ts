@@ -1,7 +1,7 @@
 import { ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
@@ -131,7 +131,7 @@ export class RecipeObject implements ServedRecipe<SfdcObject, SfdcObjectAsTable>
         }
         object.flexiPages = [];
         const result = await Promise.all([
-            Processor.map( // returns apexTriggerRefs
+            MediumProcessor.map( // returns apexTriggerRefs
                 object.apexTriggerIds,
                 (id: string) => { 
                     const apexTrigger = apexTriggers.get(id);
@@ -144,17 +144,17 @@ export class RecipeObject implements ServedRecipe<SfdcObject, SfdcObjectAsTable>
                 },
                 (id: string) => apexTriggers.has(id)
             ),
-            Processor.map( // returns workflowRuleRefs
+            MediumProcessor.map( // returns workflowRuleRefs
                 object.workflowRuleIds,
                 (id: string) => workflowRules.get(id),
                 (id: string) => workflowRules.has(id)
             ),
-            Processor.forEach(pages, async (page: SfdcLightningPage) => {
+            MediumProcessor.forEach(pages, async (page: SfdcLightningPage) => {
                 if (page.objectId === object.id) {
                     object.flexiPages.push(page);
                 }
             }),
-            Processor.map( // returns customFieldRefs
+            MediumProcessor.map( // returns customFieldRefs
                 object.customFieldIds,
                 (id: string) => { 
                     const customField = customFields.get(id);
@@ -169,7 +169,7 @@ export class RecipeObject implements ServedRecipe<SfdcObject, SfdcObjectAsTable>
             )
         ]);
         object.apexTriggerRefs = result[0];
-        object.workflowRuleRefs = result[1];
+        object.workflowRuleRefs = result[1]?.filter(n => n !== undefined);
         object.customFieldRefs = result[3];
 
         // Return data

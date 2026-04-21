@@ -1,7 +1,7 @@
 import { ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
@@ -59,10 +59,10 @@ export class RecipeUserRoles implements ServedRecipe<SfdcUserRole[], Table> {
         if (!users) throw new Error(`RecipeUserRoles: Data from dataset alias 'USERS' was undefined.`);
 
         // Augment data
-        await Processor.forEach(userRoles, async (userRole: SfdcUserRole) => {
+        await MediumProcessor.forEach(userRoles, async (userRole: SfdcUserRole) => {
             // Augment data
             if (userRole.hasActiveMembers === true) {
-                userRole.activeMemberRefs = await Processor.map(userRole.activeMemberIds, (id: string) => users.get(id));
+                userRole.activeMemberRefs = (await MediumProcessor.map(userRole.activeMemberIds, (id: string) => users.get(id)))?.filter(n => n !== undefined);
             }
             if (userRole.hasParent === true) {
                 const parentRef = userRoles.get(userRole.parentId);

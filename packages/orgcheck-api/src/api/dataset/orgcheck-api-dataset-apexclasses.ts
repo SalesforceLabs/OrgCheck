@@ -3,7 +3,7 @@ import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
 import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcApexClass, SfdcApexTestMethodResult } from 'src/api/data/orgcheck-api-data-apexclass';
@@ -56,7 +56,7 @@ export class DatasetApexClasses implements Dataset {
 
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${apexClassRecords?.length} apex classes...`);
-        const apexClassIds = await Processor.map(apexClassRecords, (/** @type {any} */ record: any) => sfdcManager.caseSafeId(record.Id));
+        const apexClassIds = await MediumProcessor.map(apexClassRecords, (record: any) => sfdcManager.caseSafeId(record.Id));
         const apexClassesDependencies = await sfdcManager.dependenciesQuery(apexClassIds, logger);
 
         // Second set of SOQL queries only for the apex classes that are editable
@@ -91,14 +91,12 @@ export class DatasetApexClasses implements Dataset {
 
         // Create instances of SfdcApexClass
         logger?.log(`Parsing ${apexClassRecords?.length} apex classes...`);
-        /** @type {Map<string, SfdcApexClass>} */
-        const apexClasses: Map<string, SfdcApexClass> = new Map(await Processor.map(apexClassRecords, async (/** @type {any} */ record: any) => {
+        const apexClasses: Map<string, SfdcApexClass> = new Map(await MediumProcessor.map(apexClassRecords, async (record: any) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
             
             // Create the instance
-            /** @type {SfdcApexClass} */
             const apexClass: SfdcApexClass = apexClassDataFactory.create({
                 properties: {
                     id: id,
@@ -132,8 +130,8 @@ export class DatasetApexClasses implements Dataset {
                 apexClass.methodsCount = record.SymbolTable.methods?.length || 0;
                 apexClass.extends = record.SymbolTable.parentClass;
                 if (record.SymbolTable.tableDeclaration) {
-                    apexClass.annotations = record.SymbolTable.tableDeclaration.annotations?.map((/** @type {any} */ a: any) => a?.name ?? a);
-                    await Processor.forEach(record.SymbolTable.tableDeclaration.modifiers, async (/** @type {any} */ m: any) => {
+                    apexClass.annotations = record.SymbolTable.tableDeclaration.annotations?.map((a: any) => a?.name ?? a);
+                    await MediumProcessor.forEach(record.SymbolTable.tableDeclaration.modifiers, async (m: any) => {
                         switch (m) {
                             case 'with sharing':      apexClass.specifiedSharing = 'with';      break;
                             case 'without sharing':   apexClass.specifiedSharing = 'without';   break;
@@ -175,13 +173,11 @@ export class DatasetApexClasses implements Dataset {
 
         // Add the related tests to apex classes
         logger?.log(`Parsing ${apexCodeCoverageRecords?.length} apex code coverages...`);
-        /** @type {Map<string, Set<string>>} */
         const relatedTestsByApexClass: Map<string, Set<string>> = new Map();
-        /** @type {Map<string, Set<string>>} */
         const relatedClassesByApexTest: Map<string, Set<string>> = new Map();
-        await Processor.forEach(
+        await MediumProcessor.forEach(
             apexCodeCoverageRecords,
-            async (/** @type {any} */ record: any) => {
+            async (record: any) => {
                 // Get the ID15 of the class that is tested and the test class
                 const id = sfdcManager.caseSafeId(record.ApexClassOrTriggerId);
                 const testId = sfdcManager.caseSafeId(record.ApexTestClassId);
@@ -195,7 +191,7 @@ export class DatasetApexClasses implements Dataset {
             }
         );
         await Promise.all([
-            Processor.forEach(relatedTestsByApexClass, async (/** @type {Set<string>} */ relatedTestsIds: Set<string>, /** @type {string} */ apexClassId: string) => {
+            MediumProcessor.forEach(relatedTestsByApexClass, async (relatedTestsIds: Set<string>, apexClassId: string) => {
                 if (apexClasses.has(apexClassId)) { // Just to be safe!
                     const clazz = apexClasses.get(apexClassId);
                     if (clazz) {
@@ -203,7 +199,7 @@ export class DatasetApexClasses implements Dataset {
                     }
                 }
             }),
-            Processor.forEach(relatedClassesByApexTest, async (/** @type {Set<string>} */ relatedClassesIds: Set<string>, /** @type {string} */apexTestId: string) => {
+            MediumProcessor.forEach(relatedClassesByApexTest, async (relatedClassesIds: Set<string>, apexTestId: string) => {
                 if (apexClasses.has(apexTestId)) { // In case a test from a package is covering a classe the id will not be in the Class map!
                     const testClazz = apexClasses.get(apexTestId);
                     if (testClazz) {
@@ -215,9 +211,9 @@ export class DatasetApexClasses implements Dataset {
 
         // Add the aggregate code coverage to apex classes
         logger?.log(`Parsing ${apexCodeCoverageAggRecords?.length} apex code coverage aggregates...`);
-        await Processor.forEach(
+        await MediumProcessor.forEach(
             apexCodeCoverageAggRecords,
-            async (/** @type {any} */ record: any) => {
+            async (record: any) => {
                 // Get the ID15 of the class that is tested
                 const id = sfdcManager.caseSafeId(record.ApexClassOrTriggerId);
                 if (apexClasses.has(id)) { // make sure the id is an existing class!
@@ -232,9 +228,9 @@ export class DatasetApexClasses implements Dataset {
 
         // Add if class is scheduled
         logger?.log(`Parsing ${asyncApexJobRecords?.length} schedule apex classes...`);
-        await Processor.forEach(
+        await MediumProcessor.forEach(
             asyncApexJobRecords,
-            async (/** @type {any} */ record: any) => {
+            async (record: any) => {
                 // Get the ID15 of the class that is scheduled
                 const id = sfdcManager.caseSafeId(record.ApexClassId);
                 if (apexClasses.has(id)) { // make sure the id is an existing class!
@@ -249,9 +245,9 @@ export class DatasetApexClasses implements Dataset {
 
         // Add if unit test have been succesful or not
         logger?.log(`Parsing ${apexTestResultRecords?.length} test results...`);
-        await Processor.forEach(
+        await MediumProcessor.forEach(
             apexTestResultRecords,
-            async (/** @type {any} */ record: any) => {
+            async (record: any) => {
                 // Get the ID15 of the related test class
                 const id = sfdcManager.caseSafeId(record.ApexClassId);
                 if (apexClasses.has(id)) { // make sure the id is an existing class
@@ -264,7 +260,6 @@ export class DatasetApexClasses implements Dataset {
                             tc.testFailedMethods = [];
                         }
                         if (tc.lastTestRunDate === record.ApexTestRunResult?.CreatedDate) {
-                            /** @type {SfdcApexTestMethodResult} */
                             const result: SfdcApexTestMethodResult = apexTestResultDataFactory.create({ 
                                 properties: {
                                     methodName: record.MethodName,
@@ -293,7 +288,7 @@ export class DatasetApexClasses implements Dataset {
 
         // FINALLY!!!! Compute the score of all items
         logger?.log(`Computing scores for ${apexClasses.size} Apex classes...`);
-        await Processor.forEach(apexClasses, async (/** @type {SfdcApexClass} */ apexClass: SfdcApexClass) => {
+        await MediumProcessor.forEach(apexClasses, async (apexClass: SfdcApexClass) => {
             apexClassDataFactory.computeScore(apexClass);
         });
 

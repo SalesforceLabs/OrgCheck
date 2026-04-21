@@ -5,7 +5,6 @@ import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcObjectType, SObjectTypes } from 'src/api/data/orgcheck-api-data-objecttype';
 
-/** @type {{id: string, label: string}[]} */ 
 const OBJECTTYPES: { id: string; label: string; }[] = [
     { id: SObjectTypes.STANDARD_SOBJECT,        label: 'Standard Object' },
     { id: SObjectTypes.CUSTOM_SOBJECT,          label: 'Custom Object' },

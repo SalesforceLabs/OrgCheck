@@ -1,7 +1,7 @@
 import { ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
@@ -63,16 +63,16 @@ export class RecipeInternalActiveUsers implements ServedRecipe<SfdcUser[], Table
         if (!permissionSets) throw new Error(`RecipeActiveUsers: Data from dataset alias 'PERMISSIONSETS' was undefined.`);
 
         // Augment data
-        await Processor.forEach(users, async (user: SfdcUser) => {
+        await MediumProcessor.forEach(users, async (user: SfdcUser) => {
             const profileRef = profiles.get(user.profileId);
             if (profileRef) {
                 user.profileRef = profileRef;
             }
-            user.permissionSetRefs = await Processor.map(
+            user.permissionSetRefs = (await MediumProcessor.map(
                 user.permissionSetIds,
                 (id: string) => permissionSets.get(id),
                 (id: string) => permissionSets.has(id)
-            );
+            ))?.filter(n => n !== undefined);
             user.importantPermissionsGrantedBy = {
                 apiEnabled: [],
                 viewSetup: [],
@@ -86,7 +86,7 @@ export class RecipeInternalActiveUsers implements ServedRecipe<SfdcUser[], Table
                     .filter((permName) => user.profileRef.importantPermissions[permName] === true)
                     .forEach((permName) => user.importantPermissionsGrantedBy[permName].push(user.profileRef));
             }
-            await Processor.forEach(user.permissionSetRefs, async (permissionSet: SfdcPermissionSet) => {
+            await MediumProcessor.forEach(user.permissionSetRefs, async (permissionSet: SfdcPermissionSet) => {
                 Object.keys(permissionSet.importantPermissions)
                     .filter((permName) => permissionSet.importantPermissions[permName] === true)
                     .forEach((permName) => user.importantPermissionsGrantedBy[permName].push(permissionSet));

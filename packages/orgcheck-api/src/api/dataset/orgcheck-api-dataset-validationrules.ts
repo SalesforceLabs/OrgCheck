@@ -2,7 +2,7 @@ import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
 import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcValidationRule } from 'src/api/data/orgcheck-api-data-validationrule';
@@ -34,13 +34,12 @@ export class DatasetValidationRules implements Dataset {
         // Create the map
         const validationRuleRecords = results[0];
         logger?.log(`Parsing ${validationRuleRecords?.length} validation rules...`);
-        const validationRules: Map<string, SfdcValidationRule> = new Map(await Processor.map(validationRuleRecords, async (/** @type {any} */ record: any) => {
+        const validationRules: Map<string, SfdcValidationRule> = new Map(await MediumProcessor.map(validationRuleRecords, async (record: any) => {
         
             // Get the ID15 of this validaiton rule
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            /** @type {SfdcValidationRule} */
             const validationRule: SfdcValidationRule = validationRuleDataFactory.createWithScore({
                 properties: {
                     id: sfdcManager.caseSafeId(id), 

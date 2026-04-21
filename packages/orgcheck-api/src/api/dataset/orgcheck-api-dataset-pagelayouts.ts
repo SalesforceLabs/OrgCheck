@@ -2,7 +2,7 @@ import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
 import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcPageLayout } from 'src/api/data/orgcheck-api-data-pagelayout';
@@ -42,20 +42,19 @@ export class DatasetPageLayouts implements Dataset {
         const pageLayoutProfileAssignRecords = results[1];
 
         // Get the page layout Ids
-        const pageLayoutIds = await Processor.map(pageLayoutRecords, (/** @type {any} */ record: any) => sfdcManager.caseSafeId(record.Id))
+        const pageLayoutIds = await MediumProcessor.map(pageLayoutRecords, (record: any) => sfdcManager.caseSafeId(record.Id))
 
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${pageLayoutRecords?.length} page layouts...`);
         const pageLayoutDependencies = await sfdcManager.dependenciesQuery(pageLayoutIds, logger);
 
         logger?.log(`Parsing ${pageLayoutRecords?.length} page layouts...`);
-        const pageLayouts: Map<string, SfdcPageLayout> = new Map(await Processor.map(pageLayoutRecords, (/** @type {any} */ record: any) => {
+        const pageLayouts: Map<string, SfdcPageLayout> = new Map(await MediumProcessor.map(pageLayoutRecords, (record: any) => {
 
             // Get the ID15 of this page layout
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            /** @type {SfdcPageLayout} */
             const pageLayout: SfdcPageLayout = pageLayoutDataFactory.create({
                 properties: {
                     id: id,
@@ -74,13 +73,13 @@ export class DatasetPageLayouts implements Dataset {
             // Add it to the map  
             return [ pageLayout.id, pageLayout ];
 
-        }, (/** @type {any} */ record: any) => { 
+        }, (record: any) => { 
             if (!record.EntityDefinition) return false; // ignore if no EntityDefinition linked
             return true;
         }));
 
         logger?.log(`Parsing ${pageLayoutProfileAssignRecords?.length} page layout assignment counts...`);
-        await Processor.forEach(pageLayoutProfileAssignRecords, async (/** @type {any} */ record: any) => {
+        await MediumProcessor.forEach(pageLayoutProfileAssignRecords, async (record: any) => {
 
             // Get the ID15 of this page layout
             const id = sfdcManager.caseSafeId(record.LayoutId);
@@ -99,7 +98,7 @@ export class DatasetPageLayouts implements Dataset {
         const pageLayoutMetadataRecords = await sfdcManager.readMetadataAtScale('Layout', pageLayoutIds, [ 'FIELD_INTEGRITY_EXCEPTION', 'UNKNOWN_EXCEPTION', 'INSUFFICIENT_ACCESS' ], logger);
 
         logger?.log(`Parsing ${pageLayoutMetadataRecords?.length} page layout metadata information...`);
-        await Processor.forEach(pageLayoutMetadataRecords, async (/** @type {any} */ metadataRecord: any) => {
+        await MediumProcessor.forEach(pageLayoutMetadataRecords, async (metadataRecord: any) => {
 
             // Get the ID15 of this page layout
             const id = sfdcManager.caseSafeId(metadataRecord.Id);
@@ -123,7 +122,7 @@ export class DatasetPageLayouts implements Dataset {
         });
 
         // Compute the score of all items
-        await Processor.forEach(pageLayouts, async (/** @type {SfdcPageLayout} */ pageLayout: SfdcPageLayout) => {
+        await MediumProcessor.forEach(pageLayouts, async (pageLayout: SfdcPageLayout) => {
             pageLayoutDataFactory.computeScore(pageLayout);
         });
 

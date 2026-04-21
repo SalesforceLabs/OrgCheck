@@ -2,7 +2,7 @@ import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
 import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcLightningAuraComponent } from 'src/api/data/orgcheck-api-data-lightningauracomponent';
@@ -35,19 +35,18 @@ export class DatasetLightningAuraComponents implements Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${componentRecords?.length} lightning aura components...`);
         const componentsDependencies = await sfdcManager.dependenciesQuery(
-            await Processor.map(componentRecords, (/** @type {any} */ record: any) => sfdcManager.caseSafeId(record.Id)), 
+            await MediumProcessor.map(componentRecords, (record: any) => sfdcManager.caseSafeId(record.Id)), 
             logger
         );
         
         // Create the map
         logger?.log(`Parsing ${componentRecords?.length} lightning aura components...`);
-        const components: Map<string, SfdcLightningAuraComponent> = new Map(await Processor.map(componentRecords, (/** @type {any} */ record: any) => {
+        const components: Map<string, SfdcLightningAuraComponent> = new Map(await MediumProcessor.map(componentRecords, (record: any) => {
 
             // Get the ID15 of this custom field
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            /** @type {SfdcLightningAuraComponent} */
             const component: SfdcLightningAuraComponent = componentDataFactory.createWithScore({
                 properties: {
                     id: id,

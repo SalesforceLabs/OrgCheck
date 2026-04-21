@@ -217,7 +217,7 @@ export class DataFactoryInstance implements DataFactoryInstanceIntf {
             if (setup['dependencyData']) {
                 row.dependencies = DataDependenciesFactory.create(
                     setup['dependencyData'], 
-                    (setup['dependencyIdFields'] || ['id']).map((/** @type {string} */ f: string) => row[f])
+                    (setup['dependencyIdFields'] || ['id']).map((f: string) => row[f])
                 );
             } else {
                 throw new TypeError(`This data (of type ${this._dataAlias}) is defined as with dependencies, but no dependencies were provided.`);

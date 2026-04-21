@@ -1,4 +1,4 @@
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 
 describe('tests.api.unit.Processor', () => {
 
@@ -12,7 +12,7 @@ describe('tests.api.unit.Processor', () => {
 
     it ('checks if the array is processed when calling forEach with a sync iteratee', async () => {
       const results: string[] = [];
-      await Processor.forEach(array, async (i: number) => { results.push(`Processing ${i}...`); });
+      await MediumProcessor.forEach(array, async (i: number) => { results.push(`Processing ${i}...`); });
       expect(results).toBeDefined();
       expect(results?.length).toBe(array?.length);
       results.forEach((result) => expect(result.includes('Processing')).toBeTruthy());
@@ -20,7 +20,7 @@ describe('tests.api.unit.Processor', () => {
 
     it ('checks if the array is processed when calling forEach with an async iteratee', async () => {
       const results: string[] = [];
-      await Processor.forEach(array, async (i: number) => { results.push(`Processing ${i}...`); });
+      await MediumProcessor.forEach(array, async (i: number) => { results.push(`Processing ${i}...`); });
       expect(results).toBeDefined();
       expect(results?.length).toBe(array?.length);
       results.forEach((result) => expect(result.includes('Processing')).toBeTruthy());
@@ -37,7 +37,7 @@ describe('tests.api.unit.Processor', () => {
 
     it ('checks if the map is processed when calling forEach() with a sync iteratee', async () => {
       const results: string[] = [];
-      await Processor.forEach(map, async (v: string, k: string) => { results.push(`Processing ${k}: ${v}...`); });
+      await MediumProcessor.forEach(map, async (v: string, k: string) => { results.push(`Processing ${k}: ${v}...`); });
       expect(results).toBeDefined();
       expect(results?.length).toBe(map.size);
       results.forEach((result) => expect(result.includes('Processing')).toBeTruthy());
@@ -45,7 +45,7 @@ describe('tests.api.unit.Processor', () => {
 
     it ('checks if the map is processed when calling forEach() with an async iteratee', async () => {
       const results: string[] = [];
-      await Processor.forEach(map, async (v: string, k: string) => { results.push(`Processing ${k}: ${v}...`); });
+      await MediumProcessor.forEach(map, async (v: string, k: string) => { results.push(`Processing ${k}: ${v}...`); });
       expect(results).toBeDefined();
       expect(results?.length).toBe(map.size);
       results.forEach((result) => expect(result.includes('Processing')).toBeTruthy());
@@ -61,7 +61,7 @@ describe('tests.api.unit.Processor', () => {
     ];
 
     it ('checks if the array is processed when calling map() with a sync iteratee and no filter', async () => {
-      const results: string[] = await Processor.map(array, (i: number) => `Processing ${i}...`);
+      const results: string[] = await MediumProcessor.map(array, (i: number) => `Processing ${i}...`);
       expect(results).toBeDefined();
       expect(results?.length).toBe(array?.length);
       results.forEach((result) => expect(result.includes('Processing')).toBeTruthy());
@@ -70,7 +70,7 @@ describe('tests.api.unit.Processor', () => {
     it ('checks if the array is processed when calling map() with a sync iteratee and filter', async () => {
       const filterFunc = (i: number) => i > 3;
       const arrayFiltered = array.filter(filterFunc);
-      const results: string[] = await Processor.map(array, (i: number) => `Processing ${i}...`, filterFunc);
+      const results: string[] = await MediumProcessor.map(array, (i: number) => `Processing ${i}...`, filterFunc);
       expect(results).toBeDefined();
       expect(results?.length).toBe(arrayFiltered?.length);
       results.forEach((result) => expect(result.includes('Processing')).toBeTruthy());

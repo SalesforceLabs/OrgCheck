@@ -2,7 +2,7 @@ import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
 import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcDashboard } from 'src/api/data/orgcheck-api-data-dashboard';
@@ -34,13 +34,12 @@ export class DatasetDashboards implements Dataset {
         // Create the map
         const dashboardRecords = results[0];
         logger?.log(`Parsing ${dashboardRecords?.length} dashboards...`);
-        const dashboards: Map<string, SfdcDashboard> = new Map(await Processor.map(dashboardRecords, async (/** @type {any} */ record: any) => {
+        const dashboards: Map<string, SfdcDashboard> = new Map(await MediumProcessor.map(dashboardRecords, async (record: any) => {
         
             // Get the ID15 of this dashboard
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            /** @type {SfdcDashboard} */
             const dashboard: SfdcDashboard = dashboardDataFactory.createWithScore({
                 properties: {
                     id: id,

@@ -1,7 +1,7 @@
 import { ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
@@ -58,7 +58,7 @@ export class RecipeVisualForcePages implements ServedRecipe<SfdcVisualForcePage[
         // Filter data
         
         const array: SfdcVisualForcePage[] = [];
-        await Processor.forEach(pages, async (page: SfdcVisualForcePage) => {
+        await MediumProcessor.forEach(pages, async (page: SfdcVisualForcePage) => {
             if (namespace === OrgCheckGlobalParameter.ALL_VALUES || page.package === namespace) {
                 array.push(page);
             }

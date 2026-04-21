@@ -179,8 +179,8 @@ export class DataCacheManager implements DataCacheManagerIntf {
      */
     public clear(): void {
         return this._storage.keys()
-            .filter((/** @type {string} */ key: string) => key.startsWith(CACHE_PREFIX))
-            .forEach((/** @type {string} */ key: any) => this._storage.removeItem(key));
+            .filter((key: string) => key.startsWith(CACHE_PREFIX))
+            .forEach((key: any) => this._storage.removeItem(key));
     }
 
     /**

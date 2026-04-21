@@ -1,7 +1,7 @@
 import { ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
@@ -63,7 +63,7 @@ export class RecipeProfileRestrictions implements ServedRecipe<SfdcProfileRestri
 
         // Augment and Filter data
         const array: SfdcProfileRestrictions[] = [];
-        await Processor.forEach(profileRestrictions, async (restriction: SfdcProfileRestrictions) => {
+        await MediumProcessor.forEach(profileRestrictions, async (restriction: SfdcProfileRestrictions) => {
             // Augment data
             const profileRef = profiles.get(restriction.profileId);
             if (profileRef) {

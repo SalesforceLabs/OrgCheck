@@ -2,7 +2,7 @@ import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
 import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcKnowledgeArticle } from 'src/api/data/orgcheck-api-data-knowledgearticle';
@@ -35,14 +35,13 @@ export class DatasetKnowledgeArticles implements Dataset {
 
         // Create the map
         logger?.log(`Parsing ${knowledgeArticleRecords?.length} articles...`);
-        const knowledgeArticles: Map<string, SfdcKnowledgeArticle> = new Map(await Processor.map(knowledgeArticleRecords, (/** @type {any} */ record: any) => {
+        const knowledgeArticles: Map<string, SfdcKnowledgeArticle> = new Map(await MediumProcessor.map(knowledgeArticleRecords, (record: any) => {
 
             // Get the ID15 of this version and article
             const versionId = sfdcManager.caseSafeId(record.Id);
             const articeId = sfdcManager.caseSafeId(record.KnowledgeArticleId);
 
             // Create the instance
-            /** @type {SfdcKnowledgeArticle} */
             const knowledgeArticle: SfdcKnowledgeArticle = knowledgeArticleDataFactory.createWithScore({
                 properties: {
                     id: articeId,

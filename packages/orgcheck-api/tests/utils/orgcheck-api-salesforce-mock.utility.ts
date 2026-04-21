@@ -27,7 +27,7 @@ export class SalesforceManagerMock_SoqlQuery extends SalesforceManagerMock_Doing
   #soqlQueryResponses: Map<string, any> = new Map();
   #describeGlobal: any[] = [];
 
-  addSoqlQueryResponse(/** @type {string} */ queryMatch: string, /** @type {any[]} */ response: any[]) {
+  addSoqlQueryResponse(queryMatch: string, response: any[]) {
     this.#soqlQueryResponses.set(queryMatch, response);
   }
 

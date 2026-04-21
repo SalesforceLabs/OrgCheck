@@ -1,5 +1,5 @@
 import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SfdcObject } from 'src/api/data/orgcheck-api-data-object';
 import { SfdcField } from 'src/api/data/orgcheck-api-data-field';
 import { SfdcFieldSet } from 'src/api/data/orgcheck-api-data-fieldset';
@@ -103,10 +103,9 @@ export class DatasetObject implements Dataset {
         const recordCount = results[2]; 
 
         // fields (standard and custom)
-        /** @type {string[]} */
         const customFieldIds: string[] = []; 
         const standardFieldsMapper = new Map();
-        await Processor.forEach(fields, async (/** @type {any} */f: any) => {
+        await MediumProcessor.forEach(fields, async (f: any) => {
             if (f && f.DurableId && f.DurableId.split && f.DurableId.includes) {
                 const id = sfdcManager.caseSafeId(f.DurableId.split('.')[1]);
                 if (f.DurableId?.includes('.00N')) {
@@ -120,10 +119,9 @@ export class DatasetObject implements Dataset {
                 }
             }
         });
-        /** @type {SfdcField[]} */
-        const standardFields: SfdcField[] = await Processor.map(
+        const standardFields: SfdcField[] = await MediumProcessor.map(
             sobjectDescribed.fields,
-            (/** @type {any} */ field: any) => {
+            (field: any) => {
                 const fieldMapper = standardFieldsMapper.get(field.name);
                 return fieldDataFactory.createWithScore({
                     properties: {
@@ -145,28 +143,25 @@ export class DatasetObject implements Dataset {
                     dependencyData: { records: [], errors: [] }
                 });
             },
-            (/** @type {any} */ field: any) => standardFieldsMapper.has(field.name)
+            (field: any) => standardFieldsMapper.has(field.name)
         );
 
         // apex triggers
-        /** @type {string[]} */
-        const apexTriggerIds: string[] = await Processor.map(
+        const apexTriggerIds: string[] = await MediumProcessor.map(
             entity.ApexTriggers?.records, 
-            (/** @type {any} */ t: any) => sfdcManager.caseSafeId(t.Id)
+            (t: any) => sfdcManager.caseSafeId(t.Id)
         );
 
         // workflow rules
-        /** @type {string[]} */
-        const workflowRuleIds: string[] = await Processor.map(
+        const workflowRuleIds: string[] = await MediumProcessor.map(
             workflowRules, 
-            (/** @type {any} */ wr: any) => sfdcManager.caseSafeId(wr.Id)
+            (wr: any) => sfdcManager.caseSafeId(wr.Id)
         );
 
         // field sets
-        /** @type {SfdcFieldSet[]} */
-        const fieldSets: SfdcFieldSet[] = await Processor.map(
+        const fieldSets: SfdcFieldSet[] = await MediumProcessor.map(
             entity.FieldSets?.records,
-            (/** @type {any} */ t: any) => fieldSetDataFactory.createWithScore({ 
+            (t: any) => fieldSetDataFactory.createWithScore({ 
                 properties: {
                     id: sfdcManager.caseSafeId(t.Id), 
                     label: t.MasterLabel, 
@@ -177,10 +172,9 @@ export class DatasetObject implements Dataset {
         );
 
         // page layouts
-        /** @type {SfdcPageLayout[]} */
-        const layouts: SfdcPageLayout[] = await Processor.map(
+        const layouts: SfdcPageLayout[] = await MediumProcessor.map(
             entity.Layouts?.records,
-            (/** @type {any} */ t: any) => layoutDataFactory.createWithScore({ 
+            (t: any) => layoutDataFactory.createWithScore({ 
                 properties: {
                     id: sfdcManager.caseSafeId(t.Id), 
                     name: t.Name, 
@@ -192,10 +186,9 @@ export class DatasetObject implements Dataset {
         );
         
         // limits
-        /** @type {SfdcLimit[]} */
-        const limits: SfdcLimit[] = await Processor.map(
+        const limits: SfdcLimit[] = await MediumProcessor.map(
             entity.Limits?.records,
-            (/** @type {any} */ t: any) => limitDataFactory.createWithScore({ 
+            (t: any) => limitDataFactory.createWithScore({ 
                 properties: {
                     id: sfdcManager.caseSafeId(t.DurableId), 
                     label: t.Label, 
@@ -209,10 +202,9 @@ export class DatasetObject implements Dataset {
         );
         
         // validation rules
-        /** @type {SfdcValidationRule[]} */
-        const validationRules: SfdcValidationRule[] = await Processor.map(
+        const validationRules: SfdcValidationRule[] = await MediumProcessor.map(
             entity.ValidationRules?.records,
-            (/** @type {any} */ t: any) => validationRuleDataFactory.createWithScore({ 
+            (t: any) => validationRuleDataFactory.createWithScore({ 
                 properties: {
                     id: sfdcManager.caseSafeId(t.Id), 
                     name: t.ValidationName, 
@@ -229,10 +221,9 @@ export class DatasetObject implements Dataset {
         );
         
         // weblinks and actions
-        /** @type {SfdcWebLink[]} */
-        const webLinks: SfdcWebLink[] = await Processor.map(
+        const webLinks: SfdcWebLink[] = await MediumProcessor.map(
             entity.WebLinks?.records,
-            (/** @type {any} */ t: any) => webLinkDataFactory.createWithScore({ 
+            (t: any) => webLinkDataFactory.createWithScore({ 
                 properties: {
                     id: sfdcManager.caseSafeId(t.Id), 
                     name: t.Name, 
@@ -251,10 +242,9 @@ export class DatasetObject implements Dataset {
         );
         
         // record types
-        /** @type {SfdcRecordType[]} */
-        const recordTypes: SfdcRecordType[] = await Processor.map(
+        const recordTypes: SfdcRecordType[] = await MediumProcessor.map(
             sobjectDescribed.recordTypeInfos,
-            (/** @type {any} */ t: any) => recordTypeDataFactory.createWithScore({ 
+            (t: any) => recordTypeDataFactory.createWithScore({ 
                 properties: {
                     id: sfdcManager.caseSafeId(t.recordTypeId), 
                     name: t.name, 
@@ -269,10 +259,9 @@ export class DatasetObject implements Dataset {
         );
         
         // relationships
-        /** @type {SfdcObjectRelationShip[]} */
-        const relationships: SfdcObjectRelationShip[] = await Processor.map(
+        const relationships: SfdcObjectRelationShip[] = await MediumProcessor.map(
             sobjectDescribed.childRelationships,
-            (/** @type {any} */ relationship: any) => relationshipDataFactory.createWithScore({ 
+            (relationship: any) => relationshipDataFactory.createWithScore({ 
                 properties: {
                     name: relationship.relationshipName,
                     childObject: relationship.childSObject,
@@ -281,11 +270,10 @@ export class DatasetObject implements Dataset {
                     isRestrictedDelete: relationship.restrictedDelete
                 }
             }),
-            (/** @type {any} */ relationship: any) => relationship.relationshipName !== null
+            (relationship: any) => relationship.relationshipName !== null
         );
 
         // Create the object
-        /** @type {SfdcObject} */
         const object: SfdcObject = objectDataFactory.createWithScore({
             properties: {
                 id: entity.DurableId,

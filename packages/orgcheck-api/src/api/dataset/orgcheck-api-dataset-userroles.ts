@@ -2,7 +2,7 @@ import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
 import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcUserRole } from 'src/api/data/orgcheck-api-data-userrole';
@@ -34,15 +34,13 @@ export class DatasetUserRoles implements Dataset {
         const userRoleRecords = results[0];
         logger?.log(`Parsing ${userRoleRecords?.length} user roles...`);
         const childrenByParent = new Map();
-        /** @type {any[]} */ 
         const roots: any[] = [];
-        const roles: Map<string, SfdcUserRole> = new Map(await Processor.map(userRoleRecords, async (record: any) => {
+        const roles: Map<string, SfdcUserRole> = new Map(await MediumProcessor.map(userRoleRecords, async (record: any) => {
 
             // Get the ID15 of this custom label
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            /** @type {SfdcUserRole} */
             const userRole: SfdcUserRole = userRoleDataFactory.create({
                 properties: {
                     id: id,
@@ -66,7 +64,7 @@ export class DatasetUserRoles implements Dataset {
                 childrenByParent.get(userRole.parentId).push(userRole);
             }
             // compute the numbers of users
-            await Processor.forEach(
+            await MediumProcessor.forEach(
                 record?.Users?.records, 
                 async (user: any) => {
                     userRole.activeMemberIds.push(sfdcManager.caseSafeId(user.Id));
@@ -80,13 +78,13 @@ export class DatasetUserRoles implements Dataset {
         }));
 
         // Compute levels 
-        await Processor.forEach(roots, async (/** @type {any} */ root: any) => {
+        await MediumProcessor.forEach(roots, async (root: any) => {
             root.level = 1;
             RECURSIVE_LEVEL_CALCULUS(root, childrenByParent);
         });
 
         // Then compute the score of roles 
-        await Processor.forEach(roles, async (userRole: any) => {
+        await MediumProcessor.forEach(roles, async (userRole: any) => {
             userRoleDataFactory.computeScore(userRole);
         });
 

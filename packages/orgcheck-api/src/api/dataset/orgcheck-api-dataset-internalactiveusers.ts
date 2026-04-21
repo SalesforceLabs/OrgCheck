@@ -2,7 +2,7 @@ import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
 import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcUser } from 'src/api/data/orgcheck-api-data-user';
@@ -67,13 +67,12 @@ export class DatasetInternalActiveUsers implements Dataset {
         const loginRecords = results[2];
         const verifRecords = results[3];
         logger?.log(`Parsing ${userRecords?.length} users...`);
-        const users: Map<string, SfdcUser> = new Map(await Processor.map(userRecords, async (/** @type {any} */ record: any) => {
+        const users: Map<string, SfdcUser> = new Map(await MediumProcessor.map(userRecords, async (record: any) => {
         
             // Get the ID15 of this user
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            /** @type {SfdcUser} */
             const user: SfdcUser = userDataFactory.create({
                 properties: {
                     id: id,
@@ -101,7 +100,7 @@ export class DatasetInternalActiveUsers implements Dataset {
 
         // Now process the permission set assignments
         logger?.log(`Parsing ${assignmentRecords?.length} permission set assignments...`);
-        assignmentRecords.forEach((/** @type {any} */ record: any) => {
+        assignmentRecords.forEach((record: any) => {
             const assigneeId = sfdcManager.caseSafeId(record.AssigneeId);
             const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId);
             const user = users.get(assigneeId);
@@ -127,7 +126,7 @@ export class DatasetInternalActiveUsers implements Dataset {
 
         // Now process the user logins aggregates
         logger?.log(`Parsing ${loginRecords?.length} user logins aggregates...`);
-        await Processor.forEach(loginRecords, async (/** @type {any} */ record: any) => {
+        await MediumProcessor.forEach(loginRecords, async (record: any) => {
 
             // Only successful logins are interesting
             if (record.Status === 'Success') { // filter not possible in SOQL!
@@ -148,7 +147,7 @@ export class DatasetInternalActiveUsers implements Dataset {
 
         // Now process the user verifications aggregates
         logger?.log(`Parsing ${verifRecords?.length} user verifications aggregates...`);
-        await Processor.forEach(verifRecords, async (/** @type {any} */ record: any) => {
+        await MediumProcessor.forEach(verifRecords, async (record: any) => {
 
             const userId = sfdcManager.caseSafeId(record.UserId);
             const user = users.get(userId);
@@ -164,7 +163,7 @@ export class DatasetInternalActiveUsers implements Dataset {
 
         // FINALLY!!!! Compute the score of all items
         logger?.log(`Computing scores for ${users.size} users...`);
-        await Processor.forEach(users, async (/** @type {SfdcUser} */ user: SfdcUser) => {
+        await MediumProcessor.forEach(users, async (user: SfdcUser) => {
             userDataFactory.computeScore(user);
         });
 

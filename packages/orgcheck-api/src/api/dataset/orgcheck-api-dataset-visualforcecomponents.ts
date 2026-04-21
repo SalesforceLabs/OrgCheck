@@ -3,7 +3,7 @@ import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
 import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcVisualForceComponent } from 'src/api/data/orgcheck-api-data-visualforcecomponent';
@@ -36,19 +36,18 @@ export class DatasetVisualForceComponents implements Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${componentRecords?.length} visualforce components...`);
         const componentsDependencies = await sfdcManager.dependenciesQuery(
-            await Processor.map(componentRecords, (/** @type {any} */ record: any) => sfdcManager.caseSafeId(record.Id)), 
+            await MediumProcessor.map(componentRecords, (record: any) => sfdcManager.caseSafeId(record.Id)), 
             logger
         );
 
         // Create the map
         logger?.log(`Parsing ${componentRecords?.length} visualforce components...`);
-        const components: Map<string, SfdcVisualForceComponent> = new Map(await Processor.map(componentRecords, (/** @type {any} */ record: any) => {
+        const components: Map<string, SfdcVisualForceComponent> = new Map(await MediumProcessor.map(componentRecords, (record: any) => {
 
             // Get the ID15 of this custom field
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            /** @type {SfdcVisualForceComponent} */
             const component: SfdcVisualForceComponent = componentDataFactory.create({
                 properties: {
                     id: id,

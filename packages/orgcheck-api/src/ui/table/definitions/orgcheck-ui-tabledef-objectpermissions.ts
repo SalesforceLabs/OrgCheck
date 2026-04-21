@@ -31,7 +31,7 @@ export class ObjectPermissionsTableDefinition implements TableDefinition {
         if (this._matrix) {
             this._matrix.columnHeaders // returns an array of string representing Object Api names
                 .sort()
-                .forEach((/** @type {string} */ objectApiName) => {
+                .forEach((objectApiName) => {
                     columns.push({ 
                         label: objectApiName, 
                         type: ColumnType.TXT, 

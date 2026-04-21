@@ -2,11 +2,11 @@ import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
 import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcProfileRestrictions } from 'src/api/data/orgcheck-api-data-profilerestrictions';
 
-const COMPUTE_NUMBER_FROM_IP = (/** @type {string} */ ip: string) => {
+const COMPUTE_NUMBER_FROM_IP = (ip: string) => {
     return ip?.split('.').reduce((prev, currentItem, currentIndex, array) => { 
         return prev + Number(currentItem) * Math.pow(255, array?.length-1-currentIndex); 
     }, 0);
@@ -35,7 +35,7 @@ export class DatasetProfileRestrictions implements Dataset {
         // List of profile ids
         const profileIdRecords = results[0];
         logger?.log(`Parsing ${profileIdRecords?.length} Profiles...`);
-        const profileIds = await Processor.map(profileIdRecords, (/** @type {any} */ record: any) => record.Id);
+        const profileIds = await MediumProcessor.map(profileIdRecords, (record: any) => record.Id);
 
         // Init the factories
         const restrictionsFactory = dataFactory.getInstance(DataAliases.SfdcProfileRestrictions);
@@ -48,7 +48,7 @@ export class DatasetProfileRestrictions implements Dataset {
 
         // Create the map
         logger?.log(`Parsing ${records?.length} profile restrictions...`);
-        const profileRestrictions: Map<string, SfdcProfileRestrictions> = new Map(await Processor.map(records, async (/** @type {any} */ record: any) => {
+        const profileRestrictions: Map<string, SfdcProfileRestrictions> = new Map(await MediumProcessor.map(records, async (record: any) => {
 
             // Get the ID15 of this profile
             const profileId = sfdcManager.caseSafeId(record.Id);
@@ -56,12 +56,11 @@ export class DatasetProfileRestrictions implements Dataset {
             // Login Hours
             let loginHours;
             if (record.Metadata.loginHours) {
-                loginHours = await Processor.map(
+                loginHours = await MediumProcessor.map(
                     WEEKDAYS,
-                    (/** @type {string} */ day: string) => {
+                    (day: string) => {
                         const hourStart = record.Metadata.loginHours[day + 'Start'];
                         const hourEnd = record.Metadata.loginHours[day + 'End'];
-                        /** @type {SfdcProfileLoginHourRestriction} */
                         return loginHourDataFactory.create({
                             properties: {
                                 day: day,
@@ -77,12 +76,11 @@ export class DatasetProfileRestrictions implements Dataset {
             // Ip Ranges
             let ipRanges;
             if (record.Metadata.loginIpRanges?.length ?? 0 > 0) {
-                ipRanges = await Processor.map(
+                ipRanges = await MediumProcessor.map(
                     record.Metadata.loginIpRanges,
-                    (/** @type {any} */ range: any) => {
+                    (range: any) => {
                         const startNumber = COMPUTE_NUMBER_FROM_IP(range.startAddress);
                         const endNumber = COMPUTE_NUMBER_FROM_IP(range.endAddress);
-                        /** @type {SfdcProfileIpRangeRestriction} */
                         return ipRangeDataFactory.create({
                             properties: {
                                 startAddress: range.startAddress,

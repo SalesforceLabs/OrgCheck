@@ -2,7 +2,7 @@ import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
 import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcWorkflow } from 'src/api/data/orgcheck-api-data-workflow';
@@ -29,7 +29,7 @@ export class DatasetWorkflows implements Dataset {
         // List of flow ids
         const workflowRuleRecords = results[0];
         logger?.log(`Parsing ${workflowRuleRecords?.length} Workflow Rules...`);
-        const workflowRuleIds = await Processor.map(workflowRuleRecords, (/** @type {any} */ record: any) => record.Id);
+        const workflowRuleIds = await MediumProcessor.map(workflowRuleRecords, (record: any) => record.Id);
 
         // Init the factory and records
         const workflowDataFactory = dataFactory.getInstance(DataAliases.SfdcWorkflow);
@@ -40,13 +40,12 @@ export class DatasetWorkflows implements Dataset {
 
         // Create the map
         logger?.log(`Parsing ${records?.length} workflows...`);
-        const workflows: Map<string, SfdcWorkflow> = new Map(await Processor.map(records, async (/** @type {any} */ record: any) => {
+        const workflows: Map<string, SfdcWorkflow> = new Map(await MediumProcessor.map(records, async (record: any) => {
 
             // Get the ID15 of this user
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            /** @type {SfdcWorkflow} */
             const workflow: SfdcWorkflow = workflowDataFactory.create({
                 properties: {
                     id: id,
@@ -64,16 +63,16 @@ export class DatasetWorkflows implements Dataset {
 
             // Add information about direction actions
             const directActions = record.Metadata.actions;
-            workflow.actions = await Processor.map(
+            workflow.actions = await MediumProcessor.map(
                 directActions,
-                (/** @type {any} */ action: any) => { return { name: action.name, type: action.type } }
+                (action: any) => { return { name: action.name, type: action.type } }
             );
 
             // Add information about time triggered actions
             const timeTriggers = record.Metadata.workflowTimeTriggers;
-            await Processor.forEach(
+            await MediumProcessor.forEach(
                 timeTriggers, 
-                async (/** @type {any} */ tt: any) => {
+                async (tt: any) => {
                     const field = tt.offsetFromField || 'TriggerDate';
                     if (tt.actions?.length === 0) {
                         workflow.emptyTimeTriggers.push({
@@ -81,7 +80,7 @@ export class DatasetWorkflows implements Dataset {
                             delay: `${tt.timeLength} ${tt.workflowTimeTriggerUnit}`
                         });
                     } else {
-                        tt.actions.forEach((/** @type {any} */ action: any) => {
+                        tt.actions.forEach((action: any) => {
                             workflow.futureActions.push({ 
                                 name: action.name, 
                                 type: action.type, 

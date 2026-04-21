@@ -2,7 +2,7 @@ import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 import { DataFactoryIntf } from 'src/api/core/data/orgcheck-api-datafactory';
 import { Dataset } from 'src/api/core/dataset/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
-import { Processor } from 'src/api/core/orgcheck-api-processor';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcGroup } from 'src/api/data/orgcheck-api-data-group';
@@ -32,7 +32,7 @@ export class DatasetGroups implements Dataset {
         // Create the map
         const groupRecords = results[0];
         logger?.log(`Parsing ${groupRecords?.length} groups...`);
-        const groups: Map<string, SfdcGroup> = new Map(await Processor.map(groupRecords, async (/** @type {any} */ record: any) => {
+        const groups: Map<string, SfdcGroup> = new Map(await MediumProcessor.map(groupRecords, async (record: any) => {
         
             // Get the ID15 of this custom field
             const groupId = sfdcManager.caseSafeId(record.Id);
@@ -71,9 +71,9 @@ export class DatasetGroups implements Dataset {
             // Handle the direct group membership
             const groupDirectUserIds: string[] = [], groupDirectGroupIds: string[] = [];
             if (record.GroupMembers && record.GroupMembers.records && record.GroupMembers.records?.length > 0) {
-                await Processor.forEach(
+                await MediumProcessor.forEach(
                     record.GroupMembers.records, 
-                    async (/** @type {any} */ m: any) => {
+                    async (m: any) => {
                         const groupMemberId = sfdcManager.caseSafeId(m.UserOrGroupId);
                         (groupMemberId.startsWith('005') ? groupDirectUserIds : groupDirectGroupIds).push(groupMemberId);
                     }
@@ -81,7 +81,6 @@ export class DatasetGroups implements Dataset {
             }
 
             // Create the instance (common one)
-            /** @type {SfdcGroup} */
             const group: SfdcGroup = groupDataFactory.createWithScore({
                 properties: {
                     id: groupId,

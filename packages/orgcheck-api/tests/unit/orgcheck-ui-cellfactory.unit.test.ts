@@ -6,10 +6,8 @@ describe('tests.ui.unit.CellFactory', () => {
 
     describe('Test Cell Factory with only one index column type (see ColumnType.IDX)', () => {
 
-        /** @type {TableColumn} */
         const column: TableColumn = { label: '#', type: ColumnType.IDX };
 
-        /** @type {any[]} */
         const data: any[] = [ 
             { id: 'uyt' }, 
             { id: 'yuiii' }, 
@@ -33,10 +31,8 @@ describe('tests.ui.unit.CellFactory', () => {
 
     describe('Test Cell Factory with only one score column type (see ColumnType.SCR)', () => {
 
-        /** @type {TableColumn} */
         const column: TableColumn = { label: 'Score', type: ColumnType.SCR, data: { value: 'score', id: 'id', name: 'label' }};
         
-        /** @type {any[]} */
         const data: any[] = [ 
             { score: 0, id: 'iii', label: 'Label III' }, 
             { score: undefined, id: 'jjj', label: 'Label JJJ' },
@@ -61,10 +57,8 @@ describe('tests.ui.unit.CellFactory', () => {
 
     describe('Test Cell Factory with only one url column type (see ColumnType.URL)', () => {
 
-        /** @type {TableColumn} */
         const column: TableColumn = { label: 'Name', type: ColumnType.URL, data: { value: 'url', label: 'name' }};
         
-        /** @type {any[]} */
         const data: any[] = [ 
             { score: 0, id: 'iii', name: 'Label III', url: '#.html' }, 
             { score: 1, id: 'jjj', name: 'Label JJJ', url: undefined },
@@ -88,10 +82,8 @@ describe('tests.ui.unit.CellFactory', () => {
     
     describe('Test Cell Factory with only one numeric column type (see ColumnType.NUM)', () => {
 
-        /** @type {TableColumn} */
         const column: TableColumn = { label: 'API Version', type: ColumnType.NUM, data: { value: 'apiVersion' }};
         
-        /** @type {any[]} */
         const data: any[] = [ 
             { score: 0, id: 'iii', name: 'Label III', apiVersion: 6 }, 
             { score: 1, id: 'jjj', name: 'Label JJJ', apiVersion: undefined },
@@ -114,10 +106,8 @@ describe('tests.ui.unit.CellFactory', () => {
     
     describe('Test Cell Factory with only one text column type (see ColumnType.TXT)', () => {
 
-        /** @type {TableColumn} */
         const column: TableColumn = { label: 'Package', type: ColumnType.TXT, data: { value: 'package' }};
         
-        /** @type {any[]} */
         const data: any[] = [ 
             { score: 0, id: 'iii', name: 'Label III', package: undefined }, 
             { score: 1, id: 'jjj', name: 'Label JJJ', package: '' },
@@ -140,10 +130,8 @@ describe('tests.ui.unit.CellFactory', () => {
 
     describe('Test Cell Factory with only one datatime column type (see ColumnType.DTM)', () => {
 
-        /** @type {TableColumn} */
         const column: TableColumn = { label: 'Created date', type: ColumnType.DTM, data: { value: 'createdDate' }};
         
-        /** @type {any[]} */
         const data: any[] = [ 
             { score: 0, id: 'iii', name: 'Label III', createdDate: undefined }, 
             { score: 1, id: 'jjj', name: 'Label JJJ', createdDate: Date.now() },
@@ -166,10 +154,8 @@ describe('tests.ui.unit.CellFactory', () => {
 
     describe('Test Cell Factory with only one dependencies column type (see ColumnType.DEP)', () => {
 
-        /** @type {TableColumn} */
         const column: TableColumn = { label: 'Dependencies',  type: ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }};
         
-        /** @type {any[]} */
         const data: any[] = [ 
             { score: 0, id: 'iii', name: 'Label III', dependencies: {} }, 
             { score: 1, id: 'jjj', name: 'Label JJJ', dependencies: {} },
@@ -194,10 +180,8 @@ describe('tests.ui.unit.CellFactory', () => {
 
     describe('Test Cell Factory with only one percentage column type (see ColumnType.PRC)', () => {
 
-        /** @type {TableColumn} */
         const column: TableColumn = { label: 'Used (%)', type: ColumnType.PRC, data: { value: 'usedPercentage' }};
         
-        /** @type {any[]} */
         const data: any[] = [ 
             { score: 0, id: 'iii', name: 'Label III', usedPercentage:  9.89 }, 
             { score: 1, id: 'jjj', name: 'Label JJJ', usedPercentage: 87.01 },
@@ -220,10 +204,8 @@ describe('tests.ui.unit.CellFactory', () => {
 
     describe('Test Cell Factory with only one boolean column type (see ColumnType.CHK)', () => {
 
-        /** @type {TableColumn} */
         const column: TableColumn = { label: 'Is Active', type: ColumnType.CHK, data: { value: 'isActive' }};
         
-        /** @type {any[]} */
         const data: any[] = [ 
             { score: 0, id: 'iii', name: 'Label III', isActive: false }, 
             { score: 1, id: 'jjj', name: 'Label JJJ', isActive: true },
@@ -246,10 +228,8 @@ describe('tests.ui.unit.CellFactory', () => {
 
     describe('Test Cell Factory with only one objects column type (see ColumnType.OBJS)', () => {
 
-        /** @type {TableColumn} */
         const column: TableColumn = { label: 'Ip Ranges', type: ColumnType.OBJS, data: { values: 'ipRanges', value: '.', template: (r) => `${r.description}: from ${r.startAddress} to ${r.endAddress} --> ${r.difference*1} address(es)` }};
 
-        /** @type {any[]} */
         const data: any[] = [ 
             { score: 0, id: 'iii', name: 'Label III', ipRanges: [
                 { description: 'uuu', startAddress: '1.1.1.1', endAddress: '2.2.2.2', difference: 1000 }
@@ -284,10 +264,8 @@ describe('tests.ui.unit.CellFactory', () => {
 
     describe('Test Cell Factory with only one texts column type (see ColumnType.TXTS)', () => {
 
-        /** @type {TableColumn} */
         const column: TableColumn = { label: 'Annotations', type: ColumnType.TXTS, data: { values: 'annotations', value: '.'}};
 
-        /** @type {any[]} */
         const data: any[] = [ 
             { score: 0, id: 'iii', name: 'Label III', annotations: [ 'IsTest', 'ReadOnly', 'RemoteAction' ]}, 
             { score: 1, id: 'jjj', name: 'Label JJJ', annotations: [] }, 
@@ -315,10 +293,8 @@ describe('tests.ui.unit.CellFactory', () => {
 
     describe('Test Cell Factory with only one urls column type (see ColumnType.URLS)', () => {
 
-        /** @type {TableColumn} */
         const column: TableColumn = { label: 'Users\' profiles', type: ColumnType.URLS, data: { values: 'assigneeProfileRefs', value: 'url', label: 'name' }};
 
-        /** @type {any[]} */
         const data: any[] = [ 
             { score: 0, id: 'iii', name: 'Label III', assigneeProfileRefs: [
                 { name: 'uuu', url: '#1.html' }
@@ -360,14 +336,12 @@ describe('tests.ui.unit.CellFactory', () => {
         const COLUMN2_VALUEBEFOREMIN = '<2';
         const COLUMN2_VALUEAFTERMAX = '>5';
 
-        /** @type {TableColumn[]} */
         const columns: TableColumn[] = [
             { label: 'Column 1', type: ColumnType.NUM, data: { value: 'propertyA' }, modifier: { minimum: 3, valueBeforeMin: COLUMN0_VALUEBEFOREMIN, valueIfEmpty: COLUMN0_VALUEIFEMPTY }},
             { label: 'Column 2', type: ColumnType.NUM, data: { value: 'propertyB' }, modifier: { maximum: 8, valueAfterMax: COLUMN1_VALUEAFTERMAX }},
             { label: 'Column 3', type: ColumnType.NUM, data: { value: 'propertyC' }, modifier: { minimum: 2, valueBeforeMin: COLUMN2_VALUEBEFOREMIN, maximum: 5, valueAfterMax: COLUMN2_VALUEAFTERMAX }}
         ];
 
-        /** @type {any[]} */
         const data: any[] = [ 
             { score: 0, id: 'iii', propertyA: 4, propertyB: 6, propertyC: 4 }, // none of the properties will be decorated
             { score: 0, id: 'iii', propertyA: 3, propertyB: 6, propertyC: 4 }, // none of the properties will be decorated -- note: propA = min, not <
@@ -452,14 +426,12 @@ describe('tests.ui.unit.CellFactory', () => {
         const COLUMN0_VALUEIFEMPTY = 'Empty value for A';
         const COLUMN2_VALUEIFEMPTY = 'Empty value for C';
 
-        /** @type {TableColumn[]} */
         const columns: TableColumn[] = [
             { label: 'Column 1', type: ColumnType.TXT, data: { value: 'propertyA' }, modifier: { maximumLength: 10, valueIfEmpty: COLUMN0_VALUEIFEMPTY }},
             { label: 'Column 2', type: ColumnType.TXT, data: { value: 'propertyB' }, modifier: { maximumLength: 8, preformatted: true }},
             { label: 'Column 3', type: ColumnType.TXT, data: { value: 'propertyC' }, modifier: { valueIfEmpty: COLUMN2_VALUEIFEMPTY }}
         ];
 
-        /** @type {any[]} */
         const data: any[] = [ 
             { score: 0, id: 'iii', propertyA: 'text',        propertyB: 'text',      propertyC: 'text' },    // none of the properties will be decorated
             { score: 0, id: 'jjj', propertyA: 'text56789A',  propertyB: 'text',      propertyC: 'text' },    // none of the properties will be decorated -- note: propA.length = maximumLength, not >

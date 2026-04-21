@@ -31,7 +31,7 @@ export class FieldPermissionsTableDefinition implements TableDefinition {
         if (this._matrix) {
             this._matrix.columnHeaders // returns an array of string representing Field Api names
                 .sort()
-                .forEach((/** @type {string} */ fieldApiName) => {
+                .forEach((fieldApiName) => {
                     columns.push({ 
                         label: fieldApiName, 
                         type: ColumnType.TXT, 
