@@ -1,7 +1,7 @@
 {
   "name": "@orgcheck/sfdx-plugin",
   "description": "Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt.",
-  "version": "8.0.4",
+  "version": "8.0.5",
   "private": false,
   "dependencies": {
     "@oclif/core": "^4",
@@ -57,8 +57,8 @@
     "lint": "eslint \"src/**/*.ts\" \"tests/**/*.ts\" --color --cache --cache-location .eslintcache --no-error-on-unmatched-pattern",
     "clean": "rm -rf lib tsconfig.tsbuildinfo && sf-clean all",
     "compile": "yarn clean && tsc -p tsconfig.json --pretty",
-    "build": "yarn compile && yarn lint && yarn oclif manifest && npm pack --ignore-scripts",
-    "npm:publish:sfdx-plugin": "yarn build && yarn version --pack && npm publish --access public --ignore-scripts",
+    "build": "yarn compile && yarn lint",
+    "npm:publish:sfdx-plugin": "yarn build && yarn version --patch && yarn oclif manifest && npm pack --ignore-scripts && npm publish --access public --ignore-scripts",
     "docs": "sf-docs",
     "format": "prettier --write \"+(src|test|schemas)/**/*.+(ts|js|json)|command-snapshot.json\"",
     "link-check": "node -e \"process.exit(process.env.CI ? 0 : 1)\" || linkinator \"**/*.md\" --skip \"CHANGELOG.md|node_modules|tests/|confluence.internal.salesforce.com|my.salesforce.com|localhost|%s\" --markdown --retry --directory-listing --verbosity error",
