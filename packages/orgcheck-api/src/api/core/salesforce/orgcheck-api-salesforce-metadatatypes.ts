@@ -40,6 +40,7 @@ export enum SalesforceMetadataTypes {
     REPORT = 'Report',
     ROLE = 'UserRole',
     TECHNICAL_GROUP = 'TechnicalGroup',
+    SHARING_RULE = 'SharingRules',
     STANDARD_FIELD = 'StandardField',
     STANDARD_OBJECT = 'StandardEntity',
     STATIC_RESOURCE = 'StaticResource',

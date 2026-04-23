@@ -48,6 +48,7 @@ export enum DataAliases {
     SfdcStaticResource = 'Static Resource', 
     SfdcUser = 'User', 
     SfdcUserRole = 'Role', 
+    SfdcSharingRule = 'Sharing Rule',
     SfdcValidationRule = 'Validation Rule', 
     SfdcVisualForceComponent = 'Visualforce Component', 
     SfdcVisualForcePage = 'Visualforce Page', 

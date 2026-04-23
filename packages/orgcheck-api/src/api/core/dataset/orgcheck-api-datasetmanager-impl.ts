@@ -47,6 +47,7 @@ import { DatasetUserRoles } from 'src/api/dataset/orgcheck-api-dataset-userroles
 import { DatasetValidationRules } from 'src/api/dataset/orgcheck-api-dataset-validationrules';
 import { DatasetVisualForceComponents } from 'src/api/dataset/orgcheck-api-dataset-visualforcecomponents';
 import { DatasetVisualForcePages } from 'src/api/dataset/orgcheck-api-dataset-visualforcepages';
+import { DatasetSharingRules } from 'src/api/dataset/orgcheck-api-dataset-sharingrules';
 import { DatasetWeblinks } from 'src/api/dataset/orgcheck-api-dataset-weblinks';
 import { DatasetWorkflows } from 'src/api/dataset/orgcheck-api-dataset-workflows';
 import { LoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
@@ -134,6 +135,7 @@ export class DatasetManager implements DatasetManagerIntf {
         this._datasets.set(DatasetAliases.VALIDATIONRULES, new DatasetValidationRules());
         this._datasets.set(DatasetAliases.VISUALFORCECOMPONENTS, new DatasetVisualForceComponents());
         this._datasets.set(DatasetAliases.VISUALFORCEPAGES, new DatasetVisualForcePages());
+        this._datasets.set(DatasetAliases.SHARINGRULES, new DatasetSharingRules());
         this._datasets.set(DatasetAliases.WEBLINKS, new DatasetWeblinks());
         this._datasets.set(DatasetAliases.WORKFLOWS, new DatasetWorkflows());
     }

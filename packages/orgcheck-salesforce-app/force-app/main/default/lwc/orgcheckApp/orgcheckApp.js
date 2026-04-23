@@ -391,6 +391,7 @@ export default class OrgcheckApp extends LightningElement {
                     VRS:           { key: '0A', data: 'validationrules', recipe: Recipes.VALIDATION_RULES },
                     RTS:           { key: '0B', data: 'recordtypes', recipe: Recipes.RECORD_TYPES },
                     WEB_LINKS:     { key: '0C', data: 'weblinks', recipe: Recipes.WEBLINKS },
+                    SHARING_RULES: { key: '32', data: 'sharingrules', recipe: Recipes.SHARING_RULES },
                 }
             },
             SECURITY: { 

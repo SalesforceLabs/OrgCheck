@@ -50,6 +50,7 @@ export enum RecipeAliases {
     VALIDATION_RULES = 'validation-rules',
     VISUALFORCE_COMPONENTS = 'visualforce-components',
     VISUALFORCE_PAGES = 'visualforce-pages',
+    SHARING_RULES = 'sharing-rules',
     WEBLINKS = 'web-links',
     WORKFLOWS = 'workflows'
 }

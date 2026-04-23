@@ -583,6 +583,20 @@
                                     export-source={exports.weblinks} 
                                     export-basename="WebLinks"></c-orgcheck-extended-datatable>
                             </div>
+                            <div data-key="32" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no sharing rules to show." show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.sharingrules}
+                                    show-export-button  
+                                    export-source={exports.sharingrules} 
+                                    export-basename="SharingRules"></c-orgcheck-extended-datatable>
+                            </div>
                             <div data-key="0D" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
                                     empty-message="There is no active internal user to show."

@@ -59,6 +59,7 @@ export type { SfdcUserRole } from 'src/api/data/orgcheck-api-data-userrole';
 export type { SfdcValidationRule } from 'src/api/data/orgcheck-api-data-validationrule';
 export type { SfdcVisualForceComponent } from 'src/api/data/orgcheck-api-data-visualforcecomponent';
 export type { SfdcVisualForcePage } from 'src/api/data/orgcheck-api-data-visualforcepage';
+export type { SfdcSharingRule } from 'src/api/data/orgcheck-api-data-sharingrule';
 export type { SfdcWebLink } from 'src/api/data/orgcheck-api-data-weblink';
 export type { SfdcWorkflow } from 'src/api/data/orgcheck-api-data-workflow';
 

@@ -44,6 +44,7 @@ export enum DatasetAliases {
     VALIDATIONRULES = 'validation-rules',
     VISUALFORCECOMPONENTS = 'visual-force-components',
     VISUALFORCEPAGES = 'visual-force-pages',
+    SHARINGRULES = 'sharing-rules',
     WEBLINKS = 'web-links',
     WORKFLOWS = 'workflows'
 }

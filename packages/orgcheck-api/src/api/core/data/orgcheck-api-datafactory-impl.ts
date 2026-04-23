@@ -41,6 +41,7 @@ import { SfdcUserRole } from 'src/api/data/orgcheck-api-data-userrole';
 import { SfdcValidationRule } from 'src/api/data/orgcheck-api-data-validationrule';
 import { SfdcVisualForceComponent } from 'src/api/data/orgcheck-api-data-visualforcecomponent';
 import { SfdcVisualForcePage } from 'src/api/data/orgcheck-api-data-visualforcepage';
+import { SfdcSharingRule } from 'src/api/data/orgcheck-api-data-sharingrule';
 import { SfdcWebLink } from 'src/api/data/orgcheck-api-data-weblink';
 import { SfdcWorkflow } from 'src/api/data/orgcheck-api-data-workflow';
 import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
@@ -97,6 +98,7 @@ const DATA_METADATA = new Map([
    [ DataAliases.SfdcValidationRule , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcValidationRule)}],
    [ DataAliases.SfdcVisualForceComponent , { hasScore: true, hasDependencies: true, caster: (p) => (p as SfdcVisualForceComponent)}],
    [ DataAliases.SfdcVisualForcePage , { hasScore: true, hasDependencies: true, caster: (p) => (p as SfdcVisualForcePage)}],
+   [ DataAliases.SfdcSharingRule , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcSharingRule)}],
    [ DataAliases.SfdcWebLink , { hasScore: true, hasDependencies: true, caster: (p) => (p as SfdcWebLink)}],
    [ DataAliases.SfdcWorkflow , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcWorkflow)}]
 ]);

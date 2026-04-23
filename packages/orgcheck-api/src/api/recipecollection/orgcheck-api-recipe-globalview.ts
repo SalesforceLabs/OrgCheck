@@ -43,6 +43,7 @@ import { RolesTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-table
 import { ValidationRulesTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-validationrules';
 import { VisualForceComponentsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-visualforcecomponents';
 import { VisualForcePagesTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-visualforcepages';
+import { SharingRulesTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-sharingrules';
 import { WebLinksTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-weblinks';
 import { WorkflowsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-workflows';
 import { ReleaseUpdatesTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-realeseupdates';
@@ -138,6 +139,7 @@ export class RecipeGlobalView implements RecipeCollection {
             RecipeAliases.REPORTS,
             RecipeAliases.STATIC_RESOURCES,
             RecipeAliases.USER_ROLES,
+            RecipeAliases.SHARING_RULES,
             RecipeAliases.VALIDATION_RULES,
             RecipeAliases.VISUALFORCE_COMPONENTS,
             RecipeAliases.VISUALFORCE_PAGES,
@@ -207,6 +209,7 @@ export class RecipeGlobalView implements RecipeCollection {
             new ReportsTableDefinition(),
             new StaticResourcesTableDefinition(),
             new RolesTableDefinition(),
+            new SharingRulesTableDefinition(),
             new ValidationRulesTableDefinition(),
             new VisualForceComponentsTableDefinition(),
             new VisualForcePagesTableDefinition(),

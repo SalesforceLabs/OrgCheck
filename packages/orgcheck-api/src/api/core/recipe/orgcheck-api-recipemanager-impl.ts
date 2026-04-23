@@ -51,6 +51,7 @@ import { RecipeUserRoles } from 'src/api/recipe/orgcheck-api-recipe-userroles';
 import { RecipeValidationRules } from 'src/api/recipe/orgcheck-api-recipe-validationrules';
 import { RecipeVisualForceComponents } from 'src/api/recipe/orgcheck-api-recipe-visualforcecomponents';
 import { RecipeVisualForcePages } from 'src/api/recipe/orgcheck-api-recipe-visualforcepages';
+import { RecipeSharingRules } from 'src/api/recipe/orgcheck-api-recipe-sharingrules';
 import { RecipeWebLinks } from 'src/api/recipe/orgcheck-api-recipe-weblinks';
 import { RecipeWorkflows } from 'src/api/recipe/orgcheck-api-recipe-workflows';
 import { DataCollectionStatisticsIntf } from 'src/api/core/data/orgcheck-api-data-datacollectionstats';
@@ -151,6 +152,7 @@ export class RecipeManager implements RecipeManagerIntf {
         this._recipes.set(RecipeAliases.VALIDATION_RULES, new RecipeValidationRules());
         this._recipes.set(RecipeAliases.VISUALFORCE_COMPONENTS, new RecipeVisualForceComponents());
         this._recipes.set(RecipeAliases.VISUALFORCE_PAGES, new RecipeVisualForcePages());
+        this._recipes.set(RecipeAliases.SHARING_RULES, new RecipeSharingRules());
         this._recipes.set(RecipeAliases.WEBLINKS, new RecipeWebLinks());
         this._recipes.set(RecipeAliases.WORKFLOWS, new RecipeWorkflows());
 
