@@ -87,6 +87,16 @@ export class DatasetObjects implements Dataset {
                         'GROUP BY EntityDefinitionId',
                 tooling: true,
                 queryMoreField: 'CreatedDate' // entityDef does not support calling QueryMore, use the custom instead
+            }, {
+                // Get the limits per object
+                string: `SELECT DurableId, (SELECT Max, Remaining, Type FROM Limits WHERE Type IN ('SharingRules', 'CbsSharingRules')) `+
+                        'FROM EntityDefinition '+
+                        `WHERE KeyPrefix <> null ` +
+                        `AND DeveloperName <> null ` +
+                        `AND (NOT(KeyPrefix IN ('00a', '017', '02c', '0D5', '1CE'))) `+
+                        `AND (NOT(QualifiedApiName like '%_hd'))`,
+                tooling: true,
+                queryMoreField: 'DurableId' // entityDef does not support calling QueryMore, use the custom instead
             }], logger)
         ]);
 
@@ -97,7 +107,8 @@ export class DatasetObjects implements Dataset {
         const nbRecordTypesPerEntity = results[1][3];
         const nbWorkflowRulesPerEntity = results[1][4];
         const nbValidationRulesPerEntity = results[1][5];
-        const nbTriggersPerEntityStatus = results[1][6];
+        const nbTriggersPerEntity = results[1][6];
+        const limitsPerEntity = results[1][7];
 
         const entitiesByName = {};
         const qualifiedApiNames = await MediumProcessor.map(
@@ -117,12 +128,13 @@ export class DatasetObjects implements Dataset {
             }
         }
         await Promise.all([
-            MediumProcessor.forEach(nbCustomFieldsPerEntity, async (r: any) => SetCounter(r.EntityDefinitionId, 'cf', r.NbCustomFields)),
-            MediumProcessor.forEach(nbPageLayoutsPerEntity, async (r: any) => SetCounter(r.EntityDefinitionId, 'pl', r.NbPageLayouts)),
-            MediumProcessor.forEach(nbRecordTypesPerEntity, async (r: any) => SetCounter(r.EntityDefinitionId, 'rt', r.NbRecordTypes)),
-            MediumProcessor.forEach(nbWorkflowRulesPerEntity, async (r: any) => SetCounter(r.TableEnumOrId, 'wf', r.NbWorkflowRules)),
-            MediumProcessor.forEach(nbValidationRulesPerEntity, async (r: any) => SetCounter(r.EntityDefinitionId, 'vr', r.NbValidationRules)),
-            MediumProcessor.forEach(nbTriggersPerEntityStatus, async (r: any) => SetCounter(r.EntityDefinitionId, 'ap', r.NbTriggers))
+            MediumProcessor.forEach(nbCustomFieldsPerEntity, (r: any) => SetCounter(r.EntityDefinitionId, 'cf', r.NbCustomFields)),
+            MediumProcessor.forEach(nbPageLayoutsPerEntity, (r: any) => SetCounter(r.EntityDefinitionId, 'pl', r.NbPageLayouts)),
+            MediumProcessor.forEach(nbRecordTypesPerEntity, (r: any) => SetCounter(r.EntityDefinitionId, 'rt', r.NbRecordTypes)),
+            MediumProcessor.forEach(nbWorkflowRulesPerEntity, (r: any) => SetCounter(r.TableEnumOrId, 'wf', r.NbWorkflowRules)),
+            MediumProcessor.forEach(nbValidationRulesPerEntity, (r: any) => SetCounter(r.EntityDefinitionId, 'vr', r.NbValidationRules)),
+            MediumProcessor.forEach(nbTriggersPerEntity, (r: any) => SetCounter(r.EntityDefinitionId, 'ap', r.NbTriggers)),
+            MediumProcessor.forEach(limitsPerEntity, (r: any) => r.Limits?.records.forEach((l: any) => counters.set(`${r.DurableId}-${l.Type}`, l.Max - l.Remaining)))
         ]) 
 
         // Create the map
@@ -134,6 +146,9 @@ export class DatasetObjects implements Dataset {
                 const type = sfdcManager.getObjectType(object.name, object.customSetting)
                 const entity = entitiesByName[object.name];
                 const durableId = entity.DurableId;
+                const nbAllSharingRules = counters.get(`${durableId}-SharingRules`) ?? 0;
+                const nbCriteriaSharingRules = counters.get(`${durableId}-CbsSharingRules`) ?? 0;
+                const nbOwnerSharingRules = nbAllSharingRules - nbCriteriaSharingRules;
 
                 // Create the instance
                 const obj: SfdcObject = objectDataFactory.createWithScore({
@@ -152,6 +167,8 @@ export class DatasetObjects implements Dataset {
                         nbWorkflowRules: counters.get(`${object.name}-wf`) ?? 0,
                         nbValidationRules: counters.get(`${durableId}-vr`) ?? 0,
                         nbApexTriggers: counters.get(`${durableId}-at`) ?? 0,
+                        nbOwnershipBasedSharingRules: nbOwnerSharingRules,
+                        nbCriteriaBasedSharingRules: nbCriteriaSharingRules,
                         url: sfdcManager.setupUrl(durableId, type)
                     }
                 });

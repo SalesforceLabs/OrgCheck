@@ -276,4 +276,18 @@ export interface SfdcObject extends DataWithScore {
      * @public
      */
     recordCount: number;
+
+    /**
+     * @description Number of ownership based sharing rules
+     * @type {number}
+     * @public
+     */
+    nbOwnershipBasedSharingRules: number;
+
+    /**
+     * @description Number of criteria based sharing rules
+     * @type {number}
+     * @public
+     */
+    nbCriteriaBasedSharingRules: number;
 }

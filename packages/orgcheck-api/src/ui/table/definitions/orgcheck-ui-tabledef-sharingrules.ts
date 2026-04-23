@@ -15,7 +15,7 @@ export class SharingRulesTableDefinition implements TableDefinition {
         { label: 'Object',                 type: ColumnType.TXT,  data: { value: 'objectType' }},
         { label: 'Name',                   type: ColumnType.TXT,  data: { value: 'name' }},
         { label: 'Type',                   type: ColumnType.TXT,  data: { value: 'type' }},
-        { label: 'Shared From Conditions', type: ColumnType.TXTS, data: { values: 'sharedFromConditions', value: '.' }}
+        { label: 'Shared From Conditions', type: ColumnType.TXTS, data: { values: 'sharedFromConditions', value: '.' }},
         { label: 'Shared From Logic',      type: ColumnType.TXT,  data: { value: 'sharedFromLogic' }},
         { label: 'Access Level',           type: ColumnType.TXT,  data: { value: 'accessLevel' }},
         { label: 'Shared To Name',         type: ColumnType.TXT,  data: { value: 'sharedToName' }},

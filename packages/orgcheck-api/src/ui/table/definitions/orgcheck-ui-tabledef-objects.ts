@@ -10,19 +10,21 @@ export class ObjectsTableDefinition implements TableDefinition {
      * @type {TableColumn[]}
      */
     columns: TableColumn[] = [
-        { label: '#',                type: ColumnType.IDX },
-        { label: 'Score',            type: ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-        { label: 'Label',            type: ColumnType.URL, data: { value: 'url', label: 'label' }},
-        { label: 'Name',             type: ColumnType.TXT, data: { value: 'name' }},
-        { label: 'Package',          type: ColumnType.TXT, data: { value: 'package' }},
-        { label: 'Custom fields',    type: ColumnType.NUM, data: { value: 'nbCustomFields' }},
-        { label: 'Page layouts',     type: ColumnType.NUM, data: { value: 'nbPageLayouts' }},
-        { label: 'Record types',     type: ColumnType.NUM, data: { value: 'nbRecordTypes' }},
-        { label: 'Workflows',        type: ColumnType.NUM, data: { value: 'nbWorkflowRules' }},
-        { label: 'Apex Triggers',    type: ColumnType.NUM, data: { value: 'nbApexTriggers' }},
-        { label: 'Validation Rules', type: ColumnType.NUM, data: { value: 'nbValidationRules' }},
-        { label: 'Internal OWD',     type: ColumnType.TXT, data: { value: 'internalSharingModel' }},
-        { label: 'External OWD',     type: ColumnType.TXT, data: { value: 'externalSharingModel' }}
+        { label: '#',                       type: ColumnType.IDX },
+        { label: 'Score',                   type: ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+        { label: 'Label',                   type: ColumnType.URL, data: { value: 'url', label: 'label' }},
+        { label: 'Name',                    type: ColumnType.TXT, data: { value: 'name' }},
+        { label: 'Package',                 type: ColumnType.TXT, data: { value: 'package' }},
+        { label: 'Custom fields',           type: ColumnType.NUM, data: { value: 'nbCustomFields' }},
+        { label: 'Page layouts',            type: ColumnType.NUM, data: { value: 'nbPageLayouts' }},
+        { label: 'Record types',            type: ColumnType.NUM, data: { value: 'nbRecordTypes' }},
+        { label: 'Workflows',               type: ColumnType.NUM, data: { value: 'nbWorkflowRules' }},
+        { label: 'Apex Triggers',           type: ColumnType.NUM, data: { value: 'nbApexTriggers' }},
+        { label: 'Validation Rules',        type: ColumnType.NUM, data: { value: 'nbValidationRules' }},
+        { label: 'Ownership Sharing Rules', type: ColumnType.NUM, data: { value: 'nbOwnershipBasedSharingRules' }},
+        { label: 'Criteria Sharing Rules',  type: ColumnType.NUM, data: { value: 'nbCriteriaBasedSharingRules' }},
+        { label: 'Internal OWD',            type: ColumnType.TXT, data: { value: 'internalSharingModel' }},
+        { label: 'External OWD',            type: ColumnType.TXT, data: { value: 'externalSharingModel' }}
     ];
 
     /**
