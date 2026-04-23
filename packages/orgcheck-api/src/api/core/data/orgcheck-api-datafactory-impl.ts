@@ -33,6 +33,7 @@ import { SfdcProfile } from 'src/api/data/orgcheck-api-data-profile';
 import { SfdcProfilePasswordPolicy } from 'src/api/data/orgcheck-api-data-profilepasswordpolicy';
 import { SfdcProfileIpRangeRestriction, SfdcProfileLoginHourRestriction, SfdcProfileRestrictions } from 'src/api/data/orgcheck-api-data-profilerestrictions';
 import { SfdcRecordType } from 'src/api/data/orgcheck-api-data-recordtype';
+import { SfdcReleaseUpdate } from 'src/api/data/orgcheck-api-data-releaseupdate';
 import { SfdcReport } from 'src/api/data/orgcheck-api-data-report';
 import { SfdcStaticResource } from 'src/api/data/orgcheck-api-data-staticresource';
 import { SfdcUser } from 'src/api/data/orgcheck-api-data-user';
@@ -88,6 +89,7 @@ const DATA_METADATA = new Map([
    [ DataAliases.SfdcProfilePasswordPolicy , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcProfilePasswordPolicy)}],
    [ DataAliases.SfdcProfileRestrictions , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcProfileRestrictions)}],
    [ DataAliases.SfdcRecordType , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcRecordType)}],
+   [ DataAliases.SfdcReleaseUpdate , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcReleaseUpdate)}],
    [ DataAliases.SfdcReport , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcReport)}],
    [ DataAliases.SfdcStaticResource , { hasScore: true, hasDependencies: true, caster: (p) => (p as SfdcStaticResource)}],
    [ DataAliases.SfdcUser , { hasScore: true, hasDependencies: false, caster: (p) => (p as SfdcUser)}],

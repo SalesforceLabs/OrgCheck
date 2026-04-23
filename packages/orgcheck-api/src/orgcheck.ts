@@ -51,6 +51,7 @@ export type { SfdcProfile } from 'src/api/data/orgcheck-api-data-profile';
 export type { SfdcProfilePasswordPolicy } from 'src/api/data/orgcheck-api-data-profilepasswordpolicy';
 export type { SfdcProfileRestrictions } from 'src/api/data/orgcheck-api-data-profilerestrictions';
 export type { SfdcRecordType } from 'src/api/data/orgcheck-api-data-recordtype';
+export type { SfdcReleaseUpdate } from 'src/api/data/orgcheck-api-data-releaseupdate';
 export type { SfdcReport } from 'src/api/data/orgcheck-api-data-report';
 export type { SfdcStaticResource } from 'src/api/data/orgcheck-api-data-staticresource';
 export type { SfdcUser } from 'src/api/data/orgcheck-api-data-user';

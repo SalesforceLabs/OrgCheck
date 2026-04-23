@@ -28,6 +28,7 @@ import { SfdcProfile } from 'src/api/data/orgcheck-api-data-profile';
 import { SfdcProfilePasswordPolicy } from 'src/api/data/orgcheck-api-data-profilepasswordpolicy';
 import { SfdcProfileRestrictions } from 'src/api/data/orgcheck-api-data-profilerestrictions';
 import { SfdcRecordType } from 'src/api/data/orgcheck-api-data-recordtype';
+import { SfdcReleaseUpdate } from 'src/api/data/orgcheck-api-data-releaseupdate';
 import { SfdcReport } from 'src/api/data/orgcheck-api-data-report';
 import { SfdcStaticResource } from 'src/api/data/orgcheck-api-data-staticresource';
 import { SfdcUser } from 'src/api/data/orgcheck-api-data-user';
@@ -117,7 +118,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
         description: 'Not referenced anywhere',
         formula: (d: SfdcCustomLabel | SfdcLightningPage | SfdcLightningAuraComponent | SfdcLightningWebComponent | SfdcVisualForceComponent | SfdcVisualForcePage | SfdcStaticResource) => d?.dependencies?.hadError === false && IS_EMPTY(d.dependencies?.referenced), 
         errorMessage: `This component is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.`,
-        badField: 'dependencies.referenced?.length',
+        badField: 'dependencies',
         applicable: [ DataAliases.SfdcCustomLabel, DataAliases.SfdcLightningPage, DataAliases.SfdcLightningAuraComponent, DataAliases.SfdcLightningWebComponent, DataAliases.SfdcVisualForceComponent, DataAliases.SfdcVisualForcePage, DataAliases.SfdcStaticResource ],
         category: SCORE_RULE_CATEGORIES.DEPENDENCY
     }, {
@@ -125,7 +126,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
         description: 'No reference anywhere for custom field',
         formula: (d: SfdcField) => d?.isCustom === true && d?.dependencies?.hadError === false && IS_EMPTY(d.dependencies?.referenced), 
         errorMessage: `This custom field is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.`,
-        badField: 'dependencies.referenced?.length',
+        badField: 'dependencies',
         applicable: [ DataAliases.SfdcField ],
         category: SCORE_RULE_CATEGORIES.DEPENDENCY
     }, {
@@ -133,7 +134,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
         description: 'No reference anywhere for apex class',
         formula: (d: SfdcApexClass) => d?.isTest === false && d?.dependencies?.hadError === false && IS_EMPTY(d.dependencies?.referenced), 
         errorMessage: `This apex class is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.`,
-        badField: 'dependencies.referenced?.length',
+        badField: 'dependencies',
         applicable: [ DataAliases.SfdcApexClass ],
         category: SCORE_RULE_CATEGORIES.DEPENDENCY
     }, {
@@ -141,7 +142,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
         description: 'Sorry, we had an issue with the Dependency API to gather the dependencies of this item',
         formula: (d: DataWithScoreAndDependencies) => d?.dependencies && d?.dependencies.hadError === true, 
         errorMessage: `Sorry, we had an issue with the Dependency API to gather the dependencies of this item.`,
-        badField: 'dependencies.referenced?.length',
+        badField: 'dependencies',
         applicable: [ DataAliases.SfdcField, DataAliases.SfdcApexClass, DataAliases.SfdcCustomLabel, DataAliases.SfdcFlow, DataAliases.SfdcLightningPage, DataAliases.SfdcLightningAuraComponent, DataAliases.SfdcLightningWebComponent, DataAliases.SfdcVisualForceComponent, DataAliases.SfdcVisualForcePage ],
         category: SCORE_RULE_CATEGORIES.DEPENDENCY
     }, {
@@ -708,7 +709,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
         badField: 'isAttachmentRelatedListIncluded',
         applicable: [ DataAliases.SfdcLightningPage ],
         category: SCORE_RULE_CATEGORIES.USER_ADOPTION
-    } , {
+    }, {
         id: 74,
         description: 'User with debug mode enabled',
         formula: (d: SfdcUser) => d?.hasDebugMode === true,
@@ -716,6 +717,14 @@ const ALL_SCORE_RULES: ScoreRule[] = [
         badField: 'hasDebugMode',
         applicable: [ DataAliases.SfdcUser ],
         category: SCORE_RULE_CATEGORIES.USER_ADOPTION
+    }, {
+        id: 75,
+        description: 'Release update to be reviewed and completed within 3 months',
+        formula: (d: SfdcReleaseUpdate) => d?.isReleased === false && d.remainingDaysBeforeDueDate < 90 && d.completionPercentage < 1,
+        errorMessage: `This release update (not yet released) needs to be reviewed and completed within 3 months. Some steps are remaining, please complete them asap.`,
+        badField: 'remainingDaysBeforeDueDate',
+        applicable: [ DataAliases.SfdcReleaseUpdate ],
+        category: SCORE_RULE_CATEGORIES.SECURITY
     },
     // Lightning Flow Scanner Rules (IDs 100-125)  
     {
@@ -916,7 +925,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
         description: 'Not referenced anywhere for flow (excluding Screen Flows)',
         formula: (d: SfdcFlow) => d?.isScreenFlow === false &&d?.dependencies?.hadError === false && IS_EMPTY(d.dependencies?.referenced), 
         errorMessage: `This flow is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.`,
-        badField: 'dependencies.referenced?.length',
+        badField: 'dependencies',
         applicable: [ DataAliases.SfdcFlow ],
         category: SCORE_RULE_CATEGORIES.DEPENDENCY
     }

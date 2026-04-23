@@ -44,6 +44,7 @@ import { RecipeProfileRestrictions } from 'src/api/recipe/orgcheck-api-recipe-pr
 import { RecipeProfiles } from 'src/api/recipe/orgcheck-api-recipe-profiles';
 import { RecipeQueues, RecipePublicGroups } from 'src/api/recipe/orgcheck-api-recipe-groups';
 import { RecipeRecordType } from 'src/api/recipe/orgcheck-api-recipe-recordtypes';
+import { RecipeReleaseUpdates } from 'src/api/recipe/orgcheck-api-recipe-releaseupdates';
 import { RecipeReports } from 'src/api/recipe/orgcheck-api-recipe-reports';
 import { RecipeStaticResources } from 'src/api/recipe/orgcheck-api-recipe-staticresources';
 import { RecipeUserRoles } from 'src/api/recipe/orgcheck-api-recipe-userroles';
@@ -142,6 +143,7 @@ export class RecipeManager implements RecipeManagerIntf {
         this._recipes.set(RecipeAliases.PUBLIC_GROUPS, new RecipePublicGroups());
         this._recipes.set(RecipeAliases.QUEUES, new RecipeQueues());
         this._recipes.set(RecipeAliases.RECORD_TYPES, new RecipeRecordType());
+        this._recipes.set(RecipeAliases.RELEASE_UPDATES, new RecipeReleaseUpdates());
         this._recipes.set(RecipeAliases.REPORTS, new RecipeReports());
         this._recipes.set(RecipeAliases.SCORE_RULES, new RecipeScoreRules());
         this._recipes.set(RecipeAliases.STATIC_RESOURCES, new RecipeStaticResources());

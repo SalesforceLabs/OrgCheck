@@ -29,6 +29,7 @@ import { RecipeProfilePasswordPolicies } from 'src/api/recipe/orgcheck-api-recip
 import { RecipeProfileRestrictions } from 'src/api/recipe/orgcheck-api-recipe-profilerestrictions';
 import { RecipeProfiles } from 'src/api/recipe/orgcheck-api-recipe-profiles';
 import { RecipePublicGroups, RecipeQueues } from 'src/api/recipe/orgcheck-api-recipe-groups';
+import { RecipeReleaseUpdates } from 'src/api/recipe/orgcheck-api-recipe-releaseupdates';
 import { RecipeGlobalView } from 'src/api/recipecollection/orgcheck-api-recipe-globalview';
 import { RecipeHardcodedURLsView } from 'src/api/recipecollection/orgcheck-api-recipe-hardcodedurlsview';
 import { RecipeUserRoles } from 'src/api/recipe/orgcheck-api-recipe-userroles';
@@ -76,6 +77,7 @@ describe('tests.api.unit.Recipes', () => {
       RecipeProfiles,
       RecipePublicGroups,
       RecipeQueues,
+      RecipeReleaseUpdates,
       RecipeUserRoles,
       RecipeValidationRules,
       RecipeVisualForceComponents,

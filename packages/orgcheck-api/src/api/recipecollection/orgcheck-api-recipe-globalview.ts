@@ -45,6 +45,7 @@ import { VisualForceComponentsTableDefinition } from 'src/ui/table/definitions/o
 import { VisualForcePagesTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-visualforcepages';
 import { WebLinksTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-weblinks';
 import { WorkflowsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-workflows';
+import { ReleaseUpdatesTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-realeseupdates';
 
 export interface GlobalViewAsTable {
 
@@ -133,6 +134,7 @@ export class RecipeGlobalView implements RecipeCollection {
             RecipeAliases.PUBLIC_GROUPS,
             RecipeAliases.QUEUES,
             RecipeAliases.RECORD_TYPES,
+            RecipeAliases.RELEASE_UPDATES,
             RecipeAliases.REPORTS,
             RecipeAliases.STATIC_RESOURCES,
             RecipeAliases.USER_ROLES,
@@ -201,6 +203,7 @@ export class RecipeGlobalView implements RecipeCollection {
             new PublicGroupsTableDefinition(),
             new QueuesTableDefinition(),
             new RecordTypesTableDefinition(),
+            new ReleaseUpdatesTableDefinition(),
             new ReportsTableDefinition(),
             new StaticResourcesTableDefinition(),
             new RolesTableDefinition(),

@@ -33,6 +33,7 @@ import { DatasetVisualForceComponents } from 'src/api/dataset/orgcheck-api-datas
 import { DatasetVisualForcePages } from 'src/api/dataset/orgcheck-api-dataset-visualforcepages';
 import { DatasetWorkflows } from 'src/api/dataset/orgcheck-api-dataset-workflows';
 import { DatasetRecordTypes } from 'src/api/dataset/orgcheck-api-dataset-recordtypes';
+import { DatasetReleaseUpdates } from 'src/api/dataset/orgcheck-api-dataset-releaseupdates';
 import { DatasetCollaborationGroups } from 'src/api/dataset/orgcheck-api-dataset-collaborationgroups';
 import { DatasetHomePageComponents } from 'src/api/dataset/orgcheck-api-dataset-homepagecomponents';
 import { DatasetCustomTabs } from 'src/api/dataset/orgcheck-api-dataset-customtabs';
@@ -61,7 +62,8 @@ describe('tests.api.unit.Datasets', () => {
       DatasetInternalActiveUsers, DatasetValidationRules, 
       DatasetVisualForceComponents, DatasetVisualForcePages, 
       DatasetWorkflows, DatasetRecordTypes, DatasetCollaborationGroups, 
-      DatasetHomePageComponents, DatasetCustomTabs, DatasetEmailTemplates 
+      DatasetHomePageComponents, DatasetCustomTabs, DatasetEmailTemplates,
+      DatasetReleaseUpdates
     ].forEach((datasetClass) => {
       const dataset = new datasetClass();
       it(`checks if ${dataset.constructor.name} runs correctly`, async () => {

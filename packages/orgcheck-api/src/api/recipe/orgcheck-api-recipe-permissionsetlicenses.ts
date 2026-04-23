@@ -16,7 +16,7 @@ export class RecipePermissionSetLicenses implements ServedRecipe<SfdcPermissionS
      * @type {string}
      * @public
      */
-    public readonly title: string = '🚔 Permission Set Licenses';
+    public readonly title: string = '💰 Permission Set Licenses';
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
@@ -32,7 +32,7 @@ export class RecipePermissionSetLicenses implements ServedRecipe<SfdcPermissionS
     }
 
     /**
-     * @description List the parameters that this mix dependes on
+     * @description List the parameters that this mix depends on on
      * @returns {string[]} List of parameters that this mix dependes on
      * @public
      */

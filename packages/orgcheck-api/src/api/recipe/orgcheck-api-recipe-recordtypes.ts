@@ -35,7 +35,7 @@ export class RecipeRecordType implements ServedRecipe<SfdcRecordType[], Table> {
     }
 
     /**
-     * @description List the parameters that this mix dependes on
+     * @description List the parameters that this mix depends on
      * @returns {string[]} List of parameters that this mix dependes on
      * @public
      */

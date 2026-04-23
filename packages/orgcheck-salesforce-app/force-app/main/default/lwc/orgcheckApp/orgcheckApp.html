@@ -1161,6 +1161,21 @@
                                     export-source={exports.dashboards} 
                                     export-basename="Dashboards"></c-orgcheck-extended-datatable>
                             </div>
+                            <div data-key="31" class="slds-hide slds-var-p-horizontal_small">
+                                <c-orgcheck-extended-datatable 
+                                    empty-message="There is no Release Updates to show."
+                                    show-search
+                                    show-statistics
+                                    onviewscore={handleViewScore}
+                                    is-sticky-headers
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    table={tableData.releaseupdates}
+                                    show-export-button  
+                                    export-source={exports.releaseupdates} 
+                                    export-basename="ReleaseUpdates"></c-orgcheck-extended-datatable>
+                            </div>
                         </div>
                     </lightning-card>
                 </lightning-layout-item>

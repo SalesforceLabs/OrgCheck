@@ -17,7 +17,7 @@ export default [
             format: 'umd',
             name: 'orgcheck',
             extend: true,
-            plugins: [ terser() ]
+            plugins: [ terser({ maxWorkers: 1 }) ]
         }
     },
     {

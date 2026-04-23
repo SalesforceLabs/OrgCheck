@@ -31,7 +31,7 @@ export class RecipePermissionSets implements ServedRecipe<SfdcPermissionSet[], T
     }
 
     /**
-     * @description List the parameters that this mix dependes on
+     * @description List the parameters that this mix depends on on
      * @returns {string[]} List of parameters that this mix dependes on
      * @public
      */

@@ -42,6 +42,9 @@ export class CellFactory {
             }
         }
         cell[`typeof${column.type}`] = true;
+        if (row?.badFields?.includes(columnData['values'] ?? columnData['value']) ?? false) {
+            cell['isbad'] = true;
+        }
         return cell;
     }
 }

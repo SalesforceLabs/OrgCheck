@@ -263,6 +263,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
             // APEX PROGAMMATION
             case SalesforceMetadataTypes.APEX_CLASS:              return `/lightning/setup/ApexClasses/page?address=%2F${id}`;
             case SalesforceMetadataTypes.KNOWLEDGE_ARTICLE_VERSION: return `/${id}`;
+            case SalesforceMetadataTypes.RELEASE_UPDATE:          return `/lightning/setup/ReleaseUpdates/${id}/detail`;
             // Other types or even undefined type
             default: {
                 //console.warn(`Type <${type}> not supported yet. Returning "/id" as url. FYI, id was <${id}>, parentId was <${parentId}> and parentType was <${parentType}>`);

@@ -280,10 +280,9 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
             badReasonIds: row.badReasonIds ? [... row.badReasonIds] : [],
             isVisible: row.isVisible ?? true,
             cells: row.cells.map((cell, cellIndex) => {
-                const isCellBad = row.badFields?.includes(table?.definition?.columns[cellIndex]?.label) ?? false;
                 return {
                     key: `${rowIndex}.${cellIndex}`,
-                    cssClass: `${this.isAllCellWrapped === true ? 'wrapped' : ''} ${isCellBad ? 'bad' : ''}`,
+                    cssClass: `${this.isAllCellWrapped === true ? 'wrapped' : ''} ${cell.isbad === true ? 'bad' : ''}`,
                     ...cell
                 }
             }) ?? [],

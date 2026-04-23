@@ -1,4 +1,5 @@
 import { DataDependencies } from 'src/api/core/data/orgcheck-api-data-dependencies';
+import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 
 /**
  * @description Data factory interface
@@ -8,12 +9,12 @@ export interface DataFactoryIntf {
 
     /**
      * @description Get the instance of the factiry for a given data class
-     * @param {any} dataClass - The class of the data for which we want to get the factory instance
+     * @param {DataAliases} dataClass - The class of the data for which we want to get the factory instance
      * @returns {DataFactoryInstanceIntf | undefined} Returns the instance of the factory for the given data class
      * @throws if the given dataClass is not an instance of Data or DataWithoutScoring
      * @public
      */
-    getInstance(dataClass: any): DataFactoryInstanceIntf;
+    getInstance(dataClass: DataAliases): DataFactoryInstanceIntf;
 }
 
 export interface DataFactoryInstanceCreateSetup {

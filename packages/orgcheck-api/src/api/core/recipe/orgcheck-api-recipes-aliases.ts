@@ -42,6 +42,7 @@ export enum RecipeAliases {
     PUBLIC_GROUPS = 'public-groups',
     QUEUES = 'queues',
     RECORD_TYPES = 'record-types',
+    RELEASE_UPDATES = 'release-updates',
     REPORTS = 'reports',
     SCORE_RULES = 'score-rules',
     STATIC_RESOURCES = 'static-resources',

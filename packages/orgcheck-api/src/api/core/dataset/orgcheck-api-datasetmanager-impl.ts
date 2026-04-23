@@ -39,6 +39,7 @@ import { DatasetProfilePasswordPolicies } from 'src/api/dataset/orgcheck-api-dat
 import { DatasetProfileRestrictions } from 'src/api/dataset/orgcheck-api-dataset-profilerestrictions';
 import { DatasetProfiles } from 'src/api/dataset/orgcheck-api-dataset-profiles';
 import { DatasetRecordTypes } from 'src/api/dataset/orgcheck-api-dataset-recordtypes';
+import { DatasetReleaseUpdates } from 'src/api/dataset/orgcheck-api-dataset-releaseupdates';
 import { DatasetReports } from 'src/api/dataset/orgcheck-api-dataset-reports';
 import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
 import { DatasetStaticResources } from 'src/api/dataset/orgcheck-api-dataset-staticresources';
@@ -125,6 +126,7 @@ export class DatasetManager implements DatasetManagerIntf {
         this._datasets.set(DatasetAliases.PROFILERESTRICTIONS, new DatasetProfileRestrictions());
         this._datasets.set(DatasetAliases.PROFILES, new DatasetProfiles());
         this._datasets.set(DatasetAliases.RECORDTYPES, new DatasetRecordTypes());
+        this._datasets.set(DatasetAliases.RELEASEUPDATES, new DatasetReleaseUpdates());
         this._datasets.set(DatasetAliases.REPORTS, new DatasetReports());
         this._datasets.set(DatasetAliases.STATICRESOURCES, new DatasetStaticResources());
         this._datasets.set(DatasetAliases.USERROLES, new DatasetUserRoles());

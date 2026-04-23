@@ -36,6 +36,7 @@ export enum SalesforceMetadataTypes {
     PUBLIC_GROUP = 'PublicGroup',
     QUEUE = 'Queue',
     RECORD_TYPE = 'RecordType',
+    RELEASE_UPDATE = 'ReleaseUpdate',
     REPORT = 'Report',
     ROLE = 'UserRole',
     TECHNICAL_GROUP = 'TechnicalGroup',

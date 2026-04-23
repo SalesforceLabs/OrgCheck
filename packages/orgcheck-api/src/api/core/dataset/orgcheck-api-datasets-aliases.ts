@@ -36,6 +36,7 @@ export enum DatasetAliases {
     PROFILERESTRICTIONS = 'profile-restrictions',
     PROFILES = 'profiles',
     RECORDTYPES = 'record-types',
+    RELEASEUPDATES = 'release-updates',
     REPORTS = 'reports',
     STATICRESOURCES = 'static-resources',   
     USERROLES = 'user-roles',
