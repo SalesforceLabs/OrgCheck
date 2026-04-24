@@ -725,6 +725,14 @@ const ALL_SCORE_RULES: ScoreRule[] = [
         badField: 'remainingDaysBeforeDueDate',
         applicable: [ DataAliases.SfdcReleaseUpdate ],
         category: SCORE_RULE_CATEGORIES.SECURITY
+    }, {
+        id: 76,
+        description: 'JavaScript code suspicion in this formula field',
+        formula: (d: SfdcField) => d?.formula?.includes('javascript') === true || d?.formula?.includes('<script>') === true,
+        errorMessage: `We suspect this custom field contains a formula with javascript code inside..`,
+        badField: 'formula',
+        applicable: [ DataAliases.SfdcField ],
+        category: SCORE_RULE_CATEGORIES.SECURITY
     },
     // Lightning Flow Scanner Rules (IDs 100-125)  
     {
