@@ -18,7 +18,7 @@ export class RecipeHardcodedURLsView implements RecipeCollection {
      * @type {string}
      * @public
      */
-    public title: string = '🏖️ Hardcoded URLs view';
+    public readonly title: string = '🏖️ Hardcoded URLs view';
 
     /**
      * @description List the parameters that this recipe collection dependes on

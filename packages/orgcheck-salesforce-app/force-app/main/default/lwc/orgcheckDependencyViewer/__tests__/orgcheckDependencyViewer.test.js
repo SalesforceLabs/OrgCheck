@@ -26,4 +26,20 @@ describe('c-orgcheck-dependency-viewer', () => {
       expect(hadError).toBeFalsy();
     }
   });
+
+  it('closes the dependency viewer when Escape is pressed', () => {
+    const viewerContext = {
+      _isShown: true,
+      handleClose() {
+        this._isShown = false;
+      }
+    };
+
+    OrgcheckDependencyViewer.prototype._handleWindowKeyDown.call(
+      viewerContext,
+      new KeyboardEvent('keydown', { key: 'Escape' })
+    );
+
+    expect(viewerContext._isShown).toBeFalsy();
+  });
 });

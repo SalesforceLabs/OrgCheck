@@ -16,6 +16,21 @@ export default class OrgcheckDependencyViewer extends LightningElement {
     _isShown = false;
 
     /**
+     * @description Register the Escape key handler when the component is mounted.
+     */
+    connectedCallback() {
+        this._boundHandleWindowKeyDown = this._handleWindowKeyDown.bind(this);
+        window.addEventListener('keydown', this._boundHandleWindowKeyDown);
+    }
+
+    /**
+     * @description Cleanup the Escape key handler when the component is unmounted.
+     */
+    disconnectedCallback() {
+        window.removeEventListener('keydown', this._boundHandleWindowKeyDown);
+    }
+
+    /**
      * @description CSS Classes for the main dialog dependengin on the _isOpened property
      * @type {string}
      * @public
@@ -147,4 +162,22 @@ export default class OrgcheckDependencyViewer extends LightningElement {
     handleClose() {
         this._isShown = false;
     }
+
+    /**
+     * @description Close the dependency viewer when the user presses Escape.
+     * @param {KeyboardEvent} event - Keyboard event fired on the window
+     * @private
+     */
+    _handleWindowKeyDown(event) {
+        if (event.key === 'Escape' && this._isShown === true) {
+            this.handleClose();
+        }
+    }
+
+    /**
+     * @description Bound keydown handler reference
+     * @type {(event: KeyboardEvent) => void}
+     * @private
+     */
+    _boundHandleWindowKeyDown;
 }

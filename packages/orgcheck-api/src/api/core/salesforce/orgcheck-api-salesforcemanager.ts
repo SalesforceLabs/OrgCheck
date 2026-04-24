@@ -64,22 +64,6 @@ export interface SalesforceMetadataRequest {
  */
 export class SalesforceError extends Error {
 
-    /** 
-     * @description Error code (should be capitalized by Salesforce)
-     * @type {string}
-     * @public
-     * @readonly
-     */
-    code: string;
-
-    /** 
-     * @description Context information about the error, such as the query that caused the error, but not limited to it.
-     * @type {any}
-     * @public
-     * @readonly
-     */
-    contextInformation: any;
-
     /**
      * @description Constructor for SalesforceError
      * @param {string} message - Context of this error
@@ -87,10 +71,8 @@ export class SalesforceError extends Error {
      * @param {any} [contextInformation] - Json object with additional context information
      * @public
      */
-    constructor(message: string, code: string, contextInformation: any) {
+    constructor(message: string, public readonly code: string, public readonly contextInformation: any) {
         super(message)
-        this.code = code;
-        this.contextInformation = contextInformation;
     }
 }
 

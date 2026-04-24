@@ -10,6 +10,16 @@ export default class OrgcheckModal extends LightningElement {
     connectedCallback() {
         this.isShown = false;
         this.isClosable = false;
+        this._boundHandleWindowKeyDown = this._handleWindowKeyDown.bind(this);
+        window.addEventListener('keydown', this._boundHandleWindowKeyDown);
+    }
+
+    /**
+     * @description Cleanup callback function
+     * @public
+     */
+    disconnectedCallback() {
+        window.removeEventListener('keydown', this._boundHandleWindowKeyDown);
     }
     
     /**
@@ -50,6 +60,17 @@ export default class OrgcheckModal extends LightningElement {
     }
 
     /**
+     * @description Close the modal when the user presses Escape.
+     * @param {KeyboardEvent} event - Keyboard event fired on the window
+     * @private
+     */
+    _handleWindowKeyDown(event) {
+        if (event.key === 'Escape' && this.isShown === true && this.isClosable === true) {
+            this.handleClose();
+        }
+    }
+
+    /**
      * @description Should we show or hide the modal?
      * @type {boolean}
      * @public
@@ -83,4 +104,11 @@ export default class OrgcheckModal extends LightningElement {
      * @public
      */
     stack;
+
+    /**
+     * @description Bound keydown handler reference
+     * @type {(event: KeyboardEvent) => void}
+     * @private
+     */
+    _boundHandleWindowKeyDown;
 }

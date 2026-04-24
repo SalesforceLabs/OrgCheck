@@ -59,4 +59,19 @@ describe('c-orgcheck-modal', () => {
       expect(element.shadowRoot.textContent).toBe('');
     });
   });
+
+  it('closes the modal when Escape is pressed and the modal is closable', async () => {
+    const element = createElement('c-orgcheck-modal', {
+      is: OrgcheckModal
+    });
+    document.body.appendChild(element);
+    element.open('title', 'content', true);
+
+    return Promise.resolve().then(() => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      return Promise.resolve().then(() => {
+        expect(element.shadowRoot.textContent).toBe('');
+      });
+    });
+  });
 });

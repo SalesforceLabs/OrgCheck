@@ -209,6 +209,16 @@
                                         <li key={joke.question}><b>{joke.question}...</b> &nbsp;&nbsp; <i>{joke.answer}</i></li>
                                     </template>
                                 </ul>
+                                <br /><br />
+
+                                <h1 class="slds-text-heading_large">Spam! Spam!! Spam!!!</h1> 
+                                <lightning-button-icon icon-name="utility:warning" title="Simple error" onclick={handleTestThrowException} data-type-error-chain="Simple"></lightning-button-icon>
+                                <lightning-button-icon icon-name="utility:warning" title="Simple -> SalesforceError error chain" onclick={handleTestThrowException} data-type-error-chain="Simple,SalesforceError"></lightning-button-icon>
+                                <lightning-button-icon icon-name="utility:warning" title="Simple -> DatasetManagerError error chain" onclick={handleTestThrowException} data-type-error-chain="Simple,DatasetManagerError"></lightning-button-icon>
+                                <lightning-button-icon icon-name="utility:warning" title="Simple -> RecipeManagerError error chain" onclick={handleTestThrowException} data-type-error-chain="Simple,RecipeManagerError"></lightning-button-icon>
+                                <lightning-button-icon icon-name="utility:warning" title="Simple -> RecipeManagerError -> DatasetManagerError error chain" onclick={handleTestThrowException} data-type-error-chain="Simple,RecipeManagerError,DatasetManagerError"></lightning-button-icon>
+                                <lightning-button-icon icon-name="utility:warning" title="Simple -> RecipeManagerError -> SalesforceError error chain" onclick={handleTestThrowException} data-type-error-chain="Simple,RecipeManagerError,DatasetManagerError,SalesforceError"></lightning-button-icon>
+                                <br /><br />
                             </div>
                             <div data-key="03" class="slds-hide slds-var-p-horizontal_small">
                                 <p>

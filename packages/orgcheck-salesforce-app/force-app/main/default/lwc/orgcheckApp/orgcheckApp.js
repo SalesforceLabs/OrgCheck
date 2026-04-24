@@ -89,6 +89,8 @@ export default class OrgcheckApp extends LightningElement {
      * @public
      */
     @track orgInformation = {
+        // Org Id
+        id: '',
         // Org name
         name: '',
         // Org type. Can be 'Production', 'Sandbox', 'Trial' or 'Developer Edition' 
@@ -727,6 +729,7 @@ export default class OrgcheckApp extends LightningElement {
             // Information about the org
             console?.log('Information about the org...');
             const orgInfo = await this._private_properties.api?.getOrganizationInformation();
+            this.orgInformation.id = orgInfo.id;
             this.orgInformation.name = orgInfo.name + ' (' + orgInfo.id + ')';
             this.orgInformation.type = orgInfo.type;
             this.orgInformation.theme = orgInfo.isProduction === true ? 'slds-theme_error' : (orgInfo.isSandbox === true ? 'slds-theme_warning' : 'slds-theme_success');
@@ -782,18 +785,36 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Show the error in a modal (that can be closed)
-     * @param {string} title - The title of the modal
+     * @param {string} methodName - The name of the method where we had the error
      * @param {Error} error - The error to show in the error modal
      * @private
      */ 
-    _showError(title, error) {
-        const htmlContent = `<font color="red">Sorry! An error occurred while processing... <br /><br />`+
-                            `Please review our <a href="http://sfdc.co/OrgCheck-FAQ" target="_blank" rel="external noopener noreferrer">Org Check FAQ</a> and try to resolve this issue in your Org based on our community's feedback. <br /><br /> `+
-                            `If the FAQ is not helping, consider creating an issue on <a href="http://sfdc.co/OrgCheck-Backlog" target="_blank" rel="external noopener noreferrer">Org Check Issues tracker</a> `+
-                            `along with the context, a screenshot and the following error. <br /><br /> `+
-                            `<ul><li>Message: <code>${error?.message}</code></li><li>Stack: <code>${error?.stack}</code></li><li>Error as JSON: <code>${JSON.stringify(error)}</code></li></ul></font>`                                
-        this._private_properties.modal?.open(title, htmlContent);
-        console.error(title, error);
+    _showError(methodName, error) {
+        const chain = [];
+        for (let e = error; e !== undefined; e = e.cause) {
+            chain.push(e);
+        }
+        const htmlContent = `
+            👉 Please review our <a href="http://sfdc.co/OrgCheck-FAQ" target="_blank" rel="external noopener 
+                noreferrer">Org Check FAQ</a> and try to resolve this issue in your Org based on our 
+                community's feedback. <br />
+            <br />
+            👉 If the FAQ is not helping, consider creating an issue on <a href="http://sfdc.co/OrgCheck-Backlog" 
+                target="_blank" rel="external noopener noreferrer">Org Check Issues tracker</a> along with 
+                the context and the following information. <br />
+            <br />
+            <ul>
+                <li>Organization Id: <b>${this.orgInformation.id}</b></li>
+                <li>Method: <b>${methodName}</b></li>
+                <li>
+                    List of errors
+                    <ol>
+                        <li>${chain.map((error) => `<b>${error.message}</b> <pre style="margin-top: 3px; background-color: #240808; color: #e9baba; font-size: xx-small;">${JSON.stringify(error)}</pre>`).join("</li>\n<li>")}</li>
+                    </ol>
+                </li>
+            </ul>`;
+        this._private_properties.modal?.open(`An error occurred while processing ${methodName}...`, htmlContent);
+        console.error(methodName, error);
     }
 
     // ----------------------------------------------------------------------------------------------------------------
@@ -976,22 +997,18 @@ export default class OrgcheckApp extends LightningElement {
             // The event should contain a detail property
             const detail = event?.detail;
             if (detail) {
-                try {
-                    // prepare the modal content
-                    let htmlContent = `The component <code><b>${detail.whatName}</b></code> (<code>${detail.whatId}</code>) has a `+
-                                      `score of <b><code>${detail.score}</code></b> because of the following reasons:<br /><ul>`;
-                    detail.reasonIds?.forEach((/** @type {number} */ id) => {
-                        const reason = getRuleById(id);
-                        if (reason) {
-                            htmlContent += `<li><b>${reason.description}</b>: <i>${reason.errorMessage}</i></li>`;
-                        }
-                    });
-                    htmlContent += '</ul>';
-                    // show the modal
-                    this._private_properties.modal?.open(`Understand the Score of "${detail.whatName}" (${detail.whatId})`, htmlContent);
-                } catch (e) {
-                    this._showError('Error while handleViewScore', e);
-                }
+                // prepare the modal content
+                let htmlContent = `The component <code><b>${detail.whatName}</b></code> (<code>${detail.whatId}</code>) has a `+
+                                    `score of <b><code>${detail.score}</code></b> because of the following reasons:<br /><ul>`;
+                detail.reasonIds?.forEach((/** @type {number} */ id) => {
+                    const reason = getRuleById(id);
+                    if (reason) {
+                        htmlContent += `<li><b>${reason.description}</b>: <i>${reason.errorMessage}</i></li>`;
+                    }
+                });
+                htmlContent += '</ul>';
+                // show the modal
+                this._private_properties.modal?.open(`Understand the Score of "${detail.whatName}" (${detail.whatId})`, htmlContent);
             }
         } catch (error) {
             this._showError('handleViewScore', error);
@@ -1074,8 +1091,6 @@ export default class OrgcheckApp extends LightningElement {
         }
     }
 
-    
-
     /**
      * @description Method called when the user click on one of the cards in the global view
      * @param {Event | any} event - The event information
@@ -1089,6 +1104,33 @@ export default class OrgcheckApp extends LightningElement {
             await this._async_goToPage(keyPage);
         } catch (error) {
             this._showError('handleOpenPage', error);
+        }
+    }
+
+    /**
+     * @description Method in case we want to explicitely see the showError message dialog box
+     * @param {Event | any} event - The event information
+     * @public
+     */ 
+    handleTestThrowException(event) {
+        try {
+            // Get attribute data-type-error-chain
+            const errorChainString = event?.target?.getAttribute('data-type-error-chain');
+            // Loop over the chain
+            let lastError = undefined;
+            errorChainString.split(',').reverse().forEach((m) => {
+                const error = new TypeError(m, lastError ? { cause: lastError } : {});
+                switch (m) {
+                    case 'RecipeManagerError': error.recipe = 'BliBlaBloo'; error.message = 'This is a test'; break;
+                    case 'DatasetManagerError': error.dataset = 'bim-boo'; error.message = 'This is a test'; break;
+                    case 'SalesforceError': error.code = 'OBLADI-OBLADA'; error.contextInformation = { fruit: 'banana', car: 'ferarri' }; break;
+                }
+                lastError = error;
+            });
+            // Throw the error
+            throw lastError;
+        } catch (error) {
+            this._showError('handleTestThrowException', error);
         }
     }
 
@@ -1160,13 +1202,6 @@ export default class OrgcheckApp extends LightningElement {
         }
         this._private_properties.modal?.open(`Details for role ${data.record.name}`, htmlContent);
     }
-
-    // ----------------------------------------------------------------------------------------------------------------
-    // ----------------------------------------------------------------------------------------------------------------
-    // Export structure for objects (which is needed because multiple tables) and global view
-    // ----------------------------------------------------------------------------------------------------------------
-    // ----------------------------------------------------------------------------------------------------------------
-
 }
 
 const __orgcheck__Get = () => {
