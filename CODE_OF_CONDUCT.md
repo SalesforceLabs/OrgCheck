@@ -93,7 +93,7 @@ Committee.
 
 This Code of Conduct is adapted from the [Contributor Covenant][contributor-covenant-home],
 version 1.4, available at https://www.contributor-covenant.org/version/1/4/code-of-conduct.html. 
-It includes adaptions and additions from [Go Community Code of Conduct][golang-coc], 
+It includes adaptations and additions from [Go Community Code of Conduct][golang-coc], 
 [CNCF Code of Conduct][cncf-coc], and [Microsoft Open Source Code of Conduct][microsoft-coc].
 
 This Code of Conduct is licensed under the [Creative Commons Attribution 3.0 License][cc-by-3-us].

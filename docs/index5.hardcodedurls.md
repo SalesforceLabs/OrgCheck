@@ -6,14 +6,14 @@ permalink: /hardcodedurls/
 
 # Hardcoded URLs Analysis
 
-This document describe how Org Check detects Hard Coded URLs in your org
+This document describes how Org Check detects hard-coded URLs in your org
 
 ## Hard coded URLs detection from a text
 
 - If the text contains xml code, we remove the comments using the following regular expression `(<!--[\\s\\S]*?-->|\\n)`
 - If the text contains Javascript or Apex code, we remove the comments using the following regular expression `(\\/\\*[\\s\\S]*?\\*\\/|\\/\\/.*\\n|\\/\\/[^\\n]*|\\n)`
-- We check if the given text has occurences that match the following regular expression `([A-Za-z0-9-]{1,63}\\.)+[A-Za-z]{2,6}``
-- We select only the occurences that contain 'salesforce.com' or '.force.'
+- We check if the given text has occurrences that match the following regular expression `([A-Za-z0-9-]{1,63}\\.)+[A-Za-z]{2,6}``
+- We select only the occurrences that contain 'salesforce.com' or '.force.'
 - We remove duplicates if any
 - Finally we remove the my.salesforce.com domains
 

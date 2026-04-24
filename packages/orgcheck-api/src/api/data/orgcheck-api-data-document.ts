@@ -18,7 +18,7 @@ export interface SfdcDocument extends DataWithScore {
     documentUrl: string;
 
     /**
-     * @description Is the url of this document is a hard coded value
+     * @description Is the URL of this document a hard-coded value?
      * @type {boolean}
      * @public
      */

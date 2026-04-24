@@ -11,7 +11,7 @@ export interface SfdcHomePageComponent extends DataWithScoreAndDependencies {
     dataType: DataAliases.SfdcHomePageComponent;
 
     /**
-     * @description Is this item has an empty body?
+     * @description Does this item have an empty body?
      * @type {boolean}
      * @public
      */

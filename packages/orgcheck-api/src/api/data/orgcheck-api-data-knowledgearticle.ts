@@ -25,7 +25,7 @@ export interface SfdcKnowledgeArticle extends DataWithScore {
     number: string;
 
     /**
-     * @description Is the url of this document is a hard coded value
+     * @description Is the URL of this article a hard-coded value?
      * @type {boolean}
      * @public
      */
@@ -53,7 +53,7 @@ export interface SfdcKnowledgeArticle extends DataWithScore {
     title: string;
     
     /**
-     * @description Url tto this article
+     * @description URL to this article
      * @type {string}
      * @public
      */

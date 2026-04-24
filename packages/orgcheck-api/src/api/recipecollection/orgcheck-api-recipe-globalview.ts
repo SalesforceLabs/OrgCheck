@@ -86,7 +86,7 @@ export class RecipeGlobalView implements RecipeCollection {
      * @type {string}
      * @public
      */
-    public title: string = '🏞️ Global view';
+    public readonly title: string = '🏞️ Global view';
 
     /**
      * @description List the parameters that this recipe collection dependes on

@@ -17,7 +17,7 @@ export class RecipeScoreRules implements ServedRecipe<DataMatrixIntf, Table> {
      * @type {string}
      * @public
      */
-    public readonly title: string = '⁉️​ Score explanation';
+    public readonly title: string = '⁉️ Score explanation';
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe

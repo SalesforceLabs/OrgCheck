@@ -16,7 +16,7 @@ export class RecipeDocuments implements ServedRecipe<SfdcDocument[], Table> {
      * @type {string}
      * @public
      */
-    public readonly title: string = '🍱 Document';
+    public readonly title: string = '🍱 Documents';
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe

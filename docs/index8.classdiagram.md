@@ -118,7 +118,7 @@ data. Note: it does not encrypt the data!
 The `logSettings` setup provides callbacks for progress tracking: `started`, `messageLogged`, 
 `endedWithError`, `endedSuccessfully`, and `stopped`. 
 
-Once initialiazed, and before processing further, you should check if the terms of conditions are 
+Once initialized, and before processing further, you should check if the terms and conditions are 
 auto-approved (non production environment) or need to be approved manually (production environment) 
 by calling api.checkUsageTerms(). If the method returns false, you will have to specifically accept 
 the term by calling api.acceptUsageTermsManually().
@@ -147,7 +147,7 @@ classDiagram
 ## Recipes
 
 A `Recipe` can be defined as a data transformer that needs some input data (from `Dataset`) and then 
-transform the data all together into a complexe structure.
+transform the data all together into a complex structure.
 
 Most of the time, the recipe combines multiple objects that are related to each other, like a `User` 
 and its `Profile`.

@@ -18,7 +18,7 @@ export interface SfdcOrganization extends DataWithoutScore {
     type: string;
 
     /**
-     * @description Is this organization a Developer Edition enviroment?
+     * @description Is this organization a Developer Edition environment?
      * @type {boolean}
      * @public
      */

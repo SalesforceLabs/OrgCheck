@@ -18,7 +18,7 @@ export interface SfdcApexTestMethodResult extends DataWithoutScore {
     methodName: string;
 
     /**
-     * @description Is this method was successful or failed
+     * @description Was this method successful or did it fail?
      * @type {boolean}
      * @public
      */
@@ -136,7 +136,7 @@ export interface SfdcApexClass extends DataWithScoreAndDependencies {
     nbSystemAsserts: number;
 
     /**
-     * @description Is this class with the Asbtract modifier?
+     * @description Does this class use the Abstract modifier?
      * @type {boolean}
      * @public
      */
@@ -164,14 +164,14 @@ export interface SfdcApexClass extends DataWithScoreAndDependencies {
     isInterface: boolean;
 
     /**
-     * @description Number of inner classs in this class
+     * @description Number of inner classes in this class
      * @type {number}
      * @public
      */
     innerClassesCount: number;
 
     /**
-     * @description Is this a class implements Schedulable?
+     * @description Does this class implement Schedulable?
      * @type {boolean}
      * @public
      */
@@ -185,21 +185,21 @@ export interface SfdcApexClass extends DataWithScoreAndDependencies {
     isScheduled: boolean;
 
     /**
-     * @description List of interface that this class implements
+     * @description List of interfaces that this class implements
      * @type {string[]}
      * @public
      */
     interfaces: string[];
     
     /**
-     * @description List of super class that this class extends
+     * @description List of superclasses that this class extends
      * @type {string[]}
      * @public
      */
    extends: string[];
 
     /**
-     * @description Number of methods in this class (Note: if the class is a test, this not only the testing methods, this is ALL the methods)
+     * @description Number of methods in this class (note: if the class is a test, this includes all methods, not only test methods)
      * @type {number}
      * @public
      */

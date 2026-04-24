@@ -733,6 +733,43 @@ FROM ApexTrigger
 GROUP BY EntityDefinitionId
 ```
 
+#### Query on EntityDefinition Limits
+```
+SELECT DurableId, (SELECT Max, Remaining, Type FROM Limits WHERE Type IN ('SharingRules', 'CbsSharingRules'))
+FROM EntityDefinition
+WHERE KeyPrefix <> null
+AND DeveloperName <> null
+AND (NOT(KeyPrefix IN ('00a', '017', '02c', '0D5', '1CE')))
+AND (NOT(QualifiedApiName like '%_hd'))
+```
+
+---
+
+
+## Queries performed by the Sharing Rules dataset
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-sharingrules.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-sharingrules.ts)
+
+### Tooling SOQL Queries
+
+#### Query on CustomObject
+This query is used to list custom objects that can have a sharing model before reading sharing rule metadata.
+```
+SELECT NamespacePrefix, DeveloperName
+FROM CustomObject
+WHERE SharingModel != ''
+```
+
+### Metadata API Calls
+
+#### Query on SharingRules
+This dataset uses the Metadata API to retrieve sharing rules for standard objects plus all custom objects returned by the previous query.
+```
+readMetadata({
+    type: 'SharingRules',
+    members: [ '*', '<namespace>__<CustomObject>__c', ... ]
+})
+```
+
 ---
 
 
@@ -1014,6 +1051,21 @@ POST /tooling/composite
     { method: 'GET', url: '/services/data/v60.0/tooling/sobjects/Profile/xyz000000000003' }, 
     ...
 ]
+```
+
+---
+
+
+## Queries performed by the Release Updates dataset
+Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-releaseupdates.ts](https://github.com/SalesforceLabs/OrgCheck/blob/main/packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-releaseupdates.ts)
+
+### Tooling SOQL Queries
+
+#### Query on ReleaseUpdate
+```
+SELECT DurableId, Title, Category, DueDate, IsReleased,
+   NumCompSteps, NumSteps, ReleaseLabel, Status
+FROM ReleaseUpdate
 ```
 
 ---

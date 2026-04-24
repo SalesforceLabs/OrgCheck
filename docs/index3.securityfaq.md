@@ -13,8 +13,8 @@ permalink: /security/
 - We do not collect your data such as Account, Contact, Opportunity or any custom object you may have created in your org.
 - The metadata types that are gathered (as of April 2026) by the application using Salesforce APIs from the org where the app is installed are:
   * Home: InstalledSubscriberPackage, Organization
-  * ⚽ Data model: Field, FieldSet, Layout, Limit, ValidationRule, WebLink, CustomField, EntityDefinition
-  * 👮 Security and Access: User, UserPermissionAccess, Profile, PermissionSet, PermissionSetAssignment, AppMenuItem, SetupEntityAccess
+  * ⚽ Data model: Field, FieldSet, Layout, Limit, ValidationRule, WebLink, CustomField, EntityDefinition, SharingRules
+  * 👮 Security and Access: User, UserPermissionAccess, Profile, PermissionSet, PermissionSetAssignment, AppMenuItem, SetupEntityAccess, ReleaseUpdate
   * 🐇 Boxes: UserRole, Group
   * 🤖 Automations: Flow, FlowDefinition, WorkflowRule
   * 🎁 Setting: ExternalString
@@ -75,10 +75,10 @@ permalink: /security/
 - Org Check is open source.
 - The code is available on GitHub: https://github.com/SalesforceLabs/OrgCheck
 - Under the MIT license: https://github.com/SalesforceLabs/OrgCheck?tab=MIT-1-ov-file#readme
-- If you install the application fro AppExchange, the code is locked because the store forces us to use a “managed package”. So in short you won’t be able to change the code directly from the Salesforce org where it is installed.
+- If you install the application from the AppExchange, the code is locked because the store forces us to use a “managed package”. So in short you won’t be able to change the code directly from the Salesforce org where it is installed.
 - Same if you installed the application for the “unlocked package” that allows you to install the application in a sandbox without having the right to install apps in production (which is the case when you install application from AppExchange).
 - As the code is open source, you are free to fork the project, and make your own modifications to it. In this case, we believe that it would be great to share your modifications to the community by doing Pull Request to the main project. To do so you will need to sign a digital agreement (this is because our repository is hosted in the Salesforce Labs project owned by Salesforce). This is own team members can contribute to the project even thought they are not part of Salesforce.
-- Of course before considering doing your own fork of the project, you could just create an issue in the main project and we will be happy to work with you on a fix or an a new feature you will want in future releases.
+- Of course before considering doing your own fork of the project, you could just create an issue in the main project and we will be happy to work with you on a fix or a new feature you will want in future releases.
 
 ## What are the security check-in related to Org Check ? past, current and future ?
 

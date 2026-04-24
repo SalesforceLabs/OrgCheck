@@ -1,11 +1,11 @@
 # check.summary
-Welcome in Org Check CLI plugin!
+Welcome to the Org Check CLI plugin!
 
 # check.description
-Welcome in Org Check CLI plugin!
+Welcome to the Org Check CLI plugin!
 
 # check.examples
-Welcome in Org Check CLI plugin!
+Welcome to the Org Check CLI plugin!
 
 
 
@@ -13,7 +13,7 @@ Welcome in Org Check CLI plugin!
 Name of the check (or action) you would like to perform on this org 
 
 # flags.accept-the-terms.summary
-In production orgs, you need to explicitelly accept the terms before using Org Check in this environment.
+In production orgs, you need to explicitly accept the terms before using Org Check in this environment.
 
 # flags.sobject.summary
 Filter by SObject API name
@@ -28,13 +28,13 @@ Filter by package/namespace
 Filename of the CSV output
 
 # flags.json-file.summary
-Filename of the JSON ouput
+Filename of the JSON output
 
 # flags.xlsx-file.summary
 Filename of the XLSX output
 
 # flags.invalidate-cache.summary
-Make sure the entries you need from the cache are flushed before start!ng
+Make sure the entries you need from the cache are flushed before starting
 
 
 

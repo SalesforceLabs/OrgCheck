@@ -317,7 +317,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
         id: 25,
         description: 'Password policy with too big expiration',
         formula: (d: SfdcProfilePasswordPolicy) => d?.passwordExpiration > 90,
-        errorMessage: `This profile password policy allows you to have a password that expires after 90 days. Please consider having a shorter period of time for expiration if you policy.`,
+        errorMessage: `This profile password policy allows passwords to expire after 90 days. Please consider using a shorter expiration period in your policy.`,
         badField: 'passwordExpiration',
         applicable: [ DataAliases.SfdcProfilePasswordPolicy ],
         category: SCORE_RULE_CATEGORIES.SECURITY
@@ -397,7 +397,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
         id: 35,
         description: 'No active version for this flow',
         formula: (d: SfdcFlow) => d?.isVersionActive === false,
-        errorMessage: `This flow does not have an active version, did you forget to activate its latest version? or you do not need that flow anymore?`,
+        errorMessage: `This flow does not have an active version. Did you forget to activate its latest version, or do you not need that flow anymore?`,
         badField: 'isVersionActive',
         applicable: [ DataAliases.SfdcFlow ],
         category: SCORE_RULE_CATEGORIES.USELESS
@@ -437,7 +437,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
         id: 40,
         description: 'This flow is running without sharing',
         formula: (d: SfdcFlow) => d?.currentVersionRef?.runningMode === 'SystemModeWithoutSharing',
-        errorMessage: `The running mode of this version without sharing. With great power comes great responsibilities. Please check if this is REALLY needed.`,
+        errorMessage: `This version is running without sharing. With great power comes great responsibilities. Please check if this is REALLY needed.`,
         badField: 'currentVersionRef.runningMode',
         applicable: [ DataAliases.SfdcFlow ],
         category: SCORE_RULE_CATEGORIES.SECURITY

@@ -314,7 +314,7 @@ export class RecipeManager implements RecipeManagerIntf {
         } catch(error) {
             throw new RecipeManagerError(alias, `An error occurred while running the dataset (message: ${error?.message}, stack: ${error?.stack}).`, error);
         }
-        this._logger.log(section, 'Datasets information successfuly retrieved!');
+        this._logger.log(section, 'Dataset information successfully retrieved!');
 
         // -------------------
         // STEP 3. Transform
@@ -326,7 +326,7 @@ export class RecipeManager implements RecipeManagerIntf {
         } catch(error) {
             throw new RecipeManagerError(alias, `An error occurred while transforming the data (message: ${error?.message}, stack: ${error?.stack}).`, error);
         }
-        this._logger.finalLog(section, 'Transformation successfuly done!');
+        this._logger.finalLog(section, 'Transformation successfully completed!');
         
         // Return value
         return finalData;
@@ -386,7 +386,7 @@ export class RecipeManager implements RecipeManagerIntf {
         } finally {
             this._logger.optimisticByPass = false;
         }
-        this._logger.log(section, 'All datasets information successfuly retrieved from recipes!');
+        this._logger.log(section, 'All dataset information successfully retrieved from recipes!');
 
         // -------------------
         // STEP 3. Transform the recipe collection finally
@@ -480,7 +480,7 @@ export class RecipeManager implements RecipeManagerIntf {
         } catch(error) {
             throw new RecipeManagerError(alias, `An error occurred while transforming the data (message: ${error?.message}, stack: ${error?.stack}).`, error);
         }
-        this._logger.finalLog(section, 'Transformation successfuly done!');
+        this._logger.finalLog(section, 'Transformation successfully completed!');
 
         // Return value
         return finalData;
@@ -524,7 +524,7 @@ export class RecipeManager implements RecipeManagerIntf {
         } catch(error) {
             throw new RecipeManagerError(alias, `An error occurred while cleaning the datasets (message: ${error?.message}, stack: ${error?.stack}).`, error);
         }
-        this._logger.finalLog(section, 'Datasets succesfully cleaned!');
+        this._logger.finalLog(section, 'Datasets successfully cleaned!');
     }
 
     /**
@@ -562,7 +562,7 @@ export class RecipeManager implements RecipeManagerIntf {
         } catch(error) {
             throw new RecipeManagerError(alias, `An error occurred while cleaning the datasets (message: ${error?.message}, stack: ${error?.stack}).`, error);
         }
-        this._logger.finalLog(section, 'Datasets of these recipes succesfully cleaned!');
+        this._logger.finalLog(section, 'Datasets for these recipes successfully cleaned!');
     }
 
     /**

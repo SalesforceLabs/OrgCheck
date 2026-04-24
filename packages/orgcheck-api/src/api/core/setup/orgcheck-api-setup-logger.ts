@@ -32,7 +32,7 @@ export interface LoggerSetup {
     endedWithError(operationName: string, error?: Error | string): void;
 
     /**
-     * @description The given operation ended successfuly (with an optional message)
+     * @description The given operation ended successfully (with an optional message)
      * @param {string} operationName - the name of the operation
      * @param {string} [message] - the message to log
      * @public

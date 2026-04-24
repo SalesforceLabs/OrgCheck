@@ -282,8 +282,8 @@ export class API implements ApiIntf {
     // -----------------------
 
     /**
-     * @description Check if we can use the current org according to the terms (specially if this is a production org)
-     * @returns {Promise<boolean>} true if this org can be used, false otehrwise.
+     * @description Check if we can use the current org according to the terms (especially if this is a production org)
+     * @returns {Promise<boolean>} true if this org can be used, false otherwise.
      * @throws Exception from recipe manager
      * @async
      * @public

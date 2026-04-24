@@ -4,7 +4,7 @@ title: FAQ
 permalink: /faq/
 ---
 
-# Frequent Asked Questions (FAQ) about Org Check
+# Frequently Asked Questions (FAQ) about Org Check
 
 
 ## Question 1: How do I install Org Check?
@@ -12,12 +12,12 @@ permalink: /faq/
  - Step 1: Go to the AppExchange
     - Go to the AppExchange at [https://appexchange.salesforce.com](https://appexchange.salesforce.com)
     - Search for "Org Check" or "Technical Debt" and hit enter. You should find it!
-    - Alternativelly, please [follow this link](https://sfdc.co/OrgCheck-InstallToday-AppExchange) to reach directly the good page.
+    - Alternatively, please [follow this link](https://sfdc.co/OrgCheck-InstallToday-AppExchange) to reach the right page directly.
  - Step 2: Click to start the installation
     - To install the package in production: click on the "**Get It Now**" button
     - To install the package in a sandbox: click on the "**Try It**" button
- - Step 3: Go throught the installation process
-    - Select the profiles -- we recommand to select **Admins Only**
+ - Step 3: Go through the installation process
+    - Select the profiles -- we recommend **Admins Only**
     - Click on "Install" (or "Upgrade")
     - Once installed, go to the app "Org Check", and you are done!
 
@@ -25,8 +25,8 @@ permalink: /faq/
 
 
 
-## Question 2: I can't install the package because some Apex class are not compiling
- - Our package does **NOT include ANY Apex class**.
+## Question 2: I can't install the package because some Apex classes are not compiling
+ - Our package does **NOT include ANY Apex classes**.
  - It is more likely an **existing Apex class** in the org you want to analyze that **does not compile** (it happens!).
  - In that case, you can still install the package BUT you will have to specify during the installation process that you only want to validate the classes that are included in the package. This can be done via the **advanced setting when installing the app**.
 
@@ -37,7 +37,7 @@ permalink: /faq/
  - The app is called "**Org Check**" obviously, maybe you spell it wrong?
  - Did you install the package for a specific set of profiles and maybe you are not part of these ones? (remember we recommended to install the package for admins only...)
  - Assign your user to the included permission set called "**Org Check Users**"
- - You should see the application definitly!
+ - You should definitely see the application!
  - If not, try to enable the App visibility in Launcher (see Setup > App Menu > Visible in App Launcher)
 
 
@@ -48,16 +48,16 @@ In case you have enabled the "**API Access Control**" feature and have the "**Fo
  - In this permission set, check the system permission called "**Use any API Client**" (which appears ONLY if you activate the "**API Access Control**" feature -- that's why we can't add it to everybody).
  - And assign your user to this additional permission set.
 
-** Warning**: We are working on another workaround as Salesforce decided to depreciate the system permission "**Use any API Client**".
+** Warning**: We are working on another workaround as Salesforce decided to deprecate the system permission "**Use any API Client**".
 
 For more information, you can check that closed issue: https://github.com/SalesforceLabs/OrgCheck/issues/118
 
 
 ## Question 5: When installing the app from AppExchange I see error like "This package can’t be installed... Package namespace conflict"
 - In this case it is more likely that you are trying to install the application from the AppExchange on a Salesforce Organization where the standalone package is already installed.
-- This can be explained easily, both app share the same namespace (aka package name).
+- This can be explained easily: both apps share the same namespace (aka package name).
 - So either you keep the standalone package or you remove it and try to install the app from the AppExchange again.
-- Both version are FREE anyway and will be maintained!
+- Both versions are FREE anyway and will be maintained!
 - It is up to you to choose the one you prefer!
 
 
@@ -73,7 +73,7 @@ For more information, you can check that closed issue: https://github.com/Salesf
 
 ## Question 7: I see you also have a standalone package
 - Historically, Org Check was available as an "**unlocked package**".
-- But the prefered way now is to install the application via the AppExchange.
+- But the preferred way now is to install the application via the AppExchange.
 - The benefits of such a package are:
    - We are able to **push a new version** of the package in your org, to make sure you have the latest fixes and features of the application, without to worry about anything. We take care of this.
    - The content of the application can be **modified in your org** (using the Salesforce Dev Console) in case you find a solution to a bug. Do not forget that every component of this package is under the MIT licence. And when we push a new version, your modification will be erased. Use this capability to send us technical feedback and maybe even solutions!

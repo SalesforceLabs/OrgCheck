@@ -11,4 +11,4 @@ assignees: VinceFINET
 A clear and concise description of what the bug is.
 
 **To Reproduce**
-Copy and past the information from the error dialog box here!!
+Copy and paste the information from the error dialog box here!!

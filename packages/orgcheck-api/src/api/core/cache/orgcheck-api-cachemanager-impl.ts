@@ -42,7 +42,7 @@ export class DataCacheManager implements DataCacheManagerIntf {
     /**
      * @description Get the entry from the cache (based on the data entry this time!)
      * @param {string} key - the key to retrieve the entry from the cache
-     * @returns {any} the entry from the cache, or null if not found or any error occured
+     * @returns {any} the entry from the cache, or null if not found or any error occurred
      * @public
      */
     public get(key: string): any {
@@ -75,7 +75,7 @@ export class DataCacheManager implements DataCacheManagerIntf {
                 // create the map from the data (double array structure)
                 return new Map(dataEntry.content);
             } catch (error) {
-                console.error(`Error occured when trying to create a map for key ${key}. We just removed the key from the cache.`, error);
+                console.error(`Error occurred when trying to create a map for key ${key}. We just removed the key from the cache.`, error);
                 // something went wrong when trying to create the map, so destroying everything!
                 this._storage.removeItem(metadataPhysicalKey);
                 this._storage.removeItem(dataPhysicalKey);  
@@ -185,7 +185,7 @@ export class DataCacheManager implements DataCacheManagerIntf {
 
     /**
      * @description Set the item to the local storage with its key and string value. The string value is 
-     *   encoded into a binary data. Then we compress this binary data into another binary data (hopefuly 
+     *   encoded into binary data. Then we compress this binary data into another binary data (hopefully 
      *   shorter). Then that data is turned into a hexadecimal value. Finally we store the hexadecimal 
      *   data in the local storage with its key.
      * @param {string} key - the key to set the item in the cache
@@ -200,9 +200,9 @@ export class DataCacheManager implements DataCacheManagerIntf {
             this._storage.setItem(key, hexValue);
         } catch (error) {
             throw new Error(
-                `Error occured when trying to save the value for key ${key} with: `+
+                `Error occurred when trying to save the value for key ${key} with: `+
                     `hexValue?.length=${hexValue?.length ?? 'N/A'}, `+
-                    `Initiale error message was ${error.message}`
+                    `Initial error message was ${error.message}`
             );
         }
     }
@@ -233,7 +233,7 @@ export class DataCacheManager implements DataCacheManagerIntf {
             if (entry.created && Date.now() - entry.created > NB_MILLISEC_IN_ONE_DAY) return null;
             return entry;
         } catch (error) {
-            console.error(`Error occured when trying to parse the string: ${entryFromStorage}`, error,  error?.message);
+            console.error(`Error occurred when trying to parse the string: ${entryFromStorage}`, error,  error?.message);
             return null;
         }
     }

@@ -18,7 +18,7 @@ export class RecipeCustomFields implements ServedRecipe<SfdcField[], Table> {
      * @type {string}
      * @public
      */
-    public readonly title: string = '🏈 Custom Field';
+    public readonly title: string = '🏈 Custom Fields';
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe

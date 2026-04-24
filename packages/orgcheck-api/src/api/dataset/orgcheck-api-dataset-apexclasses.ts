@@ -243,7 +243,7 @@ export class DatasetApexClasses implements Dataset {
             }
         );
 
-        // Add if unit test have been succesful or not
+        // Add whether unit tests have been successful or not
         logger?.log(`Parsing ${apexTestResultRecords?.length} test results...`);
         await MediumProcessor.forEach(
             apexTestResultRecords,

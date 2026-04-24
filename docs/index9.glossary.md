@@ -23,8 +23,8 @@ This document explains the column definitions for each table in the OrgCheck app
 | L | [Layouts](#layouts), [LightningWebComponents](#lightningwebcomponents), [Limits](#limits) |
 | O | [Objects](#Objects) |
 | P | [Pages](#pages), [PermissionSets](#permissionsets), [ProcessBuilders](#processbuilders), [Profiles](#profiles) |
-| R | [RecordTypes](#recordtypes), [RecordTypesInObject](#recordtypesinobject), [Reports](#reports), [Roles](#roles) |
-| S | [StaticResources](#staticresources) |
+| R | [RecordTypes](#recordtypes), [RecordTypesInObject](#recordtypesinobject), [ReleaseUpdates](#releaseupdates), [Reports](#reports), [Roles](#roles) |
+| S | [SharingRules](#sharingrules), [StaticResources](#staticresources) |
 | U | [Users](#users) |
 | V | [ValidationRules](#validationrules) |
 | W | [Workflows](#workflows) |
@@ -446,6 +446,8 @@ This document explains the column definitions for each table in the OrgCheck app
 | Workflows | Numeric | Number of workflows |
 | Apex Triggers | Numeric | Number of Apex triggers |
 | Validation Rules | Numeric | Number of validation rules |
+| Ownership Sharing Rules | Numeric | Number of owner-based sharing rules |
+| Criteria Sharing Rules | Numeric | Number of criteria-based sharing rules |
 | Internal OWD | String | Internal organization-wide default |
 | External OWD | String | External organization-wide default |
 
@@ -608,6 +610,24 @@ This document explains the column definitions for each table in the OrgCheck app
 | Description | String | Description of the report |
 | Folder | String | Folder containing the report |
 
+## ReleaseUpdates
+[Back to top](#table-of-contents)
+
+| Column Label | Column Type | Description |
+|--------------|-------------|-------------|
+| # | Numeric | Row index |
+| Score | Score | Score assigned to the release update |
+| Name | Link | Link to the release update |
+| Category | String | Release update category |
+| Due date | Date Time | Due date of the release update |
+| Remaining days | Numeric | Number of days remaining before the due date |
+| Released yet? | Boolean | Indicates whether Salesforce has released the update |
+| Completed steps | Numeric | Number of completed rollout steps |
+| Total steps | Numeric | Total number of rollout steps |
+| Completion | Percentage | Completion percentage based on completed and total steps |
+| Release | String | Salesforce release label |
+| Status | String | Current status of the release update |
+
 ## Roles
 [Back to top](#table-of-contents)
 
@@ -620,6 +640,21 @@ This document explains the column definitions for each table in the OrgCheck app
 | Number of active members | Numeric | Number of active members |
 | Level | Numeric | Level of the role |
 | Parent | Link | Link to the parent role |
+
+## SharingRules
+[Back to top](#table-of-contents)
+
+| Column Label | Column Type | Description |
+|--------------|-------------|-------------|
+| # | Numeric | Row index |
+| Object | String | API name of the object targeted by the sharing rule |
+| Name | String | Label of the sharing rule |
+| Type | String | Rule type (`OwnerBased` or `CriteriaBased`) |
+| Shared From Conditions | List of strings | Owner-based source condition or criteria expressions used by the rule |
+| Shared From Logic | String | Boolean logic used to combine the rule conditions |
+| Access Level | String | Access level granted by the rule |
+| Shared To Name | String | Name of the target group, queue, role, or audience |
+| Shared To Type | String | Type of the target group, queue, role, or audience |
 
 ## StaticResources
 [Back to top](#table-of-contents)

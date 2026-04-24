@@ -13,6 +13,6 @@ assignees: VinceFINET
 
 **Describe your environment**
 
-Copy and past the result of the following commands:
+Copy and paste the result of the following commands:
 - What is the version of the `sf` command you are using? `$ sf version`
-- What is the version of the orgcheck plugin plugin you are using `$ sf plugins`
+- What is the version of the orgcheck plugin you are using `$ sf plugins`
