@@ -7,7 +7,7 @@ permalink: /faq/
 # Frequently Asked Questions (FAQ) about Org Check
 
 
-## Question 1: How do I install Org Check?
+## Question 1: How do I install Org Check salesforce app?
 **Org Check** is a Salesforce application which can be installed on **any** Salesforce organization **very easily**. No additional infrastructure is required. No additional license. Simple as A.B.C.
  - Step 1: Go to the AppExchange
     - Go to the AppExchange at [https://appexchange.salesforce.com](https://appexchange.salesforce.com)
@@ -48,7 +48,7 @@ In case you have enabled the "**API Access Control**" feature and have the "**Fo
  - In this permission set, check the system permission called "**Use any API Client**" (which appears ONLY if you activate the "**API Access Control**" feature -- that's why we can't add it to everybody).
  - And assign your user to this additional permission set.
 
-** Warning**: We are working on another workaround as Salesforce decided to deprecate the system permission "**Use any API Client**".
+**Warning**: We are working on another workaround as Salesforce decided to deprecate the system permission "**Use any API Client**".
 
 For more information, you can check that closed issue: https://github.com/SalesforceLabs/OrgCheck/issues/118
 
