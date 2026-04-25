@@ -409,9 +409,9 @@ export class API implements ApiIntf {
             if (log?.isDebugEnabled()) log?.debug('Checking if usage terms were accepted...');
             await this._throwExceptionIfUsageTermsNotAccepted();
             if (log?.isDebugEnabled()) log?.debug('Passed the terms checking!');
-            if (log?.isDebugEnabled()) log?.debug(`Calling the prepare method for recipe: ${RecipeAliases.OBJECTS}`);
+            if (log?.isDebugEnabled()) log?.debug(`Calling the prepare method for recipe: ${RecipeAliases.OBJECTS_LITE}`);
             // @ts-ignore
-            return (await this._recipeManager.prepare(RecipeAliases.OBJECTS, new Map([
+            return (await this._recipeManager.prepare(RecipeAliases.OBJECTS_LITE, new Map([
                 [OrgCheckGlobalParameter.PACKAGE_NAME, namespace],
                 [OrgCheckGlobalParameter.SOBJECT_TYPE_NAME, sobjectType],
             ])));
@@ -427,8 +427,8 @@ export class API implements ApiIntf {
      */
     public clearObjects() {
         const log = this._logger?.toSimpleLogger('Clear Objects from Cache');
-        if (log?.isDebugEnabled()) log?.debug(`Calling the clean method for recipe: ${RecipeAliases.OBJECTS}`);
-        this._recipeManager.clean(RecipeAliases.OBJECTS);
+        if (log?.isDebugEnabled()) log?.debug(`Calling the clean method for recipe: ${RecipeAliases.OBJECTS_LITE}`);
+        this._recipeManager.clean(RecipeAliases.OBJECTS_LITE);
     }
 
     /**

@@ -28,6 +28,7 @@ export enum RecipeAliases {
     LIGHTNING_WEB_COMPONENTS = 'lightning-web-components',
     OBJECT = 'object',
     OBJECT_PERMISSIONS = 'object-permissions',
+    OBJECTS_LITE = 'objects-lite',
     OBJECTS = 'objects',
     OBJECT_TYPES = 'object-types',
     ORGANIZATION = 'org-information',

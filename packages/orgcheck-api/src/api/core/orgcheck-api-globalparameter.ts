@@ -10,6 +10,7 @@ const APEX_CLASS_TYPE_UNCOMPILED = 'apexuncompiled';
 const GROUP_TYPE = 'grouptype';
 const GROUP_TYPE_PG = 'publicgroup';
 const GROUP_TYPE_QUEUE = 'queue';
+const OBJECTS_MODE = 'objectsmode';
 
 export class OrgCheckGlobalParameter {
 
@@ -25,6 +26,13 @@ export class OrgCheckGlobalParameter {
      * @static
      */
     static get SOBJECT_NAME(): string { return SOBJECT_NAME; }
+
+    /**
+     * @description Key to represent the mode of SObjects dataset (full or lite)
+     * @returns {string} The value of the constant
+     * @static
+     */
+    static get OBJECTS_MODE(): string { return OBJECTS_MODE; }
 
     /**
      * @description Key to represent a namespace of a package
@@ -160,5 +168,16 @@ export class OrgCheckGlobalParameter {
      */
     static getGroupType(parameters: Map<string, string>): string {
         return parameters?.get(GROUP_TYPE) ?? ALL_VALUES;
+    }
+
+    /**
+     * @description Get the SObject dataset mode from the parameters
+     * @param {Map<string, string>} parameters - Map of parameters
+     * @returns {string} The mode: 'full' or 'lite' 
+     * @static
+     * @public
+     */
+    static getObjectsMode(parameters: Map<string, string>): string {
+        return parameters?.get(OBJECTS_MODE) ?? ALL_VALUES;
     }
 }

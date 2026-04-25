@@ -31,7 +31,7 @@ import { RecipeLightningWebComponents } from 'src/api/recipe/orgcheck-api-recipe
 import { RecipeManagerError, RecipeManagerIntf } from 'src/api/core/recipe/orgcheck-api-recipemanager';
 import { RecipeObject, SfdcObjectAsTable } from 'src/api/recipe/orgcheck-api-recipe-object';
 import { RecipeObjectPermissions } from 'src/api/recipe/orgcheck-api-recipe-objectpermissions';
-import { RecipeObjects } from 'src/api/recipe/orgcheck-api-recipe-objects';
+import { RecipeObjects, RecipeObjectsLite } from 'src/api/recipe/orgcheck-api-recipe-objects';
 import { RecipeObjectTypes } from 'src/api/recipe/orgcheck-api-recipe-objecttypes';
 import { RecipeOrganization } from 'src/api/recipe/orgcheck-api-recipe-organization';
 import { RecipePackages } from 'src/api/recipe/orgcheck-api-recipe-packages';
@@ -131,6 +131,7 @@ export class RecipeManager implements RecipeManagerIntf {
         this._recipes.set(RecipeAliases.OBJECT, new RecipeObject());
         this._recipes.set(RecipeAliases.OBJECT_PERMISSIONS, new RecipeObjectPermissions());
         this._recipes.set(RecipeAliases.OBJECTS, new RecipeObjects());
+        this._recipes.set(RecipeAliases.OBJECTS_LITE, new RecipeObjectsLite());
         this._recipes.set(RecipeAliases.OBJECT_TYPES, new RecipeObjectTypes());
         this._recipes.set(RecipeAliases.ORGANIZATION, new RecipeOrganization());
         this._recipes.set(RecipeAliases.PACKAGES, new RecipePackages());

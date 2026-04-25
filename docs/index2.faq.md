@@ -94,3 +94,20 @@ For more information, you can check that closed issue: https://github.com/Salesf
 - You can export results to files with flags like `--csv-file`, `--json-file`, and `--xlsx-file`.
 - In production orgs, you might need to explicitly accept terms by adding `--accept-the-terms`.
 
+
+
+## Question 9: What do I get when Org Check shows an unexpected error?
+- Org Check shows an error dialog with the method or action that failed.
+- The dialog includes the full error chain collected from the thrown error and its nested `cause` values.
+- The dialog also links to the Org Check FAQ and to the issue tracker so you can troubleshoot or report the problem with context.
+
+
+
+## Question 10: How should I read the Org Check score?
+- The score is a simple attention indicator based on anti-patterns detected by Org Check.
+- When the score is blank or `0`, the item is considered good from Org Check's point of view.
+- As soon as the score is greater than `0`, the item deserves your attention.
+- Each time Org Check detects one anti-pattern on an item, the score is incremented.
+- In short, if an item has a score of `4`, it means Org Check found `4` anti-patterns to review around that item.
+- The score helps you prioritize what to inspect first, but it does not replace the final human review of the item and its context.
+

@@ -10,14 +10,16 @@ import { SfdcObjectType }from 'src/api/data/orgcheck-api-data-objecttype';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 import { ObjectsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-objects';
 
-export class RecipeObjects implements ServedRecipe<SfdcObject[], Table> {
+abstract class AbstractRecipeObjects implements ServedRecipe<SfdcObject[], Table> {
+
+    constructor(private readonly mode: string) {}
 
     /**
      * @description Title of this recipe
      * @type {string}
      * @public
      */
-    public readonly title: string = '🏉 Objects';
+    public readonly title: string = `🏉 Objects`;
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
@@ -26,8 +28,15 @@ export class RecipeObjects implements ServedRecipe<SfdcObject[], Table> {
      * @public
      */
     public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
-        return [ DatasetAliases.OBJECTTYPES, DatasetAliases.OBJECTS ];
-    }
+        return [ 
+            DatasetAliases.OBJECTTYPES, 
+            new DatasetRunInformation(
+                DatasetAliases.OBJECTS ,
+                `${DatasetAliases.OBJECTS}-${this.mode}` ,
+                new Map([[ OrgCheckGlobalParameter.OBJECTS_MODE, this.mode ]])
+            )
+        ];
+    }    
 
     /**
      * @description List the parameters that this mix depends on on
@@ -99,5 +108,19 @@ export class RecipeObjects implements ServedRecipe<SfdcObject[], Table> {
      */
     public async serveToGo(plate: Table): Promise<ExportedTable> {
         return TableFactory.export(plate);
+    }
+}
+
+export class RecipeObjectsLite extends AbstractRecipeObjects {
+
+    constructor() {
+        super('lite');
+    }
+}
+
+export class RecipeObjects extends AbstractRecipeObjects {
+
+    constructor() {
+        super('full');
     }
 }

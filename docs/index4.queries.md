@@ -687,7 +687,7 @@ SELECT DurableId, NamespacePrefix, DeveloperName, QualifiedApiName, ExternalShar
 FROM EntityDefinition 
 WHERE KeyPrefix <> null 
 AND DeveloperName <> null 
-AND (NOT(KeyPrefix IN ('00a', '017', '02c', '0D5', '1CE'))) 
+AND (NOT(KeyPrefix IN ('00a', '017', '02c', '02e', '0D5', '1CE'))) 
 AND (NOT(QualifiedApiName like '%_hd'))
 ```
 
@@ -739,7 +739,7 @@ SELECT DurableId, (SELECT Max, Remaining, Type FROM Limits WHERE Type IN ('Shari
 FROM EntityDefinition
 WHERE KeyPrefix <> null
 AND DeveloperName <> null
-AND (NOT(KeyPrefix IN ('00a', '017', '02c', '0D5', '1CE')))
+AND (NOT(KeyPrefix IN ('00a', '017', '02c', '02e', '0D5', '1CE')))
 AND (NOT(QualifiedApiName like '%_hd'))
 ```
 

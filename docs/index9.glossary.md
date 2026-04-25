@@ -9,6 +9,9 @@ mermaid: true
 
 This document explains the column definitions for each table in the OrgCheck application.
 
+Notes:
+- A `Score` highlights how many anti-patterns Org Check detected on an item. Blank or `0` means the item is considered good; a positive score means the item deserves attention.
+
 ## Table of Contents
 
 | Letter | Sections |
