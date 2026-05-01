@@ -1,5 +1,6 @@
-import { LoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
-import { Logger } from 'src/api/core/logger/orgcheck-api-logger-impl';
+import { describe, it, expect } from '@jest/globals';
+import { LoggerFactoryIntf } from 'src/api/core/logger/orgcheck-api-loggerfactory';
+import { LoggerFactory } from 'src/api/core/logger/orgcheck-api-loggerfactory-impl';
 import { LoggerSetup } from 'src/orgcheck';
 
 class LoggerSetupForTest implements LoggerSetup {
@@ -16,8 +17,7 @@ class LoggerSetupForTest implements LoggerSetup {
   public messageLogged(): void {
     this.nbmessageLogged++;
   };
-  public messageSilentlyLogged(): void { }
-  public endedWithError(): void {
+  public endedWithErrors(): void {
     this.nbEndedOperationsKO++;
   };
   public endedSuccessfully (): void {
@@ -32,83 +32,80 @@ describe('tests.api.unit.Logger', () => {
 
   it('checks if the logger implementation runs correctly', async () => {
     const loggerSetup = new LoggerSetupForTest();
-    const logger: LoggerIntf = new Logger(loggerSetup);
-    logger.optimisticByPass = false;
+    const loggerFactory: LoggerFactoryIntf = new LoggerFactory(loggerSetup);
 
-    logger.log('1', 'starting 1...');
+    const logger1 = loggerFactory?.create('1'); // that will start 1
     expect(loggerSetup.nbStartedOperations).toBe(1);
+    expect(loggerSetup.nbmessageLogged).toBe(0);
+    expect(loggerSetup.nbStoppedOperations).toBe(0);
+
+    const logger2 = loggerFactory?.create('2'); // that will start 2
+    expect(loggerSetup.nbStartedOperations).toBe(2);
+    expect(loggerSetup.nbmessageLogged).toBe(0);
+    expect(loggerSetup.nbStoppedOperations).toBe(0);
+
+    loggerFactory?.create('3'); // that will start 3
+    expect(loggerSetup.nbStartedOperations).toBe(3);
+    expect(loggerSetup.nbmessageLogged).toBe(0);
+    expect(loggerSetup.nbStoppedOperations).toBe(0);
+
+    logger2.log('2 continues (already started)');
+    expect(loggerSetup.nbStartedOperations).toBe(3);
     expect(loggerSetup.nbmessageLogged).toBe(1);
     expect(loggerSetup.nbStoppedOperations).toBe(0);
 
-    logger.log('2', 'starting 2...');
-    expect(loggerSetup.nbStartedOperations).toBe(2);
-    expect(loggerSetup.nbmessageLogged).toBe(2);
+    logger1.hadError(new TypeError('we had a fatal error for 1...'));
+    expect(loggerSetup.nbStartedOperations).toBe(3);
+    expect(loggerSetup.nbmessageLogged).toBe(1);
     expect(loggerSetup.nbStoppedOperations).toBe(0);
 
-    logger.log('3', 'starting 3...');
+    logger2.end();
     expect(loggerSetup.nbStartedOperations).toBe(3);
-    expect(loggerSetup.nbmessageLogged).toBe(3);
-    expect(loggerSetup.nbStoppedOperations).toBe(0);
-
-    logger.log('2', '2 continues (already started)');
-    expect(loggerSetup.nbStartedOperations).toBe(3);
-    expect(loggerSetup.nbmessageLogged).toBe(4);
-    expect(loggerSetup.nbStoppedOperations).toBe(0);
-
-    logger.fatal('1', 'we had a fatal error for 1...');
-    expect(loggerSetup.nbStartedOperations).toBe(3);
-    expect(loggerSetup.nbmessageLogged).toBe(4);
+    expect(loggerSetup.nbmessageLogged).toBe(1);
     expect(loggerSetup.nbStoppedOperations).toBe(1);
-
-    logger.warn('3', 'oppps but continue...');
-    expect(loggerSetup.nbStartedOperations).toBe(3);
-    expect(loggerSetup.nbmessageLogged).toBe(5);
-    expect(loggerSetup.nbStoppedOperations).toBe(1);
-
-    logger.finalLog('2', 'done 2...');
-    expect(loggerSetup.nbStartedOperations).toBe(3);
-    expect(loggerSetup.nbmessageLogged).toBe(5);
-    expect(loggerSetup.nbStoppedOperations).toBe(2);
   });
 
   it('checks if the logger implementation behaves correclty with the optimistic flag on', async () => {
     const loggerSetup = new LoggerSetupForTest();
-    const logger: LoggerIntf = new Logger(loggerSetup);
-    logger.optimisticByPass = true;
+    const loggerFactory: LoggerFactoryIntf = new LoggerFactory(loggerSetup);
 
-    logger.log('1', 'starting 1...');
+    const logger1 = loggerFactory?.create('1');
     expect(loggerSetup.nbStartedOperations).toBe(1);
+    expect(loggerSetup.nbmessageLogged).toBe(0);
+    expect(loggerSetup.nbStoppedOperations).toBe(0);
+
+    const logger2 = loggerFactory?.create('2');
+    expect(loggerSetup.nbStartedOperations).toBe(2);
+    expect(loggerSetup.nbmessageLogged).toBe(0);
+    expect(loggerSetup.nbStoppedOperations).toBe(0);
+
+    const logger3 = loggerFactory?.create('3');
+    expect(loggerSetup.nbStartedOperations).toBe(3);
+    expect(loggerSetup.nbmessageLogged).toBe(0);
+    expect(loggerSetup.nbStoppedOperations).toBe(0);
+
+    logger1.ignoreErrors();
+    logger2.ignoreErrors();
+    logger3.ignoreErrors();
+
+    logger2.log('2 continues (already started)');
+    expect(loggerSetup.nbStartedOperations).toBe(3);
     expect(loggerSetup.nbmessageLogged).toBe(1);
     expect(loggerSetup.nbStoppedOperations).toBe(0);
 
-    logger.log('2', 'starting 2...');
-    expect(loggerSetup.nbStartedOperations).toBe(2);
-    expect(loggerSetup.nbmessageLogged).toBe(2);
+    logger1.hadError(new TypeError('we had a fatal error for 1...')); // this one should be equivalent to finalLog because of the by pass
+    expect(loggerSetup.nbStartedOperations).toBe(3);
+    expect(loggerSetup.nbmessageLogged).toBe(1);
     expect(loggerSetup.nbStoppedOperations).toBe(0);
 
-    logger.log('3', 'starting 3...');
+    logger2.end();
     expect(loggerSetup.nbStartedOperations).toBe(3);
-    expect(loggerSetup.nbmessageLogged).toBe(3);
-    expect(loggerSetup.nbStoppedOperations).toBe(0);
-
-    logger.log('2', '2 continues (already started)');
-    expect(loggerSetup.nbStartedOperations).toBe(3);
-    expect(loggerSetup.nbmessageLogged).toBe(4);
-    expect(loggerSetup.nbStoppedOperations).toBe(0);
-
-    logger.fatal('1', 'we had a fatal error for 1...'); // this one should be equivalent to finalLog because of the by pass
-    expect(loggerSetup.nbStartedOperations).toBe(3);
-    expect(loggerSetup.nbmessageLogged).toBe(4); // no message logged (like finalLog)
-    expect(loggerSetup.nbStoppedOperations).toBe(1); // but stopped (like finalLog)
-
-    logger.warn('3', 'oppps but continue...');
-    expect(loggerSetup.nbStartedOperations).toBe(3);
-    expect(loggerSetup.nbmessageLogged).toBe(5);
+    expect(loggerSetup.nbmessageLogged).toBe(1);
     expect(loggerSetup.nbStoppedOperations).toBe(1);
 
-    logger.finalLog('2', 'done 2...');
+    logger1.end();
     expect(loggerSetup.nbStartedOperations).toBe(3);
-    expect(loggerSetup.nbmessageLogged).toBe(5);
+    expect(loggerSetup.nbmessageLogged).toBe(1);
     expect(loggerSetup.nbStoppedOperations).toBe(2);
   });
 });

@@ -5,6 +5,7 @@ import { SfdcObjectAsTable } from 'src/api/recipe/orgcheck-api-recipe-object';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { RecipeAliases } from 'src/api/core/recipe/orgcheck-api-recipes-aliases';
 import { GlobalViewAsTable } from 'src/api/recipecollection/orgcheck-api-recipe-globalview';
+import { SimpleLoggerIntf } from '../logger/orgcheck-api-logger';
 
 /**
  * @description Recipe manager error class
@@ -28,13 +29,14 @@ export interface RecipeManagerIntf {
      *   - Step 3. Combine/mix all the data together
      *   - Step 4. Return the mixture
      * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
-     * @param {Map<string, any>} [parameters] - List of values to pass to the recipe
+     * @param {Map<string, any>} parameters - List of values to pass to the recipe
+     * @param {SimpleLoggerIntf} [logger] - Simple logger for this task (optional)
      * @returns {Promise<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean>| DataCollectionStatisticsIntf[]>} Returns the mixture
      * @throws {RecipeManagerError}
      * @async
      * @public
      */
-    prepare(alias: RecipeAliases, parameters: Map<string, any>): Promise<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]>;
+    prepare(alias: RecipeAliases, parameters: Map<string, any>, logger?: SimpleLoggerIntf): Promise<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]>;
 
     /**
      * @description Serve the mixture from a designated recipe to a table

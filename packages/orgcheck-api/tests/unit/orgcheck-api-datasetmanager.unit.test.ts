@@ -1,15 +1,16 @@
+import { describe, it, expect } from '@jest/globals';
 import { DatasetManager } from 'src/api/core/dataset/orgcheck-api-datasetmanager-impl';
 import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SalesforceManagerMock_DoingNothing } from 'tests/utils/orgcheck-api-salesforce-mock.utility';
 import { CacheManagerMock_UsingMap } from 'tests/utils/orgcheck-api-cache-mock.utility';
-import { LoggerMock_DoingNothing } from 'tests/utils/orgcheck-api-logger-mock.utility';
+import { LoggerFactoryMock_DoingNothing } from 'tests/utils/orgcheck-api-logger-mock.utility';
 
 describe('tests.api.unit.DatasetManager', () => {
   it('checks if the dataset manager implementation runs correctly', async () => {
     const manager = new DatasetManager(
       new SalesforceManagerMock_DoingNothing(),
       new CacheManagerMock_UsingMap(),
-      new LoggerMock_DoingNothing()
+      new LoggerFactoryMock_DoingNothing()
     ); 
     const results1 = await manager.run([ DatasetAliases.APEXCLASSES ]);
     expect(results1).toBeDefined();

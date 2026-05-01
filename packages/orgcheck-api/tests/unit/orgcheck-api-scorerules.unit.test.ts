@@ -1,3 +1,4 @@
+import { describe, it, expect } from '@jest/globals';
 import { SecretSauce } from 'src/api/core/orgcheck-api-secretsauce';
 import { ScoreRule } from 'src/api/core/orgcheck-api-data-scorerule';
 import jsforce from 'tests/utils/orgcheck-api-jsforce-mock.utility';

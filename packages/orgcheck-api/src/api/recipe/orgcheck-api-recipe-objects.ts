@@ -114,13 +114,13 @@ abstract class AbstractRecipeObjects implements ServedRecipe<SfdcObject[], Table
 export class RecipeObjectsLite extends AbstractRecipeObjects {
 
     constructor() {
-        super('lite');
+        super(OrgCheckGlobalParameter.OBJECTS_MODE_LITE);
     }
 }
 
 export class RecipeObjects extends AbstractRecipeObjects {
 
     constructor() {
-        super('full');
+        super(OrgCheckGlobalParameter.OBJECTS_MODE_FULL);
     }
 }

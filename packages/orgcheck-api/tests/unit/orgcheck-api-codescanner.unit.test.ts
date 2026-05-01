@@ -1,3 +1,4 @@
+import { describe, it, expect } from '@jest/globals';
 import { CodeScanner } from 'src/api/core/orgcheck-api-codescanner';
 
 describe('tests.api.unit.CodeScanner', () => {

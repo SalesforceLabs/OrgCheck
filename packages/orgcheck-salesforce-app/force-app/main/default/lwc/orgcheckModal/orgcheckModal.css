@@ -1,3 +1,12 @@
 div.modal-content {
     padding: 10px;
 }
+
+pre.tty {
+    margin-top: 3px;
+    background-color: #240808;
+    color: #e9baba;
+    font-size: xx-small;
+    text-wrap: auto;
+    padding: 5px;
+}

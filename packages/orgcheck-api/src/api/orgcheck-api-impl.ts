@@ -1,9 +1,9 @@
-import { LoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
+import { LoggerFactoryIntf } from 'src/api/core/logger/orgcheck-api-loggerfactory';
 import { DataCacheManagerIntf } from 'src/api/core/cache/orgcheck-api-cachemanager';
 import { DataCacheManager } from 'src/api/core/cache/orgcheck-api-cachemanager-impl';
 import { DatasetManager } from 'src/api/core/dataset/orgcheck-api-datasetmanager-impl';
 import { DatasetManagerIntf } from 'src/api/core/dataset/orgcheck-api-datasetmanager';
-import { Logger } from 'src/api/core/logger/orgcheck-api-logger-impl';
+import { LoggerFactory } from 'src/api/core/logger/orgcheck-api-loggerfactory-impl';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 import { RecipeAliases } from 'src/api/core/recipe/orgcheck-api-recipes-aliases';
 import { RecipeManager } from 'src/api/core/recipe/orgcheck-api-recipemanager-impl';
@@ -80,11 +80,11 @@ export class API implements ApiIntf {
     private readonly _cacheManager: DataCacheManagerIntf;
 
     /**
-     * @description Private Logger property used to send log information to the UI (if any)
-     * @type {LoggerIntf}
+     * @description Private Logger factory
+     * @type {LoggerFactoryIntf}
      * @private
      */
-    private readonly _logger: LoggerIntf;
+    private readonly _loggerFactory: LoggerFactoryIntf;
 
     /**
      * @description Is the current user accepted the terms manually to use Org Check in this org?
@@ -105,7 +105,7 @@ export class API implements ApiIntf {
         if (!setup?.logSettings) { 
             throw new Error(`Setup is missing a logSettings property`); 
         }
-        this._logger = new Logger(setup?.logSettings);
+        this._loggerFactory = new LoggerFactory(setup?.logSettings);
 
         // --------------------
         // Salesforce Manager
@@ -127,8 +127,8 @@ export class API implements ApiIntf {
         // --------------------
         // Other
         // --------------------
-        this._datasetManager = new DatasetManager(this._sfdcManager, this._cacheManager, this._logger);
-        this._recipeManager = new RecipeManager(this._datasetManager, this._logger);
+        this._datasetManager = new DatasetManager(this._sfdcManager, this._cacheManager, this._loggerFactory);
+        this._recipeManager = new RecipeManager(this._datasetManager, this._loggerFactory);
         this._usageTermsAcceptedManually = false;
     }
     
@@ -176,18 +176,18 @@ export class API implements ApiIntf {
      */
     public async getOrganizationInformation(): Promise<SfdcOrganization> {
         // DO NOT CALL _throwExceptionIfUsageTermsNotAccepted
-        const log = this._logger?.toSimpleLogger('Get Organization Information');
+        const logger = this._loggerFactory?.create('Get Organization Information');
         try {
-            if (log?.isDebugEnabled()) log?.debug(`Calling the prepare method for recipe: ${RecipeAliases.ORGANIZATION}`);
+            logger?.log(`Calling the prepare method for recipe: ${RecipeAliases.ORGANIZATION}`);
             // @ts-ignore
             const org: SfdcOrganization = (await this._recipeManager.prepare(RecipeAliases.ORGANIZATION));
-            if (this.orgId === undefined) {
-                this.orgId = org.id;
-            }
+            this.orgId = org?.id;
             return org;
         } catch (error) {
-            if (log?.isDebugEnabled()) log?.debug(`Error occurred: message: ${error.message}, stack: ${error.stack}`);
+            logger?.hadError(error);
             throw error;
+        } finally {
+            logger?.end();
         }
     }
 
@@ -208,14 +208,14 @@ export class API implements ApiIntf {
      * @public
      */
     public async checkCurrentUserPermissions(): Promise<boolean> {
-        const log = this._logger?.toSimpleLogger('Check Current User Permissions');
+        const logger = this._loggerFactory?.create('Check Current User Permissions');
         try {
-            if (log?.isDebugEnabled()) log?.debug('Getting current user permissions...');
+            logger?.log('Getting current user permissions...');
             // Check if usage terms were accepted
-            if (log?.isDebugEnabled()) log?.debug('Checking if usage terms were accepted...');
+            logger?.log('Checking if usage terms were accepted...');
             await this._throwExceptionIfUsageTermsNotAccepted();
-            if (log?.isDebugEnabled()) log?.debug('Passed the terms checking!');
-            if (log?.isDebugEnabled()) log?.debug(`Calling the prepare method for recipe: ${RecipeAliases.CURRENT_USER_PERMISSIONS}`);
+            logger?.log('Passed the terms checking!');
+            logger?.log(`Calling the prepare method for recipe: ${RecipeAliases.CURRENT_USER_PERMISSIONS}`);
             // @ts-ignore
             const perms: Map = (await this._recipeManager.prepare(RecipeAliases.CURRENT_USER_PERMISSIONS, new Map([
                 [OrgCheckGlobalParameter.SYSTEM_PERMISSIONS_LIST, [ 'ModifyAllData', 'AuthorApex', 'ApiEnabled', 'InstallPackaging' ]]
@@ -223,18 +223,19 @@ export class API implements ApiIntf {
             if (perms === undefined || 
                 perms?.get('ModifyAllData') === false || perms?.get('AuthorApex')       === false ||
                 perms?.get('ApiEnabled')    === false || perms?.get('InstallPackaging') === false) {
-                    if (log?.isDebugEnabled()) log?.debug('Throw exception because one of the required permissions is not assigned to the current user');
+                    logger?.log('Throw exception because one of the required permissions is not assigned to the current user');
                     throw (new TypeError(
                         'Current User Permission Access is not enough to run the application. '+
                         'Please make sure to assign ALL the following permissions to the current user: '+
                         `Modify All Data, Author Apex, API Enabled and Download AppExchange Packages.`
                     ));
             }
-            if (log?.isDebugEnabled()) log?.debug('returning TRUE');
             return true;
         } catch (error) {
-            if (log?.isDebugEnabled()) log?.debug(`Error occurred: message: ${error.message}, stack: ${error.stack}`);
+            logger?.hadError(error);
             throw error;
+        } finally {
+            logger?.end();
         }
     }
 
@@ -250,13 +251,15 @@ export class API implements ApiIntf {
      * @public
      */
     async runAllTestsAsync(): Promise<string> {
-        const log = this._logger?.toSimpleLogger('Run All Tests');
+        const logger = this._loggerFactory?.create('Run All Tests');
         try {
-            if (log?.isDebugEnabled()) log?.debug('Running all tests in the org...');
-            return this._sfdcManager?.runAllTests(log);
+            logger?.log('Running all tests in the org...');
+            return await this._sfdcManager?.runAllTests(logger.toSimpleLogger());
         } catch (error) {
-            if (log?.isDebugEnabled()) log?.debug(`Error occurred: message: ${error.message}, stack: ${error.stack}`);
+            logger?.hadError(error);
             throw error;
+        } finally {
+            logger?.end();
         }
     }
 
@@ -268,12 +271,14 @@ export class API implements ApiIntf {
      * @public
      */
     public async compileClasses(apexClassIds: string[]): Promise<Map<string, { isSuccess: boolean; reasons?: string[]; }>> {
-        const log = this._logger?.toSimpleLogger('Compile Classes');
+        const logger = this._loggerFactory?.create('Compile Classes');
         try {
-            return this._sfdcManager?.compileClasses(apexClassIds, log);
+            return this._sfdcManager?.compileClasses(apexClassIds, logger.toSimpleLogger());
         } catch (error) {
-            if (log?.isDebugEnabled()) log?.debug(`Error occurred: message: ${error.message}, stack: ${error.stack}`);
+            logger?.hadError(error);
             throw error;
+        } finally {
+            logger?.end();
         }
     }
 
@@ -289,20 +294,23 @@ export class API implements ApiIntf {
      * @public
      */
     public async checkUsageTerms(): Promise<boolean> {
-        const log = this._logger?.toSimpleLogger('Check Usage Terms');
+        const logger = this._loggerFactory?.create('Check Usage Terms');
         try {
-            if (log?.isDebugEnabled()) log?.debug('Checking usage terms acceptance...');
-            const orgInfo = (await this.getOrganizationInformation());
-            if (log?.isDebugEnabled()) log?.debug(`Organization info: ${orgInfo.name}, isProduction: ${orgInfo.isProduction}`);
-            if (orgInfo.isProduction === true && this._usageTermsAcceptedManually === false) {
-                if (log?.isDebugEnabled()) log?.debug('Usage terms not yet accepted for this org');
+            logger?.log('Checking usage terms acceptance...');
+            // @ts-ignore
+            const org: SfdcOrganization = (await this._recipeManager.prepare(RecipeAliases.ORGANIZATION, undefined, logger.toSimpleLogger()));
+            logger?.log(`Organization info: ${org?.name}, isProduction: ${org?.isProduction}`);
+            if (org?.isProduction === true && this._usageTermsAcceptedManually === false) {
+                logger?.log('Usage terms not yet accepted for this org');
                 return false;
             }
-            if (log?.isDebugEnabled()) log?.debug('Usage terms accepted for this org');
+            logger?.log('Usage terms accepted for this org');
             return true;
         } catch (error) {
-            if (log?.isDebugEnabled()) log?.debug(`Error occurred: message: ${error.message}, stack: ${error.stack}`);
+            logger?.hadError(error);
             throw error;
+        } finally {
+            logger?.end();
         }
     }
 
@@ -312,14 +320,16 @@ export class API implements ApiIntf {
      * @public
      */
     public wereUsageTermsAcceptedManually(): boolean {
-        const log = this._logger?.toSimpleLogger('Check If Usage Terms Were Accepted Manually');
+        const logger = this._loggerFactory?.create('Check If Usage Terms Were Accepted Manually');
         try {
-            if (log?.isDebugEnabled()) log?.debug('Checking if usage terms were accepted manually...');
-            if (log?.isDebugEnabled()) log?.debug(`Flag is currently set to: ${this._usageTermsAcceptedManually}`);
+            logger?.log('Checking if usage terms were accepted manually...');
+            logger?.log(`Flag is currently set to: ${this._usageTermsAcceptedManually}`);
             return this._usageTermsAcceptedManually;
         } catch (error) {
-            if (log?.isDebugEnabled()) log?.debug(`Error occurred: message: ${error.message}, stack: ${error.stack}`);
+            logger?.hadError(error);
             throw error;
+        } finally {
+            logger?.end();
         }
     }
 
@@ -328,15 +338,17 @@ export class API implements ApiIntf {
      * @public
      */
     public acceptUsageTermsManually() {
-        const log = this._logger?.toSimpleLogger('Accept Usage Terms Manually');
+        const logger = this._loggerFactory?.create('Accept Usage Terms Manually');
         try {
-            if (log?.isDebugEnabled()) log?.debug('Accepting usage terms manually...');
-            if (log?.isDebugEnabled()) log?.debug(`Flag was previously set to: ${this._usageTermsAcceptedManually}`);
+            logger?.log('Accepting usage terms manually...');
+            logger?.log(`Flag was previously set to: ${this._usageTermsAcceptedManually}`);
             this._usageTermsAcceptedManually = true;
-            if (log?.isDebugEnabled()) log?.debug('Now set to true');
+            logger?.log('Now set to true');
         } catch (error) {
-            if (log?.isDebugEnabled()) log?.debug(`Error occurred: message: ${error.message}, stack: ${error.stack}`);
+            logger?.hadError(error);
             throw error;
+        } finally {
+            logger?.end();
         }
     }
 
@@ -352,19 +364,21 @@ export class API implements ApiIntf {
      * @public
      */
     public async getPackages(): Promise<SfdcPackage[]> {
-        const log = this._logger?.toSimpleLogger('Get Packages');
+        const logger = this._loggerFactory?.create('Get Packages');
         try {
-            if (log?.isDebugEnabled()) log?.debug('Getting packages...');
+            logger?.log('Getting packages...');
             // Check if usage terms were accepted
-            if (log?.isDebugEnabled()) log?.debug('Checking if usage terms were accepted...');
+            logger?.log('Checking if usage terms were accepted...');
             await this._throwExceptionIfUsageTermsNotAccepted();
-            if (log?.isDebugEnabled()) log?.debug('Passed the terms checking!');
-            if (log?.isDebugEnabled()) log?.debug(`Calling the prepare method for recipe: ${RecipeAliases.PACKAGES}`);
+            logger?.log('Passed the terms checking!');
+            logger?.log(`Calling the prepare method for recipe: ${RecipeAliases.PACKAGES}`);
             // @ts-ignore
-            return (await this._recipeManager.prepare(RecipeAliases.PACKAGES));
+            return await this._recipeManager.prepare(RecipeAliases.PACKAGES);
         } catch (error) {
-            if (log?.isDebugEnabled()) log?.debug(`Error occurred: message: ${error.message}, stack: ${error.stack}`);
+            logger?.hadError(error);
             throw error;
+        } finally {
+            logger?.end();
         }
     }
 
@@ -376,19 +390,21 @@ export class API implements ApiIntf {
      * @public
      */
     public async getObjectTypes(): Promise<SfdcObjectType[]> {
-        const log = this._logger?.toSimpleLogger('Get Object Types');
+        const logger = this._loggerFactory?.create('Get Object Types');
         try {
-            if (log?.isDebugEnabled()) log?.debug('Getting Object Types...');
+            logger?.log('Getting Object Types...');
             // Check if usage terms were accepted
-            if (log?.isDebugEnabled()) log?.debug('Checking if usage terms were accepted...');
+            logger?.log('Checking if usage terms were accepted...');
             await this._throwExceptionIfUsageTermsNotAccepted();
-            if (log?.isDebugEnabled()) log?.debug('Passed the terms checking!');
-            if (log?.isDebugEnabled()) log?.debug(`Calling the prepare method for recipe: ${RecipeAliases.OBJECT_TYPES}`);
+            logger?.log('Passed the terms checking!');
+            logger?.log(`Calling the prepare method for recipe: ${RecipeAliases.OBJECT_TYPES}`);
             // @ts-ignore
-            return (await this._recipeManager.prepare(RecipeAliases.OBJECT_TYPES));
+            return await this._recipeManager.prepare(RecipeAliases.OBJECT_TYPES);
         } catch (error) {
-            if (log?.isDebugEnabled()) log?.debug(`Error occurred: message: ${error.message}, stack: ${error.stack}`);
+            logger?.hadError(error);
             throw error;
+        } finally {
+            logger?.end();
         }
     }
 
@@ -402,22 +418,24 @@ export class API implements ApiIntf {
      * @public
      */
     public async getObjects(namespace: string, sobjectType: string): Promise<SfdcObject[]> {
-        const log = this._logger?.toSimpleLogger('Get Objects');
+        const logger = this._loggerFactory?.create('Get Objects');
         try {
-            if (log?.isDebugEnabled()) log?.debug('Getting objects...');
+            logger?.log('Getting objects...');
             // Check if usage terms were accepted
-            if (log?.isDebugEnabled()) log?.debug('Checking if usage terms were accepted...');
+            logger?.log('Checking if usage terms were accepted...');
             await this._throwExceptionIfUsageTermsNotAccepted();
-            if (log?.isDebugEnabled()) log?.debug('Passed the terms checking!');
-            if (log?.isDebugEnabled()) log?.debug(`Calling the prepare method for recipe: ${RecipeAliases.OBJECTS_LITE}`);
+            logger?.log('Passed the terms checking!');
+            logger?.log(`Calling the prepare method for recipe: ${RecipeAliases.OBJECTS_LITE}`);
             // @ts-ignore
-            return (await this._recipeManager.prepare(RecipeAliases.OBJECTS_LITE, new Map([
+            return await this._recipeManager.prepare(RecipeAliases.OBJECTS_LITE, new Map([
                 [OrgCheckGlobalParameter.PACKAGE_NAME, namespace],
                 [OrgCheckGlobalParameter.SOBJECT_TYPE_NAME, sobjectType],
-            ])));
+            ]));
         } catch (error) {
-            if (log?.isDebugEnabled()) log?.debug(`Error occurred: message: ${error.message}, stack: ${error.stack}`);
+            logger?.hadError(error);
             throw error;
+        } finally {
+            logger?.end();
         }
     }
 
@@ -426,8 +444,8 @@ export class API implements ApiIntf {
      * @public
      */
     public clearObjects() {
-        const log = this._logger?.toSimpleLogger('Clear Objects from Cache');
-        if (log?.isDebugEnabled()) log?.debug(`Calling the clean method for recipe: ${RecipeAliases.OBJECTS_LITE}`);
+        const logger = this._loggerFactory?.create('Clear Objects from Cache');
+        logger?.log(`Calling the clean method for recipe: ${RecipeAliases.OBJECTS_LITE}`);
         this._recipeManager.clean(RecipeAliases.OBJECTS_LITE);
     }
 
@@ -436,13 +454,16 @@ export class API implements ApiIntf {
      * @public
      */
     public clearPackages() {
-        const log = this._logger?.toSimpleLogger('Clear Packages from Cache');
+        const logger = this._loggerFactory?.create('Clear Packages from Cache');
         try {
-            if (log?.isDebugEnabled()) log?.debug(`Calling the clean method for recipe: ${RecipeAliases.PACKAGES}`);
+            logger?.log(`Calling the clean method for recipe: ${RecipeAliases.PACKAGES}`);
             this._recipeManager.clean(RecipeAliases.PACKAGES);
+            logger?.log('Done');
         } catch (error) {
-            if (log?.isDebugEnabled()) log?.debug(`Error occurred: message: ${error.message}, stack: ${error.stack}`);
+            logger?.hadError(error);
             throw error;
+        } finally {
+            logger?.end();
         }
     }
 
@@ -454,14 +475,14 @@ export class API implements ApiIntf {
      * @public
      */
     public async getRolesAsTree(): Promise<SfdcUserRole> {
-        const log = this._logger?.toSimpleLogger('Get Roles as tree');
+        const logger = this._loggerFactory?.create('Get Roles as tree');
         try {
-            if (log?.isDebugEnabled()) log?.debug('Getting roles...');
+            logger?.log('Getting roles...');
             // Check if usage terms were accepted
-            if (log?.isDebugEnabled()) log?.debug('Checking if usage terms were accepted...');
+            logger?.log('Checking if usage terms were accepted...');
             await this._throwExceptionIfUsageTermsNotAccepted();
-            if (log?.isDebugEnabled()) log?.debug('Passed the terms checking!');
-            if (log?.isDebugEnabled()) log?.debug(`Calling the prepare method for recipe: ${RecipeAliases.USER_ROLES}`);
+            logger?.log('Passed the terms checking!');
+            logger?.log(`Calling the prepare method for recipe: ${RecipeAliases.USER_ROLES}`);
             // @ts-ignore
             const allRoles: Map<string, SfdcUserRole> = (await this._recipeManager.prepare(RecipeAliases.USER_ROLES));
             // Key for artificial ROOT
@@ -496,8 +517,10 @@ export class API implements ApiIntf {
             // Return the root node
             return allNodes.get(ROOT_KEY);
         } catch (error) {
-            if (log?.isDebugEnabled()) log?.debug(`Error occurred: message: ${error.message}, stack: ${error.stack}`);
+            logger?.hadError(error);
             throw error;
+        } finally {
+            logger?.end();
         }
     }
     
@@ -517,17 +540,20 @@ export class API implements ApiIntf {
      * @public
      */
     public cachestampData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string): string {
-        const log = this._logger?.toSimpleLogger('Cache Stamp Data');
+        const logger = this._loggerFactory?.create('Cache Stamp Data');
         try {
-            if (log?.isDebugEnabled()) log?.debug(`Calling the cachestamp method for recipe: ${alias} with namespace: ${namespace}, sobjectType: ${sobjectType} and sobject: ${sobject}`);
-            return this._recipeManager.cachestamp(alias, new Map([
+            logger?.log(`Calling the cachestamp method for recipe: ${alias} with namespace: ${namespace}, sobjectType: ${sobjectType} and sobject: ${sobject}`);
+            const results = this._recipeManager.cachestamp(alias, new Map([
                 [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
                 [OrgCheckGlobalParameter.PACKAGE_NAME, namespace],
                 [OrgCheckGlobalParameter.SOBJECT_TYPE_NAME, sobjectType]
             ]));
+            return results;
         } catch (error) {
-            if (log?.isDebugEnabled()) log?.debug(`Error occurred: message: ${error.message}, stack: ${error.stack}`);
+            logger?.hadError(error);
             throw error;
+        } finally {
+            logger?.end();
         }
     }
 
@@ -544,22 +570,25 @@ export class API implements ApiIntf {
      * @public
      */
     public async prepareData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string): Promise<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]> {
-        const log = this._logger?.toSimpleLogger('Prepare Data');
+        const logger = this._loggerFactory?.create('Prepare Data');
         try {
             // Check if usage terms were accepted
-            if (log?.isDebugEnabled()) log?.debug('Checking if usage terms were accepted...');
+            logger?.log('Checking if usage terms were accepted...');
             await this._throwExceptionIfUsageTermsNotAccepted();
-            if (log?.isDebugEnabled()) log?.debug('Passed the terms checking!');
+            logger?.log('Passed the terms checking!');
             // Prepare the data
-            if (log?.isDebugEnabled()) log?.debug(`Calling the prepare method for recipe: ${alias} with namespace: ${namespace}, sobjectType: ${sobjectType} and sobject: ${sobject}`);
-            return await this._recipeManager.prepare(alias, new Map([
+            logger?.log(`Calling the prepare method for recipe: ${alias} with namespace: ${namespace}, sobjectType: ${sobjectType} and sobject: ${sobject}`);
+            const results = await this._recipeManager.prepare(alias, new Map([
                 [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
                 [OrgCheckGlobalParameter.PACKAGE_NAME, namespace],
                 [OrgCheckGlobalParameter.SOBJECT_TYPE_NAME, sobjectType]
             ]));
+            return results;
         } catch (error) {
-            if (log?.isDebugEnabled()) log?.debug(`Error occurred: message: ${error.message}, stack: ${error.stack}`);
+            logger?.hadError(error);
             throw error;
+        } finally {
+            logger?.end();
         }
     }
 
@@ -573,18 +602,20 @@ export class API implements ApiIntf {
      * @public
      */
     public async serveData(alias: RecipeAliases, mixture: DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<Table | SfdcObjectAsTable | GlobalViewAsTable | Table[]> {
-        const log = this._logger?.toSimpleLogger('Serve Data');
+        const logger = this._loggerFactory?.create('Serve Data');
         try {
             // Check if usage terms were accepted
-            if (log?.isDebugEnabled()) log?.debug('Checking if usage terms were accepted...');
+            logger?.log('Checking if usage terms were accepted...');
             await this._throwExceptionIfUsageTermsNotAccepted();
-            if (log?.isDebugEnabled()) log?.debug('Passed the terms checking!');
+            logger?.log('Passed the terms checking!');
             // Serve the data
-            if (log?.isDebugEnabled()) log?.debug(`Calling the serveToTable method for recipe: ${alias} with mixture: ${LoggerUtil.JSONstringifyWithoutRef(mixture)}`);
+            logger?.log(`Calling the serveToTable method for recipe: ${alias} with mixture: ${LoggerUtil.JSONstringifyWithoutRef(mixture)}`);
             return await this._recipeManager.serveToTable(alias, mixture);
         } catch (error) {
-            if (log?.isDebugEnabled()) log?.debug(`Error occurred: message: ${error.message}, stack: ${error.stack}`);
+            logger?.hadError(error);
             throw error;
+        } finally {
+            logger?.end();
         }
     }
 
@@ -598,14 +629,16 @@ export class API implements ApiIntf {
      * @public
      */
     public async exportData(alias: RecipeAliases, plate: Table | SfdcObjectAsTable | GlobalViewAsTable | Table[]): Promise<ExportedTable | ExportedTable[]> {
-        const log = this._logger?.toSimpleLogger('Export Data');
+        const logger = this._loggerFactory?.create('Export Data');
         try {
             // Export the data
-            if (log?.isDebugEnabled()) log?.debug(`Calling the serveToGo method for recipe: ${alias} with plate: ${LoggerUtil.JSONstringifyWithoutRef(plate)}`);
+            logger?.log(`Calling the serveToGo method for recipe: ${alias} with plate: ${LoggerUtil.JSONstringifyWithoutRef(plate)}`);
             return await this._recipeManager.serveToGo(alias, plate);
         } catch (error) {
-            if (log?.isDebugEnabled()) log?.debug(`Error occurred: message: ${error.message}, stack: ${error.stack}`);
+            logger?.hadError(error);
             throw error;
+        } finally {
+            logger?.end();
         }
     }
 
@@ -615,13 +648,15 @@ export class API implements ApiIntf {
      * @public
      */
     public titlesForAllData(): Map<RecipeAliases, string> {
-        const log = this._logger?.toSimpleLogger('Get All Titles For Data');
+        const logger = this._loggerFactory?.create('Get All Titles For Data');
         try {
-            if (log?.isDebugEnabled()) log?.debug('Getting all titles for data...');
+            logger?.log('Getting all titles for data...');
             return this._recipeManager.listAllTitles();
         } catch (error) {
-            if (log?.isDebugEnabled()) log?.debug(`Error occurred: message: ${error.message}, stack: ${error.stack}`);
+            logger?.hadError(error);
             throw error;
+        } finally {
+            logger?.end();
         }
     }
 
@@ -634,18 +669,21 @@ export class API implements ApiIntf {
      * @public
      */
     public cleanData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string): void {
-        const log = this._logger?.toSimpleLogger('Clean Data');
+        const logger = this._loggerFactory?.create('Clean Data');
         try {
             // Clean the data
-            if (log?.isDebugEnabled()) log?.debug(`Calling the clean method for recipe: ${alias} with namespace: ${namespace}, sobjectType: ${sobjectType} and sobject: ${sobject}`);
-            this._recipeManager.clean(alias, new Map([
+            logger?.log(`Calling the clean method for recipe: ${alias} with namespace: ${namespace}, sobjectType: ${sobjectType} and sobject: ${sobject}`);
+            const results = this._recipeManager.clean(alias, new Map([
                 [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
                 [OrgCheckGlobalParameter.PACKAGE_NAME, namespace],
                 [OrgCheckGlobalParameter.SOBJECT_TYPE_NAME, sobjectType]
             ]));
+            return results;
         } catch (error) {
-            if (log?.isDebugEnabled()) log?.debug(`Error occurred: message: ${error.message}, stack: ${error.stack}`);
+            logger?.hadError(error);
             throw error;
+        } finally {
+            logger?.end();
         }
     }
 

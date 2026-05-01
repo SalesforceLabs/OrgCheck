@@ -267,6 +267,7 @@ export default class OrgcheckApp extends LightningElement {
                     // Log methods -- delegation to the UI spinner
                     logSettings: {
                         started: (section) => {
+                            this._private_properties.spinner?.sectionLog(section, 'Starting...'); 
                             if (this.verbose) {
                                 console.log(`Org Check [${section}] BEGIN`); 
                             }
@@ -277,21 +278,18 @@ export default class OrgcheckApp extends LightningElement {
                                 console.log(`Org Check [${section}] LOG: ${message}`); 
                             }
                         },
-                        endedWithError: (section, error) => { 
-                            this._private_properties.spinner?.sectionFailed(section, error); 
+                        endedWithErrors: (section, errors) => { 
+                            //this._private_properties.spinner?.sectionFailed(section, error); 
+                            this._private_properties.spinner?.sectionEnded(section, 'There was an error...'); 
+                            this._private_properties.modal?.showErrors(section, errors);
                             if (this.verbose) {
-                                console.error(`Org Check [${section}] ERROR: ${error?.message}`, error); 
+                                console.error(`Org Check [${section}] ERROR: `, errors); 
                             }
                         },
                         endedSuccessfully: (section, message) => { 
                             this._private_properties.spinner?.sectionEnded(section, message); 
                             if (this.verbose) {
                                 console.log(`Org Check [${section}] SUCCESS: ${message}`); 
-                            }
-                        },
-                        messageSilentlyLogged: (section, message) => { 
-                            if (this.verbose) {
-                                console.debug(`Org Check [${section}] DEBUG: ${message}`); 
                             }
                         },
                         stopped: (section) => {
@@ -783,40 +781,6 @@ export default class OrgcheckApp extends LightningElement {
         this._updateLimits();
     }
 
-    /**
-     * @description Show the error in a modal (that can be closed)
-     * @param {string} methodName - The name of the method where we had the error
-     * @param {Error} error - The error to show in the error modal
-     * @private
-     */ 
-    _showError(methodName, error) {
-        const chain = [];
-        for (let e = error; e !== undefined; e = e.cause) {
-            chain.push(e);
-        }
-        const htmlContent = `
-            👉 Please review our <a href="http://sfdc.co/OrgCheck-FAQ" target="_blank" rel="external noopener 
-                noreferrer">Org Check FAQ</a> and try to resolve this issue in your Org based on our 
-                community's feedback. <br />
-            <br />
-            👉 If the FAQ is not helping, consider creating an issue on <a href="http://sfdc.co/OrgCheck-Backlog" 
-                target="_blank" rel="external noopener noreferrer">Org Check Issues tracker</a> along with 
-                the context and the following information. <br />
-            <br />
-            <ul>
-                <li>Organization Id: <b>${this.orgInformation.id}</b></li>
-                <li>Method: <b>${methodName}</b></li>
-                <li>
-                    List of errors
-                    <ol>
-                        <li>${chain.map((error) => `<b>${error.message}</b> <pre style="margin-top: 3px; background-color: #240808; color: #e9baba; font-size: xx-small;">${JSON.stringify(error)}</pre>`).join("</li>\n<li>")}</li>
-                    </ol>
-                </li>
-            </ul>`;
-        this._private_properties.modal?.open(`An error occurred while processing ${methodName}...`, htmlContent);
-        console.error(methodName, error);
-    }
-
     // ----------------------------------------------------------------------------------------------------------------
     // ----------------------------------------------------------------------------------------------------------------
     // User Experience Handlers
@@ -847,7 +811,7 @@ export default class OrgcheckApp extends LightningElement {
                 this.navigationMenuItems = this._private_properties.initialNavigationMenuItems;
             }
         } catch (error) {
-            this._showError('handleNavigationMenuSearch', error);
+            this._private_properties.modal?.showErrors('handleNavigationMenuSearch', error);
         }
     }
 
@@ -875,7 +839,7 @@ export default class OrgcheckApp extends LightningElement {
                 }
             }
         } catch (error) {
-            this._showError('handleNavigationMenuSelect', error);
+            this._private_properties.modal?.showErrors('handleNavigationMenuSelect', error);
         }
     }
 
@@ -889,7 +853,7 @@ export default class OrgcheckApp extends LightningElement {
             this.isObjectSpecified = this._private_properties.filters?.isSelectedSObjectApiNameAny === false;
             await this._async_updateCurrentData();
         } catch (error) {
-            this._showError('handleFiltersValidated', error);
+            this._private_properties.modal?.showErrors('handleFiltersValidated', error);
         }
     }
 
@@ -902,7 +866,7 @@ export default class OrgcheckApp extends LightningElement {
         try {
             await this._async_loadFilters(true);
         } catch (error) {
-            this._showError('handleFiltersRefreshed', error);
+            this._private_properties.modal?.showErrors('handleFiltersRefreshed', error);
         }
     }
 
@@ -916,7 +880,7 @@ export default class OrgcheckApp extends LightningElement {
             this._private_properties.api?.acceptUsageTermsManually();
             await this._async_loadBasicInformationIfAccepted();
         } catch(error) {
-            this._showError('handleClickUsageAcceptance', error);
+            this._private_properties.modal?.showErrors('handleClickUsageAcceptance', error);
         }
     }
 
@@ -932,7 +896,7 @@ export default class OrgcheckApp extends LightningElement {
             // and reload
             window.location.reload();
         } catch (error) {
-            this._showError('handleRemoveAllCache', error);
+            this._private_properties.modal?.showErrors('handleRemoveAllCache', error);
         }
     }
 
@@ -945,7 +909,7 @@ export default class OrgcheckApp extends LightningElement {
         try {
             await this._async_updateCurrentData(true);
         } catch (error) {
-            this._showError('handleRefreshCurrentData', error);
+            this._private_properties.modal?.showErrors('handleRefreshCurrentData', error);
         }
     }
 
@@ -983,7 +947,7 @@ export default class OrgcheckApp extends LightningElement {
             // show the modal
             this._private_properties.modal?.open(`Dump of the browser cache for item: ${itemName}`, htmlContent);
         } catch (error) {
-            this._showError('handleLogCacheItem', error);
+            this._private_properties.modal?.showErrors('handleLogCacheItem', error);
         }
     }
 
@@ -1011,7 +975,7 @@ export default class OrgcheckApp extends LightningElement {
                 this._private_properties.modal?.open(`Understand the Score of "${detail.whatName}" (${detail.whatId})`, htmlContent);
             }
         } catch (error) {
-            this._showError('handleViewScore', error);
+            this._private_properties.modal?.showErrors('handleViewScore', error);
         }
     }
 
@@ -1040,7 +1004,7 @@ export default class OrgcheckApp extends LightningElement {
                 this._private_properties.spinner?.sectionFailed(LOG_SECTION, error);
             }
         } catch (error) {
-            this._showError('handleClickRunAllTests', error);
+            this._private_properties.modal?.showErrors('handleClickRunAllTests', error);
         }
     }
 
@@ -1087,7 +1051,7 @@ export default class OrgcheckApp extends LightningElement {
                 this._private_properties.spinner?.sectionFailed(LOG_SECTION, 'Done but with errors');
             }
         } catch (error) {
-            this._showError('handleClickRecompile', error);
+            this._private_properties.modal?.showErrors('handleClickRecompile', error);
         }
     }
 
@@ -1103,7 +1067,7 @@ export default class OrgcheckApp extends LightningElement {
             // And open the page
             await this._async_goToPage(keyPage);
         } catch (error) {
-            this._showError('handleOpenPage', error);
+            this._private_properties.modal?.showErrors('handleOpenPage', error);
         }
     }
 
@@ -1130,7 +1094,7 @@ export default class OrgcheckApp extends LightningElement {
             // Throw the error
             throw lastError;
         } catch (error) {
-            this._showError('handleTestThrowException', error);
+            this._private_properties.modal?.showErrors('handleTestThrowException', error);
         }
     }
 

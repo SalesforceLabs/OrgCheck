@@ -1,3 +1,4 @@
+import { describe, it, expect } from '@jest/globals';
 import { CellFactory } from 'src/ui/table/row/orgcheck-ui-table-cellfactory';
 import { TableColumn } from 'src/ui/table/column/orgcheck-ui-table-column';
 import { ColumnType } from 'src/ui/table/column/orgcheck-ui-table-columntype';

@@ -21,7 +21,7 @@ export class DatasetObjects implements Dataset {
      */
     async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Map<string, SfdcObject>> {
 
-        const isFull: boolean = OrgCheckGlobalParameter.getObjectsMode(parameters) === 'full';
+        const isFull: boolean = OrgCheckGlobalParameter.getObjectsMode(parameters) === OrgCheckGlobalParameter.OBJECTS_MODE_FULL
 
         // Init the factory and records
         const objectDataFactory = dataFactory.getInstance(DataAliases.SfdcObject);

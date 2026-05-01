@@ -108,6 +108,6 @@ class Processor {
     }
 }
 
-export const SmallProcessor = new Processor(3);
-export const MediumProcessor = new Processor(5);
+export const SmallProcessor = new Processor(5);
+export const MediumProcessor = new Processor(8);
 export const LargeProcessor = new Processor(10);

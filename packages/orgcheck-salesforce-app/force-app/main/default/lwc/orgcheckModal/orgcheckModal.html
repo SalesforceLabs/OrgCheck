@@ -9,9 +9,31 @@
                     <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate">{headerTitle}</h1>
                 </div>
                 <div class="slds-modal__content modal-content">
-                    <lightning-formatted-rich-text value={message}></lightning-formatted-rich-text>
-                    <template lwc:if={stack}>
-                        <pre>{stack}</pre>
+                    <template lwc:if={message}>
+                        <lightning-formatted-rich-text value={message}></lightning-formatted-rich-text>
+                    </template>
+                    <template lwc:if={errorChains}>
+                        <p>👉 Please review our <a href="http://sfdc.co/OrgCheck-FAQ" target="_blank" rel="external noopener noreferrer">Org Check FAQ</a>
+                            and try to resolve this issue in your Org based on our community's feedback.</p>
+                        <p>👉 If the FAQ is not helping, consider creating an issue on <a href="http://sfdc.co/OrgCheck-Backlog" target="_blank" rel="external noopener noreferrer">Org Check Issues tracker</a> 
+                            along with the context and the following information.</p>
+                        <ul class="slds-list_dotted">
+                            <template for:each={errorChains} for:item="errorChain">
+                                <li key={errorChain.index}>
+                                    <b> Error #{errorChain.index}: {errorChain.name} </b>
+                                    <ul class="slds-list_dotted">
+                                        <template for:each={errorChain.chain} for:item="error">
+                                            <li key={error.message}>
+                                                <b>{error.message}</b>
+                                                <pre class="tty">
+                                                    {error.body}
+                                                </pre>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </li>
+                            </template>
+                        </ul>
                     </template>
                 </div>
             </div>

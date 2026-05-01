@@ -54,15 +54,17 @@ export interface ServedRecipe<Mixture, Plate> extends Recipe<Mixture> {
     /**
      * @description Process the mixed data into a table format
      * @param {Mixture} mixture - Mixed data to be served to a table
+     * @param {SimpleLoggerIntf} [simpleLogger] - Simple logger for this task (optional)
      * @returns {Promise<Plate>} The processed view
      * @async
      * @public
      */
-    serveToTable(mixture: Mixture): Promise<Plate>;
+    serveToTable(mixture: Mixture, simpleLogger?: SimpleLoggerIntf): Promise<Plate>;
 
     /**
      * @description We put your plate in a doggy bag
      * @param {Plate} plate - Plate which was on the table
+     * @param {SimpleLoggerIntf} [simpleLogger] - Simple logger for this task (optional)
      * @returns {Promise<ExportedTable | ExportedTable[]>} Meal in a doggy bag, ready to take back home!
      * @async
      * @public

@@ -24,16 +24,9 @@ export class OrgCheckSfPluginLoggerSetup implements orgcheck.LoggerSetup {
     this.spinner.status = msg;
   }
 
-  public messageSilentlyLogged(section: string, message?: string): void {
-    // Silent/debug messages are intentionally ignored here to avoid
-    // expensive terminal and spinner updates in hot paths.
-    void section;
-    void message;
-  }
-
-  public endedWithError(section: string, error?: Error | string): void {
-    this.logger.warn(`[${section}] ${JSON.stringify(error ?? {})}`);
-    this.failures.push(error ?? 'Empty error');
+  public endedWithErrors(section: string, errors?: Error []): void {
+    this.logger.warn(`[${section}] ${errors}`);
+    if (errors) this.failures.push(... errors);
   }
 
   public endedSuccessfully(section: string, message?: string): void {

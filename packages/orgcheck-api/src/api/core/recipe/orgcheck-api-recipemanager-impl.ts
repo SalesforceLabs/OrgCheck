@@ -2,7 +2,8 @@ import { DataWithScore } from 'src/api/core/data/orgcheck-api-data';
 import { DataMatrixIntf } from 'src/api/core/data/orgcheck-api-data-matrix';
 import { DatasetManagerIntf } from 'src/api/core/dataset/orgcheck-api-datasetmanager';
 import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
-import { LoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
+import { LoggerIntf, SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
+import { LoggerFactoryIntf } from 'src/api/core/logger/orgcheck-api-loggerfactory';
 import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { RecipeAliases } from 'src/api/core/recipe/orgcheck-api-recipes-aliases';
 import { RecipeApexClasses, RecipeApexTests, RecipeApexUncompiled } from 'src/api/recipe/orgcheck-api-recipe-apexclasses';
@@ -66,13 +67,6 @@ import { SecretSauce } from '../orgcheck-api-secretsauce';
 export class RecipeManager implements RecipeManagerIntf {
 
     /**
-     * @description Private logger to use
-     * @type {LoggerIntf}
-     * @private
-     */
-    private _logger: LoggerIntf;
-
-    /**
      * @description Map of recipes given their alias
      * @type {Map<RecipeAliases, Recipe<any> | ServedRecipe<any, any>>}
      * @private
@@ -85,23 +79,14 @@ export class RecipeManager implements RecipeManagerIntf {
      * @private
      */
     private _recipeCollections: Map<RecipeAliases, RecipeCollection>;
-
-    /**
-     * @description Recipes need a dataset manager to work
-     * @type {DatasetManagerIntf}
-     * @private
-     */
-    private _datasetManager: DatasetManagerIntf;
             
     /**
      * @description Recipe Manager constructor
-     * @param {DatasetManagerIntf} datasetManager - Dataset manager to inject
-     * @param {LoggerIntf} logger - Logger to inject
+     * @param {DatasetManagerIntf} _datasetManager - Dataset manager
+     * @param {LoggerFactoryIntf} _loggerFactory - Logger factory 
      */
-    constructor(datasetManager: DatasetManagerIntf, logger: LoggerIntf) {
+    constructor(private readonly _datasetManager: DatasetManagerIntf, private readonly _loggerFactory: LoggerFactoryIntf) {
 
-        this._datasetManager = datasetManager;
-        this._logger = logger;
         this._recipes = new Map<RecipeAliases, Recipe<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean>>>();
         this._recipeCollections = new Map<RecipeAliases, RecipeCollection>();
 
@@ -169,19 +154,36 @@ export class RecipeManager implements RecipeManagerIntf {
      *   - Step 3. Combine/mix all the data together
      *   - Step 4. Return the mixture
      * @param {RecipeAliases} alias -String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
-     * @param {Map<string, any>} [parameters] - List of values to pass to the recipe
+     * @param {Map<string, any>} parameters - List of values to pass to the recipe
+     * @param {SimpleLoggerIntf} [simpleLogger] - Simple logger for this task (optional)
      * @returns {Promise<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]>} Returns the mixture
      * @throws {RecipeManagerError}
      * @async
      * @public
      */
-    public async prepare(alias: RecipeAliases, parameters: Map<string, any>): Promise<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]> {
-        if (this._recipes.has(alias)) {
-            return await this._prepareRecipe(alias, parameters);
-        } else if (this._recipeCollections.has(alias)) {
-            return await this._prepareRecipeCollection(alias, parameters);
+    public async prepare(alias: RecipeAliases, parameters: Map<string, any>, simpleLogger?: SimpleLoggerIntf): Promise<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]> {
+        let logger: LoggerIntf | undefined;
+        let slogger: SimpleLoggerIntf;
+        if (simpleLogger === undefined) {
+            logger = this._loggerFactory?.create(`Prepare recipe "${alias}"`);
+            slogger = logger?.toSimpleLogger();
         } else {
-            throw new RecipeManagerError(alias, `The given alias (${alias}) does not correspond to a registered recipe.`);
+            logger = undefined;
+            slogger = simpleLogger;
+        }
+        try {
+            if (this._recipes.has(alias)) {
+                return await this._prepareRecipe(alias, parameters, slogger);
+            } else if (this._recipeCollections.has(alias)) {
+                return await this._prepareRecipeCollection(alias, parameters, slogger);
+            } else {
+                throw new RecipeManagerError(alias, `The given alias (${alias}) does not correspond to a registered recipe.`);
+            }
+        } catch (error) {
+            logger?.hadError(/*error*/);
+            throw error;
+        } finally {
+            logger?.end();
         }
     }
 
@@ -189,21 +191,36 @@ export class RecipeManager implements RecipeManagerIntf {
      * @description Serve the mixture from a designated recipe to a table
      * @param {RecipeAliases} alias -String representation of a recipe
      * @param {DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]} [mixture] - The mixture
+     * @param {SimpleLoggerIntf} [simpleLogger] - Simple logger for this task (optional)
      * @returns {Promise<Table | SfdcObjectAsTable | GlobalViewAsTable | Table[]>} Returns the mixture as a table
      * @throws {RecipeManagerError}
      * @async
      * @public
      */
-    public async serveToTable(alias: RecipeAliases, mixture: DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]): Promise<Table | SfdcObjectAsTable | GlobalViewAsTable | Table[]> {
+    public async serveToTable(alias: RecipeAliases, mixture: DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[], simpleLogger?: SimpleLoggerIntf): Promise<Table | SfdcObjectAsTable | GlobalViewAsTable | Table[]> {
+        let logger: LoggerIntf | undefined;
+        let slogger: SimpleLoggerIntf;
+        if (simpleLogger === undefined) {
+            logger = this._loggerFactory?.create(`Serve to table recipe "${alias}"`);
+            slogger = logger?.toSimpleLogger();
+        } else {
+            logger = undefined;
+            slogger = simpleLogger;
+        }
         const recipe = this._recipes.get(alias) ?? this._recipeCollections.get(alias);
         if (recipe) {
             try {
                 // @ts-ignore
-                return await recipe.serveToTable(mixture);
+                return await recipe.serveToTable(mixture, slogger);
             } catch (error) {
+                logger?.hadError(/*error*/);
                 throw new RecipeManagerError(alias, `The given alias (${alias}) does not correspond to a registered recipe that can be served to table. ${error?.message} ${error?.stack}`, error);
+            } finally {
+                logger?.end();
             }
         } else {
+            logger?.hadError(/*error*/);
+            logger?.end();
             throw new RecipeManagerError(alias, `The given alias (${alias}) does not correspond to a registered recipe.`);
         }
     }
@@ -212,21 +229,36 @@ export class RecipeManager implements RecipeManagerIntf {
      * @description Serve the mixture from a designated recipe to go
      * @param {string} alias - String representation of a recipe
      * @param {Table | SfdcObjectAsTable | Table[]} plate - The plate to serve to go
+     * @param {SimpleLoggerIntf} [simpleLogger] - Simple logger for this task (optional)
      * @returns {Promise<ExportedTable | ExportedTable[]>} Returns the mixture as to go
      * @throws {RecipeManagerError}
      * @async
      * @public
      */
-    public async serveToGo(alias: RecipeAliases, plate: Table | SfdcObjectAsTable | Table[]): Promise<ExportedTable | ExportedTable[]> {
+    public async serveToGo(alias: RecipeAliases, plate: Table | SfdcObjectAsTable | Table[], simpleLogger?: SimpleLoggerIntf): Promise<ExportedTable | ExportedTable[]> {
+        let logger: LoggerIntf | undefined;
+        let slogger: SimpleLoggerIntf;
+        if (simpleLogger === undefined) {
+            logger = this._loggerFactory?.create(`Serve to go recipe "${alias}"`);
+            slogger = logger?.toSimpleLogger();
+        } else {
+            logger = undefined;
+            slogger = simpleLogger;
+        }
         let recipe = this._recipes.get(alias) ?? this._recipeCollections.get(alias);
         if (recipe) {
             try {
                 // @ts-ignore
                 return await recipe.serveToGo(plate);
             } catch (error) {
+                logger?.hadError(/*error*/);
                 throw new RecipeManagerError(alias, `The given alias (${alias}) does not correspond to a registered recipe that can be served to go. ${error?.message} ${error?.stack}`, error);
+            } finally {
+                logger?.end();
             }
         } else {
+            logger?.hadError(/*error*/);
+            logger?.end();
             throw new RecipeManagerError(alias, `The given alias (${alias}) does not correspond to a registered recipe.`);
         }
     }
@@ -239,12 +271,20 @@ export class RecipeManager implements RecipeManagerIntf {
      * @public
      */
     public clean(alias: RecipeAliases, parameters: Map<string, any>) {
-        if (this._recipes.has(alias)) {
-            this._cleanRecipe(alias, parameters);
-        } else if (this._recipeCollections.has(alias)) {
-            this._cleanRecipeCollection(alias, parameters);
-        } else {
-            throw new RecipeManagerError(alias, `The given alias (${alias}) does not correspond to a registered recipe.`);
+        const logger = this._loggerFactory?.create(`Clean recipe "${alias}"`);
+        try {
+            if (this._recipes.has(alias)) {
+                this._cleanRecipe(alias, parameters, logger?.toSimpleLogger());
+            } else if (this._recipeCollections.has(alias)) {
+                this._cleanRecipeCollection(alias, parameters, logger?.toSimpleLogger());
+            } else {
+                throw new RecipeManagerError(alias, `The given alias (${alias}) does not correspond to a registered recipe.`);
+            }
+        } catch (error) {
+            logger?.hadError(/*error*/);
+            throw error;
+        } finally {
+            logger?.end();
         }
     }
 
@@ -281,14 +321,14 @@ export class RecipeManager implements RecipeManagerIntf {
      *   - Step 2. Run the given datasets and gather the global data retrieved
      *   - Step 3. Transform the retrieved data and return the final result as a Map
      * @param {RecipeAliases} alias -String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
-     * @param {Map<string, any>} [parameters] List of values to pass to the recipe
+     * @param {Map<string, any>} parameters List of values to pass to the recipe
+     * @param {SimpleLoggerIntf} logger Simple logger for this task
      * @returns {Promise<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean>>} Returns the value from the recipe or undefined if something bad happens
      * @throws {RecipeManagerError}
      * @async
      */
-    private async _prepareRecipe(alias: RecipeAliases, parameters: Map<string, any>): Promise<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean>> {
+    private async _prepareRecipe(alias: RecipeAliases, parameters: Map<string, any>, logger: SimpleLoggerIntf): Promise<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean>> {
 
-        const section = `Run recipe "${alias}"`;
         const recipe = this._recipes.get(alias);
         if (recipe === undefined) {
             throw new RecipeManagerError(alias, `The recipe with alias: ${alias} was not found.`)
@@ -297,14 +337,14 @@ export class RecipeManager implements RecipeManagerIntf {
         // -------------------
         // STEP 1. Extract
         // -------------------
-        this._logger.log(section, 'How many datasets this recipe has?');
+        logger?.log('How many datasets this recipe has?');
         let datasets: Array<string | DatasetRunInformation>;
         try {
-            datasets = recipe.ingredients(this._logger.toSimpleLogger(section), parameters);
+            datasets = recipe.ingredients(logger, parameters);
         } catch (error) {
-            throw new RecipeManagerError(alias, `An error occurred while extracting the datasets (message: ${error?.message}, stack: ${error?.stack}).`, error);
+            throw new RecipeManagerError(alias, `An error occurred while extracting the datasets`, error);
         }
-        this._logger.log(section, `This recipe has ${datasets?.length} ${datasets?.length>1?'datasets':'dataset'}: ${datasets.map((d) => d instanceof DatasetRunInformation ? d.alias : d ).join(', ')}...`);
+        logger?.log(`This recipe has ${datasets?.length} ${datasets?.length>1?'datasets':'dataset'}: ${datasets.map((d) => d instanceof DatasetRunInformation ? d.alias : d ).join(', ')}...`);
 
         // -------------------
         // STEP 2. Run
@@ -313,21 +353,21 @@ export class RecipeManager implements RecipeManagerIntf {
         try {
             data = await this._datasetManager.run(datasets);
         } catch(error) {
-            throw new RecipeManagerError(alias, `An error occurred while running the dataset (message: ${error?.message}, stack: ${error?.stack}).`, error);
+            throw new RecipeManagerError(alias, `An error occurred while running the dataset`, error);
         }
-        this._logger.log(section, 'Dataset information successfully retrieved!');
+        logger?.log('Dataset information successfully retrieved!');
 
         // -------------------
         // STEP 3. Transform
         // -------------------
-        this._logger.log(section, 'This recipe will now transform all this information...');
+        logger?.log('This recipe will now transform all this information...');
         let finalData: DataWithScore[] | DataMatrixIntf | DataWithScore | Map<string, any>;
         try {
-            finalData = await recipe.mix(data, this._logger.toSimpleLogger(section), parameters);
+            finalData = await recipe.mix(data, logger, parameters);
         } catch(error) {
-            throw new RecipeManagerError(alias, `An error occurred while transforming the data (message: ${error?.message}, stack: ${error?.stack}).`, error);
+            throw new RecipeManagerError(alias, `An error occurred while transforming the data`, error);
         }
-        this._logger.finalLog(section, 'Transformation successfully completed!');
+        logger?.log('Transformation successfully completed!');
         
         // Return value
         return finalData;
@@ -337,12 +377,12 @@ export class RecipeManager implements RecipeManagerIntf {
      * @param {RecipeAliases} alias -String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map<string, any>} [parameters] - List of values to pass to the recipe
      * @returns {Promise<DataCollectionStatisticsIntf[]>} Returns the value from the recipe collection or undefined if something bad happens.
+     * @param {SimpleLoggerIntf} logger Simple logger for this task
      * @throws {RecipeManagerError}
      * @async
      */
-    private async _prepareRecipeCollection(alias: RecipeAliases, parameters: Map<string, any>): Promise<DataCollectionStatisticsIntf[]> {
+    private async _prepareRecipeCollection(alias: RecipeAliases, parameters: Map<string, any>, logger: SimpleLoggerIntf): Promise<DataCollectionStatisticsIntf[]> {
 
-        const section = `Run recipe collection "${alias}"`;
         const recipeCollection = this._recipeCollections.get(alias);
         if (recipeCollection === undefined) {
             throw new RecipeManagerError(alias, `The recipe collection with alias: ${alias} was not found.`)
@@ -351,14 +391,14 @@ export class RecipeManager implements RecipeManagerIntf {
         // -------------------
         // STEP 1. Extract recipes in the collection
         // -------------------
-        this._logger.log(section, 'How many recipes this recipe collection has?');
+        logger?.log('How many recipes this recipe collection has?');
         let recipes: RecipeAliases[];
         try {
-            recipes = recipeCollection.ingredients(this._logger.toSimpleLogger(section), parameters);
+            recipes = recipeCollection.ingredients(logger, parameters);
         } catch(error) {
-            throw new RecipeManagerError(alias, `An error occurred while extracting the recipes (message: ${error?.message}, stack: ${error?.stack}).`)
+            throw new RecipeManagerError(alias, `An error occurred while extracting the recipes`, error)
         }
-        this._logger.log(section, `This recipe collection has ${recipes?.length} ${recipes?.length>1?'recipes':'recipe'}: ${recipes.join(', ')}...`);
+        logger?.log(`This recipe collection has ${recipes?.length} ${recipes?.length>1?'recipes':'recipe'}: ${recipes.join(', ')}...`);
 
         // -------------------
         // STEP 2. Run the recipes in the collection
@@ -366,10 +406,9 @@ export class RecipeManager implements RecipeManagerIntf {
         const data: Map<RecipeAliases, DataWithScore[]> = new Map();
         const recipesInError: Map<RecipeAliases, Error> = new Map();
         try {
-            this._logger.optimisticByPass = true;
             await MediumProcessor.forEach(recipes, async (recipe: RecipeAliases) => {
                 try {
-                    const recipeData = await this._prepareRecipe(recipe, parameters);
+                    const recipeData = await this._prepareRecipe(recipe, parameters, logger);
                     if (recipeData && Array.isArray(recipeData)) {
                         data.set(recipe, recipeData);
                     } else if (recipeData) {
@@ -383,18 +422,16 @@ export class RecipeManager implements RecipeManagerIntf {
                 }
             });
         } catch (error) {
-            throw new RecipeManagerError(alias, `An error occurred while running the recipes (message: ${error?.message}, stack: ${error?.stack}).`);
-        } finally {
-            this._logger.optimisticByPass = false;
+            throw new RecipeManagerError(alias, `An error occurred while running the recipes`, error);
         }
-        this._logger.log(section, 'All dataset information successfully retrieved from recipes!');
+        logger?.log('All dataset information successfully retrieved from recipes!');
 
         // -------------------
         // STEP 3. Transform the recipe collection finally
         // -------------------
-        this._logger.log(section, 'This recipe collection will now transform all this information...');
+        logger?.log('This recipe collection will now transform all this information...');
         // Note: if listRules is empty it means we want ALL the rules
-        const listRules = recipeCollection.filterByScoreRules(this._logger.toSimpleLogger(section), parameters);
+        const listRules = recipeCollection.filterByScoreRules(logger, parameters);
         const listRuleIds = Array.from(listRules.map((rule) => rule.id));
         const isRuleFilterOn = listRules?.length > 0 || false;
         const finalData: DataCollectionStatisticsIntf[] = [];
@@ -479,9 +516,9 @@ export class RecipeManager implements RecipeManagerIntf {
             })
 
         } catch(error) {
-            throw new RecipeManagerError(alias, `An error occurred while transforming the data (message: ${error?.message}, stack: ${error?.stack}).`, error);
+            throw new RecipeManagerError(alias, `An error occurred while transforming the data`, error);
         }
-        this._logger.finalLog(section, 'Transformation successfully completed!');
+        logger?.log('Transformation successfully completed!');
 
         // Return value
         return finalData;
@@ -493,12 +530,12 @@ export class RecipeManager implements RecipeManagerIntf {
      *    - Step 2. Clean the given datasets
      * @param {RecipeAliases} alias -String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map<string, any>} [parameters] List of values to pass to the recipe
+     * @param {SimpleLoggerIntf} logger Simple logger for this task
      * @throws {RecipeManagerError}
      * @public
      */
-    private _cleanRecipe(alias: RecipeAliases, parameters: Map<string, any>) {
+    private _cleanRecipe(alias: RecipeAliases, parameters: Map<string, any>, logger: SimpleLoggerIntf) {
 
-        const section = `Clean recipe "${alias}"`;
         const recipe = this._recipes.get(alias);
         if (recipe === undefined) {
             throw new RecipeManagerError(alias, `The recipe with alias: ${alias} was not found.`);
@@ -507,36 +544,36 @@ export class RecipeManager implements RecipeManagerIntf {
         // -------------------
         // STEP 1. Extract
         // -------------------
-        this._logger.log(section, 'How many datasets this recipe has?');
+        logger?.log('How many datasets this recipe has?');
         let datasets: Array<string | DatasetRunInformation>;
         try {
-            datasets = recipe.ingredients(this._logger.toSimpleLogger(section), parameters);
+            datasets = recipe.ingredients(logger, parameters);
         } catch(error) {
-            throw new RecipeManagerError(alias, `An error occurred while extracting the datasets (message: ${error?.message}, stack: ${error?.stack}).`, error);
+            throw new RecipeManagerError(alias, `An error occurred while extracting the datasets`, error);
         }
-        this._logger.log(section, `This recipe has ${datasets?.length} ${datasets?.length>1?'datasets':'dataset'}: ${datasets.map((d) => d instanceof DatasetRunInformation ? d.alias : d ).join(', ')}...`);
+        logger?.log(`This recipe has ${datasets?.length} ${datasets?.length>1?'datasets':'dataset'}: ${datasets.map((d) => d instanceof DatasetRunInformation ? d.alias : d ).join(', ')}...`);
 
         // -------------------
         // STEP 2. Clean
         // -------------------
-        this._logger.log(section, 'Clean all datasets...');
+        logger?.log('Clean all datasets...');
         try {
             this._datasetManager.clean(datasets);
         } catch(error) {
-            throw new RecipeManagerError(alias, `An error occurred while cleaning the datasets (message: ${error?.message}, stack: ${error?.stack}).`, error);
+            throw new RecipeManagerError(alias, `An error occurred while cleaning the datasets`, error);
         }
-        this._logger.finalLog(section, 'Datasets successfully cleaned!');
+        logger?.log('Datasets successfully cleaned!');
     }
 
     /**
      * @param {RecipeAliases} alias -String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map<string, any>} [parameters] List of values to pass to the recipe
+     * @param {SimpleLoggerIntf} logger Simple logger for this task
      * @throws {RecipeManagerError}
      * @public
      */
-    private _cleanRecipeCollection(alias: RecipeAliases, parameters: Map<string, any>) {
+    private _cleanRecipeCollection(alias: RecipeAliases, parameters: Map<string, any>, logger: SimpleLoggerIntf) {
 
-        const section = `Clean recipe collection "${alias}"`;
         const recipeCollection = this._recipeCollections.get(alias);
         if (recipeCollection === undefined) {
             throw new RecipeManagerError(alias, `The recipe collection with alias: ${alias} was not found.`);
@@ -545,25 +582,25 @@ export class RecipeManager implements RecipeManagerIntf {
         // -------------------
         // STEP 1. Extract
         // -------------------
-        this._logger.log(section, 'How many recipes this recipe collection has?');
+        logger?.log('How many recipes this recipe collection has?');
         let recipes: RecipeAliases[];
         try {
-            recipes = recipeCollection.ingredients(this._logger.toSimpleLogger(section), parameters);
+            recipes = recipeCollection.ingredients(logger, parameters);
         } catch(error) {
-            throw new RecipeManagerError(alias, `An error occurred while extracting the recipes (message: ${error?.message}, stack: ${error?.stack}).`, error);
+            throw new RecipeManagerError(alias, `An error occurred while extracting the recipes`, error);
         }
-        this._logger.log(section, `This recipe collection has ${recipes?.length} ${recipes?.length>1?'recipes':'recipe'}: ${recipes.join(', ')}...`);
+        logger?.log(`This recipe collection has ${recipes?.length} ${recipes?.length>1?'recipes':'recipe'}: ${recipes.join(', ')}...`);
 
         // -------------------
         // STEP 2. Clean
         // -------------------
-        this._logger.log(section, 'Clean all datasets of these recipes...');
+        logger?.log('Clean all datasets of these recipes...');
         try {
-            recipes.forEach((recipe) => { this._cleanRecipe(recipe, parameters); });
+            recipes.forEach((recipe) => { this._cleanRecipe(recipe, parameters, logger); });
         } catch(error) {
-            throw new RecipeManagerError(alias, `An error occurred while cleaning the datasets (message: ${error?.message}, stack: ${error?.stack}).`, error);
+            throw new RecipeManagerError(alias, `An error occurred while cleaning the datasets`, error);
         }
-        this._logger.finalLog(section, 'Datasets for these recipes successfully cleaned!');
+        logger?.log('Datasets for these recipes successfully cleaned!');
     }
 
     /**

@@ -1,3 +1,4 @@
+import { describe, it, expect } from '@jest/globals';
 import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 
 describe('tests.api.unit.Processor', () => {

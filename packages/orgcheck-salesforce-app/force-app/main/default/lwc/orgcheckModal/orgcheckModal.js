@@ -1,16 +1,23 @@
 // @ts-check
-import { LightningElement, api } from 'lwc';
+import { LightningElement, api, track } from 'lwc';
 
 export default class OrgcheckModal extends LightningElement {
+
+    constructor() {
+        super();
+        this.isShown = false;
+        this.errorChains = [];
+        this.isClosable = false;
+        this.message = '';
+        this.headerTitle = '';
+        this._boundHandleWindowKeyDown = this._handleWindowKeyDown.bind(this);
+    }
 
     /**
      * @description Connected callback function
      * @public
      */
     connectedCallback() {
-        this.isShown = false;
-        this.isClosable = false;
-        this._boundHandleWindowKeyDown = this._handleWindowKeyDown.bind(this);
         window.addEventListener('keydown', this._boundHandleWindowKeyDown);
     }
 
@@ -25,7 +32,7 @@ export default class OrgcheckModal extends LightningElement {
     /**
      * @description Opens the modal
      * @param {string} title - Title of the modal
-     * @param {Error | string | object} content - Content of the modal
+     * @param {string} content - Content of the modal
      * @param {boolean} isClosable - Flag to allow the user to close the modal
      * @public
      */
@@ -34,20 +41,37 @@ export default class OrgcheckModal extends LightningElement {
             this.isShown = true;
             this.headerTitle = title;
             this.isClosable = isClosable;
-            if (content) {
-                if (content instanceof Error) {
-                    this.message = content.message;
-                    this.stack = content.stack;
-                } else if (typeof content === 'string') {
-                    this.message = content;
-                    this.stack = undefined;
-                } else {
-                    this.message = JSON.stringify(content);
-                    this.stack = undefined;
-                } 
-            } else {
-                this.message = 'Nothing to say...';
+            this.message = content ?? 'Nothing to say...';
+        }
+    }
+
+    /**
+     * @description Show the error in a modal (that can be closed)
+     * @param {string} title - Title of the modal
+     * @param {Error | Error[]} errors - The errors to show in the error modal
+     * @public
+     */ 
+    @api showErrors(title, errors) {
+        if (Array.isArray(errors) === false) {
+            errors = [ errors ];
+        }
+        /** @type {{ index: number, name: string, chain: {message: string, body: string}[] }[]} */
+        const errorChains = errors.map((error, index) => {
+            const chain = [];
+            for (let e = error; e !== undefined; e = e.cause) {
+                chain.push({ message: e.message, body: JSON.stringify(e, (key, value) => key != 'cause' ? value : undefined, 2) });
             }
+            return { index, name: title, chain };
+        });
+        if (this.isShown === false) {
+            this.errorChains = errorChains;
+            this.isShown = true;
+            this.isClosable = true;
+            this.headerTitle = title;
+        } else {
+            this.errorChains.push(...errorChains);
+            // reset the index accordingly
+            this.errorChains.forEach((errorChain, index) => errorChain.index = index);
         }
     }
 
@@ -99,11 +123,11 @@ export default class OrgcheckModal extends LightningElement {
     message;
 
     /**
-     * @description In some case we want to show an error stack below the message
-     * @type {string}
+     * @description In some case we want to show errors information 
+     * @type {{ index: number, chain: {message: string, body: string}[] }[]}
      * @public
      */
-    stack;
+    @track errorChains;
 
     /**
      * @description Bound keydown handler reference

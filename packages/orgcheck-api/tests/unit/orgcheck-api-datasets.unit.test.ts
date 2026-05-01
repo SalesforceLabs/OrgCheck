@@ -1,3 +1,4 @@
+import { describe, it, expect } from '@jest/globals';
 import { SimpleLoggerMock_DoingNothing } from 'tests/utils/orgcheck-api-logger-mock.utility';
 import { DataFactoryMock_AllIsOK } from 'tests/utils/orgcheck-api-datafactory-mock.utility';
 import { SalesforceManagerMock_SoqlQuery } from 'tests/utils/orgcheck-api-salesforce-mock.utility';
@@ -38,6 +39,7 @@ import { DatasetCollaborationGroups } from 'src/api/dataset/orgcheck-api-dataset
 import { DatasetHomePageComponents } from 'src/api/dataset/orgcheck-api-dataset-homepagecomponents';
 import { DatasetCustomTabs } from 'src/api/dataset/orgcheck-api-dataset-customtabs';
 import { DatasetEmailTemplates } from 'src/api/dataset/orgcheck-api-dataset-emailtemplates';
+import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
 describe('tests.api.unit.Datasets', () => {
 
@@ -329,7 +331,12 @@ describe('tests.api.unit.Datasets', () => {
         { DurableId: 'b', NamespacePrefix: 'test', DeveloperName: 'b', QualifiedApiName: 'test__b__c', ExternalSharingModel: 'private', InternalSharingModel: 'private' },
         { DurableId: 'c', NamespacePrefix: null, DeveloperName: 'c', QualifiedApiName: 'c__c', ExternalSharingModel: 'private', InternalSharingModel: 'private' }
       ]);
-      const results = await dataset.run(sfdcManager, new DataFactoryMock_AllIsOK(), new SimpleLoggerMock_DoingNothing());
+      const results = await dataset.run(
+        sfdcManager, 
+        new DataFactoryMock_AllIsOK(), 
+        new SimpleLoggerMock_DoingNothing(), 
+        new Map([[ OrgCheckGlobalParameter.OBJECTS_MODE, OrgCheckGlobalParameter.OBJECTS_MODE_FULL]])
+      );
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(0);
@@ -425,7 +432,12 @@ describe('tests.api.unit.Datasets', () => {
       }
       sfdcManager.setDescribeGolbal(describeGlobal);
       sfdcManager.addSoqlQueryResponse('FROM EntityDefinition', entityDefinitions);
-      const results = await dataset.run(sfdcManager, new DataFactoryMock_AllIsOK(), new SimpleLoggerMock_DoingNothing());
+      const results = await dataset.run(
+        sfdcManager, 
+        new DataFactoryMock_AllIsOK(), 
+        new SimpleLoggerMock_DoingNothing(),
+        new Map([[ OrgCheckGlobalParameter.OBJECTS_MODE, OrgCheckGlobalParameter.OBJECTS_MODE_FULL]])
+      );
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(12);

@@ -50,7 +50,7 @@ import { DatasetVisualForcePages } from 'src/api/dataset/orgcheck-api-dataset-vi
 import { DatasetSharingRules } from 'src/api/dataset/orgcheck-api-dataset-sharingrules';
 import { DatasetWeblinks } from 'src/api/dataset/orgcheck-api-dataset-weblinks';
 import { DatasetWorkflows } from 'src/api/dataset/orgcheck-api-dataset-workflows';
-import { LoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
+import { LoggerFactoryIntf } from 'src/api/core/logger/orgcheck-api-loggerfactory';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { LargeProcessor } from 'src/api/core/orgcheck-api-processor';
 
@@ -68,10 +68,10 @@ export class DatasetManager implements DatasetManagerIntf {
 
     /**
      * @description Datasets promise cache
-     * @type {Map<string, Promise<any[]>>}
+     * @type {Map<string, () => Promise<any[]>>}
      * @private
      */
-    private _datasetPromisesCache: Map<string, Promise<any[]>>;
+    private _datasetPromisesCache: Map<string, () => Promise<any[]>>;
 
     /**
      * @description Data factory
@@ -84,10 +84,10 @@ export class DatasetManager implements DatasetManagerIntf {
      * @description Dataset Manager constructor
      * @param {SalesforceManagerIntf} sfdcManager - The instance of the salesforce manager
      * @param {DataCacheManagerIntf} cacheManager - The instance of the cache manager
-     * @param {LoggerIntf} logger - The instance of the logger
+     * @param {LoggerFactoryIntf} loggerFactory - The instance of the logger factory
      * @public
      */
-    constructor(private readonly sfdcManager: SalesforceManagerIntf, private readonly cacheManager: DataCacheManagerIntf, private readonly logger: LoggerIntf) {
+    constructor(private readonly sfdcManager: SalesforceManagerIntf, private readonly cacheManager: DataCacheManagerIntf, private readonly loggerFactory: LoggerFactoryIntf) {
          
         this._datasets = new Map();
         this._datasetPromisesCache = new Map();
@@ -155,45 +155,49 @@ export class DatasetManager implements DatasetManagerIntf {
         if (datasets instanceof Array === false) {
             throw new DatasetManagerError('', `The given datasets is not an instance of Array (typeof= ${typeof datasets}).`);
         }
-        const data: any[] = await LargeProcessor.runAll<any>(datasets.map((dataset) => async () => {
+        const that = this;
+        const data: any[] = await LargeProcessor.runAll<any>(datasets.map((dataset) => async (): Promise<any[]> => {
             const alias      = (typeof dataset === 'string' ? dataset : dataset.alias);
             const cacheKey   = (typeof dataset === 'string' ? dataset : dataset.cacheKey);
             const parameters = (typeof dataset === 'string' ? undefined : dataset.parameters);
-            const section = `Run dataset "${alias}"`;
+            const logger = that.loggerFactory?.create(`Run dataset "${alias}"`);
             if (this._datasetPromisesCache.has(cacheKey) === false) {
-                this._datasetPromisesCache.set(cacheKey, Promise.resolve().then(async () => {
+                this._datasetPromisesCache.set(cacheKey, async (): Promise<any[]> => {
                     try {
-                        this.logger.log(section, `Checking the data cache for key=${cacheKey}...`);
+                        logger.log(`Checking the data cache for key=${cacheKey}...`);
                         // Get data cache if any
                         const dataFromCache = this.cacheManager.get(cacheKey);
                         if (dataFromCache) {
                             // Set the results from data cache
-                            this.logger.finalLog(section, 'There was data in data cache, we use it!');
+                            logger.log('There was data in data cache, we use it!');
                             // Return the key/alias and value from the data cache
                             return [ alias, dataFromCache ]; // when data comes from cache instanceof won't work! (keep that in mind)
                         } else {
-                            this.logger.log(section, `There was no data in data cache. Let's retrieve data.`);
+                            logger.log(`There was no data in data cache. Let's retrieve data.`);
                             // Calling the retriever
                             const data = await this._datasets.get(alias)?.run(
                                 this.sfdcManager, // sfdc manager
                                 this._dataFactory, // data factory
-                                this.logger?.toSimpleLogger(section), // local logger
+                                logger?.toSimpleLogger(), // local logger
                                 parameters // Send any parameters if needed
                             );
                             // Cache the data (if possible and not too big)
                             this.cacheManager.set(cacheKey, data); 
                             // Some logs
-                            this.logger.finalLog(section, `Data retrieved and saved in cache with key=${cacheKey}`);
+                            logger.log(`Data retrieved and saved in cache with key=${cacheKey}`);
                             // Return the key/alias and value from the cache
                             return [ alias, data ];
                         }
                     } catch (error) {
-                        this.logger.fatal(section, error);
+                        logger.hadError(error);
                         throw new DatasetManagerError(alias, `There was an error while retrieving the data for this dataset (either cache issue or dataset.run issue).`, error);
+                    } finally {
+                        logger.end();
                     }
-                }));
+                });
             }
-            return await this._datasetPromisesCache.get(cacheKey);
+            const datasetPromise = this._datasetPromisesCache.get(cacheKey);
+            return datasetPromise ? (await datasetPromise()) : [];
         }));
         return new Map(data);
     }

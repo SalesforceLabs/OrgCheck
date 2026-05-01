@@ -1,3 +1,4 @@
+import { describe, it, expect } from '@jest/globals';
 import { ApexTriggersInObjectTableDefinition, ApexTriggersTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-apextriggers';
 import { CustomFieldsTableDefinition, CustomFieldsInObjectTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-customfields';
 import { FlexiPagesTableDefinition, FlexiPagesInObjectTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-flexipages';

@@ -11,6 +11,8 @@ const GROUP_TYPE = 'grouptype';
 const GROUP_TYPE_PG = 'publicgroup';
 const GROUP_TYPE_QUEUE = 'queue';
 const OBJECTS_MODE = 'objectsmode';
+const OBJECTS_MODE_FULL = 'full';
+const OBJECTS_MODE_LITE = 'lite';
 
 export class OrgCheckGlobalParameter {
 
@@ -33,6 +35,20 @@ export class OrgCheckGlobalParameter {
      * @static
      */
     static get OBJECTS_MODE(): string { return OBJECTS_MODE; }
+
+    /**
+     * @description Key to represent the FULL mode of SObjects dataset
+     * @returns {string} The value of the constant
+     * @static
+     */
+    static get OBJECTS_MODE_FULL(): string { return OBJECTS_MODE_FULL; }
+
+    /**
+     * @description Key to represent the LITE mode of SObjects dataset
+     * @returns {string} The value of the constant
+     * @static
+     */
+    static get OBJECTS_MODE_LITE(): string { return OBJECTS_MODE_LITE; }
 
     /**
      * @description Key to represent a namespace of a package
@@ -173,11 +189,11 @@ export class OrgCheckGlobalParameter {
     /**
      * @description Get the SObject dataset mode from the parameters
      * @param {Map<string, string>} parameters - Map of parameters
-     * @returns {string} The mode: 'full' or 'lite' 
+     * @returns {string} The mode (by default it's full)
      * @static
      * @public
      */
     static getObjectsMode(parameters: Map<string, string>): string {
-        return parameters?.get(OBJECTS_MODE) ?? ALL_VALUES;
+        return parameters?.get(OBJECTS_MODE) ?? OBJECTS_MODE_FULL;
     }
 }

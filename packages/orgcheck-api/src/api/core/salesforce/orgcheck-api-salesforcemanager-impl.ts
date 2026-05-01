@@ -489,22 +489,15 @@ export class SalesforceManager implements SalesforceManagerIntf {
     public async soqlQuery(queries: SalesforceQueryRequest[], logger: SimpleLoggerIntf): Promise<Array<Array<any>>> {
         // Now we can start, log some message
         logger?.log(`Preparing ${queries?.length} SOQL ${queries?.length>1?'queries':'query'}...`);
-        const debugEnabled = logger?.isDebugEnabled?.() ?? false;
         let nbRecords = 0, nbQueryMore = 0;
-        const pendingEntities: string[] = [], 
-              doneEntities: string[] = [], 
-              errorEntities: string[] = [];
+        const pendingEntities: Set<string> = new Set(), 
+              doneEntities: Set<string> = new Set(), 
+              errorEntities: Set<string> = new Set();
         const errors: Error[] = [];
         const updateLogInformation = () => {
-            if (debugEnabled) {
-                logger?.debug(
-                    `Processing ${queries?.length} SOQL ${queries?.length>1?'queries':'query'}... `+
-                    `records=${nbRecords}, queryMoreCalls=${nbQueryMore}, `+
-                    `pending=(${pendingEntities?.length}) [${pendingEntities.join(', ')}], `+
-                    `done=(${doneEntities?.length}) [${doneEntities.join(', ')}], `+
-                    `error=(${errorEntities?.length}) [${errorEntities.join(', ')}]`
-                );
-            }
+            logger?.log(`Processing ${queries?.length} SOQLs, Records=${nbRecords}, QueryMoreCalls=${nbQueryMore}, `+
+                `Pending=(${pendingEntities?.size}), Done=(${doneEntities?.size}), Error=(${errorEntities?.size})`
+            );
         }
         const updateLogInformationOnQuery = (nbRec: number) => {
             nbQueryMore++; 
@@ -517,9 +510,9 @@ export class SalesforceManager implements SalesforceManagerIntf {
             const str = query.string.lastIndexOf('FROM ')+5;
             const end = query.string.indexOf(' ', str);
             const entityName = query.string.substring(str, end === -1 ? query.string?.length : end);
-            pendingEntities.push(entityName);
+            pendingEntities.add(entityName);
             // Are we doing a custom Query More?
-            let records;
+            let records: any[] = [];
             try {
                 if (query.queryMoreField) {
                     // yes!! do the custom one based on Ids (for non aggregate queries) -- In case the query does not support queryMore we have an alternative, based on ids
@@ -528,14 +521,12 @@ export class SalesforceManager implements SalesforceManagerIntf {
                     // no!!! use the standard one
                     records = await this._standardSOQLQuery(query.tooling, query.string, query.byPasses, updateLogInformationOnQuery);
                 }
-                doneEntities.push(entityName)
+                doneEntities.add(entityName)
             } catch (error) {
-                errorEntities.push(entityName);
+                errorEntities.add(entityName);
                 errors.push(error);
-                ///////// throw error;
             } finally {
-                const index = pendingEntities.indexOf(entityName);
-                if (index > -1) pendingEntities.splice(index, 1);
+                pendingEntities.delete(entityName);
                 updateLogInformation();
             }
             return records;
@@ -544,9 +535,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
         // if errors has at least one item, it means one of the Promises failed
         if (errors?.length > 0) {
             logger?.log(`We had ${errors.length} errors during soqlQuery.`);
-            if (debugEnabled) {
-                logger?.debug(`soqlQuery errors: ${errors.map((e,i) => (`${i}: ${e?.message}`)).join(', ')}`);
-            }
+            logger?.log(`soqlQuery errors: ${errors.map((e,i) => (`${i}: ${e?.message}`)).join(', ')}`);
             throw errors[0];
         }
         // at this point all promises have been settled (or 'successful' if you)
@@ -613,7 +602,6 @@ export class SalesforceManager implements SalesforceManagerIntf {
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         // Now we can start, log some message
         logger?.log(`Starting to call Tooling API for dependency API call of ${ids?.length ?? 0} item(s)...`);
-        const debugEnabled = logger?.isDebugEnabled?.() ?? false;
         // if no ids then just return empty structure and basta!
         if ((ids?.length ?? 0) === 0) return { records: [], errors: [] };
         // Let's start with ids
@@ -657,7 +645,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
                     // Returning this results
                     return results;
                 } catch (error) {
-                    if (debugEnabled) logger?.debug(`dependenciesQuery batch error: ${JSON.stringify(error ?? {})}`);
+                    logger?.log(`dependenciesQuery batch error: ${JSON.stringify(error ?? {})}`);
                     // Update the stats
                     nbErrors++;
                     // Returning undefined (it will be filtered out afterwards)
@@ -665,12 +653,10 @@ export class SalesforceManager implements SalesforceManagerIntf {
                 } finally {
                     // Update the stats
                     nbPending--;
-                    if (debugEnabled) {
-                        logger?.debug(
-                            `dependenciesQuery progress: total=${bodies?.length}, batchesDone=${batchCount}, `+
-                            `pending=${nbPending}, done=${nbDone}, errors=${nbErrors}`
-                        );
-                    }
+                    logger?.log(
+                        `dependenciesQuery progress: total=${bodies?.length}, batchesDone=${batchCount}, `+
+                        `pending=${nbPending}, done=${nbDone}, errors=${nbErrors}`
+                    );
                 }
             }));
             allResults.push(... results.filter((result) => result !== undefined));
@@ -682,7 +668,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
         allResults.forEach((result) => {
             result.compositeResponse.forEach((response: any) => {
                 if (response.httpStatusCode === 200) {
-                    if (debugEnabled) logger?.debug(`dependenciesQuery status=200 records=${response?.body?.records?.length ?? 0}`);
+                    logger?.log(`dependenciesQuery status=200 records=${response?.body?.records?.length ?? 0}`);
                     dependenciesRecords.push(... response.body.records // multiple response in one batch
                         .map((r: any) => { // Duplicates will be "null" and will get removed in further filter() call 
                             const id = this.caseSafeId(r.MetadataComponentId);
@@ -743,7 +729,6 @@ export class SalesforceManager implements SalesforceManagerIntf {
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         // Now we can start, log some message
         logger?.log(`Starting to call Metadata API for ${metadatas?.length} types...`);
-        const debugEnabled = logger?.isDebugEnabled?.() ?? false;
         // First, if the metadatas contains an item with member='*' we want to list for this type and substitute the '*' with the fullNames
         await LargeProcessor.runAll<void>(
             // only get the types that have at least '*' once
@@ -761,7 +746,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
                     MAKE_IT_AN_ARRAY(members).forEach(f => { metadata.members.push(f.fullName); }); 
                     // don't return anything we are just altering the metadata.members.
                 } catch (error) {
-                    if (debugEnabled) logger?.debug(`metadata.list error: ${JSON.stringify(error ?? {})}`);
+                    logger?.log(`metadata.list error: ${JSON.stringify(error ?? {})}`);
                     // We reject the promise with the current error and additional context information
                     // Throw the error
                     throw new SalesforceError(
@@ -784,17 +769,17 @@ export class SalesforceManager implements SalesforceManagerIntf {
         const response = new Map(); 
         metadatas.forEach((metadata) => {
             // Init the response array for this type 
-            if (debugEnabled) logger?.debug(`Init response array for type=${metadata.type}`);
+            logger?.log(`Init response array for type=${metadata.type}`);
             response.set(metadata.type, []);
             // The API call to Metadata.Read will be done in slice, if for one type we have more than a certain amount 
             // of members we will do more queries
-            if (debugEnabled) logger?.debug(`Looping type=${metadata.type} members=${metadata.members?.length ?? 0}`);
+            logger?.log(`Looping type=${metadata.type} members=${metadata.members?.length ?? 0}`);
             while (metadata.members?.length > 0) {
                 // Slice the members in batch of MAX_MEMBERS_IN_METADATAAPI_REQUEST_SIZE
                 const currentMembers = metadata.members.splice(0, MAX_MEMBERS_IN_METADATAAPI_REQUEST_SIZE); // get the first members
                 // These first members have been removed from metadata.members (so next time we don't see them anymore
                 tasks.push(async () => {
-                    if (debugEnabled) logger?.debug(`metadata.read type=${metadata.type} members=${currentMembers.length}`);
+                    logger?.log(`metadata.read type=${metadata.type} members=${currentMembers.length}`);
                     try {
                         const members = await this._connection.metadata.read(metadata.type, currentMembers);
                         // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
@@ -802,7 +787,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
                         // Add the received member to the global response (there might be another batch with the same type!)
                         response.get(metadata.type).push(... MAKE_IT_AN_ARRAY(members));
                     } catch (error) {
-                        if (debugEnabled) logger?.debug(`metadata.read error: ${JSON.stringify(error ?? {})}`);
+                        logger?.log(`metadata.read error: ${JSON.stringify(error ?? {})}`);
                         throw new SalesforceError(
                             `There was an error while calling Metadata API to read a list of metadata.`,
                             'METADATA_READ',
@@ -818,12 +803,10 @@ export class SalesforceManager implements SalesforceManagerIntf {
                 });
             }
         }); // Promises are ready to be run
-        if (debugEnabled) logger?.debug(`Calling metadata.read promises count=${tasks?.length}`);
+        logger?.log(`Calling metadata.read promises count=${tasks?.length}`);
         await LargeProcessor.runAll<void>(tasks); // response will be updated in the promises
         logger?.log(`Done calling Metadata API for ${metadatas?.length} types.`);
-        if (debugEnabled) {
-            logger?.debug(`Metadata API returned total records=${Array.from(response.values()).reduce((acc, arr) => acc + arr.length, 0)}`);
-        }
+        logger?.log(`Metadata API returned total records=${Array.from(response.values()).reduce((acc, arr) => acc + arr.length, 0)}`);
         return response;
     }
 
@@ -842,7 +825,6 @@ export class SalesforceManager implements SalesforceManagerIntf {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         logger?.log(`Reading metadata at scale for type=${type} and ${ids?.length ?? 0} id(s).`);
-        const debugEnabled = logger?.isDebugEnabled?.() ?? false;
         // if no ids then just return empty array and basta!
         if ((ids?.length ?? 0) === 0) return [];
         const bodies: any[] = [];
@@ -879,7 +861,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
                     // Returning this results
                     return results;
                 } catch (error) {
-                    if (debugEnabled) logger?.debug(`readMetadataAtScale batch error: ${JSON.stringify(error ?? {})}`);
+                    logger?.log(`readMetadataAtScale batch error: ${JSON.stringify(error ?? {})}`);
                     // Update the stats
                     nbErrors++;
                     // In case of error we return undefined specifically
@@ -887,12 +869,10 @@ export class SalesforceManager implements SalesforceManagerIntf {
                 } finally {
                     // Update the stats
                     nbPending--;
-                    if (debugEnabled) {
-                        logger?.debug(
-                            `readMetadataAtScale progress: total=${bodies?.length}, batchesDone=${batchCount}, `+
-                            `pending=${nbPending}, done=${nbDone}, errors=${nbErrors}`
-                        );
-                    }
+                    logger?.log(
+                        `readMetadataAtScale progress: total=${bodies?.length}, batchesDone=${batchCount}, `+
+                        `pending=${nbPending}, done=${nbDone}, errors=${nbErrors}`
+                    );
                 }
             }));
             allResults.push(... results.filter((result) => result !== undefined)); // only add the non empty results
