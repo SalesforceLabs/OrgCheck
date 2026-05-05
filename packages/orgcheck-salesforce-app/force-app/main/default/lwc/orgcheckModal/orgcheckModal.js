@@ -7,6 +7,8 @@ export default class OrgcheckModal extends LightningElement {
         super();
         this.isShown = false;
         this.errorChains = [];
+        this._errorChainsAsMap = new Map();
+        this.hasApiAccessControlIssue = false;
         this.isClosable = false;
         this.message = '';
         this.headerTitle = '';
@@ -55,24 +57,32 @@ export default class OrgcheckModal extends LightningElement {
         if (Array.isArray(errors) === false) {
             errors = [ errors ];
         }
-        /** @type {{ index: number, name: string, chain: {message: string, body: string}[] }[]} */
-        const errorChains = errors.map((error, index) => {
-            const chain = [];
-            for (let e = error; e !== undefined; e = e.cause) {
-                chain.push({ message: e.message, body: JSON.stringify(e, (key, value) => key != 'cause' ? value : undefined, 2) });
-            }
-            return { index, name: title, chain };
-        });
         if (this.isShown === false) {
-            this.errorChains = errorChains;
-            this.isShown = true;
-            this.isClosable = true;
-            this.headerTitle = title;
-        } else {
-            this.errorChains.push(...errorChains);
-            // reset the index accordingly
-            this.errorChains.forEach((errorChain, index) => errorChain.index = index);
+            this._errorChainsAsMap.clear();
+            this.hasApiAccessControlIssue = false;
         }
+        errors.forEach((error) => {
+            for (let e = error; e !== undefined; e = e.cause) {
+                this._errorChainsAsMap.set(e.message, e);
+            }
+        });
+        /** @type {{ index: number, message: string, body: string }[]} */ const errorChains = [];
+        let hasApiAccessControlIssue = false;
+        this._errorChainsAsMap.forEach((error, key) => {
+            errorChains.push({ 
+                index: errorChains.length,
+                message: key, 
+                body: JSON.stringify(error, (key, value) => key != 'cause' ? value : undefined, 2) 
+            });
+            if (hasApiAccessControlIssue === false && error.code === 'INVALID_SESSION_ID') {
+                hasApiAccessControlIssue = true;
+            }
+        });
+        this.errorChains = errorChains;
+        this.hasApiAccessControlIssue = hasApiAccessControlIssue;
+        this.isClosable = true;
+        this.headerTitle = title;
+        this.isShown = true;
     }
 
     /**
@@ -81,6 +91,7 @@ export default class OrgcheckModal extends LightningElement {
      */
     handleClose() {
         this.isShown = false;
+        this.hasApiAccessControlIssue = false;
     }
 
     /**
@@ -124,10 +135,19 @@ export default class OrgcheckModal extends LightningElement {
 
     /**
      * @description In some case we want to show errors information 
-     * @type {{ index: number, chain: {message: string, body: string}[] }[]}
+     * @type {{ index: number, message: string, body: string }[]}
      * @public
      */
     @track errorChains;
+
+    _errorChainsAsMap;
+
+    /**
+     * @description Flag to indicate the error is caused by API Access Control blocking Visualforce session IDs
+     * @type {boolean}
+     * @public
+     */
+    @track hasApiAccessControlIssue;
 
     /**
      * @description Bound keydown handler reference

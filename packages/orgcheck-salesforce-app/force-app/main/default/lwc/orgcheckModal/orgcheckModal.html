@@ -13,24 +13,30 @@
                         <lightning-formatted-rich-text value={message}></lightning-formatted-rich-text>
                     </template>
                     <template lwc:if={errorChains}>
-                        <p>👉 Please review our <a href="http://sfdc.co/OrgCheck-FAQ" target="_blank" rel="external noopener noreferrer">Org Check FAQ</a>
-                            and try to resolve this issue in your Org based on our community's feedback.</p>
-                        <p>👉 If the FAQ is not helping, consider creating an issue on <a href="http://sfdc.co/OrgCheck-Backlog" target="_blank" rel="external noopener noreferrer">Org Check Issues tracker</a> 
-                            along with the context and the following information.</p>
+                        <div class="error-warning">
+                            <template lwc:if={hasApiAccessControlIssue}>
+                                <p><strong>Your org has API Access Control activated without the option &ldquo;Allow Visualforce 
+                                    pages to access APIs&rdquo; checked.</strong></p>
+                                <p><strong>Option 1 (short term):</strong> Check the &ldquo;Allow Visualforce pages to access 
+                                    APIs&rdquo; option in your org&rsquo;s API Access Control settings to allow any Visualforce 
+                                    page (including Org Check) to use the current user&rsquo;s session ID.</p>
+                                <p><strong>Option 2 (long term):</strong> Create an External client apps, assign 
+                                    the <em>Org Check Users</em> permission set to it, make sure your user is assigned to 
+                                    the <em>Org Check Users</em> permission set, and configure Org Check to authenticate 
+                                    via that External client apps instead of the Visualforce session.</p>
+                            </template>
+                        </div>
+                        <br />
+                        <p>👉 Please review our <a href="http://sfdc.co/OrgCheck-FAQ" target="_blank" rel="external noopener noreferrer">Org Check FAQ</a> and try to resolve this issue in your Org based on our community's feedback.</p>
+                        <p>👉 If the FAQ is not helping, consider creating an issue on <a href="http://sfdc.co/OrgCheck-Backlog" target="_blank" rel="external noopener noreferrer">Org Check Issues tracker</a> along with the context and the following information.</p>
+                        <br />
                         <ul class="slds-list_dotted">
                             <template for:each={errorChains} for:item="errorChain">
                                 <li key={errorChain.index}>
-                                    <b> Error #{errorChain.index}: {errorChain.name} </b>
-                                    <ul class="slds-list_dotted">
-                                        <template for:each={errorChain.chain} for:item="error">
-                                            <li key={error.message}>
-                                                <b>{error.message}</b>
-                                                <pre class="tty">
-                                                    {error.body}
-                                                </pre>
-                                            </li>
-                                        </template>
-                                    </ul>
+                                    <b> Error #{errorChain.index}: {errorChain.message} </b>
+                                    <pre class="tty">
+                                        {errorChain.body}
+                                    </pre>
                                 </li>
                             </template>
                         </ul>

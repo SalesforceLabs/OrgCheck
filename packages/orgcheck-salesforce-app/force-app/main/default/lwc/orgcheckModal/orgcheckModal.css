@@ -10,3 +10,16 @@ pre.tty {
     text-wrap: auto;
     padding: 5px;
 }
+
+div.error-warning {
+    border-left: 4px solid #b36b00;
+    background-color: #fff8e1;
+    color: #4a3500;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    border-radius: 4px;
+}
+
+div.error-warning p {
+    margin: 6px 0;
+}
