@@ -78,7 +78,7 @@ export class DatasetVisualForcePages implements Dataset {
         }));
 
         // Return data as map
-        logger?.log(`Done`);
+        logger?.log(`Done.`);
         return pages;
     } 
 }

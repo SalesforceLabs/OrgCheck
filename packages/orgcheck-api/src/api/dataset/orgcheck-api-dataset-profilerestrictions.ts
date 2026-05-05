@@ -34,7 +34,7 @@ export class DatasetProfileRestrictions implements Dataset {
             
         // List of profile ids
         const profileIdRecords = results[0];
-        logger?.log(`Parsing ${profileIdRecords?.length} Profiles...`);
+        logger?.log(`Parsing ${profileIdRecords?.length} profiles...`);
         const profileIds = await MediumProcessor.map(profileIdRecords, (record: any) => record.Id);
 
         // Init the factories
@@ -107,7 +107,7 @@ export class DatasetProfileRestrictions implements Dataset {
         }));
 
         // Return data as map
-        logger?.log(`Done`);
+        logger?.log(`Done.`);
         return profileRestrictions;
     } 
 }

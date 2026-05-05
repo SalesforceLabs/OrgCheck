@@ -75,7 +75,7 @@ export class DatasetPermissionSetLicenses implements Dataset {
             return [ permissionSetLicense.id, permissionSetLicense ];
         }));
 
-        logger?.log(`Parsing ${assigneePermSetsWithLicenseRecords?.length} Permission Sets with a link to a License...`);    
+        logger?.log(`Parsing ${assigneePermSetsWithLicenseRecords?.length} permission sets with a link to a license...`);    
         const assigneePermSetLicense = new Map();    
         await MediumProcessor.forEach(assigneePermSetsWithLicenseRecords, async (record: any) => {
             if (record.PermissionSet && record.PermissionSet.LicenseId && record.PermissionSet.LicenseId.startsWith('0PL')) {
@@ -92,7 +92,7 @@ export class DatasetPermissionSetLicenses implements Dataset {
             }
         });
 
-        logger?.log(`Parsing ${permissionSetsWithLicenseRecords?.length} Permission Sets with a link to a License...`);
+        logger?.log(`Parsing ${permissionSetsWithLicenseRecords?.length} permission sets with a link to a license...`);
         await MediumProcessor.forEach(permissionSetsWithLicenseRecords, async (record: any) => {
             const permissionSetId = sfdcManager.caseSafeId(record.Id);
             const licenseId = sfdcManager.caseSafeId(record.LicenseId);
@@ -109,7 +109,7 @@ export class DatasetPermissionSetLicenses implements Dataset {
         });
         
         // Return data as map
-        logger?.log(`Done`);
+        logger?.log(`Done.`);
         return permissionSetLicenses;
     } 
 }

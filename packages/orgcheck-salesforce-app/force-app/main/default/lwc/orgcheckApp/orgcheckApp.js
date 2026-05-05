@@ -296,6 +296,12 @@ export default class OrgcheckApp extends LightningElement {
                             if (this.verbose) {
                                 console.log(`Org Check [${section}] END`); 
                             }
+                        },
+                        canBeInterrupted: (section, interruptCallback) => {
+                            this._private_properties.spinner?.registerInterruptibleSection(section, interruptCallback);
+                            if (this.verbose) {
+                                console.log(`Org Check [${section}] CAN BE INTERRUPTED`);
+                            }
                         }
                     }
                 });

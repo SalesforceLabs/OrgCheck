@@ -161,7 +161,7 @@ export class DatasetPermissionSets implements Dataset {
         ]);
 
         // Once all the ps and psg are in the map we can check the following:
-        logger?.log(`Checking the ${psAssignmentRecords?.length} Permission Set assignments to Permission Set Groups...`);
+        logger?.log(`Checking the ${psAssignmentRecords?.length} permission set assignments to permission set groups...`);
         const psgMemberCountSumByPermissionSetId = new Map();        
         await MediumProcessor.forEach(psAssignmentRecords, async (record: any) => {
             const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId);
@@ -186,7 +186,7 @@ export class DatasetPermissionSets implements Dataset {
         });
         
         // Return data as map
-        logger?.log(`Done`);
+        logger?.log(`Done.`);
         return permissionSets;
     } 
 }

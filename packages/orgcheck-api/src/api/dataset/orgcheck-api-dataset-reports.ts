@@ -62,7 +62,7 @@ export class DatasetReports implements Dataset {
         }));
 
         // Return data as map
-        logger?.log(`Done`);
+        logger?.log(`Done.`);
         return reports;
     } 
 }

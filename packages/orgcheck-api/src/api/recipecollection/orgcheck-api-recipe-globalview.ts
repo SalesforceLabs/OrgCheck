@@ -48,6 +48,49 @@ import { WebLinksTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-ta
 import { WorkflowsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-workflows';
 import { ReleaseUpdatesTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-realeseupdates';
 
+const LIST_RECIPES_AND_TABLE_DEFINITIONS = [
+    { recipe: RecipeAliases.APEX_CLASSES, tableDefinition: new ApexClassesTableDefinition() },
+    { recipe: RecipeAliases.APEX_TESTS, tableDefinition: new ApexTestsTableDefinition() },
+    { recipe: RecipeAliases.APEX_TRIGGERS, tableDefinition: new ApexTriggersTableDefinition() },
+    { recipe: RecipeAliases.APEX_UNCOMPILED, tableDefinition: new ApexUncompiledTableDefinition() },
+    { recipe: RecipeAliases.BROWSERS, tableDefinition: new BrowsersTableDefinition() },
+    { recipe: RecipeAliases.COLLABORATION_GROUPS, tableDefinition: new ChatterGroupsTableDefinition() },
+    { recipe: RecipeAliases.CUSTOM_FIELDS, tableDefinition: new CustomFieldsTableDefinition() },
+    { recipe: RecipeAliases.CUSTOM_LABELS, tableDefinition: new CustomLabelsTableDefinition() },
+    { recipe: RecipeAliases.CUSTOM_TABS, tableDefinition: new CustomTabsTableDefinition() },
+    { recipe: RecipeAliases.DASHBOARDS, tableDefinition: new DashboardsTableDefinition() },
+    { recipe: RecipeAliases.DOCUMENTS, tableDefinition: new DocumentsTableDefinition() },
+    { recipe: RecipeAliases.EMAIL_TEMPLATES, tableDefinition: new EmailTemplatesTableDefinition() },
+    { recipe: RecipeAliases.FLOWS, tableDefinition: new FlowsTableDefinition() },
+    { recipe: RecipeAliases.HOME_PAGE_COMPONENTS, tableDefinition: new HomePageComponentsTableDefinition() },
+    { recipe: RecipeAliases.INTERNAL_ACTIVE_USERS, tableDefinition: new UsersTableDefinition() },
+    { recipe: RecipeAliases.KNOWLEDGE_ARTICLES, tableDefinition: new KnowledgeArticlesTableDefinition() },
+    { recipe: RecipeAliases.LIGHTNING_AURA_COMPONENTS, tableDefinition: new AuraComponentsTableDefinition() },
+    { recipe: RecipeAliases.LIGHTNING_PAGES, tableDefinition: new FlexiPagesTableDefinition() },
+    { recipe: RecipeAliases.LIGHTNING_WEB_COMPONENTS, tableDefinition: new LightningWebComponentsTableDefinition() },
+    { recipe: RecipeAliases.OBJECTS, tableDefinition: new ObjectsTableDefinition() },
+    { recipe: RecipeAliases.PAGE_LAYOUTS, tableDefinition: new PageLayoutsTableDefinition() },
+    { recipe: RecipeAliases.PERMISSION_SETS, tableDefinition: new PermissionSetsTableDefinition() },
+    { recipe: RecipeAliases.PERMISSION_SET_LICENSES, tableDefinition: new PermissionSetLicensesTableDefinition() },
+    { recipe: RecipeAliases.PROCESS_BUILDERS, tableDefinition: new ProcessBuildersTableDefinition() },
+    { recipe: RecipeAliases.PROFILE_PWD_POLICIES, tableDefinition: new ProfilePasswordPoliciesTableDefinition() },
+    { recipe: RecipeAliases.PROFILE_RESTRICTIONS, tableDefinition: new ProfileRestrictionsTableDefinition() },
+    { recipe: RecipeAliases.PROFILES, tableDefinition: new ProfilesTableDefinition() },
+    { recipe: RecipeAliases.PUBLIC_GROUPS, tableDefinition: new PublicGroupsTableDefinition() },
+    { recipe: RecipeAliases.QUEUES, tableDefinition: new QueuesTableDefinition() },
+    { recipe: RecipeAliases.RECORD_TYPES, tableDefinition: new RecordTypesTableDefinition() },
+    { recipe: RecipeAliases.RELEASE_UPDATES, tableDefinition: new ReleaseUpdatesTableDefinition() },
+    { recipe: RecipeAliases.REPORTS, tableDefinition: new ReportsTableDefinition() },
+    { recipe: RecipeAliases.STATIC_RESOURCES, tableDefinition: new StaticResourcesTableDefinition() },
+    { recipe: RecipeAliases.USER_ROLES, tableDefinition: new RolesTableDefinition() },
+    { recipe: RecipeAliases.SHARING_RULES, tableDefinition: new SharingRulesTableDefinition() },
+    { recipe: RecipeAliases.VALIDATION_RULES, tableDefinition: new ValidationRulesTableDefinition() },
+    { recipe: RecipeAliases.VISUALFORCE_COMPONENTS, tableDefinition: new VisualForceComponentsTableDefinition() },
+    { recipe: RecipeAliases.VISUALFORCE_PAGES, tableDefinition: new VisualForcePagesTableDefinition() },
+    { recipe: RecipeAliases.WEBLINKS, tableDefinition: new WebLinksTableDefinition() },
+    { recipe: RecipeAliases.WORKFLOWS, tableDefinition: new WorkflowsTableDefinition() }
+];
+
 export interface GlobalViewAsTable {
 
     /**
@@ -104,48 +147,7 @@ export class RecipeGlobalView implements RecipeCollection {
      * @public
      */
     public ingredients(_logger: SimpleLoggerIntf): RecipeAliases[] {
-        return [
-            RecipeAliases.APEX_CLASSES,
-            RecipeAliases.APEX_TESTS,
-            RecipeAliases.APEX_TRIGGERS,
-            RecipeAliases.APEX_UNCOMPILED,
-            RecipeAliases.BROWSERS,
-            RecipeAliases.COLLABORATION_GROUPS,
-            RecipeAliases.CUSTOM_FIELDS,
-            RecipeAliases.CUSTOM_LABELS,
-            RecipeAliases.CUSTOM_TABS,
-            RecipeAliases.DASHBOARDS,
-            RecipeAliases.DOCUMENTS,
-            RecipeAliases.EMAIL_TEMPLATES,
-            RecipeAliases.FLOWS,
-            RecipeAliases.HOME_PAGE_COMPONENTS,
-            RecipeAliases.INTERNAL_ACTIVE_USERS,
-            RecipeAliases.KNOWLEDGE_ARTICLES,
-            RecipeAliases.LIGHTNING_AURA_COMPONENTS,
-            RecipeAliases.LIGHTNING_PAGES,
-            RecipeAliases.LIGHTNING_WEB_COMPONENTS,
-            RecipeAliases.OBJECTS,
-            RecipeAliases.PAGE_LAYOUTS,
-            RecipeAliases.PERMISSION_SETS,
-            RecipeAliases.PERMISSION_SET_LICENSES,
-            RecipeAliases.PROCESS_BUILDERS,
-            RecipeAliases.PROFILE_PWD_POLICIES,
-            RecipeAliases.PROFILE_RESTRICTIONS,
-            RecipeAliases.PROFILES,
-            RecipeAliases.PUBLIC_GROUPS,
-            RecipeAliases.QUEUES,
-            RecipeAliases.RECORD_TYPES,
-            RecipeAliases.RELEASE_UPDATES,
-            RecipeAliases.REPORTS,
-            RecipeAliases.STATIC_RESOURCES,
-            RecipeAliases.USER_ROLES,
-            RecipeAliases.SHARING_RULES,
-            RecipeAliases.VALIDATION_RULES,
-            RecipeAliases.VISUALFORCE_COMPONENTS,
-            RecipeAliases.VISUALFORCE_PAGES,
-            RecipeAliases.WEBLINKS,
-            RecipeAliases.WORKFLOWS
-        ];
+        return LIST_RECIPES_AND_TABLE_DEFINITIONS.map(r => r.recipe);
     }
 
     /**
@@ -165,57 +167,15 @@ export class RecipeGlobalView implements RecipeCollection {
      * @public
      */
     public async serveToTable(mixture: DataCollectionStatisticsIntf[]): Promise<GlobalViewAsTable> {
-        const statsGlobal: { name: string; countBad: number; countGood: number }[] = [];
+        const statsGlobal: { name: string; countBad: number; countGood: number, hadError: boolean }[] = [];
         const statsByRecipeAndRule: { name: string; ruleName: string; countBad: number }[] = [];
         mixture?.forEach((item) => {
-            statsGlobal.push({ name: item.recipeTitle, countBad: item.countBad, countGood: item.countGood });
+            statsGlobal.push({ name: item.recipeTitle, countBad: item.countBad, countGood: item.countGood, hadError: item.hadError });
             item.countBadByRule?.forEach((c) => {
                 statsByRecipeAndRule.push({ name: item.recipeTitle, ruleName: c.ruleName, countBad: c.count });
             });
         });
-        const allTableDefinitions: TableDefinition[] = [
-            // keep the same order than table returned by ingredients()!
-            new ApexClassesTableDefinition(),
-            new ApexTestsTableDefinition(),
-            new ApexTriggersTableDefinition(),
-            new ApexUncompiledTableDefinition(),
-            new BrowsersTableDefinition(),
-            new ChatterGroupsTableDefinition(),
-            new CustomFieldsTableDefinition(),
-            new CustomLabelsTableDefinition(),
-            new CustomTabsTableDefinition(),
-            new DashboardsTableDefinition(),
-            new DocumentsTableDefinition(),
-            new EmailTemplatesTableDefinition(),
-            new FlowsTableDefinition(),
-            new HomePageComponentsTableDefinition(),
-            new UsersTableDefinition(),
-            new KnowledgeArticlesTableDefinition(),
-            new AuraComponentsTableDefinition(),
-            new FlexiPagesTableDefinition(),
-            new LightningWebComponentsTableDefinition(),
-            new ObjectsTableDefinition(),
-            new PageLayoutsTableDefinition(),
-            new PermissionSetsTableDefinition(),
-            new PermissionSetLicensesTableDefinition(),
-            new ProcessBuildersTableDefinition(),
-            new ProfilePasswordPoliciesTableDefinition(),
-            new ProfileRestrictionsTableDefinition(),
-            new ProfilesTableDefinition(),
-            new PublicGroupsTableDefinition(),
-            new QueuesTableDefinition(),
-            new RecordTypesTableDefinition(),
-            new ReleaseUpdatesTableDefinition(),
-            new ReportsTableDefinition(),
-            new StaticResourcesTableDefinition(),
-            new RolesTableDefinition(),
-            new SharingRulesTableDefinition(),
-            new ValidationRulesTableDefinition(),
-            new VisualForceComponentsTableDefinition(),
-            new VisualForcePagesTableDefinition(),
-            new WebLinksTableDefinition(),
-            new WorkflowsTableDefinition()
-        ];
+        const allTableDefinitions: TableDefinition[] = LIST_RECIPES_AND_TABLE_DEFINITIONS.map((r) => r.tableDefinition);
         return {
             name: this.title,
             statisticsGoodAndBad: TableFactory.create('Statistics (Good and Bad)', new GlobalViewGlobalTableDefinition(), statsGlobal),

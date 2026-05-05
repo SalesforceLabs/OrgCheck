@@ -12,10 +12,10 @@ export class LoggerSetupMock_DoingNothing implements LoggerSetup {
   public endedWithErrors(): void { }
   public endedSuccessfully(): void { }
   public stopped(): void { }
+  public canBeInterrupted(): void { }
 }
 
 export class LoggerMock_DoingNothing implements LoggerIntf {
-
   public log(): void {}
   public ignoreErrors(): void {}
   public acknowledgeErrors(): void {}

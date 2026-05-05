@@ -2,30 +2,35 @@
 class Processor {
 
     constructor(private readonly concurrencyLimit: number) {
-        if (concurrencyLimit) {
+        if (concurrencyLimit !== Infinity) {
             if (Number.isInteger(concurrencyLimit) === false) throw new TypeError(`Given concurrencyLimit is not a proper integer.`);
             if (concurrencyLimit < 1) throw new TypeError(`Given concurrencyLimit must be positive and not equal to zero.`);
-        } else {
-            this.concurrencyLimit = Infinity;
         }
     }
 
     private async runTaskPool<T>(tasks: Array<() => Promise<T>>, settleAll: boolean): Promise<Array<PromiseSettledResult<T>>> {
         if (tasks.length === 0) return [];
 
+        const order = Array.from({ length: tasks.length }, (_, i) => i);
+        for (let i = order.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [order[i], order[j]] = [order[j], order[i]];
+        }
+
         const results: Array<PromiseSettledResult<T>> = new Array(tasks.length);
-        let nextIndex = 0;
+        let nextPosition = 0;
 
         const worker = async (): Promise<void> => {
-            while (nextIndex < tasks.length) {
-                const currentIndex = nextIndex;
-                nextIndex += 1;
+            while (nextPosition < order.length) {
+                const currentPosition = nextPosition;
+                nextPosition += 1;
+                const originalIndex = order[currentPosition];
 
                 try {
-                    const value = await tasks[currentIndex]();
-                    results[currentIndex] = { status: 'fulfilled', value };
+                    const value = await tasks[originalIndex]();
+                    results[originalIndex] = { status: 'fulfilled', value };
                 } catch (reason) {
-                    results[currentIndex] = { status: 'rejected', reason };
+                    results[originalIndex] = { status: 'rejected', reason };
                     if (!settleAll) {
                         throw reason;
                     }
@@ -111,3 +116,4 @@ class Processor {
 export const SmallProcessor = new Processor(5);
 export const MediumProcessor = new Processor(8);
 export const LargeProcessor = new Processor(10);
+export const InfiniteProcessor = new Processor(Infinity);

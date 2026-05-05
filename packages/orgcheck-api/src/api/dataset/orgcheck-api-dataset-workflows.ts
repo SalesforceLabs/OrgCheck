@@ -28,7 +28,7 @@ export class DatasetWorkflows implements Dataset {
         
         // List of flow ids
         const workflowRuleRecords = results[0];
-        logger?.log(`Parsing ${workflowRuleRecords?.length} Workflow Rules...`);
+        logger?.log(`Parsing ${workflowRuleRecords?.length} workflow rules...`);
         const workflowRuleIds = await MediumProcessor.map(workflowRuleRecords, (record: any) => record.Id);
 
         // Init the factory and records
@@ -103,7 +103,7 @@ export class DatasetWorkflows implements Dataset {
         }));
 
         // Return data as map
-        logger?.log(`Done`);
+        logger?.log(`Done.`);
         return workflows;
     } 
 }

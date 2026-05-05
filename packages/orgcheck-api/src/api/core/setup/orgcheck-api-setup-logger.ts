@@ -36,4 +36,12 @@ export interface LoggerSetup {
      * @public
      */
     stopped(operationName: string): void;
+
+    /**
+     * @description Called when a given operation can be interrupted
+     * @param {string} operationName - the name of the operation
+     * @param {() => void} interruptCallback - the callback to invoke when the operation is interrupted
+     * @public
+     */
+    canBeInterrupted(operationName: string, interruptCallback: () => void): void;
 }

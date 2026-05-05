@@ -34,7 +34,7 @@ export class DatasetFieldPermissions implements Dataset {
         const permissions = results[0];
 
         // Create the map
-        logger?.log(`Parsing ${permissions?.length} Field Permissions...`);
+        logger?.log(`Parsing ${permissions?.length} field permissions...`);
         const fieldPermissions: Map<string, SfdcFieldPermission> = new Map(await MediumProcessor.map(permissions, 
             (record: any) => {
                 // Get the ID15 of this parent
@@ -71,7 +71,7 @@ export class DatasetFieldPermissions implements Dataset {
             }
         ));
         // Return data as map
-        logger?.log(`Done`);
+        logger?.log(`Done.`);
         return fieldPermissions;
     }
 }

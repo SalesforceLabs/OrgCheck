@@ -7,7 +7,7 @@ import OrgCheckStaticResource from '@salesforce/resourceUrl/OrgCheck_SR';
 const SectionStatus = {
   IN_PROGRESS: 'in-progress',
   ENDED: 'ended',
-  FAILED: 'failed' 
+  FAILED: 'failed'
 };
 
 /**
@@ -40,7 +40,7 @@ class Section {
   markerClasses;
 
   /** 
-   * T@description he label of the section
+   * @description The label of the section
    * @type {string} 
    */
   label;
@@ -50,6 +50,18 @@ class Section {
    * @type {{ key: string, value: string }[]}
    */
   contextInformation;
+
+  /**
+   * @description Whether to show the interrupt button for this section
+   * @type {boolean}
+   */
+  showInterruptButton;
+
+  /**
+   * @description Whether the section has been interrupted by the user
+   * @type {boolean}
+   */
+  isInterrupted;
 }
 
 /**
@@ -73,6 +85,15 @@ export default class OrgcheckSpinner extends LightningElement {
    */
   @api sectionLog(sectionName, message) {
     this._setSection(sectionName, message, SectionStatus.IN_PROGRESS);
+  }
+
+  /**
+   * @description Registers a section that can be interrupted.
+   * @param {string} section - The name of the section.
+   * @param {Function} interruptCallback - The callback function to be called when the section is interrupted.
+   */
+  @api registerInterruptibleSection(section, interruptCallback) {
+    this._interruptibleSections.set(section, interruptCallback);
   }
 
   /**
@@ -115,8 +136,8 @@ export default class OrgcheckSpinner extends LightningElement {
       this._init();
       this._openSince = Date.now();
       const updateWaitingTime = () => {
-        // Update the timer
-        this.waitingTime = (Date.now() - this._openSince) / 1000;
+        const now = Date.now();
+        this.waitingTime = (now - this._openSince) / 1000;
       };
       clearInterval(this._intervalId);
       // eslint-disable-next-line @lwc/lwc/no-async-operation
@@ -159,6 +180,26 @@ export default class OrgcheckSpinner extends LightningElement {
     this._init();
     this._openSince = undefined;
     clearInterval(this._intervalId);
+  }
+
+  /**
+   * @description Handles the user clicking "Stop this section" on a long-running in-progress section.
+   * @param {Event} event - The click event from the stop link.
+   */
+  handleInterruptSection(event) {
+    event.preventDefault();
+    const sectionId = event.currentTarget.dataset.sectionId;
+    if (sectionId) {
+      this._interruptibleSections.get(sectionId)?.();
+      // that should trigger an exception in the section which will then be caught and displayed in the spinner with all the relevant information (see sectionFailed method)
+      const index = this._keysIndex.get(sectionId);
+      if (index !== undefined) {
+        const updated = Object.assign(new Section(), this.sections[index]);
+        updated.showInterruptButton = false;
+        updated.isInterrupted = true;
+        this.sections[index] = updated;
+      }
+    }
   }
   
   /**
@@ -256,6 +297,13 @@ export default class OrgcheckSpinner extends LightningElement {
   _intervalId;
 
   /**
+   * @description Map to store interruptible sections.
+   * @type {Map}
+   * @private
+   */
+  _interruptibleSections;
+
+  /**
    * @description Sets a section with the given section name, message, status, and error. We show the spinner if not yet opened.
    * @param {string} sectionName - The name of the section.
    * @param {string | Error } message - The message (string or error) to handle in the section.
@@ -308,6 +356,7 @@ export default class OrgcheckSpinner extends LightningElement {
         section.markerClasses += ' progress-marker-error';
         break;
     }
+    section.showInterruptButton = this._interruptibleSections.has(sectionName);
     
     // Is it a new section?
     if (this._keysIndex.has(sectionName) === false) {
@@ -329,7 +378,7 @@ export default class OrgcheckSpinner extends LightningElement {
       this.close(0);
     } else {
       this.inProgressPercentage = Math.round((1 - countInProgressSections / this.sections.length) * 100);
-      this.inProgressMessage = `We have currently ${countInProgressSections} section${countInProgressSections>1?'s':''} in progress over a total of ${this.sections.length} section${this.sections.length>1?'s':''}...`;
+      this.inProgressMessage = `We have currently ${countInProgressSections} process${countInProgressSections>1?'es':''} in progress over a total of ${this.sections.length}...`;
     }
   }
 
@@ -343,5 +392,6 @@ export default class OrgcheckSpinner extends LightningElement {
     this.waitingTime = 0;
     this._keysIndex = new Map();
     this.inProgressMessage = '';
+    this._interruptibleSections = new Map();
   }
 }

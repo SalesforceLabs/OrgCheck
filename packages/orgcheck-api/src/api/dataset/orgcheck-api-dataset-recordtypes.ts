@@ -63,7 +63,7 @@ export class DatasetRecordTypes implements Dataset {
         logger?.log(`Extracting Ids from ${profileRecords?.length} profiles...`);
         const profileIds = await MediumProcessor.map(profileRecords, (record: any) => sfdcManager.caseSafeId(record.Id));
 
-        logger?.log(`Get record type information from Profile Metatdata API`);
+        logger?.log(`Getting record type information from Profile Metadata API...`);
         const profiles = await sfdcManager.readMetadataAtScale('Profile', profileIds, [], logger);
 
         logger?.log(`Parsing ${profiles?.length} profiles looking for record types information...`);
@@ -90,7 +90,7 @@ export class DatasetRecordTypes implements Dataset {
         });
 
         // Return data as map
-        logger?.log(`Done`);
+        logger?.log(`Done.`);
         return recordTypes;
     } 
 }

@@ -37,7 +37,15 @@
                                         <template for:each={sections} for:item="section">
                                             <li key={section.id} class={section.liClasses}>
                                                 <div class={section.markerClasses}></div>
-                                                <div class="slds-progress__item_content"><b>{section.id}</b> {section.label}</div>
+                                                <div class="slds-progress__item_content">
+                                                    <b>{section.id}</b> {section.label}
+                                    <template if:true={section.showInterruptButton}>
+                                        &nbsp;&mdash; <a data-section-id={section.id} onclick={handleInterruptSection}>Too long? Interrupt!</a>
+                                    </template>
+                                    <template if:true={section.isInterrupted}>
+                                        &nbsp;&mdash; 🛑 Interrupted!
+                                    </template>
+                                                </div>
                                             </li>
                                             <template if:true={section.contextInformation}>
                                                 <b key={section.id}>Context information about the issue:</b>

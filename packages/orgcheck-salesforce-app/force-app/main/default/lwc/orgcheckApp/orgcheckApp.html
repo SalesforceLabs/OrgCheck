@@ -49,7 +49,7 @@
             </lightning-layout-item>
         </lightning-layout>
         <!-- Spinner and modal utilities -->
-        <c-orgcheck-spinner></c-orgcheck-spinner>
+        <c-orgcheck-spinner onsectionstop={handleSectionStop}></c-orgcheck-spinner>
         <c-orgcheck-modal></c-orgcheck-modal>
         <!-- Acceptance screen (if needed) -->
         <div lwc:if={useOrgCheck.needConfirmation} class="pleaseAcceptTheTerms">
@@ -171,7 +171,7 @@
                                 </lightning-layout>
                                 <lightning-layout multiple-rows>
                                     <template lwc:if={tableData.cacheitems} for:each={tableData.cacheitems} for:item="item">
-                                        <lightning-layout-item size="2" key={item.name} padding="around-small">
+                                        <lightning-layout-item size="2" large-device-size="3" medium-device-size="4" small-device-size="12" key={item.name} padding="around-small">
                                             <div class="viewCacheItem">
                                                 <lightning-card>
                                                     <lightning-button-icon icon-name="utility:zoomin" alternative-text="Show details" slot="actions" onclick={handleLogCacheItem} data-item-name={item.name}></lightning-button-icon>

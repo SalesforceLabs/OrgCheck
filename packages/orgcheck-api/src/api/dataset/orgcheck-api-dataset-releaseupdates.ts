@@ -17,7 +17,7 @@ export class DatasetReleaseUpdates implements Dataset {
      */
     async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcReleaseUpdate>> {
         // SOQL query
-        logger?.log('Querying Tooling API about ReleaseUpdate records in the org...');
+        logger?.log(`Querying Tooling API about ReleaseUpdate records in the org...`);
         const results = await sfdcManager.soqlQuery([{
             tooling: true,
             string: 'SELECT DurableId, Title, Category, DueDate, IsReleased, '+
@@ -37,8 +37,6 @@ export class DatasetReleaseUpdates implements Dataset {
             const dueDateInTimestamp = record.DueDate ? Date.parse(record.DueDate) : undefined;
             const diff = dueDateInTimestamp ? (dueDateInTimestamp - Date.now()) : undefined;
             const remainingDaysBeforeDueDate = (diff !== undefined && diff >= 0) ? (diff/1000/60/60/24) : undefined;
-            logger?.log(`record.DueDate=${record.DueDate}`);
-            logger?.log(`difference avec today: ${(Date.now() - record.DueDate)}`);
             const releaseUpdate: SfdcReleaseUpdate = releaseUpdateDataFactory.createWithScore({
                 properties: {
                     id: record.DurableId,
@@ -59,7 +57,7 @@ export class DatasetReleaseUpdates implements Dataset {
         }));
 
         // Return data as map
-        logger?.log('Done');
+        logger?.log(`Done.`);
         return releaseUpdates;
     }
 }

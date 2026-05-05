@@ -50,9 +50,10 @@ import { DatasetVisualForcePages } from 'src/api/dataset/orgcheck-api-dataset-vi
 import { DatasetSharingRules } from 'src/api/dataset/orgcheck-api-dataset-sharingrules';
 import { DatasetWeblinks } from 'src/api/dataset/orgcheck-api-dataset-weblinks';
 import { DatasetWorkflows } from 'src/api/dataset/orgcheck-api-dataset-workflows';
+import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { LoggerFactoryIntf } from 'src/api/core/logger/orgcheck-api-loggerfactory';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
-import { LargeProcessor } from 'src/api/core/orgcheck-api-processor';
+import { InfiniteProcessor } from 'src/api/core/orgcheck-api-processor';
 
 /**
  * @description Dataset manager
@@ -143,12 +144,13 @@ export class DatasetManager implements DatasetManagerIntf {
     /**
      * @description Run the given list of datasets and return them as a result
      * @param {string | DatasetRunInformation[]} datasets - The list of datasets to run
+     * @param {SimpleLoggerIntf} [parentLogger] - When provided, dataset progress is logged to this logger instead of opening a dedicated section per dataset
      * @returns {Promise<Map<string, any>>} Returns the result 
      * @throws {DatasetManagerError}
      * @public
      * @async
      */
-    public async run(datasets: Array<string | DatasetRunInformation>): Promise<Map<string, any[]>> {
+    public async run(datasets: Array<string | DatasetRunInformation>, parentLogger?: SimpleLoggerIntf): Promise<Map<string, any[]>> {
         if (datasets === undefined || datasets === null) {
             throw new DatasetManagerError('', `The given datasets is not defined.`);
         }
@@ -156,45 +158,63 @@ export class DatasetManager implements DatasetManagerIntf {
             throw new DatasetManagerError('', `The given datasets is not an instance of Array (typeof= ${typeof datasets}).`);
         }
         const that = this;
-        const data: any[] = await LargeProcessor.runAll<any>(datasets.map((dataset) => async (): Promise<any[]> => {
+        const data: any[] = await InfiniteProcessor.runAll<any>(datasets.map((dataset) => async (): Promise<any[]> => {
             const alias      = (typeof dataset === 'string' ? dataset : dataset.alias);
             const cacheKey   = (typeof dataset === 'string' ? dataset : dataset.cacheKey);
             const parameters = (typeof dataset === 'string' ? undefined : dataset.parameters);
-            const logger = that.loggerFactory?.create(`Run dataset "${alias}"`);
-            if (this._datasetPromisesCache.has(cacheKey) === false) {
-                this._datasetPromisesCache.set(cacheKey, async (): Promise<any[]> => {
-                    try {
-                        logger.log(`Checking the data cache for key=${cacheKey}...`);
-                        // Get data cache if any
-                        const dataFromCache = this.cacheManager.get(cacheKey);
-                        if (dataFromCache) {
-                            // Set the results from data cache
-                            logger.log('There was data in data cache, we use it!');
-                            // Return the key/alias and value from the data cache
-                            return [ alias, dataFromCache ]; // when data comes from cache instanceof won't work! (keep that in mind)
-                        } else {
-                            logger.log(`There was no data in data cache. Let's retrieve data.`);
-                            // Calling the retriever
-                            const data = await this._datasets.get(alias)?.run(
-                                this.sfdcManager, // sfdc manager
-                                this._dataFactory, // data factory
-                                logger?.toSimpleLogger(), // local logger
-                                parameters // Send any parameters if needed
-                            );
-                            // Cache the data (if possible and not too big)
-                            this.cacheManager.set(cacheKey, data); 
-                            // Some logs
-                            logger.log(`Data retrieved and saved in cache with key=${cacheKey}`);
-                            // Return the key/alias and value from the cache
-                            return [ alias, data ];
-                        }
-                    } catch (error) {
-                        logger.hadError(error);
-                        throw new DatasetManagerError(alias, `There was an error while retrieving the data for this dataset (either cache issue or dataset.run issue).`, error);
-                    } finally {
-                        logger.end();
+            const alreadyCached = this._datasetPromisesCache.has(cacheKey);
+            if (alreadyCached === false) {
+                // When a parentLogger is given, log dataset progress as messages under the parent section.
+                // Otherwise, create a dedicated section logger for this dataset (existing behaviour).
+                const sectionLogger = parentLogger ? undefined : that.loggerFactory?.create(`Running dataset: ${alias}`, true);
+                const logger: SimpleLoggerIntf | undefined = parentLogger ?? sectionLogger?.toSimpleLogger();
+                let executionPromise: Promise<any[]> | undefined;
+                this._datasetPromisesCache.set(cacheKey, (): Promise<any[]> => {
+                    if (!executionPromise) {
+                        executionPromise = (async (): Promise<any[]> => {
+                            try {
+                                logger?.log(`Checking the data cache for key=${cacheKey}...`);
+                                // Get data cache if any
+                                const dataFromCache = this.cacheManager.get(cacheKey);
+                                if (dataFromCache) {
+                                    // Set the results from data cache
+                                    logger?.log('There was data in data cache, we use it!');
+                                    // Return the key/alias and value from the data cache
+                                    return [ alias, dataFromCache ]; // when data comes from cache instanceof won't work! (keep that in mind)
+                                } else {
+                                    logger?.log(`There was no data in data cache. Let's retrieve data.`);
+                                    // Calling the retriever
+                                    const data = await this._datasets.get(alias)?.run(
+                                        this.sfdcManager, // sfdc manager
+                                        this._dataFactory, // data factory
+                                        logger, // local logger
+                                        parameters // Send any parameters if needed
+                                    );
+                                    // Cache the data (if possible and not too big)
+                                    this.cacheManager.set(cacheKey, data); 
+                                    // Some logs
+                                    logger?.log(`Data retrieved and saved in cache with key=${cacheKey}`);
+                                    // Return the key/alias and value from the cache
+                                    return [ alias, data ];
+                                }
+                            } catch (error) {
+                                sectionLogger?.hadError(error);
+                                // Reset so a subsequent run gets a fresh execution and a fresh logger section.
+                                executionPromise = undefined;
+                                // Remove the cached entry so a subsequent run of the same dataset
+                                // gets a fresh function and a fresh logger section (e.g. after an interrupt).
+                                this._datasetPromisesCache.delete(cacheKey);
+                                throw new DatasetManagerError(alias, `There was an error while retrieving the data for this dataset (either cache issue or dataset.run issue).`, error);
+                            } finally {
+                                sectionLogger?.end();
+                            }
+                        })();
                     }
+                    return executionPromise;
                 });
+            }
+            if (alreadyCached === true) {
+                parentLogger?.log(`Dataset "${alias}" was already requested by another recipe; reusing its result.`);
             }
             const datasetPromise = this._datasetPromisesCache.get(cacheKey);
             return datasetPromise ? (await datasetPromise()) : [];

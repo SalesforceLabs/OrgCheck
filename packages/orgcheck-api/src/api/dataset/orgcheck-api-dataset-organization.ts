@@ -64,7 +64,7 @@ export class DatasetOrganization implements Dataset {
         });
 
         // Return data as map
-        logger?.log(`Done`);
+        logger?.log(`Done.`);
         return organization;
     } 
 }

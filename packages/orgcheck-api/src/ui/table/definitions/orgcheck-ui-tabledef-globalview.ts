@@ -11,8 +11,9 @@ export class GlobalViewGlobalTableDefinition implements TableDefinition {
      */
     columns: TableColumn[] = [
         { label: 'Type of items', type: ColumnType.TXT, data: { value: 'name' }}, 
-        { label: '✅ count', type: ColumnType.NUM, data: { value: 'countGood' }},
-        { label: '❌ count', type: ColumnType.NUM, data: { value: 'countBad' }} 
+        { label: '✅ count',      type: ColumnType.NUM, data: { value: 'countGood' }},
+        { label: '❌ count',      type: ColumnType.NUM, data: { value: 'countBad' }},
+        { label: 'Had error?',    type: ColumnType.CHK, data: { value: 'hadError' }}
     ];
              
     /**

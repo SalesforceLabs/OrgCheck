@@ -198,7 +198,7 @@ export class DatasetFlows implements Dataset {
         await MediumProcessor.forEach(flowDefinitions, async (flowDefinition: SfdcFlow) => flowDefinitionDataFactory.computeScore(flowDefinition));
 
         // Return data as map
-        logger?.log(`Done`);
+        logger?.log(`Done.`);
         return flowDefinitions;
     } 
 }

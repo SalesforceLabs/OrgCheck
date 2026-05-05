@@ -168,7 +168,7 @@ export class DatasetInternalActiveUsers implements Dataset {
         });
 
         // Return data as map
-        logger?.log(`Done`);
+        logger?.log(`Done.`);
         return users;
     } 
 }

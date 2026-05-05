@@ -40,4 +40,10 @@ export class OrgCheckSfPluginLoggerSetup implements orgcheck.LoggerSetup {
     this.logger.info(`[${section}] STOPPED`);
     this.sections.delete(section);
   }
+
+  public canBeInterrupted(section: string, interruptCallback: () => void): void {
+    this.logger.info(`[${section}] CAN BE INTERRUPTED`);
+    interruptCallback();
+    this.logger.info(`[${section}] WAS INTERRUPTED`);
+  }
 }

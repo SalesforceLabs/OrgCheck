@@ -89,7 +89,7 @@ export class DatasetUserRoles implements Dataset {
         });
 
         // Return data as map
-        logger?.log(`Done`);
+        logger?.log(`Done.`);
         return roles;
     } 
 }

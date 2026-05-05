@@ -88,7 +88,7 @@ export class RecipeCustomFields implements ServedRecipe<SfdcField[], Table> {
                 array.push(customField);
             }
         });
-        logger?.log(`Done transforming custom fields!`);
+        logger?.log(`Done.`);
 
         // Return data
         return array;

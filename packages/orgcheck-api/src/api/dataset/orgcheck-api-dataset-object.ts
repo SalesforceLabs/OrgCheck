@@ -314,7 +314,7 @@ export class DatasetObject implements Dataset {
         });
 
         // Return data as object (and not as a map!!!)
-        logger?.log(`Done`);
+        logger?.log(`Done.`);
         return object;
     } 
 }

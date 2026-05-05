@@ -10,12 +10,31 @@ export interface LoggerIntf {
      */
     log(message?: string): void;
 
+    /**
+     * @description Instruct the logger to silently swallow any subsequent errors instead of recording them.
+     * @public
+     */
     ignoreErrors(): void;
 
+    /**
+     * @description Restore normal error recording after a prior call to ignoreErrors().
+     * @public
+     */
     acknowledgeErrors(): void;
 
+    /**
+     * @description Record an error that occurred during this operation.
+     *              Ignored when the logger is not running or error-ignore mode is active.
+     * @param {Error} [error] - the error to record
+     * @public
+     */
     hadError(error?: Error): void;
 
+    /**
+     * @description Mark the operation as finished, triggering either endedSuccessfully or
+     *              endedWithErrors on the LoggerSetup depending on whether any errors were recorded.
+     * @public
+     */
     end(): void;
 
     /**

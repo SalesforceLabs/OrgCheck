@@ -238,22 +238,22 @@ export abstract class OrgCheckSfPluginAbstractCommand extends SfCommand<CheckRes
         this.log();
         this.logSuccess('What is Salesforce saying about this limit?');
         this.log('If your org reaches or exceeds its daily API request limit, Salesforce still lets the operations');
-        this.log('proceed by a certain amount, if possible. It helps avoid blocking your workflows during unexpected');
-        this.log('spikes in workloads and occasional peak periods. A hard cap is in place to safeguard platform ');
-        this.log('resources and prevent API requests from exceeding the daily limit unimpeded.');
+        this.log(' proceed by a certain amount, if possible. It helps avoid blocking your workflows during unexpected');
+        this.log(' spikes in workloads and occasional peak periods. A hard cap is in place to safeguard platform ');
+        this.log(' resources and prevent API requests from exceeding the daily limit unimpeded.');
         this.log();
         this.logSuccess('How do we manage this limit in Org Check?');
         this.log('**Org Check** is monitoring the **API Request limit** of your org every time it uses the Salesforce');
-        this.log('APIs (and without any additional calls of course!). The usage of this limit will be shown in the');
-        this.log('application everytime. Additionally, the application will **warn** you when the limit starts ');
-        this.log('reaching **70%**, and, will **stop** working when the limit reaches **90%**.');
+        this.log(' APIs (and without any additional calls of course!). The usage of this limit will be shown in the');
+        this.log(' application everytime. Additionally, the application will **warn** you when the limit starts ');
+        this.log(' reaching **70%**, and, will **stop** working when the limit reaches **90%**.');
         this.log();
         this.logSuccess('Some last comments...');
         this.log('We strongly encourage you to use Org Check in a **dedicated Sandbox** which is not part of your');
-        this.log('Salesforce development lifecycle. We discourage you from using the application directly in your');
-        this.log('Production. Even if we put in place a control about this limit, we remind you that Salesforce ');
-        this.log('Labs applications (like Org Check) have no warranty of any sort (as described in our AppExchange');
-        this.log('listing');
+        this.log(' Salesforce development lifecycle. We discourage you from using the application directly in your');
+        this.log(' Production. Even if we put in place a control about this limit, we remind you that Salesforce ');
+        this.log(' Labs applications (like Org Check) have no warranty of any sort (as described in our AppExchange');
+        this.log(' listing');
 
         // Throw an error!
         throw new Error(`You need to accept the terms before (using the 'accept-the-terms' flag)`);

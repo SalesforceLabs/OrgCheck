@@ -19,7 +19,7 @@ export class DatasetStaticResources implements Dataset {
     async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcStaticResource>> {
 
         // SOQL query
-        logger?.log(`Querying Rest API about StaticResource in the org...`);            
+        logger?.log(`Querying REST API about StaticResource in the org...`);            
         const results = await sfdcManager.soqlQuery([{
             string: 'SELECT Id, Name, ContentType, CreatedDate, LastModifiedDate, '+
                         'Description, NamespacePrefix '+
@@ -63,7 +63,7 @@ export class DatasetStaticResources implements Dataset {
         }));
 
         // Return data as map
-        logger?.log(`Done`);
+        logger?.log(`Done.`);
         return staticResources;
     } 
 }

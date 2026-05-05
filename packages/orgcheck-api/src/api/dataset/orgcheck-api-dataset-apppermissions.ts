@@ -35,7 +35,7 @@ export class DatasetAppPermissions implements Dataset {
         const setupEntityAccesses = results[1];
 
         // Create a map of the app menu items
-        logger?.log(`Parsing ${appMenuItems?.length} Application Menu Items...`);
+        logger?.log(`Parsing ${appMenuItems?.length} application menu items...`);
         const appMenuItemAccesses: Map<string, { a: boolean, v: boolean }> = new Map(await MediumProcessor.map(appMenuItems, (record: any) => {
             return [ sfdcManager.caseSafeId(record.ApplicationId), { a: record.IsAccessible, v: record. IsVisible }] ;
         }));
@@ -71,7 +71,7 @@ export class DatasetAppPermissions implements Dataset {
         ));
 
         // Return data as map
-        logger?.log(`Done`);
+        logger?.log(`Done.`);
         return appPermissions;
     }
 }
