@@ -11,7 +11,7 @@ const __queryMock = jest.fn(async function (soql: string) {
       records: [{
         Id: '00D00000000TEST', 
         Name: 'Test', 
-        IsSandbox: false, 
+        IsSandbox: !orgcheck_isProduction, 
         OrganizationType: orgcheck_isProduction === true ? 'Production' : 'Sandbox',
         TrialExpirationDate: null, 
         NamespacePrefix: 'test'

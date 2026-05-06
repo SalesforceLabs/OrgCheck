@@ -26,6 +26,7 @@ class LoggerSetupForTest implements LoggerSetup {
   public stopped (): void { 
     this.nbStoppedOperations++; 
   };
+  public canBeInterrupted(): void { }
 }
 
 describe('tests.api.unit.Logger', () => {
@@ -34,17 +35,17 @@ describe('tests.api.unit.Logger', () => {
     const loggerSetup = new LoggerSetupForTest();
     const loggerFactory: LoggerFactoryIntf = new LoggerFactory(loggerSetup);
 
-    const logger1 = loggerFactory?.create('1'); // that will start 1
+    const logger1 = loggerFactory?.create('1', true); // that will start 1
     expect(loggerSetup.nbStartedOperations).toBe(1);
     expect(loggerSetup.nbmessageLogged).toBe(0);
     expect(loggerSetup.nbStoppedOperations).toBe(0);
 
-    const logger2 = loggerFactory?.create('2'); // that will start 2
+    const logger2 = loggerFactory?.create('2', true); // that will start 2
     expect(loggerSetup.nbStartedOperations).toBe(2);
     expect(loggerSetup.nbmessageLogged).toBe(0);
     expect(loggerSetup.nbStoppedOperations).toBe(0);
 
-    loggerFactory?.create('3'); // that will start 3
+    loggerFactory?.create('3', true); // that will start 3
     expect(loggerSetup.nbStartedOperations).toBe(3);
     expect(loggerSetup.nbmessageLogged).toBe(0);
     expect(loggerSetup.nbStoppedOperations).toBe(0);
@@ -69,17 +70,17 @@ describe('tests.api.unit.Logger', () => {
     const loggerSetup = new LoggerSetupForTest();
     const loggerFactory: LoggerFactoryIntf = new LoggerFactory(loggerSetup);
 
-    const logger1 = loggerFactory?.create('1');
+    const logger1 = loggerFactory?.create('1', true);
     expect(loggerSetup.nbStartedOperations).toBe(1);
     expect(loggerSetup.nbmessageLogged).toBe(0);
     expect(loggerSetup.nbStoppedOperations).toBe(0);
 
-    const logger2 = loggerFactory?.create('2');
+    const logger2 = loggerFactory?.create('2', true);
     expect(loggerSetup.nbStartedOperations).toBe(2);
     expect(loggerSetup.nbmessageLogged).toBe(0);
     expect(loggerSetup.nbStoppedOperations).toBe(0);
 
-    const logger3 = loggerFactory?.create('3');
+    const logger3 = loggerFactory?.create('3', true);
     expect(loggerSetup.nbStartedOperations).toBe(3);
     expect(loggerSetup.nbmessageLogged).toBe(0);
     expect(loggerSetup.nbStoppedOperations).toBe(0);

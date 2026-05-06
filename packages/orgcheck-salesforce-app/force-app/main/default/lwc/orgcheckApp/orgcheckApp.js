@@ -96,7 +96,9 @@ export default class OrgcheckApp extends LightningElement {
         // Org type. Can be 'Production', 'Sandbox', 'Trial' or 'Developer Edition' 
         type: '',
         // Depending on the type of the org, we can have different themes in the UI
-        theme: ''
+        theme: '',
+        // Flag to indicate if the error is caused by API Access Control blocking Visualforce session IDs
+        hasApiAccessControlIssue: false
     }
 
     /**
@@ -249,12 +251,20 @@ export default class OrgcheckApp extends LightningElement {
 
             // Create an Org Check API
             this._private_properties.spinner?.sectionLog(SECTION_03, `Start initiating...`);
+            const authenticationOptions = {};
             try {
+                //if (this.orgInformation.hasApiAccessControlIssue === true) {
+                //    authenticationOptions.loginUrl = 'https://...';
+                //    authenticationOptions.clientId = '3MV...';
+                //    authenticationOptions.clientSecret = '190...'
+                //    authenticationOptions.redirectUri = 'https://...';
+                //} else {
+                authenticationOptions.accessToken = this.accessToken;
+                //}
                 this._private_properties.api = __orgcheck__Get()?.ApiFactory?.create({
-                    salesforce: {
-                        authenticationOptions: {
-                            accessToken: this.accessToken
-                        }
+                    // Connection authentication options
+                    salesforce: { 
+                        authenticationOptions 
                     },
                     // Storage methods -- delegation to the local storage (which is the one of the browser)
                     storage: {
@@ -282,6 +292,9 @@ export default class OrgcheckApp extends LightningElement {
                             //this._private_properties.spinner?.sectionFailed(section, error); 
                             this._private_properties.spinner?.sectionEnded(section, 'There was an error...'); 
                             this._private_properties.modal?.showErrors(section, errors);
+                            if (errors.some((error) => error.code === 'INVALID_SESSION_ID')) {
+                                this.orgInformation.hasApiAccessControlIssue = true;
+                            }
                             if (this.verbose) {
                                 console.error(`Org Check [${section}] ERROR: `, errors); 
                             }
@@ -309,6 +322,11 @@ export default class OrgcheckApp extends LightningElement {
             } catch (error) {
                 this._private_properties.spinner?.sectionFailed(SECTION_03, error);
                 throw new Error(`Error while initiating Org Check API`);
+            } finally {
+                authenticationOptions.clientId = '';
+                authenticationOptions.clientSecret = '';
+                authenticationOptions.redirectUri = '';
+                authenticationOptions.accessToken = '';
             }
 
             // Some other stuff to do
@@ -792,6 +810,20 @@ export default class OrgcheckApp extends LightningElement {
     // User Experience Handlers
     // ----------------------------------------------------------------------------------------------------------------
     // ----------------------------------------------------------------------------------------------------------------
+
+    /**
+     * @description Event called when the user clicks on the "Re-init API" button in the API Access Control issue panel
+     * @public
+     * @async
+     */
+    async handleReInitApiIfApiAccessControlIssue() {
+        try {
+            this.orgInformation.hasApiAccessControlIssue = true;
+            await this.initApi();
+        } catch (error) {
+            this._private_properties.modal?.showErrors('handleReInitApi', error);
+        }
+    }
 
     /**
      * @description Event called when the user search something in the navigation menu on the left. We filter the 

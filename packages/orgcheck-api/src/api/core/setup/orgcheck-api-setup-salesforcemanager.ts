@@ -3,6 +3,7 @@ export interface SalesforceAuthenticationOptions {
     clientId?: string; 
     clientSecret?: string; 
     redirectUri?: string;
+    loginUrl?: string;
 }
 
 export interface SalesforceManagerSetup {

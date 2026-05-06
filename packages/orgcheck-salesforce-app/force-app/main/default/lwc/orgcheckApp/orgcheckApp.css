@@ -34,3 +34,11 @@ div.pleaseAcceptTheTerms {
     border-radius: 2em;
 }
 
+div.howToSolveApiAccessControlIssue {
+    width: 80%;
+    justify-self: center;
+    background-color: #eb97f1;
+    padding: 2em;
+    border-radius: 2em;
+}
+

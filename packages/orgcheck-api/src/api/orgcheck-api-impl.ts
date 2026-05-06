@@ -23,7 +23,6 @@ import { DataMatrixIntf, DataWithScore, GlobalViewAsTable, SfdcUserRole } from '
 import { DataCollectionStatisticsIntf } from 'src/api/core/data/orgcheck-api-data-datacollectionstats';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { CacheItem } from 'src/api/data/orgcheck-api-data-cacheitem';
-import { LoggerUtil } from './core/logger/orgcheck-api-loggerutil';
 
 /**
  * @description Org Check API main class

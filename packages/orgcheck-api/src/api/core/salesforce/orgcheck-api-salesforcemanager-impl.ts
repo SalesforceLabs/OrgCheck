@@ -118,13 +118,16 @@ export class SalesforceManager implements SalesforceManagerIntf {
             }
 
             // 1. Connection options
-            const connectionOptions: { version: string, maxRequest: number, accessToken?: string, oauth2?: { clientId: string, clientSecret: string, redirectUri: string } } = {
+            const connectionOptions: { version: string, maxRequest: number, accessToken?: string, oauth2?: { clientId: string, clientSecret: string, redirectUri: string, loginUrl: string } } = {
                 version: `${this.apiVersion}.0`,
                 maxRequest: 15 // making sure we set it to a reasonable value = 15
             }
             if (setup.authenticationOptions.accessToken) {
                 connectionOptions.accessToken = setup.authenticationOptions.accessToken;
             } else {
+                if (setup.authenticationOptions.loginUrl === undefined) {
+                    throw new Error(`Can't instanciate a SalesforceManager if a authenticationOptions.loginUrl is undefined in the setup.`)
+                }
                 if (setup.authenticationOptions.clientId === undefined) {
                     throw new Error(`Can't instanciate a SalesforceManager if a authenticationOptions.clientId is undefined in the setup.`)
                 }
@@ -135,6 +138,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
                     throw new Error(`Can't instanciate a SalesforceManager if a authenticationOptions.redirectUri is undefined in the setup.`)
                 }
                 connectionOptions.oauth2 = {
+                    loginUrl: setup.authenticationOptions.loginUrl,
                     clientId: setup.authenticationOptions.clientId,
                     clientSecret: setup.authenticationOptions.clientSecret,
                     redirectUri: setup.authenticationOptions.redirectUri

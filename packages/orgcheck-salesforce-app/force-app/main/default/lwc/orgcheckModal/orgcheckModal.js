@@ -8,7 +8,6 @@ export default class OrgcheckModal extends LightningElement {
         this.isShown = false;
         this.errorChains = [];
         this._errorChainsAsMap = new Map();
-        this.hasApiAccessControlIssue = false;
         this.isClosable = false;
         this.message = '';
         this.headerTitle = '';
@@ -48,18 +47,17 @@ export default class OrgcheckModal extends LightningElement {
     }
 
     /**
-     * @description Show the error in a modal (that can be closed)
-     * @param {string} title - Title of the modal
+     * @description Show the error in a modal (that can be closed) with some context and the errors
+     * @param {string} context - Some context for the errors 
      * @param {Error | Error[]} errors - The errors to show in the error modal
      * @public
      */ 
-    @api showErrors(title, errors) {
+    @api showErrors(context, errors) {
         if (Array.isArray(errors) === false) {
             errors = [ errors ];
         }
         if (this.isShown === false) {
             this._errorChainsAsMap.clear();
-            this.hasApiAccessControlIssue = false;
         }
         errors.forEach((error) => {
             for (let e = error; e !== undefined; e = e.cause) {
@@ -67,21 +65,16 @@ export default class OrgcheckModal extends LightningElement {
             }
         });
         /** @type {{ index: number, message: string, body: string }[]} */ const errorChains = [];
-        let hasApiAccessControlIssue = false;
         this._errorChainsAsMap.forEach((error, key) => {
             errorChains.push({ 
                 index: errorChains.length,
                 message: key, 
                 body: JSON.stringify(error, (key, value) => key != 'cause' ? value : undefined, 2) 
             });
-            if (hasApiAccessControlIssue === false && error.code === 'INVALID_SESSION_ID') {
-                hasApiAccessControlIssue = true;
-            }
         });
         this.errorChains = errorChains;
-        this.hasApiAccessControlIssue = hasApiAccessControlIssue;
         this.isClosable = true;
-        this.headerTitle = title;
+        this.headerTitle = `Oops we had an issue... (${context || ''})`;
         this.isShown = true;
     }
 
@@ -91,7 +84,6 @@ export default class OrgcheckModal extends LightningElement {
      */
     handleClose() {
         this.isShown = false;
-        this.hasApiAccessControlIssue = false;
     }
 
     /**
@@ -140,14 +132,12 @@ export default class OrgcheckModal extends LightningElement {
      */
     @track errorChains;
 
-    _errorChainsAsMap;
-
     /**
-     * @description Flag to indicate the error is caused by API Access Control blocking Visualforce session IDs
-     * @type {boolean}
-     * @public
+     * @description Map of errors as a map of error messages to error objects
+     * @type {Map<string, Error>}
+     * @private
      */
-    @track hasApiAccessControlIssue;
+    _errorChainsAsMap;
 
     /**
      * @description Bound keydown handler reference

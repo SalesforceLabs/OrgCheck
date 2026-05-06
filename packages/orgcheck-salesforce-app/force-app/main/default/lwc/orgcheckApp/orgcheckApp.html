@@ -91,6 +91,37 @@
                 <lightning-button variant="destructive" title="No, I do not accept this terms and I will use Org Check in another environment instead." label="No"></lightning-button>
             </div>
         </div>
+        <div lwc:if={orgInformation.hasApiAccessControlIssue} class="howToSolveApiAccessControlIssue">
+            <h1 class="slds-text-heading_medium">How to solve the API Access Control issue...</h1>
+            <br />
+            <b>Org Check</b> is currently not working because the API Access Control 
+            setting is activated in this org. This is totally fine with us and we 
+            understand your choice. Let's try to solve this issue together so that 
+            you can use Org Check.
+            <br />
+            <br />
+            <strong>Option 1: Let Visualforce uses Session IDs (not ideal)</strong><br />
+            <ul class="slds-list_dotted">
+                <li>The idea is to keep the current setup BUT without blocking all the 
+                    Visualforce pages from this <a target="_blank" rel="external noopener noreferrer" 
+                    href="/lightning/setup/ApiAccessControl/home">page</a>in the setup menu
+                </li>
+                <li>Check the <b>"Allow Visualforce pages to access APIs"</b> option to 
+                    allow any of these pages (including the one from the Org Check 
+                    application) to use the current user's session ID.</li>
+                <li>Please note that doing so, you will allow <b>ANY</b> Visualforce page to
+                    use the current user's session ID, not only Org Check's page.</li>
+                <li>Clearly, if you enabled this option in the first place, you may not be 
+                    likely OK with this option. But it's worth mentioning it in case it's 
+                    OK for you...</li>
+            </ul>
+            <br />
+            <br />
+            <strong>Option 2: You should be able to create a new External Client App and use it in Org Check (not available yet)</strong><br />
+            <ul class="slds-list_dotted">
+                <li>To be defined...</strong></li>
+            </ul>
+        </div>
         <!-- The navigation, title, filters and content (only if the use was accepted!!) -->
         <div data-key="orgcheck-main" class="slds-hide">
             <lightning-layout>
