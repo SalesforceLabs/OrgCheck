@@ -57,11 +57,11 @@ export class DatasetFlows implements Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${flowDefRecords?.length} flow versions...`);
         const flowDependenciesIds: string[] = [];
-        await MediumProcessor.forEach(flowDefRecords, async (record: any) => {
+        await MediumProcessor.forEach(flowDefRecords, async (record: Record<string, unknown>) => {
             // Add the ID15 of the most interesting flow version
-            flowDependenciesIds.push(sfdcManager.caseSafeId(record.ActiveVersionId ?? record.LatestVersionId));
+            flowDependenciesIds.push(sfdcManager.caseSafeId((record.ActiveVersionId ?? record.LatestVersionId) as string));
             // Add the ID15 of the flow definition
-            flowDependenciesIds.push(sfdcManager.caseSafeId(record.Id));
+            flowDependenciesIds.push(sfdcManager.caseSafeId(record.Id as string));
         });
         const flowDefinitionsDependencies = await sfdcManager.dependenciesQuery(flowDependenciesIds, logger);
         
@@ -70,12 +70,12 @@ export class DatasetFlows implements Dataset {
 
         // Create the map
         logger?.log(`Parsing ${flowDefRecords?.length} flow definitions...`);
-        const flowDefinitions: Map<string, SfdcFlow> = new Map(await MediumProcessor.map(flowDefRecords, (record: any) => {
+        const flowDefinitions: Map<string, SfdcFlow> = new Map(await MediumProcessor.map(flowDefRecords, (record: Record<string, unknown>) => {
         
             // Get the ID15 of this flow definition and others
-            const id = sfdcManager.caseSafeId(record.Id);
-            const activeVersionId = sfdcManager.caseSafeId(record.ActiveVersionId);
-            const latestVersionId = sfdcManager.caseSafeId(record.LatestVersionId);
+            const id = sfdcManager.caseSafeId(record.Id as string);
+            const activeVersionId = sfdcManager.caseSafeId(record.ActiveVersionId as string);
+            const latestVersionId = sfdcManager.caseSafeId(record.LatestVersionId as string);
 
             // Create the instance
             const flowDefinition: SfdcFlow = flowDefinitionDataFactory.create({
@@ -105,10 +105,10 @@ export class DatasetFlows implements Dataset {
 
         // Add count of Flow verions (whatever they are active or not)
         logger?.log(`Parsing ${flowVersionsByDefRecords?.length} flow versions...`);
-        await MediumProcessor.forEach(flowVersionsByDefRecords, async (record: any) => {
+        await MediumProcessor.forEach(flowVersionsByDefRecords, async (record: Record<string, unknown>) => {
                 
             // Get the ID15s of the parent flow definition
-            const parentId = sfdcManager.caseSafeId(record.DefinitionId);
+            const parentId = sfdcManager.caseSafeId(record.DefinitionId as string);
 
             // Get the parent Flow definition
             const flowDefinition : SfdcFlow | undefined = flowDefinitions.get(parentId);
@@ -116,7 +116,7 @@ export class DatasetFlows implements Dataset {
                 
                 // Add to the version counter to the definition
                 // Using += because using custom queryMore could return multiple batches
-                flowDefinition.versionsCount += record.NbVersions;
+                flowDefinition.versionsCount += record.NbVersions as number;
             }
         });
 
@@ -131,14 +131,15 @@ export class DatasetFlows implements Dataset {
 
         // Lets parse the flow versions by ourselves
         logger?.log(`Parsing ${records?.length} flow versions from Tooling API...`);
-        await MediumProcessor.forEach(records, async (record: any)=> {
+        await MediumProcessor.forEach(records, async (record: Record<string, unknown>)=> {
 
             // Get the ID15s of this flow version and parent flow definition
-            const id = sfdcManager.caseSafeId(record.Id);
-            const parentId = sfdcManager.caseSafeId(record.DefinitionId);
+            const id = sfdcManager.caseSafeId(record.Id as string);
+            const parentId = sfdcManager.caseSafeId(record.DefinitionId as string);
             const violations = lfsViolations.get(id) ?? [];
 
             // Create the instance
+            const metadata = record.Metadata as Record<string, unknown>;
             const activeFlowVersion: SfdcFlowVersion = flowVersionDataFactory.create({
                 properties: {
                     id: id,
@@ -150,17 +151,17 @@ export class DatasetFlows implements Dataset {
                                         'orchestratedStages', 'recordCreates', 'recordDeletes',
                                         'recordLookups', 'recordRollbacks', 'recordUpdates',
                                         'screens', 'steps', 'waits'
-                                    ].reduce((count, property) => count + record.Metadata[property]?.length || 0, 0),
-                    dmlCreateNodeCount: record.Metadata.recordCreates?.length || 0,
-                    dmlDeleteNodeCount: record.Metadata.recordDeletes?.length || 0,
-                    dmlUpdateNodeCount: record.Metadata.recordUpdates?.length || 0,
-                    screenNodeCount: record.Metadata.screens?.length || 0,
-                    sobject: record.Metadata.start?.object || '',
-                    triggerType: record.Metadata.start?.triggerType || '',
-                    recordTriggerType: record.Metadata.start?.recordTriggerType || '',
+                                    ].reduce((count, property) => count + ((metadata[property] as unknown[] | undefined)?.length || 0), 0),
+                    dmlCreateNodeCount: (metadata.recordCreates as unknown[] | undefined)?.length || 0,
+                    dmlDeleteNodeCount: (metadata.recordDeletes as unknown[] | undefined)?.length || 0,
+                    dmlUpdateNodeCount: (metadata.recordUpdates as unknown[] | undefined)?.length || 0,
+                    screenNodeCount: (metadata.screens as unknown[] | undefined)?.length || 0,
+                    sobject: (metadata.start as Record<string, unknown> | undefined)?.object as string || '',
+                    triggerType: (metadata.start as Record<string, unknown> | undefined)?.triggerType as string || '',
+                    recordTriggerType: (metadata.start as Record<string, unknown> | undefined)?.recordTriggerType as string || '',
                     isActive: record.Status === 'Active',
                     description: record.Description,
-                    type: PROCESSTYPE_TRANSLATION[record.ProcessType] || `Other (${record.ProcessType})`,
+                    type: PROCESSTYPE_TRANSLATION[record.ProcessType as string] || `Other (${record.ProcessType as string})`,
                     isProcessBuilder: record.ProcessType === 'Workflow',
                     isScreenFlow: record.ProcessType === 'Flow',
                     runningMode: record.RunInMode,
@@ -171,9 +172,9 @@ export class DatasetFlows implements Dataset {
                 }
             });
             if (activeFlowVersion.isProcessBuilder === true) {
-                record.Metadata.processMetadataValues?.forEach((m: any) => {
-                    if (m.name === 'ObjectType') activeFlowVersion.sobject = m.value.stringValue;
-                    if (m.name === 'TriggerType') activeFlowVersion.triggerType = m.value.stringValue;
+                (metadata.processMetadataValues as Record<string, unknown>[] | undefined)?.forEach((m: Record<string, unknown>) => {
+                    if (m.name === 'ObjectType') activeFlowVersion.sobject = (m.value as Record<string, unknown>).stringValue as string;
+                    if (m.name === 'TriggerType') activeFlowVersion.triggerType = (m.value as Record<string, unknown>).stringValue as string;
                 });
             }
 
@@ -195,7 +196,7 @@ export class DatasetFlows implements Dataset {
         });
 
         // Compute the score of all definitions
-        await MediumProcessor.forEach(flowDefinitions, async (flowDefinition: SfdcFlow) => flowDefinitionDataFactory.computeScore(flowDefinition));
+        await MediumProcessor.forEach(flowDefinitions, async (flowDefinition: SfdcFlow) => { await flowDefinitionDataFactory.computeScore(flowDefinition); });
 
         // Return data as map
         logger?.log(`Done.`);

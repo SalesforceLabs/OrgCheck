@@ -35,16 +35,16 @@ export class DatasetCustomLabels implements Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${customLabelRecords?.length} custom labels...`);
         const customLabelsDependencies = await sfdcManager.dependenciesQuery(
-            await MediumProcessor.map(customLabelRecords, (record: any) => sfdcManager.caseSafeId(record.Id)), 
+            await MediumProcessor.map(customLabelRecords, (record) => sfdcManager.caseSafeId(record.Id as string)), 
             logger
         );
         
         // Create the map
         logger?.log(`Parsing ${customLabelRecords?.length} custom labels...`);
-        const customLabels: Map<string, SfdcCustomLabel> = new Map(await MediumProcessor.map(customLabelRecords, (record: any) => {
+        const customLabels: Map<string, SfdcCustomLabel> = new Map(await MediumProcessor.map(customLabelRecords, (record) => {
 
             // Get the ID15 of this custom label
-            const id = sfdcManager.caseSafeId(record.Id);
+            const id = sfdcManager.caseSafeId(record.Id as string);
 
             // Create the instance
             const customLabel: SfdcCustomLabel = labelDataFactory.createWithScore({

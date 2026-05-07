@@ -23,11 +23,10 @@ abstract class AbstractRecipeObjects implements ServedRecipe<SfdcObject[], Table
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
-     * @param {SimpleLoggerIntf} _logger - Logger
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public ingredients(): Array<string | DatasetRunInformation> {
         return [ 
             DatasetAliases.OBJECTTYPES, 
             new DatasetRunInformation(
@@ -56,11 +55,11 @@ abstract class AbstractRecipeObjects implements ServedRecipe<SfdcObject[], Table
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<SfdcObject[]> {
+    public async mix(ingredients: Map<string, unknown>, _logger: SimpleLoggerIntf, parameters: Map<string, string>): Promise<SfdcObject[]> {
 
         // Get data and parameters
-        const types: Map<string, SfdcObjectType> = ingredients.get(DatasetAliases.OBJECTTYPES);
-        const objects: Map<string, SfdcObject> = ingredients.get(DatasetAliases.OBJECTS);
+        const types = ingredients.get(DatasetAliases.OBJECTTYPES) as Map<string, SfdcObjectType>;
+        const objects = ingredients.get(DatasetAliases.OBJECTS) as Map<string, SfdcObject>;
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
         const type = OrgCheckGlobalParameter.getSObjectTypeName(parameters);
 

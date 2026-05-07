@@ -19,7 +19,7 @@ export class DatasetRunInformation {
      * @type {Map<string, any>}
      * @public
      */
-    public readonly parameters: Map<string, any>;
+    public readonly parameters: Map<string, unknown>;
     
     /**
      * @description Constructor
@@ -27,7 +27,7 @@ export class DatasetRunInformation {
      * @param {string} cacheKey - The cache key
      * @param {Map<string, any>} parameters - The parameters
      */
-    constructor(alias: string, cacheKey: string, parameters: Map<string, any>) {
+    constructor(alias: string, cacheKey: string, parameters: Map<string, unknown>) {
         this.alias = alias;
         this.cacheKey = cacheKey;
         this.parameters = parameters;

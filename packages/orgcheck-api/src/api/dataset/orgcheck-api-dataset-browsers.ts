@@ -35,17 +35,17 @@ export class DatasetBrowsers implements Dataset {
 
         logger?.log(`Parsing ${browserRecords?.length} browsers...`);
         const browsers = new Map();
-        await MediumProcessor.forEach(browserRecords, async (record: any) => {
+        await MediumProcessor.forEach(browserRecords, async (record) => {
 
-            const browserElements = record.Browser.split(' ', 2);
-            const name = browserElements && browserElements?.length > 0 ? browserElements[0] : record.Browser;
+            const browserElements = (record.Browser as string).split(' ', 2);
+            const name = browserElements && browserElements?.length > 0 ? browserElements[0] : record.Browser as string;
             const versionAsText = browserElements && browserElements?.length > 1 ? browserElements[1] : '';
             const version = Number.parseInt(versionAsText, 10) ?? NaN;
 
             if (browsers.has(name)) {
                 const browser: SfdcBrowser = browsers.get(name);
                 // Update the number of logins
-                browser.nbApplicationLogin += record.CntBrowser;
+                browser.nbApplicationLogin += (record.CntBrowser as number);
             } else {
                 const browser: SfdcBrowser = browserDataFactory.create({
                     properties: {

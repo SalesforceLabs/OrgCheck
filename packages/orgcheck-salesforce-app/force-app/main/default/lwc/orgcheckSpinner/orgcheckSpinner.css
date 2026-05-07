@@ -5,21 +5,21 @@
 }
 
 .progress-marker-ended {
-    border-color: green !important; 
+    border-color: var(--slds-g-color-palette-green-50) !important; 
     background-image: url(/img/func_icons/util/checkmark16.gif) !important; 
     background-size: 8px !important;
 }
 
 .progress-marker-error {
-    border-color: red !important; 
+    border-color: var(--slds-g-color-palette-red-50) !important; 
     background-image: url(/img/func_icons/remove12_on.gif) !important; 
     background-size: 8px !important;
 }
 
 pre {
-    background-color: rgb(66 24 24);
-    color: #e39893;
-    padding: 10px;
+    background-color: var(--slds-g-color-error-base-10);
+    color: var(--slds-g-color-palette-red-70);
+    padding: var(--slds-g-spacing-3, 0.75rem);
 }
 
 .li-ended {

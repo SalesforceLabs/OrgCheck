@@ -20,11 +20,10 @@ export class RecipePermissionSets implements ServedRecipe<SfdcPermissionSet[], T
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
-     * @param {SimpleLoggerIntf} _logger - Logger
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public ingredients(): Array<string | DatasetRunInformation> {
         return [
             DatasetAliases.PERMISSIONSETS
         ];
@@ -48,10 +47,10 @@ export class RecipePermissionSets implements ServedRecipe<SfdcPermissionSet[], T
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<SfdcPermissionSet[]> {
+    public async mix(ingredients: Map<string, unknown>, _logger: SimpleLoggerIntf, parameters: Map<string, string>): Promise<SfdcPermissionSet[]> {
 
         // Get data and parameters
-        const permissionSets: Map<string, SfdcPermissionSet> = ingredients.get(DatasetAliases.PERMISSIONSETS);
+        const permissionSets = ingredients.get(DatasetAliases.PERMISSIONSETS) as Map<string, SfdcPermissionSet>;
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data

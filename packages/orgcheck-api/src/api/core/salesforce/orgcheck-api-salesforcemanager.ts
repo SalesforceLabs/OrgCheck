@@ -1,5 +1,6 @@
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { SalesforceUsageInformationIntf } from 'src/api/core/salesforce/orgcheck-api-limit-usageinformation';
+import { DataDependencies } from 'src/api/core/data/orgcheck-api-data-dependencies';
 
 /**
  * @description Salesforce Query request
@@ -71,7 +72,7 @@ export class SalesforceError extends Error {
      * @param {any} [contextInformation] - Json object with additional context information
      * @public
      */
-    constructor(message: string, public readonly code: string, public readonly contextInformation: any) {
+    constructor(message: string, public readonly code: string, public readonly contextInformation: unknown) {
         super(message)
     }
 }
@@ -132,7 +133,7 @@ export interface SalesforceManagerIntf {
      * @async
      * @public
      */
-    soqlQuery(queries: SalesforceQueryRequest | any[], logger: SimpleLoggerIntf): Promise<any[][]>;
+    soqlQuery(queries: SalesforceQueryRequest | SalesforceQueryRequest[], logger: SimpleLoggerIntf): Promise<Record<string, unknown>[][]>;
 
     /**
      * @description Method to call a list of SOSL queries (tooling or not)
@@ -143,7 +144,7 @@ export interface SalesforceManagerIntf {
      * @async
      * @public
      */
-    soslQuery(queries: SalesforceQueryRequest | any[], logger: SimpleLoggerIntf): Promise<any[][]>;
+    soslQuery(queries: SalesforceQueryRequest | SalesforceQueryRequest[], logger: SimpleLoggerIntf): Promise<Record<string, unknown>[][]>;
 
     /**
      * @param {string[]} ids - Array of Salesforce Ids
@@ -153,7 +154,7 @@ export interface SalesforceManagerIntf {
      * @async
      * @public
      */
-    dependenciesQuery(ids: string[], logger: SimpleLoggerIntf): Promise<{ records: any[]; errors: string[]; }>;
+    dependenciesQuery(ids: string[], logger: SimpleLoggerIntf): Promise<DataDependencies>;
 
     /**
      * @description Method to retrieve a list of metadata types
@@ -164,7 +165,7 @@ export interface SalesforceManagerIntf {
      * @async
      * @public
      */
-    readMetadata(metadatas: SalesforceMetadataRequest[], logger: SimpleLoggerIntf): Promise<Map<string, Array<any>>>;
+    readMetadata(metadatas: SalesforceMetadataRequest[], logger: SimpleLoggerIntf): Promise<Map<string, Array<Record<string, unknown>>>>;
     
     /**
      * @description Method to retrieve a list of metadata types by at Scale (using composite tooling api)
@@ -177,7 +178,7 @@ export interface SalesforceManagerIntf {
      * @async
      * @public
      */
-    readMetadataAtScale(type: string, ids: any[], byPasses: string[], logger: SimpleLoggerIntf): Promise<any[]>;
+    readMetadataAtScale(type: string, ids: string[], byPasses: string[], logger: SimpleLoggerIntf): Promise<Record<string, unknown>[]>;
     
     /**
      * @description Method to get the list of sobjects
@@ -187,7 +188,7 @@ export interface SalesforceManagerIntf {
      * @async
      * @public
      */
-    describeGlobal(logger: SimpleLoggerIntf): Promise<any[]>;
+    describeGlobal(logger: SimpleLoggerIntf): Promise<Record<string, unknown>[]>;
 
     /**
      * @description Method to describe one particular sobject
@@ -198,7 +199,7 @@ export interface SalesforceManagerIntf {
      * @async
      * @public
      */
-    describe(sobjectDevName: string, logger: SimpleLoggerIntf): Promise<any>;
+    describe(sobjectDevName: string, logger: SimpleLoggerIntf): Promise<Record<string, unknown>>;
     
     /**
      * @description Method to get the record count (recycle bin included) of one particular sobject

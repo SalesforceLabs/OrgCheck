@@ -37,15 +37,15 @@ export class DatasetHomePageComponents implements Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${homePageRecords?.length} homepage components...`);
         const homePageDependencies = await sfdcManager.dependenciesQuery(
-            await MediumProcessor.map(homePageRecords, (record: any) => sfdcManager.caseSafeId(record.Id)), 
+            await MediumProcessor.map(homePageRecords, (record: Record<string, unknown>) => sfdcManager.caseSafeId(record.Id as string)), 
             logger
         );
 
         logger?.log(`Parsing ${homePageRecords?.length} homepage components...`);
-        const homePages: Map<string, SfdcHomePageComponent> = new Map(await MediumProcessor.map(homePageRecords, (record: any) => {
+        const homePages: Map<string, SfdcHomePageComponent> = new Map(await MediumProcessor.map(homePageRecords, (record: Record<string, unknown>) => {
 
             // Get the ID15 of this custom field
-            const id = sfdcManager.caseSafeId(record.Id);
+            const id = sfdcManager.caseSafeId(record.Id as string);
 
             // Create the instance
             const homePage: SfdcHomePageComponent = homePageDataFactory.create({
@@ -63,7 +63,7 @@ export class DatasetHomePageComponents implements Dataset {
 
             // Get information directly from the source code (if available)
             if (record.Body) {
-                const bodyCode = CodeScanner.RemoveCommentsFromXML(record.Body);
+                const bodyCode = CodeScanner.RemoveCommentsFromXML(record.Body as string);
                 homePage.hardCodedURLs = CodeScanner.FindHardCodedURLs(bodyCode);
                 homePage.hardCodedIDs = CodeScanner.FindHardCodedIDs(bodyCode);
             }

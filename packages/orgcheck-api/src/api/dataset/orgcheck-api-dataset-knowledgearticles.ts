@@ -35,11 +35,11 @@ export class DatasetKnowledgeArticles implements Dataset {
 
         // Create the map
         logger?.log(`Parsing ${knowledgeArticleRecords?.length} articles...`);
-        const knowledgeArticles: Map<string, SfdcKnowledgeArticle> = new Map(await MediumProcessor.map(knowledgeArticleRecords, (record: any) => {
+        const knowledgeArticles: Map<string, SfdcKnowledgeArticle> = new Map(await MediumProcessor.map(knowledgeArticleRecords, (record: Record<string, unknown>) => {
 
             // Get the ID15 of this version and article
-            const versionId = sfdcManager.caseSafeId(record.Id);
-            const articeId = sfdcManager.caseSafeId(record.KnowledgeArticleId);
+            const versionId = sfdcManager.caseSafeId(record.Id as string);
+            const articeId = sfdcManager.caseSafeId(record.KnowledgeArticleId as string);
 
             // Create the instance
             const knowledgeArticle: SfdcKnowledgeArticle = knowledgeArticleDataFactory.createWithScore({

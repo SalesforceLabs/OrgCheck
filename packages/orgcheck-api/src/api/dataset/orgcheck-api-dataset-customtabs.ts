@@ -38,7 +38,7 @@ export class DatasetCustomTabs implements Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${customTabRecords?.length} custom tabs...`);
         const customTabDependencies = await sfdcManager.dependenciesQuery(
-            await MediumProcessor.map(customTabRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+            await MediumProcessor.map(customTabRecords, (record) => sfdcManager.caseSafeId(record.Id as string)), 
             logger
         );
 
@@ -46,10 +46,10 @@ export class DatasetCustomTabs implements Dataset {
         const customTabs: Map<string, SfdcCustomTab> = new Map(await MediumProcessor.map(customTabRecords, (record) => {
 
             // Get the ID15 of this custom field
-            const id = sfdcManager.caseSafeId(record.Id);
+            const id = sfdcManager.caseSafeId(record.Id as string);
 
             // Create the instance
-            const customTab = customTabDataFactory.createWithScore({
+            const customTab: SfdcCustomTab = customTabDataFactory.createWithScore({
                 properties: {
                     id: id,
                     name: record.DeveloperName || `${id} (No name from API!)`,
@@ -58,8 +58,8 @@ export class DatasetCustomTabs implements Dataset {
                     description: record.Description,
                     createdDate: record.CreatedDate,
                     lastModifiedDate: record.LastModifiedDate,
-                    hardCodedURLs: CodeScanner.FindHardCodedURLs(record.Url),
-                    hardCodedIDs: CodeScanner.FindHardCodedIDs(record.Url),
+                    hardCodedURLs: CodeScanner.FindHardCodedURLs(record.Url as string),
+                    hardCodedIDs: CodeScanner.FindHardCodedIDs(record.Url as string),
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.CUSTOM_TAB)                    
                 },
                 dependencyData: customTabDependencies

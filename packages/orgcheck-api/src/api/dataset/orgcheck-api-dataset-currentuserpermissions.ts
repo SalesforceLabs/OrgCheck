@@ -14,12 +14,12 @@ export class DatasetCurrentUserPermissions implements Dataset {
      * @param {Map<string, any>} parameters - The parameters
      * @returns {Promise<Map<string, boolean>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, _dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Map<string, boolean>> {
+    async run(sfdcManager: SalesforceManagerIntf, _dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf, parameters: Map<string, unknown>): Promise<Map<string, boolean>> {
 
         const permissionFields = parameters?.get(OrgCheckGlobalParameter.SYSTEM_PERMISSIONS_LIST);
 
         // Checking parameters
-        if (permissionFields === undefined || permissionFields?.length === 0) {
+        if (permissionFields === undefined || (permissionFields as unknown[])?.length === 0) {
             throw new Error(`DatasetCurrentUserPermissions: No '${OrgCheckGlobalParameter.SYSTEM_PERMISSIONS_LIST}' were provided in the parameters.`);
         }
         if (!Array.isArray(permissionFields)) {
@@ -44,7 +44,7 @@ export class DatasetCurrentUserPermissions implements Dataset {
                         const soqlField = soqlFields[0];
                         if (soqlField) {
                             const field = soqlField.substring('Permissions'.length);
-                            permissionsMap.set(field, record[soqlField]);
+                            permissionsMap.set(field, record[soqlField] as boolean);
                         }
                     }
                 }

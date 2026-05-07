@@ -114,7 +114,7 @@ export class DataFactory implements DataFactoryIntf {
      * @type {Map<any, DataFactoryInstanceIntf>}
      * @private
      */
-    _instances: Map<any, DataFactoryInstanceIntf>;
+    _instances: Map<DataAliases, DataFactoryInstanceIntf>;
 
     /**
      * @description Constructor
@@ -181,7 +181,7 @@ export class DataFactoryInstance implements DataFactoryInstanceIntf {
      * @type {Function}
      * @private
      */
-    private _caster: Function;
+    private _caster: (data: unknown) => unknown;
 
     /**
      * @description Constructor
@@ -190,7 +190,7 @@ export class DataFactoryInstance implements DataFactoryInstanceIntf {
      * @param {boolean} isDependenciesNeeded - If true, the data will have dependencies information, otherwise it won't
      * @param {Function} caster - The caster method to call
      */
-    constructor(dataAlias: DataAliases, scoreRules: ScoreRule[], isDependenciesNeeded: boolean, caster: Function) {
+    constructor(dataAlias: DataAliases, scoreRules: ScoreRule[], isDependenciesNeeded: boolean, caster: (data: unknown) => unknown) {
         this._dataAlias = dataAlias;
         this._scoreRules = scoreRules;
         this._isDependenciesNeeded = isDependenciesNeeded;
@@ -204,12 +204,12 @@ export class DataFactoryInstance implements DataFactoryInstanceIntf {
      * @throws if configuration is null or configuration.properties is null
      * @public
      */
-    public create(setup: DataFactoryInstanceCreateSetup | DataFactoryInstanceCreateSetup_WithDependencies): any {
+    public create<T = Record<string, unknown>>(setup: DataFactoryInstanceCreateSetup | DataFactoryInstanceCreateSetup_WithDependencies): T {
         // Checks
         if (!setup) throw new TypeError("Setup can't be null.");
         if (!setup.properties) throw new TypeError("Setup.properties can't be null.");
         // Cast the property into the row
-        const row = this._caster(setup.properties);
+        const row = this._caster(setup.properties) as Record<string, unknown>;
         // For this type if we have at least one Org Check "score rules", then score is needed
         if (this._scoreRules?.length > 0) {
             row.score = 0;
@@ -232,7 +232,7 @@ export class DataFactoryInstance implements DataFactoryInstanceIntf {
             }
         }
         // Return the row finally
-        return row;
+        return row as unknown as T;
     }
 
     /**
@@ -241,30 +241,31 @@ export class DataFactoryInstance implements DataFactoryInstanceIntf {
      * @returns {any} Returns the row with computed score
      * @public
      */
-    public computeScore(row: any): any { 
+    public computeScore(row: unknown): Record<string, unknown> { 
+        const typedRow = row as Record<string, unknown>;
         this._scoreRules.filter(v => { 
             try { 
-                if (v.formula(row) === true) return true;
+                if (v.formula(typedRow) === true) return true;
             } catch (error) { 
-                console.error('COMPUTE SCORE', error, row); 
+                console.error('COMPUTE SCORE', error, typedRow); 
             }
             return false;
         }).forEach(v => {
-            row.score++;
-            row.badFields.push(v.badField);
-            row.badReasonIds.push(v.id);
+            (typedRow.score as number)++;
+            (typedRow.badFields as unknown[]).push(v.badField);
+            (typedRow.badReasonIds as unknown[]).push(v.id);
         });
-        return row;
+        return typedRow;
     }
 
     /**
      * @description Creates a new instance of the given data class AND computes the score
      * @param {DataFactoryInstanceCreateSetup | DataFactoryInstanceCreateSetup_WithDependencies} setup - The setup containing properties and dependencies to create a new instance
-     * @returns {any} Returns the row with computed score
+     * @returns {Record<string, unknown>} Returns the row with computed score
      * @throws if setup is null or configuration.properties is null
      * @public
      */
-    public createWithScore(setup: DataFactoryInstanceCreateSetup | DataFactoryInstanceCreateSetup_WithDependencies): any {
-        return this.computeScore(this.create(setup));
+    public createWithScore<T = Record<string, unknown>>(setup: DataFactoryInstanceCreateSetup | DataFactoryInstanceCreateSetup_WithDependencies): T {
+        return this.computeScore(this.create(setup)) as unknown as T;
     }
 }

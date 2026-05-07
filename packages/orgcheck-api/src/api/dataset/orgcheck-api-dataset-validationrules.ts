@@ -34,10 +34,10 @@ export class DatasetValidationRules implements Dataset {
         // Create the map
         const validationRuleRecords = results[0];
         logger?.log(`Parsing ${validationRuleRecords?.length} validation rules...`);
-        const validationRules: Map<string, SfdcValidationRule> = new Map(await MediumProcessor.map(validationRuleRecords, async (record: any) => {
+        const validationRules: Map<string, SfdcValidationRule> = new Map(await MediumProcessor.map(validationRuleRecords, async (record: Record<string, unknown>) => {
         
             // Get the ID15 of this validaiton rule
-            const id = sfdcManager.caseSafeId(record.Id);
+            const id = sfdcManager.caseSafeId(record.Id as string);
 
             // Create the instance
             const validationRule: SfdcValidationRule = validationRuleDataFactory.createWithScore({
@@ -49,7 +49,7 @@ export class DatasetValidationRules implements Dataset {
                     description: record.Description,
                     errorDisplayField: record.ErrorDisplayField,
                     errorMessage: record.ErrorMessage,
-                    objectId: record.EntityDefinition?.QualifiedApiName,
+                    objectId: (record.EntityDefinition as Record<string, string> | undefined)?.QualifiedApiName as string,
                     createdDate: record.CreatedDate,
                     lastModifiedDate: record.LastModifiedDate, 
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.VALIDATION_RULE)

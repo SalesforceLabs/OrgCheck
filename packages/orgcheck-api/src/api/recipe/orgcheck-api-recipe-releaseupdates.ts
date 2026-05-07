@@ -1,5 +1,4 @@
 import { ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
-import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SfdcReleaseUpdate } from 'src/api/data/orgcheck-api-data-releaseupdate';
@@ -17,11 +16,10 @@ export class RecipeReleaseUpdates implements ServedRecipe<SfdcReleaseUpdate[], T
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
-     * @param {SimpleLoggerIntf} _logger - Logger
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public ingredients(): Array<string | DatasetRunInformation> {
         return [DatasetAliases.RELEASEUPDATES];
     }
     
@@ -42,10 +40,10 @@ export class RecipeReleaseUpdates implements ServedRecipe<SfdcReleaseUpdate[], T
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf): Promise<SfdcReleaseUpdate[]> {
+    public async mix(ingredients: Map<string, unknown>): Promise<SfdcReleaseUpdate[]> {
 
         // Get data
-        const releaseUpdates: Map<string, SfdcReleaseUpdate> = ingredients.get(DatasetAliases.RELEASEUPDATES);
+        const releaseUpdates = ingredients.get(DatasetAliases.RELEASEUPDATES) as Map<string, SfdcReleaseUpdate>;
 
         // Checking data
         if (!releaseUpdates) throw new Error(`RecipeReleaseUpdates: Data from dataset alias 'RELEASEUPDATES' was undefined.`);

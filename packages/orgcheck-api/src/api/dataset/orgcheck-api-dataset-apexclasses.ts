@@ -56,13 +56,13 @@ export class DatasetApexClasses implements Dataset {
 
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${apexClassRecords?.length} apex classes...`);
-        const apexClassIds = await MediumProcessor.map(apexClassRecords, (record: any) => sfdcManager.caseSafeId(record.Id));
+        const apexClassIds = await MediumProcessor.map(apexClassRecords, (record: Record<string, unknown>) => sfdcManager.caseSafeId(record.Id as string));
         const apexClassesDependencies = await sfdcManager.dependenciesQuery(apexClassIds, logger);
 
         // Second set of SOQL queries only for the apex classes that are editable
         // This workaround is due to the fact that we can't filter on ApexClassOrTrigger.ManageableState in these queres
-        const apexCodeCoverageQueries: any[] = [];
-        const apexCodeCoverageAggQueries: any[] = [];
+        const apexCodeCoverageQueries: { string: string; queryMoreField: string; tooling: boolean }[] = [];
+        const apexCodeCoverageAggQueries: { string: string; tooling: boolean }[] = [];
         for (let i = 0; i < apexClassIds?.length; i += 500) {
             const subsetIds = `'${apexClassIds.slice(i, i + 500).join("','")}'`;
             apexCodeCoverageQueries.push({
@@ -82,22 +82,22 @@ export class DatasetApexClasses implements Dataset {
                 tooling: true
             });
         }
-        const results2: any[] = await Promise.all([
+        const results2 = await Promise.all([
             sfdcManager.soqlQuery(apexCodeCoverageQueries, logger),
             sfdcManager.soqlQuery(apexCodeCoverageAggQueries, logger)
         ]);
-        const apexCodeCoverageRecords = [].concat(... results2[0]);
-        const apexCodeCoverageAggRecords = [].concat(... results2[1]);
+        const apexCodeCoverageRecords = ([] as Record<string, unknown>[]).concat(...results2[0]);
+        const apexCodeCoverageAggRecords = ([] as Record<string, unknown>[]).concat(...results2[1]);
 
         // Create instances of SfdcApexClass
         logger?.log(`Parsing ${apexClassRecords?.length} apex classes...`);
-        const apexClasses: Map<string, SfdcApexClass> = new Map(await MediumProcessor.map(apexClassRecords, async (record: any) => {
+        const apexClasses: Map<string, SfdcApexClass> = new Map(await MediumProcessor.map(apexClassRecords, async (record) => {
 
             // Get the ID15
-            const id = sfdcManager.caseSafeId(record.Id);
+            const id = sfdcManager.caseSafeId(record.Id as string);
             
             // Create the instance
-            const apexClass: SfdcApexClass = apexClassDataFactory.create({
+            const apexClass: SfdcApexClass = apexClassDataFactory.create<SfdcApexClass>({
                 properties: {
                     id: id,
                     name: record.Name,
@@ -124,14 +124,16 @@ export class DatasetApexClasses implements Dataset {
 
             // Get information from the compilation output information by the Apex compiler on salesforce side (if available)
             if (record.SymbolTable) {
-                apexClass.innerClassesCount = record.SymbolTable.innerClasses?.length || 0;
-                apexClass.interfaces = record.SymbolTable.interfaces;
-                apexClass.isSchedulable = record.SymbolTable.interfaces?.includes('System.Schedulable') ?? false;
-                apexClass.methodsCount = record.SymbolTable.methods?.length || 0;
-                apexClass.extends = record.SymbolTable.parentClass;
-                if (record.SymbolTable.tableDeclaration) {
-                    apexClass.annotations = record.SymbolTable.tableDeclaration.annotations?.map((a: any) => a?.name ?? a);
-                    await MediumProcessor.forEach(record.SymbolTable.tableDeclaration.modifiers, async (m: any) => {
+                const symbolTable = record.SymbolTable as Record<string, unknown>;
+                apexClass.innerClassesCount = (symbolTable.innerClasses as unknown[] | undefined)?.length || 0;
+                apexClass.interfaces = (symbolTable.interfaces as string[] | undefined) ?? [];
+                apexClass.isSchedulable = (symbolTable.interfaces as string[] | undefined)?.includes('System.Schedulable') ?? false;
+                apexClass.methodsCount = (symbolTable.methods as unknown[] | undefined)?.length || 0;
+                apexClass.extends = symbolTable.parentClass ? [symbolTable.parentClass as string] : [];
+                if (symbolTable.tableDeclaration) {
+                    const tableDeclaration = symbolTable.tableDeclaration as Record<string, unknown>;
+                    apexClass.annotations = ((tableDeclaration.annotations as Array<{ name?: string }> | undefined) ?? []).map((a) => a?.name ?? '');
+                    await MediumProcessor.forEach(tableDeclaration.modifiers as string[], async (m: string) => {
                         switch (m) {
                             case 'with sharing':      apexClass.specifiedSharing = 'with';      break;
                             case 'without sharing':   apexClass.specifiedSharing = 'without';   break;
@@ -150,7 +152,7 @@ export class DatasetApexClasses implements Dataset {
             
             // Get information directly from the source code (if available)
             if (record.Body) {
-                const sourceCode = CodeScanner.RemoveCommentsFromCode(record.Body);
+                const sourceCode = CodeScanner.RemoveCommentsFromCode(record.Body as string);
                 apexClass.isInterface = CodeScanner.IsInterfaceFromApexCode(sourceCode);
                 apexClass.isEnum = CodeScanner.IsEnumFromApexCode(sourceCode);
                 apexClass.isClass = (apexClass.isInterface === false && apexClass.isEnum === false);
@@ -177,10 +179,10 @@ export class DatasetApexClasses implements Dataset {
         const relatedClassesByApexTest: Map<string, Set<string>> = new Map();
         await MediumProcessor.forEach(
             apexCodeCoverageRecords,
-            async (record: any) => {
+            async (record) => {
                 // Get the ID15 of the class that is tested and the test class
-                const id = sfdcManager.caseSafeId(record.ApexClassOrTriggerId);
-                const testId = sfdcManager.caseSafeId(record.ApexTestClassId);
+                const id = sfdcManager.caseSafeId(record.ApexClassOrTriggerId as string);
+                const testId = sfdcManager.caseSafeId(record.ApexTestClassId as string);
                 if (apexClasses.has(id)) { // make sure the id is an existing class!
                     // Add the relationships between class and test class
                     if (relatedTestsByApexClass.has(id) === false) relatedTestsByApexClass.set(id, new Set());
@@ -213,14 +215,14 @@ export class DatasetApexClasses implements Dataset {
         logger?.log(`Parsing ${apexCodeCoverageAggRecords?.length} apex code coverage aggregates...`);
         await MediumProcessor.forEach(
             apexCodeCoverageAggRecords,
-            async (record: any) => {
+            async (record) => {
                 // Get the ID15 of the class that is tested
-                const id = sfdcManager.caseSafeId(record.ApexClassOrTriggerId);
+                const id = sfdcManager.caseSafeId(record.ApexClassOrTriggerId as string);
                 if (apexClasses.has(id)) { // make sure the id is an existing class!
                     // set the coverage of that class
                     const clazz = apexClasses.get(id);
                     if (clazz) {
-                        clazz.coverage = (record.NumLinesCovered / (record.NumLinesCovered + record.NumLinesUncovered));
+                        clazz.coverage = ((record.NumLinesCovered as number) / ((record.NumLinesCovered as number) + (record.NumLinesUncovered as number)));
                     }
                 }
             }
@@ -230,9 +232,9 @@ export class DatasetApexClasses implements Dataset {
         logger?.log(`Parsing ${asyncApexJobRecords?.length} schedule apex classes...`);
         await MediumProcessor.forEach(
             asyncApexJobRecords,
-            async (record: any) => {
+            async (record) => {
                 // Get the ID15 of the class that is scheduled
-                const id = sfdcManager.caseSafeId(record.ApexClassId);
+                const id = sfdcManager.caseSafeId(record.ApexClassId as string);
                 if (apexClasses.has(id)) { // make sure the id is an existing class!
                     // set the scheduled flag to true
                     const clazz = apexClasses.get(id);
@@ -247,20 +249,20 @@ export class DatasetApexClasses implements Dataset {
         logger?.log(`Parsing ${apexTestResultRecords?.length} test results...`);
         await MediumProcessor.forEach(
             apexTestResultRecords,
-            async (record: any) => {
+            async (record) => {
                 // Get the ID15 of the related test class
-                const id = sfdcManager.caseSafeId(record.ApexClassId);
+                const id = sfdcManager.caseSafeId(record.ApexClassId as string);
                 if (apexClasses.has(id)) { // make sure the id is an existing class
                     const tc = apexClasses.get(id);
                     if (tc?.isTest === true) { // make sure this is a Test class!
                         if (!tc.lastTestRunDate) {
-                            tc.lastTestRunDate = record.ApexTestRunResult?.CreatedDate;
+                            tc.lastTestRunDate = ((record.ApexTestRunResult as Record<string, unknown> | undefined)?.CreatedDate) as unknown as number;
                             tc.testMethodsRunTime = 0;
                             tc.testPassedButLongMethods = [];
                             tc.testFailedMethods = [];
                         }
-                        if (tc.lastTestRunDate === record.ApexTestRunResult?.CreatedDate) {
-                            const result: SfdcApexTestMethodResult = apexTestResultDataFactory.create({ 
+                        if (tc.lastTestRunDate === (record.ApexTestRunResult as Record<string, unknown> | undefined)?.CreatedDate) {
+                            const result: SfdcApexTestMethodResult = apexTestResultDataFactory.create<SfdcApexTestMethodResult>({ 
                                 properties: {
                                     methodName: record.MethodName,
                                     isSuccessful: record.Outcome === 'Pass',
@@ -268,15 +270,16 @@ export class DatasetApexClasses implements Dataset {
                                     stacktrace: record.StackTrace,
                                 }
                             });
-                            if (record.ApexTestResults?.records && record.ApexTestResults.records?.length > 0) {
-                                const limit = record.ApexTestResults.records[0];
-                                if (limit.Cpu > 0) result.cpuConsumption = limit.Cpu; 
-                                if (limit.AsyncCalls > 0) result.asyncCallsConsumption = limit.AsyncCalls;
-                                if (limit.Sosl > 0) result.soslConsumption = limit.Sosl;
-                                if (limit.Soql > 0) result.soqlConsumption = limit.Soql;
-                                if (limit.QueryRows > 0) result.queryRowsConsumption = limit.QueryRows;
-                                if (limit.DmlRows > 0) result.dmlRowsConsumption = limit.DmlRows;
-                                if (limit.Dml > 0) result.dmlConsumption = limit.Dml;
+                            const apexTestResults = record.ApexTestResults as { records?: Record<string, unknown>[] } | undefined;
+                            if (apexTestResults?.records && apexTestResults.records?.length > 0) {
+                                const limitRec = apexTestResults.records[0] as Record<string, number>;
+                                if (limitRec.Cpu > 0) result.cpuConsumption = limitRec.Cpu; 
+                                if (limitRec.AsyncCalls > 0) result.asyncCallsConsumption = limitRec.AsyncCalls;
+                                if (limitRec.Sosl > 0) result.soslConsumption = limitRec.Sosl;
+                                if (limitRec.Soql > 0) result.soqlConsumption = limitRec.Soql;
+                                if (limitRec.QueryRows > 0) result.queryRowsConsumption = limitRec.QueryRows;
+                                if (limitRec.DmlRows > 0) result.dmlRowsConsumption = limitRec.DmlRows;
+                                if (limitRec.Dml > 0) result.dmlConsumption = limitRec.Dml;
                             }
                             tc.testMethodsRunTime += result.runtime;
                             (result.isSuccessful ? tc.testPassedButLongMethods : tc.testFailedMethods).push(result);

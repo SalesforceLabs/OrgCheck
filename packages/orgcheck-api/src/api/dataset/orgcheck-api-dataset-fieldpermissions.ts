@@ -17,9 +17,9 @@ export class DatasetFieldPermissions implements Dataset {
      * @param {Map<string, any>} parameters - The parameters
      * @returns {Promise<Map<string, SfdcFieldPermission>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Map<string, SfdcFieldPermission>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf, parameters: Map<string, unknown>): Promise<Map<string, SfdcFieldPermission>> {
 
-        const fullObjectApiName = OrgCheckGlobalParameter.getSObjectName(parameters);
+        const fullObjectApiName = OrgCheckGlobalParameter.getSObjectName(parameters as Map<string, string>);
 
         // First SOQL query
         logger?.log(`Querying REST API about SetupEntityAccess for TabSet in the org...`);            
@@ -36,13 +36,15 @@ export class DatasetFieldPermissions implements Dataset {
         // Create the map
         logger?.log(`Parsing ${permissions?.length} field permissions...`);
         const fieldPermissions: Map<string, SfdcFieldPermission> = new Map(await MediumProcessor.map(permissions, 
-            (record: any) => {
+            (record) => {
                 // Get the ID15 of this parent
-                const parentId = sfdcManager.caseSafeId(record.Parent.IsOwnedByProfile === true ? record.Parent.ProfileId : record.ParentId);
+                const parent = record.Parent as { IsOwnedByProfile: boolean; ProfileId: string } | null;
+                const parentId = sfdcManager.caseSafeId(parent?.IsOwnedByProfile === true ? parent.ProfileId : record.ParentId as string);
 
                 // Get only the name of the field without the object name (and by the way without dot
-                const indeOfDot = record.Field.indexOf('.');
-                const fieldName = indeOfDot === -1 ? record.Field : record.Field.substring(indeOfDot + 1);
+                const field = record.Field as string;
+                const indeOfDot = field.indexOf('.');
+                const fieldName = indeOfDot === -1 ? field : field.substring(indeOfDot + 1);
 
                 // Create the instance
                 const fieldPermission: SfdcFieldPermission = fieldPermissionDataFactory.create({
@@ -55,9 +57,9 @@ export class DatasetFieldPermissions implements Dataset {
                 });
 
                 // Add the app in map
-                return [ `${record.Field}-${parentId}`, fieldPermission ];
+                return [ `${field}-${parentId}`, fieldPermission ];
             }, 
-            (record: any) => {
+            (record) => {
                 // We do not want records with no Parent structure
                 if (!record.Parent) return false;
                 // We do not want records with no ParentId

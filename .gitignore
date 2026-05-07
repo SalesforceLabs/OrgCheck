@@ -38,3 +38,4 @@ yarn.lock
 .cursor/
 .vscode/
 .wireit/
+.mcp.json

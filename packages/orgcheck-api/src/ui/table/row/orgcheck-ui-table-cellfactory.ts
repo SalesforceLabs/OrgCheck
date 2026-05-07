@@ -1,48 +1,49 @@
 import { TableColumn } from 'src/ui/table/column/orgcheck-ui-table-column';
 import { ColumnType } from 'src/ui/table/column/orgcheck-ui-table-columntype';
+import { Modifier } from 'src/ui/table/column/orgcheck-ui-table-modifier';
 
 export class CellFactory {
 
     /**
      * @description Create a cell based on the column definition and the input row
      * @param {TableColumn } column - Column header information
-     * @param {any} row - Input data
-     * @returns {any} Output data
+     * @param {Record<string, unknown>} row - Input data
+     * @returns {Record<string, unknown>} Output data
      * @static
      */
-    static create(column: TableColumn, row: any): any {
-        const cell: { data: any } = { data: {}};
+    static create(column: TableColumn, row: Record<string, unknown>): Record<string, unknown> {
+        const cell: { data: Record<string, unknown>; [key: string]: unknown } = { data: {}};
         const modifier = column['modifier'] ?? undefined;
         const columnData = column['data'] ?? {};
         switch (column.type) {
             case ColumnType.TXTS: {
-                cell.data.values = MAP(RESOLVE(row, columnData['values']), (item: any) => DECORATE({ data: item }, modifier));
+                cell.data['values'] = MAP(RESOLVE(row, (columnData as Record<string, string>)['values']), (item: unknown) => DECORATE({ data: item }, modifier as Modifier | undefined));
                 break;
             }
             case ColumnType.OBJS: {
-                const template = columnData['template'] ?? (() => '');
-                cell.data.values = MAP(RESOLVE(row, columnData['values']), (item: any) => DECORATE({ data: template(item) }, modifier));
+                const template = (columnData as Record<string, unknown>)['template'] ?? (() => '');
+                cell.data['values'] = MAP(RESOLVE(row, (columnData as Record<string, string>)['values']), (item: unknown) => DECORATE({ data: (template as (arg: unknown) => unknown)(item) }, modifier as Modifier | undefined));
                 break;
             }
             case ColumnType.URLS: {
-                cell.data.values = MAP(RESOLVE(row, columnData['values']), (item: any) => {
-                    const value = { data: {}};
-                    Object.keys(columnData).filter((p) => p !== 'values').forEach((property) => {
-                        value.data[property] = RESOLVE(item, columnData[property]);
+                cell.data['values'] = MAP(RESOLVE(row, (columnData as Record<string, string>)['values']), (item: unknown) => {
+                    const value: { data: Record<string, unknown>; [key: string]: unknown } = { data: {}};
+                    Object.keys(columnData as Record<string, string>).filter((p) => p !== 'values').forEach((property) => {
+                        value.data[property] = RESOLVE(item as Record<string, unknown>, (columnData as Record<string, string>)[property]);
                     });
-                    return DECORATE(value, modifier);
+                    return DECORATE(value, modifier as Modifier | undefined);
                 });
                 break;
             }
             default: {
-                Object.keys(columnData).forEach((property) => {
-                    cell.data[property] = RESOLVE(row, columnData[property]);
+                Object.keys(columnData as Record<string, string>).forEach((property) => {
+                    cell.data[property] = RESOLVE(row, (columnData as Record<string, string>)[property]);
                 });
-                DECORATE(cell, modifier);
+                DECORATE(cell, modifier as Modifier | undefined);
             }
         }
         cell[`typeof${column.type}`] = true;
-        if (row?.badFields?.includes(columnData['values'] ?? columnData['value']) ?? false) {
+        if ((row?.['badFields'] as string[] | undefined)?.includes((columnData as Record<string, string>)['values'] ?? (columnData as Record<string, string>)['value']) ?? false) {
             cell['isbad'] = true;
         }
         return cell;
@@ -50,36 +51,36 @@ export class CellFactory {
 }
 
 /**
- * @description Get the value of the given property (could include neasted properties using the dot sign) in the given row.
- * @param {any} row - Input row
+ * @description Get the value of the given property (could include nested properties using the dot sign) in the given row.
+ * @param {Record<string, unknown>} row - Input row
  * @param {string} property - Name of the property to look for.
- * @returns {any} Value of the given property in the given row
+ * @returns {unknown} Value of the given property in the given row
  */
-const RESOLVE = (row: any, property: string): any => {
-    let reference = row;
-    property?.split('.').forEach((p: string) => { if (reference) reference = reference[p]; });
+const RESOLVE = (row: Record<string, unknown>, property: string): unknown => {
+    let reference: unknown = row;
+    property?.split('.').forEach((p: string) => { if (reference) reference = (reference as Record<string, unknown>)[p]; });
     return reference;
 }
 
-const MAP = (array: any[], callback: Function): any[] => {
+const MAP = (array: unknown, callback: (item: unknown) => unknown): unknown[] => {
     if (Array.isArray(array)) {
         return array.map((item) => callback(item));
     }
-    return array;
+    return array as unknown[];
 }
 
 /**
  * @description Decorate the cell based on modifiers and potentially add a decoration property to the given cell
- * @param {any} cell - Cell information
- * @param {any} modifier - Modifier information
- * @returns {any} the cell with a potential decoration property
+ * @param {{ data: Record<string, unknown>; [key: string]: unknown }} cell - Cell information
+ * @param {Modifier | undefined} modifier - Modifier information
+ * @returns {{ data: Record<string, unknown>; [key: string]: unknown }} the cell with a potential decoration property
  */
-const DECORATE = (cell: any, modifier: any): any => {
+const DECORATE = (cell: { data: Record<string, unknown> | unknown; [key: string]: unknown }, modifier: Modifier | undefined): { data: Record<string, unknown> | unknown; [key: string]: unknown } => {
     if (modifier) {
-        const data = ('value' in cell.data) ? cell.data.value : cell.data; // 'in syntax' used --> if cell.data.value === undefined!!!
+        const data = (typeof cell.data === 'object' && cell.data !== null && 'value' in (cell.data as Record<string, unknown>)) ? (cell.data as Record<string, unknown>)['value'] : cell.data;
         if (modifier.maximumLength !== undefined) {
             if (data && typeof data === 'string' && data.length > modifier.maximumLength) {
-                cell.decoration = data.substring(0, modifier.maximumLength);
+                cell['decoration'] = data.substring(0, modifier.maximumLength);
             }
         }
         if (modifier.valueIfEmpty !== undefined) {
@@ -93,20 +94,20 @@ const DECORATE = (cell: any, modifier: any): any => {
                 // Empty array 
                 (Array.isArray(data) && data.length === 0)
             ) {
-                cell.decoration =  modifier.valueIfEmpty;
+                cell['decoration'] =  modifier.valueIfEmpty;
             }
         }
         if (modifier.preformatted === true) {
-            cell.isPreformatted = true;
+            cell['isPreformatted'] = true;
         }
         if (modifier.minimum !== undefined && modifier.valueBeforeMin !== undefined) {
             if (data !== undefined && typeof data === 'number' && data < modifier.minimum) {
-                cell.decoration = modifier.valueBeforeMin;
+                cell['decoration'] = modifier.valueBeforeMin;
             }
         }
         if (modifier.maximum !== undefined && modifier.valueAfterMax !== undefined) {
             if (data !== undefined && typeof data === 'number' && data > modifier.maximum) {
-                cell.decoration = modifier.valueAfterMax;
+                cell['decoration'] = modifier.valueAfterMax;
             }
         }
     }

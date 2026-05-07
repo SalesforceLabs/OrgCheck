@@ -6,6 +6,37 @@ import { SalesforceError, SalesforceManagerIntf, SalesforceMetadataRequest, Sale
 import { SecretSauce } from 'src/api/core/orgcheck-api-secretsauce';
 import { SalesforceManagerSetup } from 'src/api/core/setup/orgcheck-api-setup-salesforcemanager';
 import { LargeProcessor } from 'src/api/core/orgcheck-api-processor';
+import { DataDependencies, DataDependency } from 'src/api/core/data/orgcheck-api-data-dependencies';
+
+interface JsForceQueryResult {
+    records: Record<string, unknown>[];
+    done: boolean;
+    nextRecordsUrl?: string;
+}
+
+interface JsForceConnection {
+    limitInfo?: { apiUsage?: { used?: number; limit?: number } };
+    query(soql: string, opts?: { autoFetch?: boolean; headers?: Record<string, string> }): Promise<JsForceQueryResult>;
+    queryMore(locator: string): Promise<JsForceQueryResult>;
+    search(sosl: string): Promise<{ searchRecords: Record<string, unknown>[] }>;
+    request(opts: { url: string; method: string; body?: string; headers?: Record<string, string> }): Promise<Record<string, unknown>>;
+    describe(sobjectName: string): Promise<Record<string, unknown>>;
+    describeGlobal(): Promise<{ sobjects: Record<string, unknown>[] }>;
+    tooling: {
+        query(soql: string, opts?: { autoFetch?: boolean; headers?: Record<string, string> }): Promise<JsForceQueryResult>;
+        queryMore(locator: string): Promise<JsForceQueryResult>;
+        request(opts: { url: string; method: string; body?: string; headers?: Record<string, string> }): Promise<unknown>;
+        executeAnonymous(code: string): Promise<{ compiled: boolean; compileProblem?: string | null; exceptionMessage?: string | null; exceptionStackTrace?: string | null }>;
+    };
+    metadata: {
+        list(types: Array<{ type: string }>): Promise<Array<Record<string, unknown>>>;
+        read(type: string, members: string[]): Promise<Record<string, unknown> | Record<string, unknown>[]>;
+    };
+}
+
+interface JsForceLib {
+    Connection: new(opts: Record<string, unknown>) => JsForceConnection;
+}
 
 /**
  * @description Maximum number of Ids that is contained per DAPI query
@@ -77,10 +108,10 @@ export class SalesforceManager implements SalesforceManagerIntf {
 
     /**
      * @description JsForce Connection
-     * @type {any}
+     * @type {JsForceConnection}
      * @private
      */ 
-    private _connection: any;
+    private _connection: JsForceConnection;
 
     /**
      * @description Construct the connection manager
@@ -94,7 +125,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
         }
 
         // The connection we use or create
-        let connection: any | undefined;
+        let connection: JsForceConnection | undefined;
 
         if (setup.connection) {
 
@@ -102,7 +133,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
             // We will use an existing connection (usefull for SFDX PlugIn)
             // ----------------------------------------------------------------------------
 
-            connection = setup.connection;
+            connection = setup.connection as unknown as JsForceConnection;
 
         } else {
 
@@ -150,15 +181,14 @@ export class SalesforceManager implements SalesforceManagerIntf {
             // loadScript-loaded libraries to window.jsforce are not visible across compartments.
             // Salesforce's recommended fix is to use `self`, which refers to the actual global
             // scope shared within the LWS sandbox.
-            // eslint-disable-next-line no-undef
-            const jsforce = (typeof self !== 'undefined' && (self as any)?.jsforce) 
-                          || (typeof window !== 'undefined' && (window as any)?.jsforce) 
-                          || (typeof globalThis !== 'undefined' && (globalThis as any)?.jsforce) 
+            const jsforce = (typeof self !== 'undefined' && (self as unknown as Record<string, unknown>)?.jsforce) 
+                          || (typeof window !== 'undefined' && (window as unknown as Record<string, unknown>)?.jsforce) 
+                          || (typeof globalThis !== 'undefined' && (globalThis as unknown as Record<string, unknown>)?.jsforce) 
                           || null;
             if (!jsforce) {
                 throw new Error(`jsforce not available`);
             }
-            connection = new jsforce.Connection(connectionOptions);
+            connection = new (jsforce as unknown as JsForceLib).Connection(connectionOptions as Record<string, unknown>);
             if (!connection) {
                 throw new Error(`Couldn't instantiate a salesforce Connection with the given factory and options`)
             }
@@ -169,8 +199,8 @@ export class SalesforceManager implements SalesforceManagerIntf {
             () => {
                 return { 
                     // please note here we do not use this._connection on purpose
-                    used: connection.limitInfo?.apiUsage?.used ?? 0, 
-                    max: connection.limitInfo?.apiUsage?.limit ?? 0
+                    used: (connection as JsForceConnection)?.limitInfo?.apiUsage?.used ?? 0, 
+                    max: (connection as JsForceConnection)?.limitInfo?.apiUsage?.limit ?? 0
                 };
             }
         );
@@ -313,11 +343,11 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @async
      * @private
      */
-    private async _standardSOQLQuery(useTooling: boolean | undefined, query: string, byPasses: string[] | undefined, callback: Function): Promise<Array<any>> {
+    private async _standardSOQLQuery(useTooling: boolean | undefined, query: string, byPasses: string[] | undefined, callback: (nbRecords: number) => void): Promise<Record<string, unknown>[]> {
         // Each query can use the tooling or not, se based on that flag we'll use the right JsForce connection
         const conn = useTooling === true ? this._connection.tooling : this._connection;
         // the records to return
-        const allRecords: any[] = [];
+        const allRecords: Record<string, unknown>[] = [];
         // If `locator` is undefined, it means we are calling doNextQuery() the first time
         const doNextQuery = async (locator?: string) => {
             // Let's start to check if we are 'allowed' to use the Salesforce API...
@@ -381,11 +411,11 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @async
      * @private
      */
-    private async _customSOQLQuery(useTooling: boolean | undefined, query: string, field: string, callback: Function): Promise<any[]> {
+    private async _customSOQLQuery(useTooling: boolean | undefined, query: string, field: string, callback: (nbRecords: number) => void): Promise<Record<string, unknown>[]> {
         // Each query can use the tooling or not, se based on that flag we'll use the right JsForce connection
         const conn = useTooling === true ? this._connection.tooling : this._connection;
         // the records to return
-        const allRecords: any[] = [];
+        const allRecords: Record<string, unknown>[] = [];
         const indexOfFromStatment = query.indexOf(' FROM ');
         const indexOfGroupByStatment = query.indexOf(' GROUP BY ');
         const isWhereStatmentAlreadyUsed = query.indexOf(' WHERE ') !== -1;        
@@ -454,10 +484,10 @@ export class SalesforceManager implements SalesforceManagerIntf {
                 const lastRecord = allRecords[allRecords?.length-1];
                 if (isAggregateQuery === false) {
                     // call the next Batch with lastRecord field
-                    await doNextQuery(lastRecord[field]);
+                    await doNextQuery(lastRecord[field] as string);
                 } else {
                     // if aggregate query, call the next Batch with lastRecord 'qmField' (the alias of "MAX(field)" )'
-                    await doNextQuery(lastRecord['qmField']);
+                    await doNextQuery(lastRecord['qmField'] as string);
                 }
             }
         }
@@ -490,7 +520,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @throws {SalesforceError} If an error occurs during the query
      * @public
      */
-    public async soqlQuery(queries: SalesforceQueryRequest[], logger: SimpleLoggerIntf): Promise<Array<Array<any>>> {
+    public async soqlQuery(queries: SalesforceQueryRequest[], logger: SimpleLoggerIntf): Promise<Record<string, unknown>[][]> {
         // Now we can start, log some message
         logger?.log(`Preparing ${queries?.length} SOQL ${queries?.length>1?'queries':'query'}...`);
         let nbRecords = 0, nbQueryMore = 0;
@@ -514,7 +544,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
             const entityName = query.string.substring(str, end === -1 ? query.string?.length : end);
             pendingEntities.add(entityName);
             // Are we doing a custom Query More?
-            let records: any[] = [];
+            let records: Record<string, unknown>[] = [];
             try {
                 if (query.queryMoreField) {
                     // yes!! do the custom one based on Ids (for non aggregate queries) -- In case the query does not support queryMore we have an alternative, based on ids
@@ -555,7 +585,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @async
      * @public
      */
-    public async soslQuery(queries: SalesforceQueryRequest[] | any[], logger: SimpleLoggerIntf): Promise<Array<Array<any>>> { 
+    public async soslQuery(queries: SalesforceQueryRequest[], logger: SimpleLoggerIntf): Promise<Record<string, unknown>[][]> { 
         // Now we can start, log some message
         logger?.log(`Preparing ${queries?.length} SOSL ${queries?.length>1?'queries':'query'}...`);
         const allSettledPromisesResult = await Promise.allSettled(queries.map(async (query) => {
@@ -598,7 +628,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @public
      * @async
      */
-    async dependenciesQuery(ids: string[], logger: SimpleLoggerIntf): Promise<{ records: Array<any>; errors: Array<string>; }> {
+    async dependenciesQuery(ids: string[], logger: SimpleLoggerIntf): Promise<DataDependencies> {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         // Now we can start, log some message
@@ -606,7 +636,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
         // if no ids then just return empty structure and basta!
         if ((ids?.length ?? 0) === 0) return { records: [], errors: [] };
         // Let's start with ids
-        const bodies: any[] = [];
+        const bodies: { allOrNone: boolean, compositeRequest: { method: string, url: string, referenceId: string }[] }[] = [];
         let currentBody: { allOrNone: boolean, compositeRequest: { method: string, url: string, referenceId: string }[]} | undefined;
         for (let i = 0; i < ids?.length; i += MAX_IDS_IN_DAPI_REQUEST_SIZE) {
             if (!currentBody || currentBody.compositeRequest?.length === MAX_COMPOSITE_REQUEST_SIZE) {
@@ -625,12 +655,13 @@ export class SalesforceManager implements SalesforceManagerIntf {
                 referenceId: `chunk${i}`
             });
         }
+        type DapiCompositeResult = { compositeResponse: { httpStatusCode: number, body: { records: Record<string, unknown>[] } | { errorCode: string }[] }[] };
         let nbPending = bodies?.length, nbDone = 0, nbErrors = 0, batchCount = 0;
-        const allResults: { compositeResponse: { httpStatusCode: number, body: { records: any[] } | { errorCode: string }[] }[] }[] = [];
+        const allResults: DapiCompositeResult[] = [];
         for (let i = 0; i < bodies?.length; i += MAX_DAPI_TOOLING_BATCH_SIZE) {
             const bodiesInBatch = bodies.slice(i, i + MAX_DAPI_TOOLING_BATCH_SIZE);
             batchCount++;
-            const results: any[] = await LargeProcessor.runAll<any>(bodiesInBatch.map((body) => async () => {
+            const results = await LargeProcessor.runAll<DapiCompositeResult | undefined>(bodiesInBatch.map((body) => async () => {
                 try {
                     // Call the tooling composite request
                     const results = await this._connection.tooling.request({
@@ -644,7 +675,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
                     // Update the stats
                     nbDone++;
                     // Returning this results
-                    return results;
+                    return results as DapiCompositeResult;
                 } catch (error) {
                     logger?.log(`DependenciesQuery batch error: ${JSON.stringify(error ?? {})}`);
                     // Update the stats
@@ -657,38 +688,39 @@ export class SalesforceManager implements SalesforceManagerIntf {
                     logger?.log(`DependenciesQuery progress: 🔜 Total=${bodies?.length}, ✅ BatchesDone=${batchCount}, 🏃‍♀️‍➡️ Pending=${nbPending}, ✅ Done=${nbDone}, ❌ Errors=${nbErrors}`);
                 }
             }));
-            allResults.push(... results.filter((result) => result !== undefined));
+            allResults.push(...(results.filter((result) => result !== undefined) as DapiCompositeResult[]));
         }
         logger?.log(`Got all the results`);
-        const dependenciesRecords: any[] = []; // dependencies records
+        const dependenciesRecords: DataDependency[] = []; // dependencies records
         const idsInError: string[] = []; // ids contained in a batch that has an error
         const duplicateCheck = new Set(); // Using a set to filter duplicates
         allResults.forEach((result) => {
-            result.compositeResponse.forEach((response: any) => {
+            result.compositeResponse.forEach((response) => {
                 if (response.httpStatusCode === 200) {
-                    logger?.log(`✅ DependenciesQuery status=200 records=${response?.body?.records?.length ?? 0}`);
-                    dependenciesRecords.push(... response.body.records // multiple response in one batch
-                        .map((r: any) => { // Duplicates will be "null" and will get removed in further filter() call 
-                            const id = this.caseSafeId(r.MetadataComponentId);
-                            const refId = this.caseSafeId(r.RefMetadataComponentId);
+                    const successBody = response.body as { records: Record<string, unknown>[] };
+                    logger?.log(`✅ DependenciesQuery status=200 records=${successBody?.records?.length ?? 0}`);
+                    dependenciesRecords.push(... successBody.records // multiple response in one batch
+                        .map((r: Record<string, unknown>) => { // Duplicates will be "null" and will get removed in further filter() call 
+                            const id = this.caseSafeId(r.MetadataComponentId as string);
+                            const refId = this.caseSafeId(r.RefMetadataComponentId as string);
                             const key = `${id}-${refId}`;
                             if (duplicateCheck.has(key)) return null;
                             duplicateCheck.add(key);
                             return {
                                 id: id,
-                                name: r.MetadataComponentName, 
-                                type: r.MetadataComponentType,
-                                url: this.setupUrl(id, r.MetadataComponentType),
+                                name: r.MetadataComponentName as string, 
+                                type: r.MetadataComponentType as string,
+                                url: this.setupUrl(id, r.MetadataComponentType as string),
                                 refId: refId, 
-                                refName: r.RefMetadataComponentName,
-                                refType: r.RefMetadataComponentType,
-                                refUrl: this.setupUrl(refId, r.RefMetadataComponentType)
+                                refName: r.RefMetadataComponentName as string,
+                                refType: r.RefMetadataComponentType as string,
+                                refUrl: this.setupUrl(refId, r.RefMetadataComponentType as string)
                             }
                         })
-                        .filter((r: any) => r !== null) // Remove duplicates
+                        .filter((r) => r !== null) as DataDependency[] // Remove duplicates
                     ); 
                 } else {
-                    const errorCode = response.body[0].errorCode;
+                    const errorCode = (response.body as { errorCode: string }[])[0].errorCode;
                     if (errorCode === 'UNKNOWN_EXCEPTION') {
                         // This is a known issue with the DAPI in case the metadata in the org is messy for one of the IDs
                         idsInError.push(... ids);
@@ -722,7 +754,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @public
      * @async
      */
-    public async readMetadata(metadatas: SalesforceMetadataRequest[], logger: SimpleLoggerIntf): Promise<Map<string, Array<any>>> {
+    public async readMetadata(metadatas: SalesforceMetadataRequest[], logger: SimpleLoggerIntf): Promise<Map<string, Array<Record<string, unknown>>>> {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         // Now we can start, log some message
@@ -741,7 +773,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
                     // clear the members (remove the stars)
                     metadata.members = metadata.members.filter((b: string) => b !== '*'); // 'metadatas' will be altered!
                     // Add the rerieved fullNames to the members array
-                    MAKE_IT_AN_ARRAY(members).forEach(f => { metadata.members.push(f.fullName); }); 
+                    MAKE_IT_AN_ARRAY(members).forEach(f => { metadata.members.push((f as Record<string, unknown>).fullName as string); }); 
                     // don't return anything we are just altering the metadata.members.
                 } catch (error) {
                     logger?.log(`Metadata.list error: ${JSON.stringify(error ?? {})}`);
@@ -819,14 +851,14 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @public
      * @async
      */
-    public async readMetadataAtScale(type: string, ids: any[], byPasses: string[], logger: SimpleLoggerIntf): Promise<any[]> {
+    public async readMetadataAtScale(type: string, ids: string[], byPasses: string[], logger: SimpleLoggerIntf): Promise<Record<string, unknown>[]> {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         logger?.log(`Reading metadata at scale for type=${type} and ${ids?.length ?? 0} id(s).`);
         // if no ids then just return empty array and basta!
         if ((ids?.length ?? 0) === 0) return [];
-        const bodies: any[] = [];
-        let currentBody: any;
+        const bodies: { allOrNone: boolean; compositeRequest: { method: string; url: string; referenceId: string }[] }[] = [];
+        let currentBody: { allOrNone: boolean; compositeRequest: { method: string; url: string; referenceId: string }[] } | undefined;
         ids.forEach((id, i) => {
             if (!currentBody || currentBody.compositeRequest?.length === MAX_COMPOSITE_REQUEST_SIZE) {
                 currentBody = { allOrNone: false, compositeRequest: [] };
@@ -838,12 +870,13 @@ export class SalesforceManager implements SalesforceManagerIntf {
                 referenceId: `chunk${i}`
             });
         });
+        type AtScaleCompositeResult = { compositeResponse: { httpStatusCode: number, body: Record<string, unknown> | { errorCode: string }[] }[] };
         let nbPending = bodies?.length, nbDone = 0, nbErrors = 0, batchCount = 0;
-        const allResults: { compositeResponse: { httpStatusCode: number, body: { records: any[] } | { errorCode: string }[] }[] }[] = [];
+        const allResults: AtScaleCompositeResult[] = [];
         for (let i = 0; i < bodies?.length; i += MAX_ATSCALE_TOOLING_BATCH_SIZE) {
             const bodiesInBatch = bodies.slice(i, i + MAX_ATSCALE_TOOLING_BATCH_SIZE);
             batchCount++;
-            const results = await LargeProcessor.runAll<any>(bodiesInBatch.map((body) => async () => {
+            const results = await LargeProcessor.runAll<AtScaleCompositeResult | undefined>(bodiesInBatch.map((body) => async () => {
                 try {
                     // Call the tooling composite request
                     const results = await this._connection.tooling.request({
@@ -857,7 +890,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
                     // Update the stats
                     nbDone++;
                     // Returning this results
-                    return results;
+                    return results as AtScaleCompositeResult;
                 } catch (error) {
                     logger?.log(`ReadMetadataAtScale batch error: ${JSON.stringify(error ?? {})}`);
                     // Update the stats
@@ -870,15 +903,15 @@ export class SalesforceManager implements SalesforceManagerIntf {
                     logger?.log(`ReadMetadataAtScale progress: 🧮 Total=${bodies?.length}, ✅ BatchesDone=${batchCount}, 🏃‍♀️‍➡️ Pending=${nbPending}, ✅ Done=${nbDone}, ❌ Errors=${nbErrors}`);
                 }
             }));
-            allResults.push(... results.filter((result) => result !== undefined)); // only add the non empty results
+            allResults.push(...(results.filter((result) => result !== undefined) as AtScaleCompositeResult[])); // only add the non empty results
         }
-        const records: any[] = [];
+        const records: Record<string, unknown>[] = [];
         allResults.forEach((result) => {
-            result.compositeResponse.forEach((response: any) => {
+            result.compositeResponse.forEach((response) => {
                 if (response.httpStatusCode === 200) {
-                    records.push(response.body); // here only one record per response 
+                    records.push(response.body as Record<string, unknown>); // here only one record per response 
                 } else {
-                    const errorCode = response.body[0].errorCode;
+                    const errorCode = (response.body as { errorCode: string }[])[0].errorCode;
                     if (byPasses && byPasses.includes && byPasses.includes(errorCode) === false) {
                         // Throw the error
                         throw new SalesforceError(
@@ -909,7 +942,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @public
      * @async
      */
-    public async describeGlobal(logger: SimpleLoggerIntf): Promise<any[]> {
+    public async describeGlobal(logger: SimpleLoggerIntf): Promise<Record<string, unknown>[]> {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         logger?.log(`Describing globally all sobjects in the org.`);
@@ -937,7 +970,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @public
      * @async
      */
-    public async describe(sobjectDevName: string, logger: SimpleLoggerIntf): Promise<any> {
+    public async describe(sobjectDevName: string, logger: SimpleLoggerIntf): Promise<Record<string, unknown>> {
         // Adding support of the Activity object from describe
         if (sobjectDevName === 'Activity') {
             logger?.log(`Describing the "activity" sobject...`);
@@ -979,7 +1012,8 @@ export class SalesforceManager implements SalesforceManagerIntf {
         this._watchDog?.afterRequest(); // if limit has been reached, an error will be thrown here
         // return the first item of the sobjects property
         logger?.log(`Done counting for the sobject: ${sobjectDevName}.`);
-        return (Array.isArray(result?.sObjects) && result?.sObjects?.length === 1) ? result?.sObjects[0].count : 0;
+        const resultObj = result as Record<string, unknown>;
+        return (Array.isArray(resultObj?.sObjects) && (resultObj?.sObjects as unknown[])?.length === 1) ? (resultObj?.sObjects as Record<string, unknown>[])[0].count as number : 0;
     }
 
     /**
@@ -1004,7 +1038,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
         this._watchDog?.afterRequest(); // if limit has been reached, an error will be thrown here
         // return the result as it is
         logger?.log(`Done asking to run asynchronously all tests in this org.`);
-        return result;
+        return result as unknown as string;
     }
 
     /**
@@ -1025,8 +1059,8 @@ export class SalesforceManager implements SalesforceManagerIntf {
         // Check another time the limit
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         const timestamp = Date.now();
-        const bodies: any[] = [];
-        let currentBody: any;
+        const bodies: { allOrNone: boolean; compositeRequest: { method: string; url: string; referenceId: string; body?: Record<string, unknown> }[] }[] = [];
+        let currentBody: { allOrNone: boolean; compositeRequest: { method: string; url: string; referenceId: string; body?: Record<string, unknown> }[] } | undefined;
         let countBatches = 0;
         apexClasses.filter(apexClass => apexClass.Body).forEach((apexClass) => {
             if (!currentBody || currentBody.compositeRequest?.length === MAX_COMPOSITE_REQUEST_SIZE) {
@@ -1053,11 +1087,11 @@ export class SalesforceManager implements SalesforceManagerIntf {
             currentBody.compositeRequest.push({ 
                 method: 'POST',
                 url: `/services/data/v${this.apiVersion}.0/tooling/sobjects/ApexClassMember`, 
-                referenceId: apexClass.Id,
+                referenceId: apexClass.Id as string,
                 body: { MetadataContainerId: '@{container.id}', ContentEntityId: apexClass.Id, Body: apexClass.Body }
             });
         });
-        const responses = await LargeProcessor.runAll<any>(bodies.map((body) => async () => {
+        const responses = await LargeProcessor.runAll<unknown>(bodies.map((body) => async () => {
             // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
             this._watchDog?.afterRequest(); // if limit has been reached, we reject the promise with a specific error and stop the process
             // Call the tooling composite request
@@ -1070,13 +1104,16 @@ export class SalesforceManager implements SalesforceManagerIntf {
         }));
         // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
         this._watchDog?.afterRequest(); // if limit has been reached, an error will be thrown here
+        type CompileCompositeResponseItem = { referenceId?: string; body?: Record<string, unknown> | unknown[]; errors?: unknown[] };
+        type CompileCompositeResult = { compositeResponse: CompileCompositeResponseItem[] };
         // Map the responses to finalResult
         const finalResult: Map<string, { isSuccess: boolean; reasons?: string[]; }> = new Map();
         responses?.forEach(response => 
-            response.compositeResponse?.filter(compositeResponse => compositeResponse?.referenceId?.startsWith('01p'))
+            (response as CompileCompositeResult).compositeResponse?.filter(compositeResponse => compositeResponse?.referenceId?.startsWith('01p'))
                 .forEach(compositeResponse => {
-                    const classId = compositeResponse?.referenceId?.substring(0, 15);
-                    if (compositeResponse?.body?.success === true) {
+                    const classId = compositeResponse?.referenceId?.substring(0, 15) ?? '';
+                    const body = compositeResponse?.body as Record<string, unknown> | undefined;
+                    if (body?.success === true) {
                         logger?.log(`Recompilation requested for classId ${classId}`);
                         finalResult.set(classId, { isSuccess: true });
                     } else {
@@ -1088,8 +1125,8 @@ export class SalesforceManager implements SalesforceManagerIntf {
                         } else {
                             reasons = [ 'Unknown error during recompilation' ];
                         }
-                        logger?.log(`Errors for classId ${classId}: ${reasons?.map(reason => JSON.stringify(reason)).join(', ')}`);
-                        finalResult.set(classId, { isSuccess: false, reasons: reasons } );
+                        logger?.log(`Errors for classId ${classId}: ${(reasons as unknown[])?.map(reason => JSON.stringify(reason)).join(', ')}`);
+                        finalResult.set(classId, { isSuccess: false, reasons: reasons as string[] } );
                     }
                 })
         );
@@ -1106,14 +1143,14 @@ export class SalesforceManager implements SalesforceManagerIntf {
  * @returns {any[]} If data is not an array, created array containing the data, or the given data
  * @private
  */
-const MAKE_IT_AN_ARRAY = (data: any): any[] => data ? (Array.isArray(data) ? data : [ data ]) : []; 
+const MAKE_IT_AN_ARRAY = (data: unknown): unknown[] => data ? (Array.isArray(data) ? data : [ data ]) : []; 
 
 /**
  * @description Activity object that is not present in the describe API
  * @type {any}
  * @private
  */
-const ACTIVITY_OBJECT_THAT_SHOULD_BE_RETURNED_BY_DESCRIBE: any = {
+const ACTIVITY_OBJECT_THAT_SHOULD_BE_RETURNED_BY_DESCRIBE: Record<string, unknown> = {
     name: 'Activity',
     label: 'Activity',
     labelPlural: 'Activities',

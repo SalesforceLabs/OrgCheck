@@ -33,10 +33,10 @@ export class DatasetRecordTypes implements Dataset {
 
         logger?.log(`Parsing ${recordTypeRecords?.length} record types...`);
         const recordTypeDevNameToId = new Map();
-        const recordTypes: Map<string, SfdcRecordType> = new Map(await MediumProcessor.map(recordTypeRecords, async (record: any) => {
+        const recordTypes: Map<string, SfdcRecordType> = new Map(await MediumProcessor.map(recordTypeRecords, async (record: Record<string, unknown>) => {
         
             // Get the ID15 of this record type
-            const id = sfdcManager.caseSafeId(record.Id);
+            const id = sfdcManager.caseSafeId(record.Id as string);
 
             // Create the instance
             const recordType: SfdcRecordType = recordTypeDataFactory.create({
@@ -45,7 +45,7 @@ export class DatasetRecordTypes implements Dataset {
                     name: record.Name, 
                     developerName: record.DeveloperName,
                     package: (record.NamespacePrefix || ''),
-                    url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.RECORD_TYPE, record.SobjectType),
+                    url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.RECORD_TYPE, record.SobjectType as string | undefined),
                     isActive: record.IsActive,
                     objectId: record.SobjectType,
                     isAvailable: false, // as a start value may change when we check the profiles
@@ -61,14 +61,14 @@ export class DatasetRecordTypes implements Dataset {
         }));
 
         logger?.log(`Extracting Ids from ${profileRecords?.length} profiles...`);
-        const profileIds = await MediumProcessor.map(profileRecords, (record: any) => sfdcManager.caseSafeId(record.Id));
+        const profileIds = await MediumProcessor.map(profileRecords, (record: Record<string, unknown>) => sfdcManager.caseSafeId(record.Id as string));
 
         logger?.log(`Getting record type information from Profile Metadata API...`);
         const profiles = await sfdcManager.readMetadataAtScale('Profile', profileIds, [], logger);
 
         logger?.log(`Parsing ${profiles?.length} profiles looking for record types information...`);
-        await MediumProcessor.forEach(profiles, async (profile: any) => {
-            profile.Metadata?.recordTypeVisibilities?.forEach((rtv: any) => {
+        await MediumProcessor.forEach(profiles, async (profile: Record<string, unknown>) => {
+            (profile.Metadata as { recordTypeVisibilities?: Record<string, unknown>[] } | undefined)?.recordTypeVisibilities?.forEach((rtv: Record<string, unknown>) => {
                 if (recordTypeDevNameToId.has(rtv.recordType)) {
                     const id = recordTypeDevNameToId.get(rtv.recordType);
                     const recordType = recordTypes.get(id);

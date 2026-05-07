@@ -12,7 +12,7 @@
                     <template lwc:if={message}>
                         <lightning-formatted-rich-text value={message}></lightning-formatted-rich-text>
                     </template>
-                    <template lwc:if={errorChains}>
+                    <template lwc:if={errorChains.length}>
                         <div class="error-warning">
                             <p>👉 Please review our <a href="http://sfdc.co/OrgCheck-FAQ" target="_blank" 
                                 rel="external noopener noreferrer">Org Check FAQ</a> and try to resolve 

@@ -25,7 +25,7 @@ export interface DatasetManagerIntf {
      * @public
      * @async
      */
-    run(datasets: Array<string | DatasetRunInformation>, parentLogger?: SimpleLoggerIntf): Promise<Map<string, any>>;
+    run(datasets: Array<string | DatasetRunInformation>, parentLogger?: SimpleLoggerIntf): Promise<Map<string, unknown>>;
 
     /**
      * @description Clean the given list of datasets from cache (if present)

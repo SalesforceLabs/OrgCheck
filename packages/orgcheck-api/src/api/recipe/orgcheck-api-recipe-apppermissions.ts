@@ -25,11 +25,10 @@ export class RecipeAppPermissions implements ServedRecipe<DataMatrixIntf, Table>
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
-     * @param {SimpleLoggerIntf} _logger - Logger
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public ingredients(): Array<string | DatasetRunInformation> {
         return [
             DatasetAliases.APPLICATIONS,
             DatasetAliases.APPPERMISSIONS,
@@ -56,13 +55,13 @@ export class RecipeAppPermissions implements ServedRecipe<DataMatrixIntf, Table>
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<DataMatrixIntf> {
+    public async mix(ingredients: Map<string, unknown>, _logger: SimpleLoggerIntf, parameters: Map<string, string>): Promise<DataMatrixIntf> {
 
         // Get data and parameters
-        const applications: Map<string, SfdcApplication> = ingredients.get(DatasetAliases.APPLICATIONS);
-        const appPermissions: Map<string, SfdcAppPermission> = ingredients.get(DatasetAliases.APPPERMISSIONS);
-        const profiles: Map<string, SfdcProfile> = ingredients.get(DatasetAliases.PROFILES);
-        const permissionSets: Map<string, SfdcPermissionSet> = ingredients.get(DatasetAliases.PERMISSIONSETS);
+        const applications = ingredients.get(DatasetAliases.APPLICATIONS) as Map<string, SfdcApplication>;
+        const appPermissions = ingredients.get(DatasetAliases.APPPERMISSIONS) as Map<string, SfdcAppPermission>;
+        const profiles = ingredients.get(DatasetAliases.PROFILES) as Map<string, SfdcProfile>;
+        const permissionSets = ingredients.get(DatasetAliases.PERMISSIONSETS) as Map<string, SfdcPermissionSet>;
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data

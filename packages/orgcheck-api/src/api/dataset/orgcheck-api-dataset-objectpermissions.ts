@@ -35,11 +35,12 @@ export class DatasetObjectPermissions implements Dataset {
         logger?.log(`Parsing ${permissionRecords?.length} object permissions...`);
         const permissions: Map<string, SfdcObjectPermission> = new Map(await MediumProcessor.map(
             permissionRecords,
-            (record: any) => {
+            (record: Record<string, unknown>) => {
                 // Create the instance
+                const parent = record.Parent as { IsOwnedByProfile: boolean; ProfileId: string } | null;
                 const permission: SfdcObjectPermission = permissionDataFactory.create({
                     properties: {
-                        parentId: sfdcManager.caseSafeId(record.Parent.IsOwnedByProfile === true ? record.Parent.ProfileId : record.ParentId),
+                        parentId: sfdcManager.caseSafeId(parent?.IsOwnedByProfile === true ? parent.ProfileId : record.ParentId as string),
                         objectType: record.SobjectType,
                         isRead: record.PermissionsRead,
                         isCreate: record.PermissionsCreate,
@@ -55,7 +56,7 @@ export class DatasetObjectPermissions implements Dataset {
                 // Add it to the map  
                 return [ `${permission.parentId}_${permission.objectType}`, permission ];
             },
-            (record: any) => record.Parent !== null // in some orgs, 'ParentId' is set to a value, BUT 'Parent' is null (because id can't be found!),
+            (record: Record<string, unknown>) => record.Parent !== null // in some orgs, 'ParentId' is set to a value, BUT 'Parent' is null (because id can't be found!),
         ));
 
         // Return data as map

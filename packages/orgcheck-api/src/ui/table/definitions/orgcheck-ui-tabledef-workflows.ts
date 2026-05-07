@@ -16,8 +16,8 @@ export class WorkflowsTableDefinition implements TableDefinition {
         { label: 'Is Active',         type: ColumnType.CHK,  data: { value: 'isActive' }},
         { label: 'Has Actions',       type: ColumnType.CHK,  data: { value: 'hasAction' }},
         { label: 'Direct Actions',    type: ColumnType.OBJS, data: { values: 'actions', value: '.', template: (r) => `${r.name} (${r.type})` }},
-        { label: 'Empty Timetrigger', type: ColumnType.OBJS, data: { values: 'emptyTimeTriggers', value: '.', template: (r) => `${r.field} after ${r.delay*1}` }},
-        { label: 'Future Actions',    type: ColumnType.OBJS, data: { values: 'futureActions', value: '.', template: (r) => `${r.field} after ${r.delay*1}: ${r.name} (${r.type})` }},
+        { label: 'Empty Timetrigger', type: ColumnType.OBJS, data: { values: 'emptyTimeTriggers', value: '.', template: (r) => `${r.field} after ${(r.delay as number)*1}` }},
+        { label: 'Future Actions',    type: ColumnType.OBJS, data: { values: 'futureActions', value: '.', template: (r) => `${r.field} after ${(r.delay as number)*1}: ${r.name} (${r.type})` }},
         { label: 'Created date',      type: ColumnType.DTM,  data: { value: 'createdDate' }},
         { label: 'Modified date',     type: ColumnType.DTM,  data: { value: 'lastModifiedDate' }},
         { label: 'Description',       type: ColumnType.TXT,  data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}

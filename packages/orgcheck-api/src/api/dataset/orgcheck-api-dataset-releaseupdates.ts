@@ -31,10 +31,10 @@ export class DatasetReleaseUpdates implements Dataset {
         // Create the map
         const releaseUpdateRecords = results[0];
         logger?.log(`Parsing ${releaseUpdateRecords?.length} release updates...`);
-        const releaseUpdates: Map<string, SfdcReleaseUpdate> = new Map(await MediumProcessor.map(releaseUpdateRecords, (record: any) => {
-            const nbCompletedSteps = record.NumCompSteps > 0 ? record.NumCompSteps : 0;
-            const nbAllSteps = record.NumSteps > 0 ? record.NumSteps : 0;
-            const dueDateInTimestamp = record.DueDate ? Date.parse(record.DueDate) : undefined;
+        const releaseUpdates: Map<string, SfdcReleaseUpdate> = new Map(await MediumProcessor.map(releaseUpdateRecords, (record: Record<string, unknown>) => {
+            const nbCompletedSteps = (record.NumCompSteps as number) > 0 ? (record.NumCompSteps as number) : 0;
+            const nbAllSteps = (record.NumSteps as number) > 0 ? (record.NumSteps as number) : 0;
+            const dueDateInTimestamp = record.DueDate ? Date.parse(record.DueDate as string) : undefined;
             const diff = dueDateInTimestamp ? (dueDateInTimestamp - Date.now()) : undefined;
             const remainingDaysBeforeDueDate = (diff !== undefined && diff >= 0) ? (diff/1000/60/60/24) : undefined;
             const releaseUpdate: SfdcReleaseUpdate = releaseUpdateDataFactory.createWithScore({
@@ -50,7 +50,7 @@ export class DatasetReleaseUpdates implements Dataset {
                     completionPercentage: nbAllSteps > 0 ? nbCompletedSteps / nbAllSteps : 1,
                     sfdcReleaseLabel: record.ReleaseLabel ?? '',
                     status: record.Status,
-                    url: sfdcManager.setupUrl(record.DurableId, SalesforceMetadataTypes.RELEASE_UPDATE)
+                    url: sfdcManager.setupUrl(record.DurableId as string, SalesforceMetadataTypes.RELEASE_UPDATE)
                 }
             });
             return [releaseUpdate.id, releaseUpdate];

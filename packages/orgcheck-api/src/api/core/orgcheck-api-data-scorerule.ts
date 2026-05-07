@@ -25,7 +25,7 @@ export interface ScoreRule {
      * @type {Function}
      * @public
      */
-    formula: Function;
+    formula(data: unknown): boolean;
 
     /**
      * @description Message to show if the formula returns false for a given data.

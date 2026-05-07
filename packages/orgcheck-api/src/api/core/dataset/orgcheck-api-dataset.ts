@@ -18,5 +18,5 @@ export interface Dataset {
      * @returns {Promise<Map<string, Data | boolean | ScoreRule> | Data>} The result of the dataset
      * @async
      */
-    run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger?: SimpleLoggerIntf | undefined, parameters?: Map<string, any> | undefined): Promise<Map<string, Data | boolean | ScoreRule> | Data>;
+    run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger?: SimpleLoggerIntf | undefined, parameters?: Map<string, unknown> | undefined): Promise<Map<string, Data | boolean | ScoreRule> | Data>;
 }

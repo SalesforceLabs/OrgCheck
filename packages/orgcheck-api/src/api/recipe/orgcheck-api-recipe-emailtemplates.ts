@@ -20,11 +20,10 @@ export class RecipeEmailTemplates implements ServedRecipe<SfdcEmailTemplate[], T
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
-     * @param {SimpleLoggerIntf} _logger - Logger
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public ingredients(): Array<string | DatasetRunInformation> {
         return [DatasetAliases.EMAILTEMPLATES];
     }
 
@@ -46,10 +45,10 @@ export class RecipeEmailTemplates implements ServedRecipe<SfdcEmailTemplate[], T
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<SfdcEmailTemplate[]> {
+    public async mix(ingredients: Map<string, unknown>, _logger: SimpleLoggerIntf, parameters: Map<string, string>): Promise<SfdcEmailTemplate[]> {
 
         // Get data and parameters
-        const emailTemplates: Map<string, SfdcEmailTemplate> = ingredients.get(DatasetAliases.EMAILTEMPLATES);
+        const emailTemplates = ingredients.get(DatasetAliases.EMAILTEMPLATES) as Map<string, SfdcEmailTemplate>;
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data

@@ -86,7 +86,7 @@ export interface ApiIntf {
      * @returns {any} cached item 
      * @public
      */
-    getCacheItem(itemName: string): any;
+    getCacheItem(itemName: string): unknown;
 
     // -----------------------
     // ORG LIMIT & ACCESS

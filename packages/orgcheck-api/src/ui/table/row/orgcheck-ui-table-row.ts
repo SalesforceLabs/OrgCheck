@@ -37,10 +37,10 @@ export interface Row {
 
     /** 
      * @description List of cells in this row
-    /* @type {any[]}
+    /* @type {Record<string, unknown>[]}
      * @public
      */
-    cells: any[];
+    cells: Record<string, unknown>[];
 
     /** 
      * @description Flag used when filtering the table. Meaning is obvious.

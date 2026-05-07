@@ -60,18 +60,18 @@ export class DatasetProfiles implements Dataset {
 
         // Create the map of profiles
         logger?.log(`Parsing ${profileRecords?.length} profiles...`);
-        const profiles: Map<string, SfdcProfile> = new Map(await MediumProcessor.map(profileRecords, (record: any) => {
+        const profiles: Map<string, SfdcProfile> = new Map(await MediumProcessor.map(profileRecords, (record: Record<string, unknown>) => {
 
             // Get the ID15
-            const id = sfdcManager.caseSafeId(record.ProfileId);
+            const id = sfdcManager.caseSafeId(record.ProfileId as string);
 
             // Create the instance
             const profile: SfdcProfile = profileDataFactory.create({
                 properties: {
                     id: id,
-                    name: record.Profile.Name,
-                    description: record.Profile.Description,
-                    license: (record.License ? record.License.Name : ''),
+                    name: (record.Profile as Record<string, unknown>).Name as string,
+                    description: (record.Profile as Record<string, unknown>).Description as string,
+                    license: (record.License ? (record.License as Record<string, unknown>).Name as string : ''),
                     isCustom: record.IsCustom,
                     package: (record.NamespacePrefix || ''),
                     memberCounts: 0, // default value, may be changed in further SOQL
@@ -104,25 +104,25 @@ export class DatasetProfiles implements Dataset {
 
         logger?.log(`Parsing ${objectPermissionRecords?.length} object permissions, ${fieldPermissionRecords?.length} field permissions and ${assignmentRecords?.length} assignments...`);
         await Promise.all([
-            MediumProcessor.forEach(objectPermissionRecords, async (record: any) => {
-                const profileId = sfdcManager.caseSafeId(record.ProfileId); // see warning in the SOQL query (this is not a bug we use ProfileId instead of Parent.ProfileId)
+            MediumProcessor.forEach(objectPermissionRecords, async (record: Record<string, unknown>) => {
+                const profileId = sfdcManager.caseSafeId(record.ProfileId as string); // see warning in the SOQL query (this is not a bug we use ProfileId instead of Parent.ProfileId)
                 const profile = profiles.get(profileId);
                 if (profile) {
-                    profile.nbObjectPermissions += record.CountObject;
+                    profile.nbObjectPermissions += record.CountObject as number;
                 }
             }),
-            MediumProcessor.forEach(fieldPermissionRecords, async (record: any) => {
-                const profileId = sfdcManager.caseSafeId(record.ProfileId); // see warning in the SOQL query (this is not a bug we use ProfileId instead of Parent.ProfileId)
+            MediumProcessor.forEach(fieldPermissionRecords, async (record: Record<string, unknown>) => {
+                const profileId = sfdcManager.caseSafeId(record.ProfileId as string); // see warning in the SOQL query (this is not a bug we use ProfileId instead of Parent.ProfileId)
                 const profile = profiles.get(profileId);
                 if (profile) {
-                    profile.nbFieldPermissions += record.CountField;    
+                    profile.nbFieldPermissions += record.CountField as number;    
                 }
             }),
-            MediumProcessor.forEach(assignmentRecords, async (record: any) => {
-                const profileId = sfdcManager.caseSafeId(record.ProfileId); // see warning in the SOQL query (this is not a bug we use ProfileId instead of PermissionSet.ProfileId)
+            MediumProcessor.forEach(assignmentRecords, async (record: Record<string, unknown>) => {
+                const profileId = sfdcManager.caseSafeId(record.ProfileId as string); // see warning in the SOQL query (this is not a bug we use ProfileId instead of PermissionSet.ProfileId)
                 const profile = profiles.get(profileId);
                 if (profile) {
-                    profile.memberCounts += record.CountAssignment;    
+                    profile.memberCounts += record.CountAssignment as number;    
                 }
             })
         ]);

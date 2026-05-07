@@ -17,9 +17,9 @@ export interface ItemInCache {
 export interface DataItemInCache extends ItemInCache {
 
     /** 
-     * @type {any[]}
+     * @type {unknown[]}
      */
-    content: any[];
+    content: unknown[];
 }
 
 /**
@@ -49,7 +49,7 @@ export interface DataCacheManagerIntf {
      * @returns {any} the value of the entry in the cache
      * @public
      */
-    get(key: string): any;
+    get(key: string): unknown;
 
     /**
      * @description Set an entry into the cache with a given key
@@ -57,7 +57,7 @@ export interface DataCacheManagerIntf {
      * @param {any} value - the value of the entry to set
      * @public
      */
-    set(key: string, value: any): void;
+    set(key: string, value: unknown): void;
 
     /**
      * @description Get details of the cache.

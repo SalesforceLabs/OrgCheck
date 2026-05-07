@@ -90,7 +90,7 @@ export default class OrgcheckSpinner extends LightningElement {
   /**
    * @description Registers a section that can be interrupted.
    * @param {string} section - The name of the section.
-   * @param {Function} interruptCallback - The callback function to be called when the section is interrupted.
+   * @param {function(): void} interruptCallback - The callback function to be called when the section is interrupted.
    */
   @api registerInterruptibleSection(section, interruptCallback) {
     this._interruptibleSections.set(section, interruptCallback);
@@ -291,7 +291,7 @@ export default class OrgcheckSpinner extends LightningElement {
 
   /**
    * @description Information to use internally with setInterval method.
-   * @type {any}
+   * @type {number | null}
    * @private
    */
   _intervalId;
@@ -378,7 +378,7 @@ export default class OrgcheckSpinner extends LightningElement {
       this.close(0);
     } else {
       this.inProgressPercentage = Math.round((1 - countInProgressSections / this.sections.length) * 100);
-      this.inProgressMessage = `We have currently ${countInProgressSections} process${countInProgressSections>1?'es':''} in progress over a total of ${this.sections.length}...`;
+      this.inProgressMessage = `We have currently ${countInProgressSections} process(es) in progress and ${this.sections.length - countInProgressSections} process(es) completed...`;
     }
   }
 

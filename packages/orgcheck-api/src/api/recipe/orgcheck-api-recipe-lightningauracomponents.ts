@@ -20,11 +20,10 @@ export class RecipeLightningAuraComponents implements ServedRecipe<SfdcLightning
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
-     * @param {SimpleLoggerIntf} _logger - Logger
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public ingredients(): Array<string | DatasetRunInformation> {
         return [DatasetAliases.LIGHTNINGAURACOMPONENTS];
     }
 
@@ -46,10 +45,10 @@ export class RecipeLightningAuraComponents implements ServedRecipe<SfdcLightning
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<SfdcLightningAuraComponent[]> {
+    public async mix(ingredients: Map<string, unknown>, _logger: SimpleLoggerIntf, parameters: Map<string, string>): Promise<SfdcLightningAuraComponent[]> {
 
         // Get data and parameters
-        const components: Map<string, SfdcLightningAuraComponent> = ingredients.get(DatasetAliases.LIGHTNINGAURACOMPONENTS);
+        const components = ingredients.get(DatasetAliases.LIGHTNINGAURACOMPONENTS) as Map<string, SfdcLightningAuraComponent>;
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data

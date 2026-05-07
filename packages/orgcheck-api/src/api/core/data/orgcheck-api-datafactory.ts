@@ -23,7 +23,7 @@ export interface DataFactoryInstanceCreateSetup {
      * @description List of properties and values to create a new instance
      * @type {any}
      */
-    properties: any;
+    properties: Record<string, unknown>;
 }
 
 export interface DataFactoryInstanceCreateSetup_WithDependencies extends DataFactoryInstanceCreateSetup {
@@ -53,21 +53,21 @@ export interface DataFactoryInstanceIntf {
      * @returns {any} Returns the new row with no score
      * @public
      */
-    create(setup: DataFactoryInstanceCreateSetup | DataFactoryInstanceCreateSetup_WithDependencies): any;
+    create<T = Record<string, unknown>>(setup: DataFactoryInstanceCreateSetup | DataFactoryInstanceCreateSetup_WithDependencies): T;
 
     /**
      * @description Computes the score on an existing row
-     * @param {any} row - The row to compute the score on
-     * @returns {any} Returns the given row with computed score
+     * @param {Record<string, unknown>} row - The row to compute the score on
+     * @returns {Record<string, unknown>} Returns the given row with computed score
      * @public
      */
-    computeScore(row: any): any;
+    computeScore(row: unknown): Record<string, unknown>;
 
     /**
      * @description Creates a new instance of the given data class AND computes the score
      * @param {DataFactoryInstanceCreateSetup | DataFactoryInstanceCreateSetup_WithDependencies} setup - The setup containing properties to create a new instance
-     * @returns {any} Returns the new row with computed score
+     * @returns {Record<string, unknown>} Returns the new row with computed score
      * @public
      */
-    createWithScore(setup: DataFactoryInstanceCreateSetup | DataFactoryInstanceCreateSetup_WithDependencies): any;
+    createWithScore<T = Record<string, unknown>>(setup: DataFactoryInstanceCreateSetup | DataFactoryInstanceCreateSetup_WithDependencies): T;
 }

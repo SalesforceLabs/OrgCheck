@@ -56,7 +56,7 @@ export default class OrgcheckGlobalFilters extends LightningElement {
 
     /** 
      * @description SObject name original data (used for filtering and generate name options)
-     * @type {any[]}
+     * @type {object[]}
      * @public
      */
     sobjectApiNameData;
@@ -105,7 +105,7 @@ export default class OrgcheckGlobalFilters extends LightningElement {
      * @description Update the list of package options. This method adds systematically the 'All packages' 
      *                 and the 'No package' options on top.  It also sets the current filter value back to 
      *                 the 'All packages' option.
-     * @param {any[]} data - is an array coming from the Org Check API representing the list of Packages in the org
+     * @param {object[]} data - is an array coming from the Org Check API representing the list of Packages in the org
      * @public
      */
     @api updatePackageOptions(data) {
@@ -126,7 +126,7 @@ export default class OrgcheckGlobalFilters extends LightningElement {
     /**
      * @description Update the list of object type options. This method adds systematically the 'All types' 
      *                 option on top. It also sets the current filter value back to the 'All types' option.
-     * @param {any[]} data - is an array coming from the Org Check API representing the list of SObject Types in the org
+     * @param {object[]} data - is an array coming from the Org Check API representing the list of SObject Types in the org
      * @public
      */
     @api updateSObjectTypeOptions(data) {
@@ -146,7 +146,7 @@ export default class OrgcheckGlobalFilters extends LightningElement {
     /**
      * @description Update the list of object name options. This method adds systematically the 'All objects' 
      *                  option on top. It also sets the current filter value back to the 'All objects' option.
-     * @param {any[]} data - is an array coming from the Org Check API representing the list of SObject in the org
+     * @param {object[]} data - is an array coming from the Org Check API representing the list of SObject in the org
      * @public
      */
     @api updateSObjectApiNameOptions(data) {
@@ -266,7 +266,7 @@ export default class OrgcheckGlobalFilters extends LightningElement {
 
     /**
      * @description Event triggered when one of the filters have changed
-     * @param {Event | any} event - containing the id of the changed filter (identified by data-id property in html view)
+     * @param {Event} event - containing the id of the changed filter (identified by data-id property in html view)
      * @public
      */
     handleChangeValue(event) {

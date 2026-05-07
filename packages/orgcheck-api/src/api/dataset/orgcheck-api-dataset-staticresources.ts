@@ -33,15 +33,15 @@ export class DatasetStaticResources implements Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${staticResourceRecords?.length} static resources...`);
         const staticResourceDependencies = await sfdcManager.dependenciesQuery(
-            await MediumProcessor.map(staticResourceRecords, (record: any) => sfdcManager.caseSafeId(record.Id)), 
+            await MediumProcessor.map(staticResourceRecords, (record: Record<string, unknown>) => sfdcManager.caseSafeId(record.Id as string)), 
             logger
         );
 
         logger?.log(`Parsing ${staticResourceRecords?.length} static resources...`);
-        const staticResources: Map<string, SfdcStaticResource> = new Map(await MediumProcessor.map(staticResourceRecords, async (record: any) => {
+        const staticResources: Map<string, SfdcStaticResource> = new Map(await MediumProcessor.map(staticResourceRecords, async (record: Record<string, unknown>) => {
 
             // Get the ID15
-            const id = sfdcManager.caseSafeId(record.Id);
+            const id = sfdcManager.caseSafeId(record.Id as string);
             
             // Create the instance
             const staticResource: SfdcStaticResource = staticResourceDataFactory.createWithScore({

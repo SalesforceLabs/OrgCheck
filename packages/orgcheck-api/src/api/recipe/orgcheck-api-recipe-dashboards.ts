@@ -1,7 +1,6 @@
 import { ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
-import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SfdcUser }from 'src/api/data/orgcheck-api-data-user';
@@ -19,11 +18,10 @@ export class RecipeDashboards implements ServedRecipe<SfdcDashboard[], Table> {
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
-     * @param {SimpleLoggerIntf} _logger - Logger
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public ingredients(): Array<string | DatasetRunInformation> {
         return [DatasetAliases.INTERNALACTIVEUSERS, DatasetAliases.DASHBOARDS];
     }
 
@@ -44,11 +42,11 @@ export class RecipeDashboards implements ServedRecipe<SfdcDashboard[], Table> {
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf): Promise<SfdcDashboard[]> {
+    public async mix(ingredients: Map<string, unknown>): Promise<SfdcDashboard[]> {
 
         // Get data
-        const dashboards: Map<string, SfdcDashboard> = ingredients.get(DatasetAliases.DASHBOARDS);
-        const users: Map<string, SfdcUser> = ingredients.get(DatasetAliases.INTERNALACTIVEUSERS);
+        const dashboards = ingredients.get(DatasetAliases.DASHBOARDS) as Map<string, SfdcDashboard>;
+        const users = ingredients.get(DatasetAliases.INTERNALACTIVEUSERS) as Map<string, SfdcUser>;
 
         // Checking data
         if (!dashboards) throw new Error(`RecipeDashboards: Data from dataset alias 'DASHBOARDS' was undefined.`);

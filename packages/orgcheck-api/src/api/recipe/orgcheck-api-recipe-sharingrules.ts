@@ -1,7 +1,6 @@
 import { ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
-import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SfdcSharingRule } from 'src/api/data/orgcheck-api-data-sharingrule';
@@ -18,11 +17,10 @@ export class RecipeSharingRules implements ServedRecipe<SfdcSharingRule[], Table
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
-     * @param {SimpleLoggerIntf} _logger - Logger
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public ingredients(): Array<string | DatasetRunInformation> {
         return [
             DatasetAliases.SHARINGRULES
         ];
@@ -45,9 +43,9 @@ export class RecipeSharingRules implements ServedRecipe<SfdcSharingRule[], Table
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, any>, logger: SimpleLoggerIntf): Promise<SfdcSharingRule[]> {
+    public async mix(ingredients: Map<string, unknown>): Promise<SfdcSharingRule[]> {
 
-        const sharingRules: Map<string, SfdcSharingRule> = ingredients.get(DatasetAliases.SHARINGRULES);
+        const sharingRules = ingredients.get(DatasetAliases.SHARINGRULES) as Map<string, SfdcSharingRule>;
         if (!sharingRules) throw new Error(`RecipeSharingRules: Data from dataset alias 'SHARINGRULES' was undefined.`);
 
         return Array.from(sharingRules.values());

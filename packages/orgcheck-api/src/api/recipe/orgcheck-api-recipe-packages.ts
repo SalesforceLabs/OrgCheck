@@ -1,5 +1,4 @@
 import { Recipe } from 'src/api/core/recipe/orgcheck-api-recipe';
-import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SfdcPackage }from 'src/api/data/orgcheck-api-data-package';
@@ -15,11 +14,10 @@ export class RecipePackages implements Recipe<SfdcPackage[]> {
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
-     * @param {SimpleLoggerIntf} _logger - Logger
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public ingredients(): Array<string | DatasetRunInformation> {
         return [ DatasetAliases.PACKAGES ];
     }
     
@@ -40,10 +38,10 @@ export class RecipePackages implements Recipe<SfdcPackage[]> {
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf): Promise<SfdcPackage[]> {
+    public async mix(ingredients: Map<string, unknown>): Promise<SfdcPackage[]> {
 
         // Get data
-        const packages: Map<string, SfdcPackage> = ingredients.get(DatasetAliases.PACKAGES);
+        const packages = ingredients.get(DatasetAliases.PACKAGES) as Map<string, SfdcPackage>;
 
         // Checking data
         if (!packages) throw new Error(`RecipePackages: Data from dataset alias 'PACKAGES' was undefined.`);

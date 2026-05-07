@@ -11,7 +11,7 @@ export class Exporter {
      * @returns {ArrayBuffer} Generated XLS data
      */
     static exportAsXls(source: ExportedTable[] | ExportedTable): ArrayBuffer {
-        // @ts-ignore
+        // @ts-expect-error: XLSX is a global library injected at runtime and not declared in TypeScript's Window type definitions
         const xlsx = typeof window !== 'undefined' ? window?.XLSX : globalThis?.XLSX ?? null;
         if (!xlsx) {
             throw new Error('XLSX not available, skipping XLS export');
@@ -21,8 +21,8 @@ export class Exporter {
         const workbook = xlsx.utils.book_new();
         (Array.isArray(source) ? source : [ source ]).forEach(/** @param {ExportedTable} item - information about a data exportable */ (item: ExportedTable) => {
             const datasheet = [ item.columns ].concat(
-                item.rows.map((row, i) => 
-                    row.map((cell, j) => {
+                item.rows.map((row) => 
+                    row.map((cell) => {
                         // Important: At this point, all cells (in the source) SHOULD be strings -- ready to be exported.
                         // Not objects, not arrays, not booleans nor numbers.
                         // Not even null/undefined -- they must be empty strings. (reminder: typeof null is "object"!!)

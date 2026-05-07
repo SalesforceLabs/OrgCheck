@@ -23,7 +23,7 @@ export class DataDependenciesFactory {
         }
         // Data can contain a lot of dependencies from other ids, we just want to get the dependencies for the given whatIds
         // WhatID is using what? -- Here we are getting the dependencies where the ID is in the whatIds list
-        const using = data.records.filter((e: any) => whatIds.includes(e.id)).map((n: any) => { 
+        const using = data.records.filter((e) => whatIds.includes(e.id)).map((n) => { 
             return { 
                 id: n.refId, 
                 name: n.refName, 
@@ -33,7 +33,7 @@ export class DataDependenciesFactory {
         });
         const refByTypes = {};
         // WhatID is referenced where? -- Here we are getting the dependencies where the REFID is in the whatIds list
-        const referenced = data.records.filter((e: any) => whatIds.includes(e.refId)).map((n: any) => {
+        const referenced = data.records.filter((e) => whatIds.includes(e.refId)).map((n) => {
             if (refByTypes[n.type] === undefined) {
                 refByTypes[n.type] = 1;
             } else {

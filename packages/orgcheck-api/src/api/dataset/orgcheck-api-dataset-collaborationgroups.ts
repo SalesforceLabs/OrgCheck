@@ -33,10 +33,10 @@ export class DatasetCollaborationGroups implements Dataset {
 
         // Create the map
         logger?.log(`Parsing ${groupRecords?.length} chatter groups...`);
-        const groups: Map<string, SfdcCollaborationGroup> = new Map(await MediumProcessor.map(groupRecords, (record: any) => {
+        const groups: Map<string, SfdcCollaborationGroup> = new Map(await MediumProcessor.map(groupRecords, (record) => {
 
             // Get the ID15
-            const id = sfdcManager.caseSafeId(record.Id);
+            const id = sfdcManager.caseSafeId(record.Id as string);
 
             // Create the instance
             const group: SfdcCollaborationGroup = groupDataFactory.create({
@@ -52,7 +52,7 @@ export class DatasetCollaborationGroups implements Dataset {
 
             // Get information directly from the source code (if available)
             if (record.InformationBody) {
-                const bodyCode = CodeScanner.RemoveCommentsFromXML(record.InformationBody);
+                const bodyCode = CodeScanner.RemoveCommentsFromXML(record.InformationBody as string);
                 group.hardCodedURLs = CodeScanner.FindHardCodedURLs(bodyCode);
                 group.hardCodedIDs = CodeScanner.FindHardCodedIDs(bodyCode);
             }

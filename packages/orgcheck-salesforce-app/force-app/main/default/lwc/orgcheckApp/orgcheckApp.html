@@ -104,7 +104,7 @@
             <ul class="slds-list_dotted">
                 <li>The idea is to keep the current setup BUT without blocking all the 
                     Visualforce pages from this <a target="_blank" rel="external noopener noreferrer" 
-                    href="/lightning/setup/ApiAccessControl/home">page</a>in the setup menu
+                    href="/lightning/setup/ApiAccessControl/home">page</a> in the setup menu
                 </li>
                 <li>Check the <b>"Allow Visualforce pages to access APIs"</b> option to 
                     allow any of these pages (including the one from the Org Check 
@@ -232,24 +232,6 @@
                                         </lightning-layout-item>  
                                     </template>
                                 </lightning-layout>
-                                <br /><br />
-                                
-                                <h1 class="slds-text-heading_large">And now, for something completely different... 🏰🐇⚔️🧙🏼‍♂️🕊️</h1> 
-                                <ul class="slds-list_dotted">
-                                    <template for:each={jokes} for:item="joke" for:>
-                                        <li key={joke.question}><b>{joke.question}...</b> &nbsp;&nbsp; <i>{joke.answer}</i></li>
-                                    </template>
-                                </ul>
-                                <br /><br />
-
-                                <h1 class="slds-text-heading_large">Spam! Spam!! Spam!!!</h1> 
-                                <lightning-button-icon icon-name="utility:warning" title="Simple error" onclick={handleTestThrowException} data-type-error-chain="Simple"></lightning-button-icon>
-                                <lightning-button-icon icon-name="utility:warning" title="Simple -> SalesforceError error chain" onclick={handleTestThrowException} data-type-error-chain="Simple,SalesforceError"></lightning-button-icon>
-                                <lightning-button-icon icon-name="utility:warning" title="Simple -> DatasetManagerError error chain" onclick={handleTestThrowException} data-type-error-chain="Simple,DatasetManagerError"></lightning-button-icon>
-                                <lightning-button-icon icon-name="utility:warning" title="Simple -> RecipeManagerError error chain" onclick={handleTestThrowException} data-type-error-chain="Simple,RecipeManagerError"></lightning-button-icon>
-                                <lightning-button-icon icon-name="utility:warning" title="Simple -> RecipeManagerError -> DatasetManagerError error chain" onclick={handleTestThrowException} data-type-error-chain="Simple,RecipeManagerError,DatasetManagerError"></lightning-button-icon>
-                                <lightning-button-icon icon-name="utility:warning" title="Simple -> RecipeManagerError -> SalesforceError error chain" onclick={handleTestThrowException} data-type-error-chain="Simple,RecipeManagerError,DatasetManagerError,SalesforceError"></lightning-button-icon>
-                                <br /><br />
                             </div>
                             <div data-key="03" class="slds-hide slds-var-p-horizontal_small">
                                 <p>
@@ -265,14 +247,14 @@
                                     dont-use-all-space 
                                     table={tableData.scorerules}
                                     show-export-button  
-                                    export-source={exports.scorerules} 
-                                    export-basename="Org Check Rules"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.scorerules} 
+                                    export-basename={exportBasenames.scorerules}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="04" class="slds-hide slds-var-p-horizontal_medium">
                                 <template lwc:if={tableData.globalview}>
                                     <lightning-layout>
                                         <lightning-layout-item alignment-bump="left">
-                                            <c-orgcheck-export-button source={exports.globalview} basename="GlobalView"></c-orgcheck-export-button>
+                                            <c-orgcheck-export-button source={exports.globalview} basename={exports.globalview}></c-orgcheck-export-button>
                                         </lightning-layout-item>
                                     </lightning-layout>
                                     <lightning-layout>
@@ -302,8 +284,8 @@
                                 <c-orgcheck-extended-datatable 
                                     table={tableData.hardcodedurls} 
                                     show-export-button  
-                                    export-source={exports.hardcodedurls} 
-                                    export-basename="HardCodedURLs"
+                                    export-source={exportData.hardcodedurls} 
+                                    export-basename={exportBasenames.hardcodedurls}
                                     dont-use-all-space></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="06" class="slds-hide slds-var-p-horizontal_small">
@@ -314,7 +296,7 @@
                                                 <h1 class="slds-text-heading_large">{tableData.object.label} ({tableData.object.apiname})</h1>
                                             </lightning-layout-item>
                                             <lightning-layout-item alignment-bump="left">
-                                                <c-orgcheck-export-button source={exports.object} basename={tableData.object.apiname}></c-orgcheck-export-button>
+                                                <c-orgcheck-export-button source={exports.object} basename={exports.object}></c-orgcheck-export-button>
                                             </lightning-layout-item>
                                         </lightning-layout>
                                         <div class="slds-text-body_small">
@@ -548,8 +530,8 @@
                                     infinite-scrolling-additional-nb-rows=100 
                                     table={tableData.objects} 
                                     show-export-button 
-                                    export-source={exports.objects}
-                                    export-basename="Objects"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.objects}
+                                    export-basename={exportBasenames.objects}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="08" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -563,8 +545,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.customfields}
                                     show-export-button  
-                                    export-source={exports.customfields} 
-                                    export-basename="CustomFields"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.customfields} 
+                                    export-basename={exportBasenames.customfields}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="09" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -578,8 +560,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.pagelayouts}
                                     show-export-button  
-                                    export-source={exports.pagelayouts} 
-                                    export-basename="PageLayouts"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.pagelayouts} 
+                                    export-basename={exportBasenames.pagelayouts}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="0A" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -593,8 +575,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.validationrules}
                                     show-export-button  
-                                    export-source={exports.validationrules} 
-                                    export-basename="ValidationRules"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.validationrules} 
+                                    export-basename={exportBasenames.validationrules}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="0B" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -607,8 +589,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.recordtypes}
                                     show-export-button  
-                                    export-source={exports.recordtypes} 
-                                    export-basename="RecordTypes"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.recordtypes} 
+                                    export-basename={exportBasenames.recordtypes}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="0C" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -621,8 +603,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.weblinks}
                                     show-export-button  
-                                    export-source={exports.weblinks} 
-                                    export-basename="WebLinks"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.weblinks} 
+                                    export-basename={exportBasenames.weblinks}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="32" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -635,8 +617,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.sharingrules}
                                     show-export-button  
-                                    export-source={exports.sharingrules} 
-                                    export-basename="SharingRules"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.sharingrules} 
+                                    export-basename={exportBasenames.sharingrules}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="0D" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -650,8 +632,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.internalactiveusers}
                                     show-export-button  
-                                    export-source={exports.internalactiveusers} 
-                                    export-basename="Users"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.internalactiveusers} 
+                                    export-basename={exportBasenames.internalactiveusers}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="0E" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -665,8 +647,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.profiles}
                                     show-export-button  
-                                    export-source={exports.profiles} 
-                                    export-basename="Profiles"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.profiles} 
+                                    export-basename={exportBasenames.profiles}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="0F" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -680,8 +662,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.permissionsets}
                                     show-export-button  
-                                    export-source={exports.permissionsets} 
-                                    export-basename="PermissionSets"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.permissionsets} 
+                                    export-basename={exportBasenames.permissionsets}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="10" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -695,8 +677,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.permissionsetlicenses}
                                     show-export-button  
-                                    export-source={exports.permissionsetlicenses} 
-                                    export-basename="PermissionSetLicenses"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.permissionsetlicenses} 
+                                    export-basename={exportBasenames.permissionsetlicenses}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="11" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -710,8 +692,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.profilerestrictions}
                                     show-export-button  
-                                    export-source={exports.profilerestrictions} 
-                                    export-basename="ProfileRestrictions"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.profilerestrictions} 
+                                    export-basename={exportBasenames.profilerestrictions}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="12" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -725,8 +707,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.profilepasswordpolicies}
                                     show-export-button  
-                                    export-source={exports.profilepasswordpolicies} 
-                                    export-basename="ProfilePasswordPolicies"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.profilepasswordpolicies} 
+                                    export-basename={exportBasenames.profilepasswordpolicies}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="13" class="slds-hide slds-var-p-horizontal_small">
                                 <div style="text-align: right;">
@@ -742,8 +724,8 @@
                                     infinite-scrolling-additional-nb-rows=100 
                                     table={tableData.objectpermissions}
                                     show-export-button  
-                                    export-source={exports.objectpermissions} 
-                                    export-basename="ObjectPermissions"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.objectpermissions} 
+                                    export-basename={exportBasenames.objectpermissions}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="14" class="slds-hide slds-var-p-horizontal_small">
                                 <template lwc:if={isObjectSpecified}>
@@ -762,8 +744,8 @@
                                     infinite-scrolling-additional-nb-rows=100 
                                     table={tableData.fieldpermissions}
                                     show-export-button  
-                                    export-source={exports.fieldpermissions} 
-                                    export-basename="FieldPermissions"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.fieldpermissions} 
+                                    export-basename={exportBasenames.fieldpermissions}></c-orgcheck-extended-datatable>
                                 </template>
                                 <template lwc:else>
                                     There is no specific object set in the global filter above. <br />
@@ -786,8 +768,8 @@
                                     infinite-scrolling-additional-nb-rows=100 
                                     table={tableData.apppermissions}
                                     show-export-button  
-                                    export-source={exports.apppermissions} 
-                                    export-basename="AppPermissions"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.apppermissions} 
+                                    export-basename={exportBasenames.apppermissions}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="16" class="slds-hide slds-var-p-horizontal_small">
                                 If you are interested in the login history details, please go to <a href="/lightning/setup/OrgLoginHistory/home" target="_blank" rel="external noopener noreferrer">the Login History setup page</a> where you can download the last six months of login history (including user information and the browser that was used).<br /><br />
@@ -802,8 +784,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.browsers}
                                     show-export-button  
-                                    export-source={exports.browsers} 
-                                    export-basename="Browsers"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.browsers} 
+                                    export-basename={exportBasenames.browsers}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="17" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-graphics 
@@ -828,8 +810,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.userroles}
                                     show-export-button  
-                                    export-source={exports.userroles} 
-                                    export-basename="Roles"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.userroles} 
+                                    export-basename={exportBasenames.userroles}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="19" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -843,8 +825,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.publicgroups}
                                     show-export-button  
-                                    export-source={exports.publicgroups} 
-                                    export-basename="PublicGroups"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.publicgroups} 
+                                    export-basename={exportBasenames.publicgroups}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="1A" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -858,8 +840,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.queues}
                                     show-export-button  
-                                    export-source={exports.queues} 
-                                    export-basename="Queues"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.queues} 
+                                    export-basename={exportBasenames.queues}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="1B" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -873,8 +855,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.chatterroups}
                                     show-export-button  
-                                    export-source={exports.chatterroups} 
-                                    export-basename="ChatterGroups"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.chatterroups} 
+                                    export-basename={exportBasenames.chatterroups}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="1C" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -888,8 +870,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.flows}
                                     show-export-button  
-                                    export-source={exports.flows} 
-                                    export-basename="Flows"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.flows} 
+                                    export-basename={exportBasenames.flows}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="1D" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -903,8 +885,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.processbuilders}
                                     show-export-button  
-                                    export-source={exports.processbuilders} 
-                                    export-basename="ProcessBuilders"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.processbuilders} 
+                                    export-basename={exportBasenames.processbuilders}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="1E" class="slds-hide slds-var-p-horizontal_small">
                                 Salesforce provides a <a href="/lightning/setup/MigrateToFlowTool/home" target="_blank" rel="external noopener noreferrer">migration tool</a> for your workflows<br /><br />
@@ -919,8 +901,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.workflows}
                                     show-export-button  
-                                    export-source={exports.workflows} 
-                                    export-basename="Workflows"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.workflows} 
+                                    export-basename={exportBasenames.workflows}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="1F" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -934,8 +916,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.customlabels}
                                     show-export-button  
-                                    export-source={exports.customlabels} 
-                                    export-basename="CustomLabels"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.customlabels} 
+                                    export-basename={exportBasenames.customlabels}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="20" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -949,8 +931,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.documents}
                                     show-export-button  
-                                    export-source={exports.documents} 
-                                    export-basename="Documents"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.documents} 
+                                    export-basename={exportBasenames.documents}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="21" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -964,8 +946,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.emailtemplates}
                                     show-export-button  
-                                    export-source={exports.emailtemplates} 
-                                    export-basename="EmailTemplates"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.emailtemplates} 
+                                    export-basename={exportBasenames.emailtemplates}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="22" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -979,8 +961,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.knowledgearticles}
                                     show-export-button  
-                                    export-source={exports.knowledgearticles} 
-                                    export-basename="KnowledgeArticles"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.knowledgearticles} 
+                                    export-basename={exportBasenames.knowledgearticles}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="23" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -994,8 +976,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.staticresources}
                                     show-export-button  
-                                    export-source={exports.staticresources} 
-                                    export-basename="StaticResources"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.staticresources} 
+                                    export-basename={exportBasenames.staticresources}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="24" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -1009,8 +991,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.visualforcepages}
                                     show-export-button  
-                                    export-source={exports.visualforcepages} 
-                                    export-basename="VisualForcePages"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.visualforcepages} 
+                                    export-basename={exportBasenames.visualforcepages}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="25" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -1024,8 +1006,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.visualforcecomponents}
                                     show-export-button  
-                                    export-source={exports.visualforcecomponents} 
-                                    export-basename="VisualForceComponents"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.visualforcecomponents} 
+                                    export-basename={exportBasenames.visualforcecomponents}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="26" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -1039,8 +1021,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.lightningpages}
                                     show-export-button  
-                                    export-source={exports.lightningpages} 
-                                    export-basename="LightningPages"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.lightningpages} 
+                                    export-basename={exportBasenames.lightningpages}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="27" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -1054,8 +1036,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.lightningauracomponents}
                                     show-export-button  
-                                    export-source={exports.lightningauracomponents} 
-                                    export-basename="LightningAuraComponents"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.lightningauracomponents} 
+                                    export-basename={exportBasenames.lightningauracomponents}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="28" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -1069,8 +1051,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.lightningwebcomponents}
                                     show-export-button  
-                                    export-source={exports.lightningwebcomponents} 
-                                    export-basename="LightningWebComponents"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.lightningwebcomponents} 
+                                    export-basename={exportBasenames.lightningwebcomponents}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="29" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -1084,8 +1066,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.homepages}
                                     show-export-button  
-                                    export-source={exports.homepages} 
-                                    export-basename="HomePageComponents"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.homepages} 
+                                    export-basename={exportBasenames.homepages}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="2A" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -1099,8 +1081,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.customtabs}
                                     show-export-button  
-                                    export-source={exports.customtabs} 
-                                    export-basename="CustomTabs"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.customtabs} 
+                                    export-basename={exportBasenames.customtabs}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="2B" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -1114,8 +1096,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.apexclasses}
                                     show-export-button  
-                                    export-source={exports.apexclasses} 
-                                    export-basename="ApexClasses">
+                                    export-source={exportData.apexclasses} 
+                                    export-basename={exportBasenames.apexclasses}>
                                         <template lwc:if={tableData.apexclasses}>
                                             <li class="slds-button-group-item">
                                                 <lightning-button 
@@ -1141,8 +1123,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.apexuncompiled}
                                     show-export-button  
-                                    export-source={exports.apexuncompiled} 
-                                    export-basename="ApexClassesNeedCompilation">
+                                    export-source={exportData.apexuncompiled} 
+                                    export-basename={exportBasenames.apexuncompiled}>
                                         <template lwc:if={tableData.apexuncompiled}>
                                             <li class="slds-button-group-item">
                                                 <lightning-button 
@@ -1168,8 +1150,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.apextriggers}
                                     show-export-button  
-                                    export-source={exports.apextriggers} 
-                                    export-basename="ApexTriggers"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.apextriggers} 
+                                    export-basename={exportBasenames.apextriggers}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="2E" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -1183,8 +1165,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.apextests}
                                     show-export-button  
-                                    export-source={exports.apextests} 
-                                    export-basename="ApexUnitTests"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.apextests} 
+                                    export-basename={exportBasenames.apextests}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="2F" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -1198,8 +1180,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.reports}
                                     show-export-button  
-                                    export-source={exports.reports} 
-                                    export-basename="Reports"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.reports} 
+                                    export-basename={exportBasenames.reports}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="30" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -1213,8 +1195,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.dashboards}
                                     show-export-button  
-                                    export-source={exports.dashboards} 
-                                    export-basename="Dashboards"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.dashboards} 
+                                    export-basename={exportBasenames.dashboards}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="31" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 
@@ -1228,8 +1210,8 @@
                                     infinite-scrolling-additional-nb-rows=100
                                     table={tableData.releaseupdates}
                                     show-export-button  
-                                    export-source={exports.releaseupdates} 
-                                    export-basename="ReleaseUpdates"></c-orgcheck-extended-datatable>
+                                    export-source={exportData.releaseupdates} 
+                                    export-basename={exportBasenames.releaseupdates}></c-orgcheck-extended-datatable>
                             </div>
                         </div>
                     </lightning-card>

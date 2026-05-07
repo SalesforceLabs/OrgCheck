@@ -29,7 +29,7 @@ export class FieldPermissionsTableDefinition implements TableDefinition {
             { label: 'Custom',  type: ColumnType.CHK, data: { value: 'header.isCustom' }}
         ];
         if (this._matrix) {
-            this._matrix.columnHeaders // returns an array of string representing Field Api names
+            (this._matrix.columnHeaders as string[]) // returns an array of string representing Field Api names
                 .sort()
                 .forEach((fieldApiName) => {
                     columns.push({ 

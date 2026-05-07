@@ -29,11 +29,11 @@ export class AppPermissionsTableDefinition implements TableDefinition {
             { label: 'Custom',  type: ColumnType.CHK, data: { value: 'header.isCustom' }}
         ];
         if (this._matrix) {
-            this._matrix.columnHeaders // returns an array of Object like {id: string, label: string} representing an Application
-                .sort((a: { id: string; label: string; }, b: { id: string; label: string; }) => { 
+            (this._matrix.columnHeaders as { id: string; label: string; }[]) // returns an array of Object like {id: string, label: string} representing an Application
+                .sort((a, b) => { 
                     return a.label < b.label ? -1: 1; 
                 })
-                .forEach((app: { id: string; label: string; }) => {
+                .forEach((app) => {
                     columns.push({ 
                         label: app.label, 
                         type: ColumnType.TXT, 

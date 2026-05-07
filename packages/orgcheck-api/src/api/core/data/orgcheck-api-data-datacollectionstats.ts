@@ -64,7 +64,7 @@ export interface DataCollectionStatisticsIntf {
      * @type {any[]}
      * @public
      */
-    distinctBadValues: any[];
+    distinctBadValues: unknown[];
 
     /**
      * @description List of bad items and their bad values

@@ -25,7 +25,7 @@ export interface RecipeCollection {
      * @returns {RecipeAliases[]} List of recipe aliases that this recipe collection needs
      * @public
      */
-    ingredients(logger: SimpleLoggerIntf | undefined, parameters?: Map<string, any>): RecipeAliases[];
+    ingredients(logger: SimpleLoggerIntf | undefined, parameters?: Map<string, unknown>): RecipeAliases[];
 
     /**
      * @description List the parameters that this recipe collection dependes on
@@ -41,7 +41,7 @@ export interface RecipeCollection {
      * @returns {ScoreRule[]} List of score rule to filter by. Empty array means no filtering
      * @public
      */ 
-    filterByScoreRules(logger: SimpleLoggerIntf | undefined, parameters?: Map<string, any>): ScoreRule[];
+    filterByScoreRules(logger: SimpleLoggerIntf | undefined, parameters?: Map<string, unknown>): ScoreRule[];
 
     /**
      * @description Serve the mixture from a designated recipe collection to a table
@@ -78,7 +78,7 @@ export class DataCollectionStatisticsOK implements DataCollectionStatisticsIntf 
     constructor(public readonly recipeAlias: string, public readonly recipeTitle: string, 
         public readonly countAll: number, public readonly countBad: number, 
         public readonly countBadByRule: { ruleId: number; ruleName: string; count: number; }[], 
-        public readonly distinctBadValues: any[], public readonly badItems: {data: DataWithScore, badValues: string[]}[] , 
+        public readonly distinctBadValues: unknown[], public readonly badItems: {data: DataWithScore, badValues: string[]}[] , 
         public readonly allData: DataWithScore[]) {
         this.countGood = countAll - countBad;
     }
@@ -155,7 +155,7 @@ export class DataCollectionStatisticsWithError implements DataCollectionStatisti
      * @type {any[]}
      * @public
      */
-    public readonly distinctBadValues: any[] = [];
+    public readonly distinctBadValues: unknown[] = [];
 
     /**
      * @description List of bad items and their bad values

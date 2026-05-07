@@ -86,7 +86,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
 
     /**
      * @description The source data for the export functionality
-     * @type {ExportedTable | ExportedTable[]}
+     * @type {object | object[]}
      */
     @api exportSource = undefined;
 
@@ -227,9 +227,9 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
 
     /**
      * @description Internal properties without LWC reactivity
-     * @property allRows {Array} Array of all rows (even the one that are not visible because of the filter or infinite scrolling)
-     * @property table {Object} The whole table information as it is set by the caller with the "table" property (headers, rows, etc...)
-     * @property filteringSearchInput {string} Current value of the search input which is used by the filter method
+     * @property {Array} allRows - Array of all rows (even the one that are not visible because of the filter or infinite scrolling)
+     * @property {object} table - The whole table information as it is set by the caller with the "table" property (headers, rows, etc...)
+     * @property {string} filteringSearchInput - Current value of the search input which is used by the filter method
      */
     _private_properties = {
         table: undefined,
@@ -240,7 +240,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
 
     /**
      * @description Set the table information: headers, rows, etc...
-     * @param {{ definition: { columns: any[]; }; rows: any[]; }} table
+     * @param {{ definition: { columns: object[]; }; rows: object[]; }} table - The table configuration object
      */
     @api set table(table) {
 
@@ -300,6 +300,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
 
     /**
      * @description Get the table information: headers, rows, etc...
+     * @returns {object} The table configuration object
      */
     get table() {
         return this._private_properties.table;
@@ -333,7 +334,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
 
     /**
      * @description Handler when a user type a search text in the appropriate input text field
-     * @param {Event | any} event - The event information
+     * @param {Event} event - The event information
      */
     handleSearchInputChanged(event) {
         this._private_properties.filteringSearchInput = event.target.value;
@@ -344,7 +345,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
 
     /**
      * @description Handler when a user clicks on a header of the table
-     * @param {Event | any} event - The event information
+     * @param {Event} event - The event information
      */
     handleSortColumnClick(event) {
 
@@ -387,7 +388,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
 
     /**
      * @description Handler when a user click on the dependency link to open the modal dialog with dependency diagram
-     * @param {Event | any} event - The event information
+     * @param {Event} event - The event information
      */
     handleViewDependency(event) {
         const viewer = this.template.querySelector('c-orgcheck-dependency-viewer');
@@ -396,7 +397,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
 
     /**
      * @description Handler when a user click on the score link to open the modal dialog with score explanation
-     * @param {Event | any} event - The event information
+     * @param {Event} event - The event information
      */
     handleViewScore(event) {
         this.dispatchEvent(new CustomEvent('viewscore', { detail: { 

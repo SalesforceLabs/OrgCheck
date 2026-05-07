@@ -52,7 +52,7 @@ export class DatasetOrganization implements Dataset {
         // Create the data
         const organization: SfdcOrganization = organizationDataFactory.create({
             properties: {
-                id: sfdcManager.caseSafeId(record.Id),
+                id: sfdcManager.caseSafeId(record.Id as string),
                 name: record.Name,
                 type: type,
                 isDeveloperEdition: (type === ORGTYPE_DE),

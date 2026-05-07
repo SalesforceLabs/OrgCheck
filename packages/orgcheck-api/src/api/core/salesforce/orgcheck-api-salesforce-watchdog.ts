@@ -133,7 +133,7 @@ export class SalesforceWatchDog {
      * @throws {SalesforceError} If we reach the limit
      * @public
      */
-    public beforeRequest(callback?: Function) {
+    public beforeRequest(callback?: (error: Error) => void) {
         if (this._lastRequestToSalesforce && 
             Date.now() - this._lastRequestToSalesforce <= IF_LIMIT_INFO_ARE_OLDER_THAN_THIS_FORCE_REFRESH && 
             this._lastApiUsage.isRedZone
@@ -158,7 +158,7 @@ export class SalesforceWatchDog {
      * @throws {SalesforceError} If we reach the limit
      * @public
      */
-    public afterRequest(callback?: Function) {
+    public afterRequest(callback?: (error: Error) => void) {
         const apiUsage = this._apiLimitExtractor();
         if (apiUsage) {
             this._lastApiUsage.currentUsageRatio = apiUsage.used / apiUsage.max;

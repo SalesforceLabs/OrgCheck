@@ -38,32 +38,32 @@ export class DatasetWeblinks implements Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${webLinkRecords?.length} web links...`);
         const webLinkDependencies = await sfdcManager.dependenciesQuery(
-            await MediumProcessor.map(webLinkRecords, (record: any) => sfdcManager.caseSafeId(record.Id)), 
+            await MediumProcessor.map(webLinkRecords, (record: Record<string, unknown>) => sfdcManager.caseSafeId(record.Id as string)), 
             logger
         );
 
         // Create the map
         logger?.log(`Parsing ${webLinkRecords?.length} weblinks...`);
-        const webLinks: Map<string, SfdcWebLink> = new Map(await MediumProcessor.map(webLinkRecords, async (record: any) => {
+        const webLinks: Map<string, SfdcWebLink> = new Map(await MediumProcessor.map(webLinkRecords, async (record: Record<string, unknown>) => {
 
             // Get the ID15
-            const id = sfdcManager.caseSafeId(record.Id);
+            const id = sfdcManager.caseSafeId(record.Id as string);
 
             // Create the instance
             const webLink: SfdcWebLink = webLinkDataFactory.createWithScore({
                 properties: {
                     id: id,
                     name: record.Name, 
-                    hardCodedURLs: CodeScanner.FindHardCodedURLs(record.Url),
-                    hardCodedIDs: CodeScanner.FindHardCodedIDs(record.Url),
+                    hardCodedURLs: CodeScanner.FindHardCodedURLs(record.Url as string),
+                    hardCodedIDs: CodeScanner.FindHardCodedIDs(record.Url as string),
                     type: record.LinkType,
                     behavior: record.OpenType,
                     package: (record.NamespacePrefix || ''),
                     createdDate: record.CreatedDate,
                     lastModifiedDate: record.LastModifiedDate,
                     description: record.Description,
-                    objectId: record.EntityDefinition?.DurableId,
-                    url: sfdcManager.setupUrl(record.Id, SalesforceMetadataTypes.WEB_LINK, record.PageOrSobjectType)
+                    objectId: (record.EntityDefinition as Record<string, unknown> | undefined)?.DurableId as string | undefined,
+                    url: sfdcManager.setupUrl(record.Id as string, SalesforceMetadataTypes.WEB_LINK, record.PageOrSobjectType as string | undefined)
                 },
                 dependencyData: webLinkDependencies
             });

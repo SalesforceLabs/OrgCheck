@@ -7,6 +7,6 @@ export interface SalesforceAuthenticationOptions {
 }
 
 export interface SalesforceManagerSetup {
-    connection?: any;
+    connection?: unknown;
     authenticationOptions?: SalesforceAuthenticationOptions;
 }

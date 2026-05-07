@@ -1,25 +1,25 @@
 div.modal-content {
-    padding: 10px;
+    padding: var(--slds-g-spacing-3, 0.75rem);
 }
 
 pre.tty {
-    margin-top: 3px;
-    background-color: #240808;
-    color: #e9baba;
+    margin-top: var(--slds-g-spacing-1, 0.25rem);
+    background-color: var(--slds-g-color-warning-base-10);
+    color: var(--slds-g-color-error-base-80);
     font-size: xx-small;
     text-wrap: auto;
-    padding: 5px;
+    padding: var(--slds-g-spacing-1, 0.25rem);
 }
 
 div.error-warning {
-    border-left: 4px solid #b36b00;
-    background-color: #fff8e1;
-    color: #4a3500;
-    padding: 12px 16px;
-    margin-bottom: 12px;
-    border-radius: 4px;
+    border-left: var(--slds-g-sizing-border-3, 3px) solid var(--slds-g-color-warning-base-50);
+    background-color: var(--slds-g-color-surface-2, #f3f3f3);
+    color: var(--slds-g-color-warning-base-15);
+    padding: var(--slds-g-spacing-3, 0.75rem) var(--slds-g-spacing-4, 1rem);
+    margin-bottom: var(--slds-g-spacing-3, 0.75rem);
+    border-radius: var(--slds-g-radius-border-1, 0.125rem);
 }
 
 div.error-warning p {
-    margin: 6px 0;
+    margin: var(--slds-g-spacing-1, 0.25rem) 0;
 }

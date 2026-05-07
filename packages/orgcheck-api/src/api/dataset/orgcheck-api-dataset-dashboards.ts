@@ -34,10 +34,10 @@ export class DatasetDashboards implements Dataset {
         // Create the map
         const dashboardRecords = results[0];
         logger?.log(`Parsing ${dashboardRecords?.length} dashboards...`);
-        const dashboards: Map<string, SfdcDashboard> = new Map(await MediumProcessor.map(dashboardRecords, async (record: any) => {
+        const dashboards: Map<string, SfdcDashboard> = new Map(await MediumProcessor.map(dashboardRecords, async (record) => {
         
             // Get the ID15 of this dashboard
-            const id = sfdcManager.caseSafeId(record.Id);
+            const id = sfdcManager.caseSafeId(record.Id as string);
 
             // Create the instance
             const dashboard: SfdcDashboard = dashboardDataFactory.createWithScore({

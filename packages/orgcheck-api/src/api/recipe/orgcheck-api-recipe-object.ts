@@ -70,7 +70,7 @@ export class RecipeObject implements ServedRecipe<SfdcObject, SfdcObjectAsTable>
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public ingredients(_logger: SimpleLoggerIntf, parameters: Map<string, any>): Array<string | DatasetRunInformation> {
+    public ingredients(_logger: SimpleLoggerIntf, parameters: Map<string, string>): Array<string | DatasetRunInformation> {
         return [ 
             new DatasetRunInformation(
                 DatasetAliases.OBJECT,
@@ -106,15 +106,15 @@ export class RecipeObject implements ServedRecipe<SfdcObject, SfdcObjectAsTable>
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf): Promise<SfdcObject> {
+    public async mix(ingredients: Map<string, unknown>): Promise<SfdcObject> {
 
         // Get data
-        const types: Map<string, SfdcObjectType> = ingredients.get(DatasetAliases.OBJECTTYPES);
-        const object: SfdcObject = ingredients.get(DatasetAliases.OBJECT);
-        const apexTriggers: Map<string, SfdcApexTrigger> = ingredients.get(DatasetAliases.APEXTRIGGERS);
-        const workflowRules: Map<string, SfdcWorkflow> = ingredients.get(DatasetAliases.WORKFLOWS);
-        const pages: Map<string, SfdcLightningPage> = ingredients.get(DatasetAliases.LIGHTNINGPAGES);
-        const customFields: Map<string, SfdcField> = ingredients.get(DatasetAliases.CUSTOMFIELDS);
+        const types = ingredients.get(DatasetAliases.OBJECTTYPES) as Map<string, SfdcObjectType>;
+        const object = ingredients.get(DatasetAliases.OBJECT) as SfdcObject;
+        const apexTriggers = ingredients.get(DatasetAliases.APEXTRIGGERS) as Map<string, SfdcApexTrigger>;
+        const workflowRules = ingredients.get(DatasetAliases.WORKFLOWS) as Map<string, SfdcWorkflow>;
+        const pages = ingredients.get(DatasetAliases.LIGHTNINGPAGES) as Map<string, SfdcLightningPage>;
+        const customFields = ingredients.get(DatasetAliases.CUSTOMFIELDS) as Map<string, SfdcField>;
 
         // Checking data
         if (!types) throw new Error(`RecipeObject: Data from dataset alias 'OBJECTTYPES' was undefined.`);

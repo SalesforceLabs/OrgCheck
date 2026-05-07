@@ -22,11 +22,10 @@ abstract class AbstractRecipeApexClasses implements ServedRecipe<SfdcApexClass[]
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
-     * @param {SimpleLoggerIntf} _logger - Logger
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public ingredients(): Array<string | DatasetRunInformation> {
         return [
             DatasetAliases.APEXCLASSES
         ];
@@ -50,10 +49,10 @@ abstract class AbstractRecipeApexClasses implements ServedRecipe<SfdcApexClass[]
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<SfdcApexClass[]> {
+    public async mix(ingredients: Map<string, unknown>, _logger: SimpleLoggerIntf, parameters: Map<string, string>): Promise<SfdcApexClass[]> {
 
         // Get data and parameters
-        const apexClasses: Map<string, SfdcApexClass> = ingredients.get(DatasetAliases.APEXCLASSES);
+        const apexClasses = ingredients.get(DatasetAliases.APEXCLASSES) as Map<string, SfdcApexClass>;
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data

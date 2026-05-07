@@ -67,10 +67,10 @@ export class DatasetInternalActiveUsers implements Dataset {
         const loginRecords = results[2];
         const verifRecords = results[3];
         logger?.log(`Parsing ${userRecords?.length} users...`);
-        const users: Map<string, SfdcUser> = new Map(await MediumProcessor.map(userRecords, async (record: any) => {
+        const users: Map<string, SfdcUser> = new Map(await MediumProcessor.map(userRecords, async (record: Record<string, unknown>) => {
         
             // Get the ID15 of this user
-            const id = sfdcManager.caseSafeId(record.Id);
+            const id = sfdcManager.caseSafeId(record.Id as string);
 
             // Create the instance
             const user: SfdcUser = userDataFactory.create({
@@ -81,7 +81,7 @@ export class DatasetInternalActiveUsers implements Dataset {
                     numberFailedLogins: record.NumberOfFailedLogins,
                     onLightningExperience: record.UserPreferencesLightningExperiencePreferred === true,
                     lastPasswordChange: record.LastPasswordChangeDate,
-                    profileId: sfdcManager.caseSafeId(record.ProfileId),
+                    profileId: sfdcManager.caseSafeId(record.ProfileId as string),
                     permissionSetIds: [],
                     isAdminLike: false,
                     hasMfaByPass: false,
@@ -100,25 +100,26 @@ export class DatasetInternalActiveUsers implements Dataset {
 
         // Now process the permission set assignments
         logger?.log(`Parsing ${assignmentRecords?.length} permission set assignments...`);
-        assignmentRecords.forEach((record: any) => {
-            const assigneeId = sfdcManager.caseSafeId(record.AssigneeId);
-            const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId);
+        assignmentRecords.forEach((record: Record<string, unknown>) => {
+            const assigneeId = sfdcManager.caseSafeId(record.AssigneeId as string);
+            const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId as string);
             const user = users.get(assigneeId);
             if (user) {
+                const permissionSet = record.PermissionSet as Record<string, unknown> | undefined;
                 // Add permission set id to the user (only persets or PSGs)
-                if (record.PermissionSet?.IsOwnedByProfile === false) {
+                if (permissionSet?.IsOwnedByProfile === false) {
                     // IsOwnedByProfile === false means it's a PermSet or PSG (not a Profile)
                     user.permissionSetIds.push(permissionSetId);
                 }
                 // Check for admin-like permissions for this user via this Permission Set / PSG / Profile
-                if (record.PermissionSet?.PermissionsModifyAllData === true ||
-                    record.PermissionSet?.PermissionsViewAllData === true ||
-                    record.PermissionSet?.PermissionsManageUsers === true ||
-                    record.PermissionSet?.PermissionsCustomizeApplication === true) {
+                if (permissionSet?.PermissionsModifyAllData === true ||
+                    permissionSet?.PermissionsViewAllData === true ||
+                    permissionSet?.PermissionsManageUsers === true ||
+                    permissionSet?.PermissionsCustomizeApplication === true) {
                     user.isAdminLike = true;                    
                 }
                 // Check user has MFA bypass via this Permission Set / PSG / Profile
-                if (record.PermissionSet?.PermissionsBypassMFAForUiLogins === true) {
+                if (permissionSet?.PermissionsBypassMFAForUiLogins === true) {
                     user.hasMfaByPass = true;
                 }
             }
@@ -126,20 +127,20 @@ export class DatasetInternalActiveUsers implements Dataset {
 
         // Now process the user logins aggregates
         logger?.log(`Parsing ${loginRecords?.length} user logins aggregates...`);
-        await MediumProcessor.forEach(loginRecords, async (record: any) => {
+        await MediumProcessor.forEach(loginRecords, async (record: Record<string, unknown>) => {
 
             // Only successful logins are interesting
             if (record.Status === 'Success') { // filter not possible in SOQL!
-                const userId = sfdcManager.caseSafeId(record.UserId);
+                const userId = sfdcManager.caseSafeId(record.UserId as string);
                 const user = users.get(userId);
                 if (user) {
                     // depending on the login access (direct or sso)
                     if (record.LoginType === 'Application') {
                         // Direct login access via browser
-                        user.nbDirectLogins += record.CntLogins;
+                        user.nbDirectLogins += record.CntLogins as number;
                     } else {
                         // SSO login access via IDP
-                        user.nbSSOLogins += record.CntLogins;
+                        user.nbSSOLogins += record.CntLogins as number;
                     }
                 }
             }
@@ -147,16 +148,16 @@ export class DatasetInternalActiveUsers implements Dataset {
 
         // Now process the user verifications aggregates
         logger?.log(`Parsing ${verifRecords?.length} user verifications aggregates...`);
-        await MediumProcessor.forEach(verifRecords, async (record: any) => {
+        await MediumProcessor.forEach(verifRecords, async (record: Record<string, unknown>) => {
 
-            const userId = sfdcManager.caseSafeId(record.UserId);
+            const userId = sfdcManager.caseSafeId(record.UserId as string);
             const user = users.get(userId);
             if (user) {
                 // If MFA is used for internal logins
                 if (record.Policy === 'TwoFactorAuthentication') {
-                    user.nbDirectLoginsWithMFA += record.CntVerifications;
+                    user.nbDirectLoginsWithMFA += record.CntVerifications as number;
                 } else {
-                    user.nbDirectLoginsWithoutMFA += record.CntVerifications;
+                    user.nbDirectLoginsWithoutMFA += record.CntVerifications as number;
                 }
             }
         });

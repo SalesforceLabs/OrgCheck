@@ -142,5 +142,5 @@ export interface DataDependenciesForOneItem {
      * @type {any}
      * @public
      */
-    referencedByTypes: any;
+    referencedByTypes: Record<string, number>;
 }

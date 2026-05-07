@@ -2,7 +2,6 @@ import { ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
 import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
-import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SfdcUserRole }from 'src/api/data/orgcheck-api-data-userrole';
@@ -20,11 +19,10 @@ export class RecipeUserRoles implements ServedRecipe<SfdcUserRole[], Table> {
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
-     * @param {SimpleLoggerIntf} _logger - Logger
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public ingredients(): Array<string | DatasetRunInformation> {
         return [
             DatasetAliases.USERROLES,
             DatasetAliases.INTERNALACTIVEUSERS
@@ -48,11 +46,11 @@ export class RecipeUserRoles implements ServedRecipe<SfdcUserRole[], Table> {
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf): Promise<SfdcUserRole[]> {
+    public async mix(ingredients: Map<string, unknown>): Promise<SfdcUserRole[]> {
 
         // Get data
-        const userRoles: Map<string, SfdcUserRole> = ingredients.get(DatasetAliases.USERROLES);
-        const users: Map<string, SfdcUser> = ingredients.get(DatasetAliases.INTERNALACTIVEUSERS);
+        const userRoles = ingredients.get(DatasetAliases.USERROLES) as Map<string, SfdcUserRole>;
+        const users = ingredients.get(DatasetAliases.INTERNALACTIVEUSERS) as Map<string, SfdcUser>;
 
         // Checking data
         if (!userRoles) throw new Error(`RecipeUserRoles: Data from dataset alias 'USERROLES' was undefined.`);

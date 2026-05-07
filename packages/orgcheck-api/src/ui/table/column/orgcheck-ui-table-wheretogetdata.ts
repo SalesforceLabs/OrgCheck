@@ -43,8 +43,7 @@ export interface WhereToGetScoreData extends WhereToGetData {
 /**
  * @description The text is the value in this case, no additional field needed
  */ 
-export interface WhereToGetTextData extends WhereToGetData {
-}
+export type WhereToGetTextData = WhereToGetData;
 
 /**
  * @description The URL is the value in this case, and we add the field to find the label for the hyperlink
@@ -67,7 +66,7 @@ export interface WhereToGetObjectData extends WhereToGetData {
      * @description Template function to generate a text based on the object
      * @type {function(any): string}
      */
-    template(arg0: any): string;
+    template(arg0: Record<string, unknown>): string;
 }
 
 

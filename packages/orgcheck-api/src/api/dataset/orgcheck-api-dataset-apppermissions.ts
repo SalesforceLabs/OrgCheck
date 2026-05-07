@@ -36,17 +36,18 @@ export class DatasetAppPermissions implements Dataset {
 
         // Create a map of the app menu items
         logger?.log(`Parsing ${appMenuItems?.length} application menu items...`);
-        const appMenuItemAccesses: Map<string, { a: boolean, v: boolean }> = new Map(await MediumProcessor.map(appMenuItems, (record: any) => {
-            return [ sfdcManager.caseSafeId(record.ApplicationId), { a: record.IsAccessible, v: record. IsVisible }] ;
+        const appMenuItemAccesses: Map<string, { a: boolean, v: boolean }> = new Map(await MediumProcessor.map(appMenuItems, (record) => {
+            return [ sfdcManager.caseSafeId(record.ApplicationId as string), { a: record.IsAccessible as boolean, v: record.IsVisible as boolean }] ;
         }));
 
         // Create the map
         logger?.log(`Parsing ${setupEntityAccesses?.length} Setup Entity Accesses...`);
         const appPermissions: Map<string, SfdcAppPermission> = new Map(await MediumProcessor.map(setupEntityAccesses, 
-            (record: any) => {
+            (record) => {
                 // Get the ID15 of this application
-                const appId = sfdcManager.caseSafeId(record.SetupEntityId);
-                const parentId = sfdcManager.caseSafeId(record.Parent.IsOwnedByProfile ? record.Parent.ProfileId : record.ParentId);
+                const appId = sfdcManager.caseSafeId(record.SetupEntityId as string);
+                const parent = record.Parent as { IsOwnedByProfile: boolean; ProfileId: string } | null;
+                const parentId = sfdcManager.caseSafeId(parent?.IsOwnedByProfile ? parent.ProfileId : record.ParentId as string);
 
                 // Get the appMenuItemAccesses
                 const accesses = appMenuItemAccesses.get(appId);
@@ -64,9 +65,9 @@ export class DatasetAppPermissions implements Dataset {
                 // Add the app in map
                 return [ `${appId}-${parentId}`, appPermission ];
             }, 
-            (record: any) => { 
+            (record) => { 
                 // Make sure we only get the access for Application that have in AppMenuItem
-                return appMenuItemAccesses.has(sfdcManager.caseSafeId(record.SetupEntityId));
+                return appMenuItemAccesses.has(sfdcManager.caseSafeId(record.SetupEntityId as string));
             }
         ));
 

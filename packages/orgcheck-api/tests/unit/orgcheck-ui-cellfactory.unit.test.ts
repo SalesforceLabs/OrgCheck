@@ -21,11 +21,11 @@ describe('tests.ui.unit.CellFactory', () => {
             });
             expect(tableRows).not.toBeNull();
             expect(tableRows.length).toBe(3);
-            tableRows.forEach((row) => {
+            tableRows.forEach((row: any) => {
                 expect(row).toBeDefined();
-                expect(row.data).toBeDefined();
-                expect(row.data.value).toBeUndefined();
-                expect(row.typeofindex).toBeTruthy();
+                expect(row?.data).toBeDefined();
+                expect(row?.data?.value).toBeUndefined();
+                expect(row?.typeofindex).toBeTruthy();
             });
         });
     });
@@ -45,7 +45,7 @@ describe('tests.ui.unit.CellFactory', () => {
             });
             expect(tableRows).not.toBeNull();
             expect(tableRows.length).toBe(3);
-            tableRows.forEach((row, i) => {
+            tableRows.forEach((row: any, i) => {
                 expect(row).toBeDefined();
                 expect(row.data).toBeDefined();
                 expect(row.data.value).toBe(data[i].score);
@@ -71,7 +71,7 @@ describe('tests.ui.unit.CellFactory', () => {
             });
             expect(tableRows).not.toBeNull();
             expect(tableRows.length).toBe(3);
-            tableRows.forEach((row, i) => {
+            tableRows.forEach((row: any, i) => {
                 expect(row).toBeDefined();
                 expect(row.data).toBeDefined();
                 expect(row.data.value).toBe(data[i].url);
@@ -96,7 +96,7 @@ describe('tests.ui.unit.CellFactory', () => {
             });
             expect(tableRows).not.toBeNull();
             expect(tableRows.length).toBe(3);
-            tableRows.forEach((row, i) => {
+            tableRows.forEach((row: any, i) => {
                 expect(row).toBeDefined();
                 expect(row.data).toBeDefined();
                 expect(row.data.value).toBe(data[i].apiVersion);
@@ -120,7 +120,7 @@ describe('tests.ui.unit.CellFactory', () => {
             });
             expect(tableRows).not.toBeNull();
             expect(tableRows.length).toBe(3);
-            tableRows.forEach((row, i) => {
+            tableRows.forEach((row: any, i) => {
                 expect(row).toBeDefined();
                 expect(row.data).toBeDefined();
                 expect(row.data.value).toBe(data[i].package);
@@ -144,7 +144,7 @@ describe('tests.ui.unit.CellFactory', () => {
             });
             expect(tableRows).not.toBeNull();
             expect(tableRows.length).toBe(3);
-            tableRows.forEach((row, i) => {
+            tableRows.forEach((row: any, i) => {
                 expect(row).toBeDefined();
                 expect(row.data).toBeDefined();
                 expect(row.data.value).toBe(data[i].createdDate);
@@ -168,7 +168,7 @@ describe('tests.ui.unit.CellFactory', () => {
             });
             expect(tableRows).not.toBeNull();
             expect(tableRows.length).toBe(3);
-            tableRows.forEach((row, i) => {
+            tableRows.forEach((row: any, i) => {
                 expect(row).toBeDefined();
                 expect(row.data).toBeDefined();
                 expect(row.data.value).toBe(data[i].dependencies);
@@ -194,7 +194,7 @@ describe('tests.ui.unit.CellFactory', () => {
             });
             expect(tableRows).not.toBeNull();
             expect(tableRows.length).toBe(3);
-            tableRows.forEach((row, i) => {
+            tableRows.forEach((row: any, i) => {
                 expect(row).toBeDefined();
                 expect(row.data).toBeDefined();
                 expect(row.data.value).toBe(data[i].usedPercentage);
@@ -218,7 +218,7 @@ describe('tests.ui.unit.CellFactory', () => {
             });
             expect(tableRows).not.toBeNull();
             expect(tableRows.length).toBe(3);
-            tableRows.forEach((row, i) => {
+            tableRows.forEach((row: any, i) => {
                 expect(row).toBeDefined();
                 expect(row.data).toBeDefined();
                 expect(row.data.value).toBe(data[i].isActive);
@@ -229,7 +229,7 @@ describe('tests.ui.unit.CellFactory', () => {
 
     describe('Test Cell Factory with only one objects column type (see ColumnType.OBJS)', () => {
 
-        const column: TableColumn = { label: 'Ip Ranges', type: ColumnType.OBJS, data: { values: 'ipRanges', value: '.', template: (r) => `${r.description}: from ${r.startAddress} to ${r.endAddress} --> ${r.difference*1} address(es)` }};
+        const column: TableColumn = { label: 'Ip Ranges', type: ColumnType.OBJS, data: { values: 'ipRanges', value: '.', template: (r) => `${r.description}: from ${r.startAddress} to ${r.endAddress} --> ${r.difference} address(es)` }};
 
         const data: any[] = [ 
             { score: 0, id: 'iii', name: 'Label III', ipRanges: [
@@ -248,7 +248,7 @@ describe('tests.ui.unit.CellFactory', () => {
             });
             expect(tableRows).not.toBeNull();
             expect(tableRows.length).toBe(4);
-            tableRows.forEach((row/*, i*/) => {
+            tableRows.forEach((row: any) => {
                 expect(row).toBeDefined();
                 expect(row.data).toBeDefined();
                 expect(row.data.values ? Array.isArray(row.data.values) : true).toBeTruthy();
@@ -278,7 +278,7 @@ describe('tests.ui.unit.CellFactory', () => {
             });
             expect(tableRows).not.toBeNull();
             expect(tableRows.length).toBe(3);
-            tableRows.forEach((row, i) => {
+            tableRows.forEach((row: any, i) => {
                 expect(row).toBeDefined();
                 expect(row.data).toBeDefined();
                 expect(row.data.values ? Array.isArray(row.data.values) : true).toBeTruthy();
@@ -313,7 +313,7 @@ describe('tests.ui.unit.CellFactory', () => {
             });
             expect(tableRows).not.toBeNull();
             expect(tableRows.length).toBe(4);
-            tableRows.forEach((row, i) => {
+            tableRows.forEach((row: any, i) => {
                 expect(row).toBeDefined();
                 expect(row.data).toBeDefined();
                 expect(row.data.values ? Array.isArray(row.data.values) : true).toBeTruthy();
@@ -364,7 +364,7 @@ describe('tests.ui.unit.CellFactory', () => {
             });
             expect(tableRows).not.toBeNull();
             expect(tableRows.length).toBe(10);
-            tableRows.forEach((row, i) => {
+            tableRows.forEach((row: any, i) => {
                 expect(row[0].data.value).toBe(data[i].propertyA);
                 expect(row[1].data.value).toBe(data[i].propertyB);
                 expect(row[2].data.value).toBe(data[i].propertyC);
@@ -453,7 +453,7 @@ describe('tests.ui.unit.CellFactory', () => {
             });
             expect(tableRows).not.toBeNull();
             expect(tableRows.length).toBe(9);
-            tableRows.forEach((row, i) => {
+            tableRows.forEach((row: any, i: number) => {
                 expect(row[0].data.value).toBe(data[i].propertyA);
                 expect(row[1].data.value).toBe(data[i].propertyB);
                 expect(row[1].isPreformatted).toBeTruthy();

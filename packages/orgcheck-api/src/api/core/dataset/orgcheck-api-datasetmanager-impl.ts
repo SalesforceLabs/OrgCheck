@@ -72,7 +72,7 @@ export class DatasetManager implements DatasetManagerIntf {
      * @type {Map<string, () => Promise<any[]>>}
      * @private
      */
-    private _datasetPromisesCache: Map<string, () => Promise<any[]>>;
+    private _datasetPromisesCache: Map<string, () => Promise<unknown[]>>;
 
     /**
      * @description Data factory
@@ -150,15 +150,14 @@ export class DatasetManager implements DatasetManagerIntf {
      * @public
      * @async
      */
-    public async run(datasets: Array<string | DatasetRunInformation>, parentLogger?: SimpleLoggerIntf): Promise<Map<string, any[]>> {
+    public async run(datasets: Array<string | DatasetRunInformation>, parentLogger?: SimpleLoggerIntf): Promise<Map<string, unknown>> {
         if (datasets === undefined || datasets === null) {
             throw new DatasetManagerError('', `The given datasets is not defined.`);
         }
         if (datasets instanceof Array === false) {
             throw new DatasetManagerError('', `The given datasets is not an instance of Array (typeof= ${typeof datasets}).`);
         }
-        const that = this;
-        const data: any[] = await InfiniteProcessor.runAll<any>(datasets.map((dataset) => async (): Promise<any[]> => {
+        const data: unknown[] = await InfiniteProcessor.runAll<unknown>(datasets.map((dataset) => async (): Promise<unknown[]> => {
             const alias      = (typeof dataset === 'string' ? dataset : dataset.alias);
             const cacheKey   = (typeof dataset === 'string' ? dataset : dataset.cacheKey);
             const parameters = (typeof dataset === 'string' ? undefined : dataset.parameters);
@@ -166,12 +165,12 @@ export class DatasetManager implements DatasetManagerIntf {
             if (alreadyCached === false) {
                 // When a parentLogger is given, log dataset progress as messages under the parent section.
                 // Otherwise, create a dedicated section logger for this dataset (existing behaviour).
-                const sectionLogger = parentLogger ? undefined : that.loggerFactory?.create(`Running dataset: ${alias}`, true);
+                const sectionLogger = parentLogger ? undefined : this.loggerFactory?.create(`Running dataset: ${alias}`, true);
                 const logger: SimpleLoggerIntf | undefined = parentLogger ?? sectionLogger?.toSimpleLogger();
-                let executionPromise: Promise<any[]> | undefined;
-                this._datasetPromisesCache.set(cacheKey, (): Promise<any[]> => {
+                let executionPromise: Promise<unknown[]> | undefined;
+                this._datasetPromisesCache.set(cacheKey, (): Promise<unknown[]> => {
                     if (!executionPromise) {
-                        executionPromise = (async (): Promise<any[]> => {
+                        executionPromise = (async (): Promise<unknown[]> => {
                             try {
                                 logger?.log(`Checking the data cache for key=${cacheKey}...`);
                                 // Get data cache if any
@@ -219,7 +218,7 @@ export class DatasetManager implements DatasetManagerIntf {
             const datasetPromise = this._datasetPromisesCache.get(cacheKey);
             return datasetPromise ? (await datasetPromise()) : [];
         }));
-        return new Map(data);
+        return new Map(data as Array<[string, unknown]>);
     }
 
     /**

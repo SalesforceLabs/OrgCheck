@@ -1,5 +1,4 @@
 import { RecipeCollection } from 'src/api/core/recipe/orgcheck-api-recipecollection';
-import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { RecipeAliases } from 'src/api/core/recipe/orgcheck-api-recipes-aliases';
 import { ScoreRule } from 'src/api/core/orgcheck-api-data-scorerule';
 import { DataCollectionStatisticsIntf } from '../core/data/orgcheck-api-data-datacollectionstats';
@@ -146,7 +145,7 @@ export class RecipeGlobalView implements RecipeCollection {
      * @returns {RecipeAliases[]} List of recipe aliases that this recipe collection needs
      * @public
      */
-    public ingredients(_logger: SimpleLoggerIntf): RecipeAliases[] {
+    public ingredients(): RecipeAliases[] {
         return LIST_RECIPES_AND_TABLE_DEFINITIONS.map(r => r.recipe);
     }
 

@@ -46,10 +46,10 @@ export class DatasetPermissionSetLicenses implements Dataset {
 
         // Create the map
         logger?.log(`Parsing ${permissionSetLicenseRecords?.length} permission sets licenses...`);
-        const permissionSetLicenses: Map<string, SfdcPermissionSetLicense> = new Map(await MediumProcessor.map(permissionSetLicenseRecords, (record: any) => {
+        const permissionSetLicenses: Map<string, SfdcPermissionSetLicense> = new Map(await MediumProcessor.map(permissionSetLicenseRecords, (record: Record<string, unknown>) => {
 
             // Get the ID15
-            const id = sfdcManager.caseSafeId(record.Id);
+            const id = sfdcManager.caseSafeId(record.Id as string);
         
             // Create the instance
             const permissionSetLicense: SfdcPermissionSetLicense = permissionSetLicenseDataFactory.create({
@@ -60,8 +60,8 @@ export class DatasetPermissionSetLicenses implements Dataset {
                     lastModifiedDate: record.LastModifiedDate, 
                     totalCount: record.TotalLicenses, 
                     usedCount: record.UsedLicenses,
-                    usedPercentage: record.TotalLicenses !== 0 ? record.UsedLicenses / record.TotalLicenses : undefined,
-                    remainingCount: record.TotalLicenses - record.UsedLicenses,
+                    usedPercentage: record.TotalLicenses !== 0 ? (record.UsedLicenses as number) / (record.TotalLicenses as number) : undefined,
+                    remainingCount: (record.TotalLicenses as number) - (record.UsedLicenses as number),
                     permissionSetIds: [],
                     distinctActiveAssigneeCount: 0,
                     status: record.Status, 
@@ -77,10 +77,11 @@ export class DatasetPermissionSetLicenses implements Dataset {
 
         logger?.log(`Parsing ${assigneePermSetsWithLicenseRecords?.length} permission sets with a link to a license...`);    
         const assigneePermSetLicense = new Map();    
-        await MediumProcessor.forEach(assigneePermSetsWithLicenseRecords, async (record: any) => {
-            if (record.PermissionSet && record.PermissionSet.LicenseId && record.PermissionSet.LicenseId.startsWith('0PL')) {
-                const licenseId = sfdcManager.caseSafeId(record.PermissionSet.LicenseId);
-                const assigneeId = sfdcManager.caseSafeId(record.AssigneeId);
+        await MediumProcessor.forEach(assigneePermSetsWithLicenseRecords, async (record: Record<string, unknown>) => {
+            const permSet = record.PermissionSet as { LicenseId?: string } | undefined;
+            if (permSet && permSet.LicenseId && permSet.LicenseId.startsWith('0PL')) {
+                const licenseId = sfdcManager.caseSafeId(permSet.LicenseId);
+                const assigneeId = sfdcManager.caseSafeId(record.AssigneeId as string);
                 if (assigneePermSetLicense.has(licenseId) === false) {
                     assigneePermSetLicense.set(licenseId, new Set());
                 }
@@ -93,9 +94,9 @@ export class DatasetPermissionSetLicenses implements Dataset {
         });
 
         logger?.log(`Parsing ${permissionSetsWithLicenseRecords?.length} permission sets with a link to a license...`);
-        await MediumProcessor.forEach(permissionSetsWithLicenseRecords, async (record: any) => {
-            const permissionSetId = sfdcManager.caseSafeId(record.Id);
-            const licenseId = sfdcManager.caseSafeId(record.LicenseId);
+        await MediumProcessor.forEach(permissionSetsWithLicenseRecords, async (record: Record<string, unknown>) => {
+            const permissionSetId = sfdcManager.caseSafeId(record.Id as string);
+            const licenseId = sfdcManager.caseSafeId(record.LicenseId as string);
             const permissionSeLicense = permissionSetLicenses.get(licenseId);
             if (permissionSeLicense) {
                 permissionSeLicense.permissionSetIds.push(permissionSetId);
@@ -104,7 +105,7 @@ export class DatasetPermissionSetLicenses implements Dataset {
 
         // Compute scores for all permission set licenses
         logger?.log(`Computing the score for ${permissionSetLicenses.size} permission set licenses...`);
-        await MediumProcessor.forEach(permissionSetLicenses, async (record: any) => {
+        await MediumProcessor.forEach(permissionSetLicenses, async (record: SfdcPermissionSetLicense) => {
             permissionSetLicenseDataFactory.computeScore(record);
         });
         

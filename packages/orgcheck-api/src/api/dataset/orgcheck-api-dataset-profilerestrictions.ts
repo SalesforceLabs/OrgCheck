@@ -35,7 +35,7 @@ export class DatasetProfileRestrictions implements Dataset {
         // List of profile ids
         const profileIdRecords = results[0];
         logger?.log(`Parsing ${profileIdRecords?.length} profiles...`);
-        const profileIds = await MediumProcessor.map(profileIdRecords, (record: any) => record.Id);
+        const profileIds = await MediumProcessor.map(profileIdRecords, (record: Record<string, unknown>) => record.Id as string);
 
         // Init the factories
         const restrictionsFactory = dataFactory.getInstance(DataAliases.SfdcProfileRestrictions);
@@ -48,19 +48,21 @@ export class DatasetProfileRestrictions implements Dataset {
 
         // Create the map
         logger?.log(`Parsing ${records?.length} profile restrictions...`);
-        const profileRestrictions: Map<string, SfdcProfileRestrictions> = new Map(await MediumProcessor.map(records, async (record: any) => {
+        const profileRestrictions: Map<string, SfdcProfileRestrictions> = new Map(await MediumProcessor.map(records, async (record: Record<string, unknown>) => {
 
             // Get the ID15 of this profile
-            const profileId = sfdcManager.caseSafeId(record.Id);
+            const profileId = sfdcManager.caseSafeId(record.Id as string);
 
             // Login Hours
+            const metadata = record.Metadata as Record<string, unknown> | undefined;
             let loginHours;
-            if (record.Metadata.loginHours) {
+            if (metadata?.loginHours) {
+                const loginHoursData = metadata.loginHours as Record<string, unknown>;
                 loginHours = await MediumProcessor.map(
                     WEEKDAYS,
                     (day: string) => {
-                        const hourStart = record.Metadata.loginHours[day + 'Start'];
-                        const hourEnd = record.Metadata.loginHours[day + 'End'];
+                        const hourStart = loginHoursData[day + 'Start'] as number;
+                        const hourEnd = loginHoursData[day + 'End'] as number;
                         return loginHourDataFactory.create({
                             properties: {
                                 day: day,
@@ -74,18 +76,19 @@ export class DatasetProfileRestrictions implements Dataset {
             }
 
             // Ip Ranges
+            const loginIpRanges = metadata?.loginIpRanges as Record<string, unknown>[] | undefined;
             let ipRanges;
-            if (record.Metadata.loginIpRanges?.length ?? 0 > 0) {
+            if ((loginIpRanges?.length ?? 0) > 0) {
                 ipRanges = await MediumProcessor.map(
-                    record.Metadata.loginIpRanges,
-                    (range: any) => {
-                        const startNumber = COMPUTE_NUMBER_FROM_IP(range.startAddress);
-                        const endNumber = COMPUTE_NUMBER_FROM_IP(range.endAddress);
+                    loginIpRanges!,
+                    (range: Record<string, unknown>) => {
+                        const startNumber = COMPUTE_NUMBER_FROM_IP(range.startAddress as string);
+                        const endNumber = COMPUTE_NUMBER_FROM_IP(range.endAddress as string);
                         return ipRangeDataFactory.create({
                             properties: {
-                                startAddress: range.startAddress,
-                                endAddress: range.endAddress,
-                                description: range.description || '(empty)',
+                                startAddress: range.startAddress as string,
+                                endAddress: range.endAddress as string,
+                                description: range.description as string || '(empty)',
                                 difference: endNumber - startNumber + 1
                         }});
                 });
@@ -94,7 +97,7 @@ export class DatasetProfileRestrictions implements Dataset {
             }
 
             // Create the instance
-            const profileRestriction = restrictionsFactory.createWithScore({
+            const profileRestriction = restrictionsFactory.createWithScore<SfdcProfileRestrictions>({
                 properties: {
                     profileId: profileId,
                     ipRanges: ipRanges,
@@ -103,7 +106,7 @@ export class DatasetProfileRestrictions implements Dataset {
             });
 
             // Add it to the map  
-            return [ profileRestriction.profileId, profileRestriction ];
+            return [ profileRestriction.profileId as string, profileRestriction ];
         }));
 
         // Return data as map

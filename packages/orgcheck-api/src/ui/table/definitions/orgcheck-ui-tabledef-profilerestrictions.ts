@@ -15,8 +15,8 @@ export class ProfileRestrictionsTableDefinition implements TableDefinition {
         { label: 'Name',            type: ColumnType.URL,  data: { value: 'profileRef.url', label: 'profileRef.name' }},
         { label: 'Custom',          type: ColumnType.CHK,  data: { value: 'profileRef.isCustom' }},
         { label: 'Package',         type: ColumnType.TXT,  data: { value: 'profileRef.package' }},
-        { label: 'Ip Ranges',       type: ColumnType.OBJS, data: { values: 'ipRanges', value: '.', template: (r) => `${r.description}: from ${r.startAddress} to ${r.endAddress} --> ${r.difference*1} address(es)` }},
-        { label: 'Login Hours',     type: ColumnType.OBJS, data: { values: 'loginHours', value: '.', template: (r) => `${r.day} from ${r.fromTime} to ${r.toTime} --> ${r.difference*1} minute(s)` }},
+        { label: 'Ip Ranges',       type: ColumnType.OBJS, data: { values: 'ipRanges', value: '.', template: (r) => `${r.description}: from ${r.startAddress} to ${r.endAddress} --> ${(r.difference as number)*1} address(es)` }},
+        { label: 'Login Hours',     type: ColumnType.OBJS, data: { values: 'loginHours', value: '.', template: (r) => `${r.day} from ${r.fromTime} to ${r.toTime} --> ${(r.difference as number)*1} minute(s)` }},
         { label: 'Description',     type: ColumnType.TXT,  data: { value: 'profileRef.description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
 

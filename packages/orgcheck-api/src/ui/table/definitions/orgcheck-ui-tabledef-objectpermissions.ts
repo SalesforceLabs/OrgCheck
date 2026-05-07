@@ -29,7 +29,7 @@ export class ObjectPermissionsTableDefinition implements TableDefinition {
             { label: 'Custom',  type: ColumnType.CHK, data: { value: 'header.isCustom' }}
         ];
         if (this._matrix) {
-            this._matrix.columnHeaders // returns an array of string representing Object Api names
+            (this._matrix.columnHeaders as string[]) // returns an array of string representing Object Api names
                 .sort()
                 .forEach((objectApiName) => {
                     columns.push({ 

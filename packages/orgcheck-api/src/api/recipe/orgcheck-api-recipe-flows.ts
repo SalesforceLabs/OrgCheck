@@ -2,7 +2,6 @@ import { ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
 import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
-import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SfdcFlow }from 'src/api/data/orgcheck-api-data-flow';
@@ -19,11 +18,10 @@ export class RecipeFlows implements ServedRecipe<SfdcFlow[], Table> {
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
-     * @param {SimpleLoggerIntf} _logger - Logger
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public ingredients(): Array<string | DatasetRunInformation> {
         return [DatasetAliases.FLOWS];
     }
 
@@ -44,10 +42,10 @@ export class RecipeFlows implements ServedRecipe<SfdcFlow[], Table> {
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf): Promise<SfdcFlow[]> {
+    public async mix(ingredients: Map<string, unknown>): Promise<SfdcFlow[]> {
 
         // Get data
-        const flows: Map<string, SfdcFlow> = ingredients.get(DatasetAliases.FLOWS);
+        const flows = ingredients.get(DatasetAliases.FLOWS) as Map<string, SfdcFlow>;
 
         // Checking data and filter
         if (!flows) throw new Error(`RecipeFlows: Data from dataset alias 'FLOWS' was undefined.`);

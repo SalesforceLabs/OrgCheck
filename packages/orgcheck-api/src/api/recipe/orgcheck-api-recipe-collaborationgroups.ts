@@ -1,7 +1,6 @@
 import { ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
-import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SfdcCollaborationGroup }from 'src/api/data/orgcheck-api-data-collaborationgroup';
@@ -18,11 +17,10 @@ export class RecipeCollaborationGroups implements ServedRecipe<SfdcCollaboration
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
-     * @param {SimpleLoggerIntf} _logger - Logger
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public ingredients(): Array<string | DatasetRunInformation> {
         return [
             DatasetAliases.COLLABORATIONGROUPS
         ];
@@ -45,10 +43,10 @@ export class RecipeCollaborationGroups implements ServedRecipe<SfdcCollaboration
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf): Promise<SfdcCollaborationGroup[]> {
+    public async mix(ingredients: Map<string, unknown>): Promise<SfdcCollaborationGroup[]> {
 
         // Get data
-        const groups: Map<string, SfdcCollaborationGroup> = ingredients.get(DatasetAliases.COLLABORATIONGROUPS);
+        const groups = ingredients.get(DatasetAliases.COLLABORATIONGROUPS) as Map<string, SfdcCollaborationGroup>;
 
         // Checking data
         if (!groups) throw new Error(`RecipeCollaborationGroups: Data from dataset alias 'COLLABORATIONGROUPS' was undefined.`);

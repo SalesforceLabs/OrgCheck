@@ -9,7 +9,7 @@ const REGEX_XML_COMMENTS_AND_NEWLINES = new RegExp('(<!--[\\s\\S]*?-->|\\n)', 'g
 const REGEX_HARDCODEDURLS = new RegExp("([A-Za-z0-9-]{1,63}\\.)+[A-Za-z]{2,6}", 'ig');
 const REGEX_HARDCODEDIDS = new RegExp("[,\"'\\s][a-zA-Z0-9]{5}0[a-zA-Z0-9]{9}([a-zA-Z0-9]{3})?[,\"'\\s]", 'ig');
 const SALESFORCE_DOMAINS = [ 'salesforce.com', '.force.' ];
-const SALESFORCE_WITH_INSTANCE = new RegExp("(^|[^A-Za-z])[A-Za-z]{1,4}[0-9]{1,4}S{0,1}\.", 'ig');
+const SALESFORCE_WITH_INSTANCE = new RegExp("(^|[^A-Za-z])[A-Za-z]{1,4}[0-9]{1,4}S{0,1}.", 'ig');
 
 /**
  * @description Code Scanner class

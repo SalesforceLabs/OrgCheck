@@ -31,10 +31,10 @@ export class DatasetApplications implements Dataset {
 
         // Create the map
         logger?.log(`Parsing ${applicationRecords?.length} applications...`);
-        const applications: Map<string, SfdcApplication> = new Map(await MediumProcessor.map(applicationRecords, (record: any) => {
+        const applications: Map<string, SfdcApplication> = new Map(await MediumProcessor.map(applicationRecords, (record) => {
 
             // Get the ID15 of this application
-            const id = sfdcManager.caseSafeId(record.ApplicationId);
+            const id = sfdcManager.caseSafeId(record.ApplicationId as string);
 
             // Create the instance
             const application: SfdcApplication = applicationDataFactory.create({

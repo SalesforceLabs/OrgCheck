@@ -13,7 +13,7 @@
         "strictPropertyInitialization": true,
         "useUnknownInCatchVariables": false,
         "lib": [
-            "ES2021",
+            "ES2022",
             "DOM"
         ],
         "paths": {

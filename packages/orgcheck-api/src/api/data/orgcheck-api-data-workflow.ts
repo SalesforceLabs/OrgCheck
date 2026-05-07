@@ -22,21 +22,21 @@ export interface SfdcWorkflow extends DataWithScore {
      * @type {any[]}
      * @public
      */
-    actions: any[];
+    actions: unknown[];
 
     /**
      * @description Future actions associated with this item
      * @type {any[]}
      * @public
      */
-    futureActions: any[];
+    futureActions: unknown[];
 
     /**
      * @description Empty time triggers associated with this item
      * @type {any[]}
      * @public
      */
-    emptyTimeTriggers: any[];
+    emptyTimeTriggers: unknown[];
 
     /**
      * @description Is this item active or not?

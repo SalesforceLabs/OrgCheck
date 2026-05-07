@@ -42,17 +42,17 @@ export class DatasetPageLayouts implements Dataset {
         const pageLayoutProfileAssignRecords = results[1];
 
         // Get the page layout Ids
-        const pageLayoutIds = await MediumProcessor.map(pageLayoutRecords, (record: any) => sfdcManager.caseSafeId(record.Id))
+        const pageLayoutIds = await MediumProcessor.map(pageLayoutRecords, (record: Record<string, unknown>) => sfdcManager.caseSafeId(record.Id as string))
 
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${pageLayoutRecords?.length} page layouts...`);
         const pageLayoutDependencies = await sfdcManager.dependenciesQuery(pageLayoutIds, logger);
 
         logger?.log(`Parsing ${pageLayoutRecords?.length} page layouts...`);
-        const pageLayouts: Map<string, SfdcPageLayout> = new Map(await MediumProcessor.map(pageLayoutRecords, (record: any) => {
+        const pageLayouts: Map<string, SfdcPageLayout> = new Map(await MediumProcessor.map(pageLayoutRecords, (record: Record<string, unknown>) => {
 
             // Get the ID15 of this page layout
-            const id = sfdcManager.caseSafeId(record.Id);
+            const id = sfdcManager.caseSafeId(record.Id as string);
 
             // Create the instance
             const pageLayout: SfdcPageLayout = pageLayoutDataFactory.create({
@@ -60,12 +60,12 @@ export class DatasetPageLayouts implements Dataset {
                     id: id,
                     name: record.Name,
                     package: (record.NamespacePrefix || ''),
-                    objectId: record.EntityDefinition?.QualifiedApiName,
+                    objectId: (record.EntityDefinition as Record<string, string> | undefined)?.QualifiedApiName as string,
                     type: record.LayoutType,
                     profileAssignmentCount: 0,
                     createdDate: record.CreatedDate, 
                     lastModifiedDate: record.LastModifiedDate,
-                    url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.PAGE_LAYOUT, record.EntityDefinition?.DurableId)
+                    url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.PAGE_LAYOUT, (record.EntityDefinition as Record<string, string> | undefined)?.DurableId)
                 },
                 dependencyData: pageLayoutDependencies
             });
@@ -73,23 +73,23 @@ export class DatasetPageLayouts implements Dataset {
             // Add it to the map  
             return [ pageLayout.id, pageLayout ];
 
-        }, (record: any) => { 
+        }, (record: Record<string, unknown>) => { 
             if (!record.EntityDefinition) return false; // ignore if no EntityDefinition linked
             return true;
         }));
 
         logger?.log(`Parsing ${pageLayoutProfileAssignRecords?.length} page layout assignment counts...`);
-        await MediumProcessor.forEach(pageLayoutProfileAssignRecords, async (record: any) => {
+        await MediumProcessor.forEach(pageLayoutProfileAssignRecords, async (record: Record<string, unknown>) => {
 
             // Get the ID15 of this page layout
-            const id = sfdcManager.caseSafeId(record.LayoutId);
+            const id = sfdcManager.caseSafeId(record.LayoutId as string);
 
             // Get the page layout
             const pageLayout = pageLayouts.get(id);
             if (pageLayout) {
 
                 // Set the assignment count
-                pageLayout.profileAssignmentCount += record.CountAssignment;
+                pageLayout.profileAssignmentCount += record.CountAssignment as number;
             }
         });
 
@@ -98,22 +98,23 @@ export class DatasetPageLayouts implements Dataset {
         const pageLayoutMetadataRecords = await sfdcManager.readMetadataAtScale('Layout', pageLayoutIds, [ 'FIELD_INTEGRITY_EXCEPTION', 'UNKNOWN_EXCEPTION', 'INSUFFICIENT_ACCESS' ], logger);
 
         logger?.log(`Parsing ${pageLayoutMetadataRecords?.length} page layout metadata information...`);
-        await MediumProcessor.forEach(pageLayoutMetadataRecords, async (metadataRecord: any) => {
+        await MediumProcessor.forEach(pageLayoutMetadataRecords, async (metadataRecord: Record<string, unknown>) => {
 
             // Get the ID15 of this page layout
-            const id = sfdcManager.caseSafeId(metadataRecord.Id);
+            const id = sfdcManager.caseSafeId(metadataRecord.Id as string);
 
             // Get the page layout
             const pageLayout = pageLayouts.get(id);
             if (pageLayout) {
 
                 // Set the metadata info
-                pageLayout.nbRelatedLists = metadataRecord?.Metadata?.relatedLists?.length ?? 0;
-                pageLayout.isAttachmentRelatedListIncluded = metadataRecord?.Metadata?.relatedLists?.some((relList) => relList.relatedList === 'RelatedNoteList') ?? false;
+                const pageLayoutMetadata = metadataRecord?.Metadata as { relatedLists?: Record<string, unknown>[]; layoutSections?: Record<string, unknown>[] } | undefined;
+                pageLayout.nbRelatedLists = pageLayoutMetadata?.relatedLists?.length ?? 0;
+                pageLayout.isAttachmentRelatedListIncluded = pageLayoutMetadata?.relatedLists?.some((relList) => relList.relatedList === 'RelatedNoteList') ?? false;
                 pageLayout.nbFields = 0;
-                metadataRecord?.Metadata?.layoutSections?.forEach((section) => {
-                    section?.layoutColumns?.forEach((column) => {
-                        column?.layoutItems?.forEach((item) => {
+                pageLayoutMetadata?.layoutSections?.forEach((section) => {
+                    (section?.layoutColumns as Record<string, unknown>[] | undefined)?.forEach((column) => {
+                        (column?.layoutItems as Record<string, unknown>[] | undefined)?.forEach((item) => {
                             if (item.field) pageLayout.nbFields++;
                         });
                     });

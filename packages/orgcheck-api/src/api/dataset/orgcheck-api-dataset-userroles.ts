@@ -33,12 +33,12 @@ export class DatasetUserRoles implements Dataset {
         // Create the map
         const userRoleRecords = results[0];
         logger?.log(`Parsing ${userRoleRecords?.length} user roles...`);
-        const childrenByParent = new Map();
-        const roots: any[] = [];
-        const roles: Map<string, SfdcUserRole> = new Map(await MediumProcessor.map(userRoleRecords, async (record: any) => {
+        const childrenByParent = new Map<string, SfdcUserRole[]>();
+        const roots: SfdcUserRole[] = [];
+        const roles: Map<string, SfdcUserRole> = new Map(await MediumProcessor.map(userRoleRecords, async (record: Record<string, unknown>) => {
 
             // Get the ID15 of this custom label
-            const id = sfdcManager.caseSafeId(record.Id);
+            const id = sfdcManager.caseSafeId(record.Id as string);
 
             // Create the instance
             const userRole: SfdcUserRole = userRoleDataFactory.create({
@@ -46,7 +46,7 @@ export class DatasetUserRoles implements Dataset {
                     id: id,
                     name: record.Name,
                     apiname: record.DeveloperName,
-                    parentId: record.ParentRoleId ? sfdcManager.caseSafeId(record.ParentRoleId) : undefined,
+                    parentId: record.ParentRoleId ? sfdcManager.caseSafeId(record.ParentRoleId as string) : undefined,
                     hasParent: record.ParentRoleId ? true : false,
                     activeMembersCount: 0,
                     activeMemberIds: [],
@@ -61,13 +61,13 @@ export class DatasetUserRoles implements Dataset {
                 if (childrenByParent.has(userRole.parentId) === false) {
                     childrenByParent.set(userRole.parentId, []);
                 }
-                childrenByParent.get(userRole.parentId).push(userRole);
+                childrenByParent.get(userRole.parentId!)!.push(userRole);
             }
             // compute the numbers of users
             await MediumProcessor.forEach(
-                record?.Users?.records, 
-                async (user: any) => {
-                    userRole.activeMemberIds.push(sfdcManager.caseSafeId(user.Id));
+                ((record.Users as { records?: Record<string, unknown>[] } | undefined)?.records ?? []), 
+                async (user: Record<string, unknown>) => {
+                    userRole.activeMemberIds.push(sfdcManager.caseSafeId(user.Id as string));
                 }
             );
             userRole.activeMembersCount = userRole.activeMemberIds?.length;
@@ -78,13 +78,13 @@ export class DatasetUserRoles implements Dataset {
         }));
 
         // Compute levels 
-        await MediumProcessor.forEach(roots, async (root: any) => {
+        await MediumProcessor.forEach(roots, async (root: SfdcUserRole) => {
             root.level = 1;
             RECURSIVE_LEVEL_CALCULUS(root, childrenByParent);
         });
 
         // Then compute the score of roles 
-        await MediumProcessor.forEach(roles, async (userRole: any) => {
+        await MediumProcessor.forEach(roles, async (userRole: SfdcUserRole) => {
             userRoleDataFactory.computeScore(userRole);
         });
 

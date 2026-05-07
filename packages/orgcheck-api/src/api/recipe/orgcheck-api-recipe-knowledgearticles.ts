@@ -1,7 +1,6 @@
 import { ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
-import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SfdcKnowledgeArticle }from 'src/api/data/orgcheck-api-data-knowledgearticle';
@@ -18,11 +17,10 @@ export class RecipeKnowledgeArticles implements ServedRecipe<SfdcKnowledgeArticl
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
-     * @param {SimpleLoggerIntf} _logger - Logger
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public ingredients(): Array<string | DatasetRunInformation> {
         return [DatasetAliases.KNOWLEDGEARTICLES];
     }
 
@@ -43,10 +41,10 @@ export class RecipeKnowledgeArticles implements ServedRecipe<SfdcKnowledgeArticl
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf): Promise<SfdcKnowledgeArticle[]> {
+    public async mix(ingredients: Map<string, unknown>): Promise<SfdcKnowledgeArticle[]> {
 
         // Get data
-        const articles: Map<string, SfdcKnowledgeArticle> = ingredients.get(DatasetAliases.KNOWLEDGEARTICLES);
+        const articles = ingredients.get(DatasetAliases.KNOWLEDGEARTICLES) as Map<string, SfdcKnowledgeArticle>;
 
         // Checking data
         if (!articles) throw new Error(`RecipeDocuments: Data from dataset alias 'KNOWLEDGEARTICLES' was undefined.`);

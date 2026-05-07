@@ -34,7 +34,7 @@ export class DatasetLightningPages implements Dataset {
         const pageRecords = results[0];
 
         // Get the page Ids
-        const pageIds = await MediumProcessor.map(pageRecords, (record: any) => sfdcManager.caseSafeId(record.Id))
+        const pageIds = await MediumProcessor.map(pageRecords, (record: Record<string, unknown>) => sfdcManager.caseSafeId(record.Id as string))
 
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${pageRecords?.length} lightning pages...`);
@@ -42,10 +42,10 @@ export class DatasetLightningPages implements Dataset {
 
         // Create the map
         logger?.log(`Parsing ${pageRecords?.length} lightning pages...`);
-        const pages: Map<string, SfdcLightningPage> = new Map(await MediumProcessor.map(pageRecords, (record: any) => {
+        const pages: Map<string, SfdcLightningPage> = new Map(await MediumProcessor.map(pageRecords, (record: Record<string, unknown>) => {
 
             // Get the ID15
-            const id = sfdcManager.caseSafeId(record.Id);
+            const id = sfdcManager.caseSafeId(record.Id as string);
 
             // Create the instance
             const page: SfdcLightningPage = pageDataFactory.create({
@@ -57,7 +57,7 @@ export class DatasetLightningPages implements Dataset {
                     createdDate: record.CreatedDate,
                     lastModifiedDate: record.LastModifiedDate,
                     description: record.Description,
-                    objectId: (record.EntityDefinition?.QualifiedApiName || ''),
+                    objectId: ((record.EntityDefinition as Record<string, string> | undefined)?.QualifiedApiName as string || ''),
                     nbComponents: 0,
                     nbFields: 0,
                     nbRelatedLists: 0,
@@ -77,21 +77,22 @@ export class DatasetLightningPages implements Dataset {
         const flexipageMetadataRecords = await sfdcManager.readMetadataAtScale('FlexiPage', pageIds, [ 'FIELD_INTEGRITY_EXCEPTION', 'UNKNOWN_EXCEPTION' ], logger);
 
         logger?.log(`Parsing ${flexipageMetadataRecords?.length} lightning pages metadata information...`);
-        await MediumProcessor.forEach(flexipageMetadataRecords, async (metadataRecord: any) => {
+        await MediumProcessor.forEach(flexipageMetadataRecords, async (metadataRecord: Record<string, unknown>) => {
 
             // Get the ID15 of this lightning page
-            const id = sfdcManager.caseSafeId(metadataRecord.Id);
+            const id = sfdcManager.caseSafeId(metadataRecord.Id as string);
 
             // Get the page layout
             const page: SfdcLightningPage | undefined = pages.get(id);
             if (page) {
 
                 // Set the metadata info
-                metadataRecord?.Metadata?.flexiPageRegions?.forEach((region) => {
-                    region?.itemInstances?.forEach((item) => {
+                const flexiMetadata = metadataRecord?.Metadata as { flexiPageRegions?: Record<string, unknown>[] } | undefined;
+                flexiMetadata?.flexiPageRegions?.forEach((region) => {
+                    (region?.itemInstances as Record<string, unknown>[] | undefined)?.forEach((item) => {
                         if (item.componentInstance && item.fieldInstance === null) {
                             page.nbComponents++;
-                            const instance = item.componentInstance;
+                            const instance = item.componentInstance as { componentName?: string; componentInstanceProperties?: Array<{ name?: string; value?: string }> };
                             switch (instance?.componentName) {
                                 case 'force:relatedListContainer': {
                                     page.isRelatedListFromPageLayoutIncluded = true;

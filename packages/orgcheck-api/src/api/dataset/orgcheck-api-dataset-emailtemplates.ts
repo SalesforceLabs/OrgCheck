@@ -34,11 +34,11 @@ export class DatasetEmailTemplates implements Dataset {
          
         // Create the map
         logger?.log(`Parsing ${emailTemplateRecords?.length} email templates...`);
-        const emailTemplates: Map<string, SfdcEmailTemplate> = new Map(await MediumProcessor.map(emailTemplateRecords, (record: any) => {
+        const emailTemplates: Map<string, SfdcEmailTemplate> = new Map(await MediumProcessor.map(emailTemplateRecords, (record) => {
         
             // Get the ID15
-            const id = sfdcManager.caseSafeId(record.Id);
-            const sourceCode = CodeScanner.RemoveCommentsFromXML(record.HtmlValue || record.Body || record.Markup || '');
+            const id = sfdcManager.caseSafeId(record.Id as string);
+            const sourceCode = CodeScanner.RemoveCommentsFromXML((record.HtmlValue || record.Body || record.Markup || '') as string);
 
             // Create the instance
             const emailTemplate: SfdcEmailTemplate = emailTemplateDataFactory.createWithScore({

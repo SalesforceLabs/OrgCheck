@@ -21,11 +21,10 @@ export class RecipeProfileRestrictions implements ServedRecipe<SfdcProfileRestri
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
-     * @param {SimpleLoggerIntf} _logger - Logger
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public ingredients(): Array<string | DatasetRunInformation> {
         return [
             DatasetAliases.PROFILES,
             DatasetAliases.PROFILERESTRICTIONS
@@ -50,11 +49,11 @@ export class RecipeProfileRestrictions implements ServedRecipe<SfdcProfileRestri
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<SfdcProfileRestrictions[]> {
+    public async mix(ingredients: Map<string, unknown>, _logger: SimpleLoggerIntf, parameters: Map<string, string>): Promise<SfdcProfileRestrictions[]> {
 
         // Get data and parameters
-        const profiles: Map<string, SfdcProfile> = ingredients.get(DatasetAliases.PROFILES);
-        const profileRestrictions: Map<string, SfdcProfileRestrictions> = ingredients.get(DatasetAliases.PROFILERESTRICTIONS);
+        const profiles = ingredients.get(DatasetAliases.PROFILES) as Map<string, SfdcProfile>;
+        const profileRestrictions = ingredients.get(DatasetAliases.PROFILERESTRICTIONS) as Map<string, SfdcProfileRestrictions>;
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data

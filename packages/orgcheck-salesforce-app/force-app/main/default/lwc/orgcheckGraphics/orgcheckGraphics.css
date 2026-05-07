@@ -3,6 +3,6 @@
 }
 
 .legend-square {
-    width: 1em;
-    height: 1em;
+    width: var(--slds-g-spacing-4, 1rem);
+    height: var(--slds-g-spacing-4, 1rem);
 }

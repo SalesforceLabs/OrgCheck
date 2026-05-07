@@ -60,10 +60,9 @@ export class Logger implements LoggerIntf {
                 throw new Error(`Operation "${this._name}" has been interrupted.`);
             } else {
                 if (Date.now() - this._startedAt >= MAX_TIME_BEFORE_INTERRUPTABLE && this._willItBeInterruptible === true && this._canBeInterruptedNotified === false) {
-                    const that = this;
                     this._setup?.canBeInterrupted(this._name, () => { 
-                        that._interruptAsap = true; 
-                        that._isErrorIgnore = true; 
+                        this._interruptAsap = true; 
+                        this._isErrorIgnore = true; 
                     });
                     this._canBeInterruptedNotified = true;
                 }

@@ -22,11 +22,10 @@ export class RecipeWebLinks implements ServedRecipe<SfdcWebLink[], Table> {
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
-     * @param {SimpleLoggerIntf} _logger - Logger
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public ingredients(): Array<string | DatasetRunInformation> {
         return [
             DatasetAliases.OBJECTTYPES,
             DatasetAliases.OBJECTS,
@@ -52,12 +51,12 @@ export class RecipeWebLinks implements ServedRecipe<SfdcWebLink[], Table> {
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, any>, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<SfdcWebLink[]> {
+    public async mix(ingredients: Map<string, unknown>, logger: SimpleLoggerIntf, parameters: Map<string, string>): Promise<SfdcWebLink[]> {
 
         // Get data and parameters
-        const types: Map<string, SfdcObjectType> = ingredients.get(DatasetAliases.OBJECTTYPES);
-        const objects: Map<string, SfdcObject> = ingredients.get(DatasetAliases.OBJECTS);
-        const weblinks: Map<string, SfdcWebLink> = ingredients.get(DatasetAliases.WEBLINKS);
+        const types = ingredients.get(DatasetAliases.OBJECTTYPES) as Map<string, SfdcObjectType>;
+        const objects = ingredients.get(DatasetAliases.OBJECTS) as Map<string, SfdcObject>;
+        const weblinks = ingredients.get(DatasetAliases.WEBLINKS) as Map<string, SfdcWebLink>;
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
         const objecttype = OrgCheckGlobalParameter.getSObjectTypeName(parameters);
         const object = OrgCheckGlobalParameter.getSObjectName(parameters);

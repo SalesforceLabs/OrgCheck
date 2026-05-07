@@ -27,9 +27,9 @@ export class DatasetCustomFields implements Dataset {
      * @param {Map<string, any>} parameters - The parameters
      * @returns {Promise<Map<string, SfdcField>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Map<string, SfdcField>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf, parameters: Map<string, unknown>): Promise<Map<string, SfdcField>> {
 
-        const fullObjectApiName = OrgCheckGlobalParameter.getSObjectName(parameters);
+        const fullObjectApiName = OrgCheckGlobalParameter.getSObjectName(parameters as unknown as Map<string, string>);
 
         // First SOQL query
         logger?.log(`Querying Tooling API about CustomField in the org...`);            
@@ -47,19 +47,19 @@ export class DatasetCustomFields implements Dataset {
 
         logger?.log(`Parsing ${customFieldRecords?.length} custom fields...`);        
         
-        const entityInfoByCustomFieldId: Map<string, any> = new Map(await MediumProcessor.map(
+        const entityInfoByCustomFieldId: Map<string, { qualifiedApiName: string; isCustomSetting: boolean }> = new Map(await MediumProcessor.map(
             customFieldRecords, 
-            (record: any) => [ 
-                sfdcManager.caseSafeId(record.Id), 
+            (record) => [ 
+                sfdcManager.caseSafeId(record.Id as string), 
                 { 
-                    qualifiedApiName: record.EntityDefinition.QualifiedApiName, 
-                    isCustomSetting: record.EntityDefinition.IsCustomSetting 
+                    qualifiedApiName: (record.EntityDefinition as Record<string, unknown>).QualifiedApiName as string, 
+                    isCustomSetting: (record.EntityDefinition as Record<string, unknown>).IsCustomSetting as boolean
                 }
             ],
-            (record: any) => {
+            (record) => {
                 if (!record.EntityDefinition) return false; // ignore if no EntityDefinition linked
-                if (EXCLUDED_OBJECT_PREFIXES.includes(record.EntityDefinition.KeyPrefix)) return false; // ignore these objects
-                if (record.EntityDefinition.QualifiedApiName?.endsWith('_hd')) return false; // ignore the trending historical objects
+                if (EXCLUDED_OBJECT_PREFIXES.includes((record.EntityDefinition as Record<string, unknown>).KeyPrefix as string)) return false; // ignore these objects
+                if (((record.EntityDefinition as Record<string, unknown>).QualifiedApiName as string | undefined)?.endsWith('_hd')) return false; // ignore the trending historical objects
                 return true;
             }
         ));
@@ -67,7 +67,7 @@ export class DatasetCustomFields implements Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${customFieldRecords?.length} custom fields...`);
         const customFieldsDependencies = await sfdcManager.dependenciesQuery(
-            await MediumProcessor.map(customFieldRecords, (record: any) => sfdcManager.caseSafeId(record.Id)), 
+            await MediumProcessor.map(customFieldRecords, (record) => sfdcManager.caseSafeId(record.Id as string)), 
             logger
         );
 
@@ -81,48 +81,49 @@ export class DatasetCustomFields implements Dataset {
         );
 
         // Create the map
-        const customFields: Map<string, SfdcField> = new Map(await MediumProcessor.map(records, (record: any) => {
+        const customFields: Map<string, SfdcField> = new Map(await MediumProcessor.map(records, (record) => {
 
             // Get the ID15
-            const id = sfdcManager.caseSafeId(record.Id);
+            const id = sfdcManager.caseSafeId(record.Id as string);
 
             // Get Information about entity
             const entityInfo = entityInfoByCustomFieldId.get(id);
 
             // Create the instance
+            const metadata = record.Metadata as Record<string, unknown>;
             const customField: SfdcField = fieldDataFactory.create({
                 properties: {
                     id: id,
                     name: record.DeveloperName,
-                    label: record.Metadata.label,
+                    label: metadata.label,
                     package: (record.NamespacePrefix || ''),
                     description: record.Description,
                     isCustom: true,
                     createdDate: record.CreatedDate,
                     lastModifiedDate: record.LastModifiedDate,
-                    objectId: entityInfo.qualifiedApiName,
+                    objectId: entityInfo!.qualifiedApiName,
                     tooltip: record.InlineHelpText,
-                    type: record.Metadata.type,
-                    length: record.Metadata?.length,
-                    isUnique: record.Metadata.unique === true,
-                    isEncrypted: record.Metadata.encryptionScheme !== null && record.Metadata.encryptionScheme !== 'None',
-                    isExternalId: record.Metadata.externalId === true,
-                    isIndexed: record.Metadata.unique === true || record.Metadata.externalId === true,
-                    defaultValue: record.Metadata.defaultValue,
-                    formula: record.Metadata.formula,
-                    url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.CUSTOM_FIELD, entityInfo.qualifiedApiName, sfdcManager.getObjectType( entityInfo.qualifiedApiName, entityInfo.isCustomSetting))
+                    type: metadata.type,
+                    length: metadata?.length,
+                    isUnique: metadata.unique === true,
+                    isEncrypted: metadata.encryptionScheme !== null && metadata.encryptionScheme !== 'None',
+                    isExternalId: metadata.externalId === true,
+                    isIndexed: metadata.unique === true || metadata.externalId === true,
+                    defaultValue: metadata.defaultValue,
+                    formula: metadata.formula,
+                    url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.CUSTOM_FIELD, entityInfo!.qualifiedApiName, sfdcManager.getObjectType( entityInfo!.qualifiedApiName, entityInfo!.isCustomSetting))
                 }, 
                 dependencyData: customFieldsDependencies
             });
 
-            if (record.Metadata.valueSet) {
-                if (typeof record.Metadata.valueSet === 'string') {
+            if (metadata.valueSet) {
+                if (typeof metadata.valueSet === 'string') {
                     // If valueSet is a string it refers to a global picklist and is ALWAYS restricted
                     // see https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_skills.htm
                     customField.isRestrictedPicklist = true;
                 } else {
                     // see https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_field_types.htm?q=valueSetDefinition
-                    customField.isRestrictedPicklist = (record.Metadata.valueSet.restricted === true);
+                    customField.isRestrictedPicklist = ((metadata.valueSet as Record<string, unknown>).restricted === true);
                 }
             } else {
                 customField.isRestrictedPicklist = false

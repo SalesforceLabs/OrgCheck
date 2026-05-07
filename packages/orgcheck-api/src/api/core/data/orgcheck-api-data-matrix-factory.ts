@@ -73,7 +73,7 @@ export class DataMatrixWorking {
      * @param {string} columnId - the id of the column to set
      * @param {any} columnRef - the reference to the column header, can be a string or any other type
      */
-    setColumnHeader(columnId: string, columnRef: any) {
+    setColumnHeader(columnId: string, columnRef: unknown) {
         this._columns.set(columnId, columnRef);
     }
    
@@ -98,7 +98,7 @@ export class DataMatrixWorking {
      * @param {string} rowId - the id of the row to set
      * @param {any} rowRef - the reference to the row header, can be a string or any other type
      */
-    setRowHeader(rowId: string, rowRef: any) {
+    setRowHeader(rowId: string, rowRef: unknown) {
         if (this._rows.has(rowId) === true) {
             const row = this._rows.get(rowId);
             if (row === undefined) { 
@@ -120,7 +120,7 @@ export class DataMatrixWorking {
      * @type {Map<string, any>}}
      * @private
      */
-    _columns: Map<string, any>;
+    _columns: Map<string, unknown>;
 
     /**
      * @type {Map<string, DataMatrixRowIntf>}

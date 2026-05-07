@@ -23,7 +23,7 @@ export interface Recipe<T> {
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    ingredients(logger: SimpleLoggerIntf | undefined, parameters: Map<string, any>): Array<string | DatasetRunInformation>;
+    ingredients(logger: SimpleLoggerIntf | undefined, parameters: Map<string, unknown>): Array<string | DatasetRunInformation>;
 
     /**
      * @description mix the ingredients all together and return the result
@@ -34,7 +34,7 @@ export interface Recipe<T> {
      * @async
      * @public
      */
-    mix(ingredients: Map<string, any>, logger: SimpleLoggerIntf | undefined, parameters: Map<string, any>): Promise<T>;
+    mix(ingredients: Map<string, unknown>, logger: SimpleLoggerIntf | undefined, parameters: Map<string, unknown>): Promise<T>;
 
     /**
      * @description List the parameters that this mix depends on on

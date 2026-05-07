@@ -33,17 +33,17 @@ export class DatasetPackages implements Dataset {
         // Create the map
         const packageRecords = results[0];
         logger?.log(`Parsing ${packageRecords?.length} installed packages...`);
-        const packages: Map<string, SfdcPackage> = new Map(await MediumProcessor.map(packageRecords, (record: any) => {
+        const packages: Map<string, SfdcPackage> = new Map(await MediumProcessor.map(packageRecords, (record: Record<string, unknown>) => {
 
             // Get the ID15 of this custom field
-            const id = sfdcManager.caseSafeId(record.Id);
+            const id = sfdcManager.caseSafeId(record.Id as string);
 
             // Create the instance
             const installedPackage: SfdcPackage = packageDataFactory.create({
                 properties: {
                     id: id,
-                    name: record.SubscriberPackage.Name,
-                    namespace: record.SubscriberPackage.NamespacePrefix,
+                    name: (record.SubscriberPackage as Record<string, unknown>).Name,
+                    namespace: (record.SubscriberPackage as Record<string, unknown>).NamespacePrefix,
                     type: 'Installed'
                 }
             });
@@ -59,7 +59,7 @@ export class DatasetPackages implements Dataset {
             throw new Error(`DatasetPackages: No Organization record found in the org.`);
         }
         // Get the first record
-        const localPackage = organizationRecords[0].NamespacePrefix;
+        const localPackage = organizationRecords[0].NamespacePrefix as string | null;
         if (localPackage) {
             logger?.log(`Adding your local package ${localPackage}...`);
             packages.set(

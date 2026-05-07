@@ -19,7 +19,7 @@ export class RecipeCurrentUserPermissions implements Recipe<Map<string, boolean>
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public ingredients(_logger: SimpleLoggerIntf, parameters: Map<string, any>): Array<string | DatasetRunInformation> {
+    public ingredients(_logger: SimpleLoggerIntf, parameters: Map<string, string>): Array<string | DatasetRunInformation> {
         return [
             new DatasetRunInformation(
                 DatasetAliases.CURRENTUSERPERMISSIONS,
@@ -46,10 +46,10 @@ export class RecipeCurrentUserPermissions implements Recipe<Map<string, boolean>
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf): Promise<Map<string, boolean>> {
+    public async mix(ingredients: Map<string, unknown>): Promise<Map<string, boolean>> {
 
         // Get data
-        const currentUserPermissions: Map<string, boolean> = ingredients.get(DatasetAliases.CURRENTUSERPERMISSIONS);
+        const currentUserPermissions = ingredients.get(DatasetAliases.CURRENTUSERPERMISSIONS) as Map<string, boolean>;
         
         // Checking data
         if (!currentUserPermissions) throw new Error(`RecipeCurrentUserPermissions: Data from dataset alias 'CURRENTUSERPERMISSIONS' was undefined.`);

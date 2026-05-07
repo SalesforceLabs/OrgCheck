@@ -64,7 +64,7 @@ export default class OrgcheckDependencyViewer extends LightningElement {
 
     /** 
      * @description Hierarchical view of the dependency data
-     * @type {{label: string, children: {id: string, label: string, children: Array<{label: string, children: Array<{id: string, label: string, url: string}>}>}>}}[]}
+     * @type {{label: string, children: {id: string, label: string, children: Array<{label: string, children: Array<{id: string, label: string, url: string}>}>}}[]}
      */
     dependencyTreeByType;
 
@@ -100,7 +100,7 @@ export default class OrgcheckDependencyViewer extends LightningElement {
     /**
      * @description Returns the HTML code for each box depending on its depth and data
      * @param {number} depth - the depth of the box
-     * @param {any} data - the data of the box
+     * @param {object} data - the data of the box
      * @returns {string} HTML code for the box
      * @public
      */ 
@@ -121,7 +121,7 @@ export default class OrgcheckDependencyViewer extends LightningElement {
      * @description Set information about the item and its dependencies and then open the modal
      * @param {string} whatId - Salesforce ID of the item
      * @param {string} whatName - Name of the item
-     * @param {any} dependencies - Data dependencies of the item
+     * @param {object} dependencies - Data dependencies of the item
      * @public
      */ 
     @api open(whatId, whatName, dependencies) {

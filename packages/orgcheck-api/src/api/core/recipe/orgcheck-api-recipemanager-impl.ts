@@ -71,7 +71,7 @@ export class RecipeManager implements RecipeManagerIntf {
      * @type {Map<RecipeAliases, Recipe<any> | ServedRecipe<any, any>>}
      * @private
      */
-    private _recipes: Map<RecipeAliases, Recipe<any> | ServedRecipe<any, any>>;
+    private _recipes: Map<RecipeAliases, Recipe<unknown> | ServedRecipe<unknown, unknown>>;
 
     /**
      * @description Map of recipe collections given their alias.
@@ -161,7 +161,7 @@ export class RecipeManager implements RecipeManagerIntf {
      * @async
      * @public
      */
-    public async prepare(alias: RecipeAliases, parameters: Map<string, any>, simpleLogger?: SimpleLoggerIntf): Promise<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]> {
+    public async prepare(alias: RecipeAliases, parameters: Map<string, unknown>, simpleLogger?: SimpleLoggerIntf): Promise<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]> {
         let logger: LoggerIntf | undefined;
         let slogger: SimpleLoggerIntf;
         if (simpleLogger === undefined) {
@@ -210,7 +210,7 @@ export class RecipeManager implements RecipeManagerIntf {
         const recipe = this._recipes.get(alias) ?? this._recipeCollections.get(alias);
         if (recipe) {
             try {
-                // @ts-ignore
+                // @ts-expect-error: recipe is typed as Recipe<T> from the map, but serveToTable is only on ServedRecipe — caller ensures the alias corresponds to a ServedRecipe
                 return await recipe.serveToTable(mixture, slogger);
             } catch (error) {
                 logger?.hadError(/*error*/);
@@ -245,10 +245,10 @@ export class RecipeManager implements RecipeManagerIntf {
             logger = undefined;
             slogger = simpleLogger;
         }
-        let recipe = this._recipes.get(alias) ?? this._recipeCollections.get(alias);
+        const recipe = this._recipes.get(alias) ?? this._recipeCollections.get(alias);
         if (recipe) {
             try {
-                // @ts-ignore
+                // @ts-expect-error: recipe is typed as Recipe<T> from the map, but serveToGo is only on ServedRecipe — caller ensures the alias corresponds to a ServedRecipe
                 return await recipe.serveToGo(plate, slogger);
             } catch (error) {
                 logger?.hadError(/*error*/);
@@ -270,7 +270,7 @@ export class RecipeManager implements RecipeManagerIntf {
      * @throws {RecipeManagerError}
      * @public
      */
-    public clean(alias: RecipeAliases, parameters: Map<string, any>) {
+    public clean(alias: RecipeAliases, parameters: Map<string, unknown>) {
         const logger = this._loggerFactory?.create(`Clean recipe "${alias}"`, false);
         try {
             if (this._recipes.has(alias)) {
@@ -295,7 +295,7 @@ export class RecipeManager implements RecipeManagerIntf {
      * @returns {Promise<string>} Returns the cache stamp
      * @public
      */
-    public cachestamp(alias: RecipeAliases, parameters: Map<string, any>): string {
+    public cachestamp(alias: RecipeAliases, parameters: Map<string, unknown>): string {
         if (this._recipes.has(alias)) {
             const recipe = this._recipes.get(alias);
             let cachestamp = '';
@@ -328,7 +328,7 @@ export class RecipeManager implements RecipeManagerIntf {
      * @throws {RecipeManagerError}
      * @async
      */
-    private async _prepareRecipe(alias: RecipeAliases, parameters: Map<string, any>, logger: SimpleLoggerIntf, datasetsParentLogger?: SimpleLoggerIntf): Promise<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean>> {
+    private async _prepareRecipe(alias: RecipeAliases, parameters: Map<string, unknown>, logger: SimpleLoggerIntf, datasetsParentLogger?: SimpleLoggerIntf): Promise<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean>> {
 
         const recipe = this._recipes.get(alias);
         if (recipe === undefined) {
@@ -350,7 +350,7 @@ export class RecipeManager implements RecipeManagerIntf {
         // -------------------
         // STEP 2. Run
         // -------------------
-        let data: Map<string, any>;
+        let data: Map<string, unknown>;
         try {
             data = await this._datasetManager.run(datasets, datasetsParentLogger);
         } catch(error) {
@@ -362,9 +362,9 @@ export class RecipeManager implements RecipeManagerIntf {
         // STEP 3. Transform
         // -------------------
         logger?.log(`Transforming all retrieved information...`);
-        let finalData: DataWithScore[] | DataMatrixIntf | DataWithScore | Map<string, any>;
+        let finalData: DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean>;
         try {
-            finalData = await recipe.mix(data, logger, parameters);
+            finalData = await recipe.mix(data, logger, parameters) as DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean>;
         } catch(error) {
             throw new RecipeManagerError(alias, `An error occurred while transforming the data`, error);
         }
@@ -382,7 +382,7 @@ export class RecipeManager implements RecipeManagerIntf {
      * @throws {RecipeManagerError}
      * @async
      */
-    private async _prepareRecipeCollection(alias: RecipeAliases, parameters: Map<string, any>, logger: SimpleLoggerIntf): Promise<DataCollectionStatisticsIntf[]> {
+    private async _prepareRecipeCollection(alias: RecipeAliases, parameters: Map<string, unknown>, logger: SimpleLoggerIntf): Promise<DataCollectionStatisticsIntf[]> {
 
         const recipeCollection = this._recipeCollections.get(alias);
         if (recipeCollection === undefined) {
@@ -558,7 +558,7 @@ export class RecipeManager implements RecipeManagerIntf {
      * @throws {RecipeManagerError}
      * @public
      */
-    private _cleanRecipe(alias: RecipeAliases, parameters: Map<string, any>, logger: SimpleLoggerIntf) {
+    private _cleanRecipe(alias: RecipeAliases, parameters: Map<string, unknown>, logger: SimpleLoggerIntf) {
 
         const recipe = this._recipes.get(alias);
         if (recipe === undefined) {
@@ -596,7 +596,7 @@ export class RecipeManager implements RecipeManagerIntf {
      * @throws {RecipeManagerError}
      * @public
      */
-    private _cleanRecipeCollection(alias: RecipeAliases, parameters: Map<string, any>, logger: SimpleLoggerIntf) {
+    private _cleanRecipeCollection(alias: RecipeAliases, parameters: Map<string, unknown>, logger: SimpleLoggerIntf) {
 
         const recipeCollection = this._recipeCollections.get(alias);
         if (recipeCollection === undefined) {

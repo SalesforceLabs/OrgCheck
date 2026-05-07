@@ -7,7 +7,7 @@ import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-sa
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcSharingRule } from 'src/api/data/orgcheck-api-data-sharingrule';
 
-const metadata_MakeItArray = (value: any) => (Array.isArray(value) ? value : [ value ]);
+const metadata_MakeItArray = (value: unknown) => (Array.isArray(value) ? value : [ value ]);
 
 export class DatasetSharingRules implements Dataset {
 
@@ -28,13 +28,13 @@ export class DatasetSharingRules implements Dataset {
                    'FROM CustomObject ' +
                    `WHERE SharingModel != ''`
         }], logger);
-        const customObjectNames: any[] = customObjectsResults[0];
+        const customObjectNames: Record<string, unknown>[] = customObjectsResults[0];
 
         // Read all SharingRules metadata
         logger?.log(`Reading sharing rules metadata via Metadata API...`);
         const results = await sfdcManager.readMetadata([{
             type: SalesforceMetadataTypes.SHARING_RULE,
-            members: ['*', ... customObjectNames?.map((r) => `${r.NamespacePrefix ? `${r.NamespacePrefix}__`: ''}${r.DeveloperName}__c`)]
+            members: ['*', ...(customObjectNames?.map((r) => `${r.NamespacePrefix ? `${r.NamespacePrefix}__`: ''}${r.DeveloperName}__c`) ?? [])]
         }], logger);
 
         // Init the factory and records
@@ -42,17 +42,17 @@ export class DatasetSharingRules implements Dataset {
 
         // Create the map
         // Note: The return result from metadata is per object
-        const objectRecords: any[] = results.get(SalesforceMetadataTypes.SHARING_RULE) ?? [];
+        const objectRecords: Record<string, unknown>[] = results.get(SalesforceMetadataTypes.SHARING_RULE) ?? [];
         logger?.log(`Processing sharing rule metadata for ${objectRecords.length} object(s)...`);
         // Then the list of sharing rules will need to be init here...
         const sharingRules: Map<string, SfdcSharingRule> = new Map();
         // ... and loop will be forEach() and not map() (as usual for other datasets we have)
-        await MediumProcessor.forEach(objectRecords, async (objectRecord: any) => {
+        await MediumProcessor.forEach(objectRecords, async (objectRecord: Record<string, unknown>) => {
 
             // At this level we have the name of the object and two lists of sharing rules
             // one being the owner based sharing rules list
             // and the second one being the criteria based sharing rules list
-            const object: string = objectRecord.fullName;
+            const object: string = objectRecord.fullName as string;
             [
                 { type: 'OwnerBased',    rules: objectRecord.sharingOwnerRules },
                 { type: 'CriteriaBased', rules: objectRecord.sharingCriteriaRules }

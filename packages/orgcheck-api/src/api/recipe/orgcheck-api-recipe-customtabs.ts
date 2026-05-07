@@ -1,7 +1,6 @@
 import { ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
-import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SfdcCustomTab }from 'src/api/data/orgcheck-api-data-customtab';
@@ -18,11 +17,10 @@ export class RecipeCustomTabs implements ServedRecipe<SfdcCustomTab[], Table> {
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
-     * @param {SimpleLoggerIntf} _logger - Logger
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public ingredients(): Array<string | DatasetRunInformation> {
         return [
             DatasetAliases.CUSTOMTABS
         ];
@@ -45,10 +43,10 @@ export class RecipeCustomTabs implements ServedRecipe<SfdcCustomTab[], Table> {
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf): Promise<SfdcCustomTab[]> {
+    public async mix(ingredients: Map<string, unknown>): Promise<SfdcCustomTab[]> {
 
         // Get data
-        const pages: Map<string, SfdcCustomTab> = ingredients.get(DatasetAliases.CUSTOMTABS);
+        const pages = ingredients.get(DatasetAliases.CUSTOMTABS) as Map<string, SfdcCustomTab>;
 
         // Checking data
         if (!pages) throw new Error(`RecipeCustomTabs: Data from dataset alias 'CUSTOMTABS' was undefined.`);

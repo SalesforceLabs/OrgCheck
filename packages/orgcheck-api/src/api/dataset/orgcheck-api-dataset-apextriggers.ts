@@ -43,7 +43,7 @@ export class DatasetApexTriggers implements Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${apexTriggerRecords?.length} apex triggers...`);
         const apexTriggersDependencies = await sfdcManager.dependenciesQuery(
-            await MediumProcessor.map(apexTriggerRecords, (record: any) => sfdcManager.caseSafeId(record.Id)), 
+            await MediumProcessor.map(apexTriggerRecords, (record) => sfdcManager.caseSafeId(record.Id as string)), 
             logger
         );
 
@@ -51,10 +51,10 @@ export class DatasetApexTriggers implements Dataset {
         logger?.log(`Parsing ${apexTriggerRecords?.length} apex triggers...`);
         const apexTriggers: Map<string, SfdcApexTrigger> = new Map(await MediumProcessor.map(
             apexTriggerRecords,
-            (record: any) => {
+            (record) => {
 
                 // Get the ID15
-                const id = sfdcManager.caseSafeId(record.Id);
+                const id = sfdcManager.caseSafeId(record.Id as string);
 
                 // Create the instance
                 const apexTrigger: SfdcApexTrigger = apexTriggerDataFactory.create({
@@ -72,19 +72,19 @@ export class DatasetApexTriggers implements Dataset {
                         beforeDelete: record.UsageBeforeDelete,
                         afterDelete: record.UsageAfterDelete,
                         afterUndelete: record.UsageAfterUndelete,
-                        objectId: sfdcManager.caseSafeId(record.EntityDefinition?.QualifiedApiName),
+                        objectId: sfdcManager.caseSafeId((record.EntityDefinition as Record<string, string> | undefined)?.QualifiedApiName as string),
                         hasSOQL: false,
                         hasDML: false,
                         createdDate: record.CreatedDate,
                         lastModifiedDate: record.LastModifiedDate,
-                        url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.APEX_TRIGGER, record.EntityDefinition?.QualifiedApiName)
+                        url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.APEX_TRIGGER, (record.EntityDefinition as Record<string, string> | undefined)?.QualifiedApiName as string)
                     }, 
                     dependencyData: apexTriggersDependencies
                 });
                 
                 // Get information directly from the source code (if available)
                 if (record.Body) {
-                    const sourceCode = CodeScanner.RemoveCommentsFromCode(record.Body);
+                    const sourceCode = CodeScanner.RemoveCommentsFromCode(record.Body as string);
                     apexTrigger.hasSOQL = CodeScanner.HasSOQLFromApexCode(sourceCode); 
                     apexTrigger.hasDML = CodeScanner.HasDMLFromApexCode(sourceCode); 
                     apexTrigger.hardCodedURLs = CodeScanner.FindHardCodedURLs(sourceCode);
@@ -97,7 +97,7 @@ export class DatasetApexTriggers implements Dataset {
                 // Add it to the map  
                 return [ apexTrigger.id, apexTrigger ];
             },
-            (record: any)=> (record.EntityDefinition ? true : false)
+            (record)=> (record.EntityDefinition ? true : false)
         ));
 
         // Return data as map

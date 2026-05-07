@@ -22,7 +22,7 @@ export interface DataMatrixIntf {
      * @type {any[]}
      * @public
      */
-    columnHeaders: any[];
+    columnHeaders: unknown[];
 
     /** 
      * @description List of data for each "row". A row will have a headerId (used as row header in the matrix view). And data is an object with as many properties.
@@ -42,7 +42,7 @@ export interface DataMatrixRowIntf {
      * @type {any}
      * @public
      */
-    header: any;
+    header: unknown;
     
     /** 
      * @description Data of the row as an object with dynamic properties (defined in the parent DataMatrix object).
@@ -50,5 +50,5 @@ export interface DataMatrixRowIntf {
      * @public
      * @see DataMatrix
      */
-    data: any;
+    data: Record<string, unknown>;
 }

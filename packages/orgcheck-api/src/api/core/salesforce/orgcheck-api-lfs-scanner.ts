@@ -10,7 +10,7 @@ export class LFSScanner {
      * @param {any} metadata - Flow metadata from Tooling API
      * @returns {any} Normalized metadata compatible with LFS
      */
-    static normalizeMetadata(metadata: any): any {
+    static normalizeMetadata(metadata: unknown): unknown {
         if (metadata == null) return null;
         if (typeof metadata !== 'object') return metadata;
         if (Array.isArray(metadata)) {
@@ -20,9 +20,9 @@ export class LFSScanner {
                 .map(item => this.normalizeMetadata(item));
         }
         // For objects, recursively normalize and remove null/undefined properties
-        const normalized = {};
-        for (const key in metadata) {
-            const value = metadata[key];
+        const normalized: Record<string, unknown> = {};
+        for (const key in (metadata as Record<string, unknown>)) {
+            const value = (metadata as Record<string, unknown>)[key];
             if (value != null) {
                 const normalizedValue = this.normalizeMetadata(value);
                 // Only include non-null normalized values
@@ -41,16 +41,16 @@ export class LFSScanner {
      * @param {Function} CaseSafeId - Function to convert 18-char IDs to 15-char
      * @returns {Promise<Map<string, any[]>>} Map of flow version ID to LFS violations
      */
-    static async scanFlows(flowRecords: any[], CaseSafeId: Function): Promise<Map<string, any[]>> {
+    static async scanFlows(flowRecords: Record<string, unknown>[], CaseSafeId: (id: string) => string): Promise<Map<string, unknown[]>> {
         let results = new Map();
         try {
-            // @ts-ignore
+            // @ts-expect-error: lightningflowscanner is a global library injected at runtime and not declared in TypeScript's Window type definitions
             const lfsCore = typeof window !== 'undefined' ? window?.lightningflowscanner : globalThis?.lightningflowscanner ?? null;
             if (lfsCore) {
                 // Convert flow records to LFS format
                 const lfsFlows = flowRecords.filter(record => record.Metadata) // only if flows have metadata!
                     .map(record => {
-                        const id15: string = CaseSafeId(record.Id);
+                        const id15: string = CaseSafeId(record.Id as string);
                         return {
                             uri: id15,
                             flow: new lfsCore.Flow(id15, this.normalizeMetadata(record.Metadata))
@@ -75,14 +75,15 @@ export class LFSScanner {
      * @param {any[]} scanResults - LFS scan results
      * @returns {Map<string, string[]>} Map of flow version ID to violations
      */
-    static mapResults(scanResults: any[]): Map<string, string[]> {
+    static mapResults(scanResults: Record<string, unknown>[]): Map<string, string[]> {
         const violationsMap = new Map();
         for (const result of scanResults) {
-            const violations = result.ruleResults
-                .filter((ruleResult: any) => ruleResult.occurs === true)
-                .map((ruleResult: any) => ruleResult.ruleName);
+            const ruleResults = result.ruleResults as { occurs: boolean; ruleName: string }[];
+            const violations = ruleResults
+                .filter((ruleResult) => ruleResult.occurs === true)
+                .map((ruleResult) => ruleResult.ruleName);
             if (violations?.length > 0) {
-                violationsMap.set(result.flow.uri, violations);
+                violationsMap.set((result.flow as { uri: string }).uri, violations);
             }
         }
         return violationsMap;

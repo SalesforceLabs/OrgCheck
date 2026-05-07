@@ -2,7 +2,6 @@ import { ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
 import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
-import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { DataMatrixIntf } from 'src/api/core/data/orgcheck-api-data-matrix';
 import { DataMatrixFactory } from 'src/api/core/data/orgcheck-api-data-matrix-factory';
 import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
@@ -21,11 +20,10 @@ export class RecipeScoreRules implements ServedRecipe<DataMatrixIntf, Table> {
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
-     * @param {SimpleLoggerIntf} _logger - Logger
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public ingredients(): Array<string | DatasetRunInformation> {
         return [];
     }
 

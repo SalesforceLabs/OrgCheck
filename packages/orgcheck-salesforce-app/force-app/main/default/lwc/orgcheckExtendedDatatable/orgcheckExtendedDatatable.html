@@ -12,7 +12,7 @@
                     <span if:true={nbFilteredRows} class="slds-badge slds-theme_success">There are {nbFilteredRows} rows matching your filter.</span>
                 </template>
                 <template if:true={isInfiniteScrolling}>
-                    <span if:true={isInfiniteScrollingMoreData} class="slds-badge slds-badge_inverse">For performance, we are showing only the first {infiniteScrollingCurrentNbRows} rows. But you can ask for more!</span>
+                    <span if:true={isInfiniteScrollingMoreData} class="slds-badge slds-badge_inverse">You currently see {infiniteScrollingCurrentNbRows} rows. But you can ask for more!</span>
                 </template>
                 <span if:true={isSorted} class="slds-badge">Table is sorted by field "{sortingField}" in {sortingOrder} order.</span>
                 <span if:false={isSorted} class="slds-badge">Table is not sorted yet.</span>

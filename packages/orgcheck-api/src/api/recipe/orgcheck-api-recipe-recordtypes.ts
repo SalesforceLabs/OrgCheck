@@ -22,11 +22,10 @@ export class RecipeRecordType implements ServedRecipe<SfdcRecordType[], Table> {
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
-     * @param {SimpleLoggerIntf} _logger - Logger
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public ingredients(): Array<string | DatasetRunInformation> {
         return [ 
             DatasetAliases.RECORDTYPES,
             DatasetAliases.OBJECTTYPES, 
@@ -53,12 +52,12 @@ export class RecipeRecordType implements ServedRecipe<SfdcRecordType[], Table> {
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, any>, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<SfdcRecordType[]> {
+    public async mix(ingredients: Map<string, unknown>, logger: SimpleLoggerIntf, parameters: Map<string, string>): Promise<SfdcRecordType[]> {
 
         // Get data and parameters
-        const recordTypes: Map<string, SfdcRecordType> = ingredients.get(DatasetAliases.RECORDTYPES);
-        const types: Map<string, SfdcObjectType> = ingredients.get(DatasetAliases.OBJECTTYPES);
-        const objects: Map<string, SfdcObject> = ingredients.get(DatasetAliases.OBJECTS);
+        const recordTypes = ingredients.get(DatasetAliases.RECORDTYPES) as Map<string, SfdcRecordType>;
+        const types = ingredients.get(DatasetAliases.OBJECTTYPES) as Map<string, SfdcObjectType>;
+        const objects = ingredients.get(DatasetAliases.OBJECTS) as Map<string, SfdcObject>;
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
         const objecttype = OrgCheckGlobalParameter.getSObjectTypeName(parameters);
         const object = OrgCheckGlobalParameter.getSObjectName(parameters);

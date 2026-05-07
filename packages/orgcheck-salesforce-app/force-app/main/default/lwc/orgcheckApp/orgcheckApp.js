@@ -121,22 +121,28 @@ export default class OrgcheckApp extends LightningElement {
     /**
      * @description Data received from the Org Check API and used in the different 
      *              components of the UI.
-     * @type {Object<string, Data | Data[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]>}
+     * @type {{[key: string]: (object | Map<string, boolean>)}}
      */
     @track data = { };
 
     /**
      * @description Data received from the Org Check API and used in the different 
      *              tables and components of the UI.
-     * @type {Object<string, Table | SfdcObjectAsTable | Table[]>}
+     * @type {{[key: string]: object}}
      */
     @track tableData = { };
 
     /**
      * @description Exports data
-     * @type {Object<string, ExportedTable | ExportedTable[]>}
+     * @type {{[key: string]: object}}
      */
-    @track exports = { };
+    @track exportData = { };
+
+    /**
+     * @description Exports basenames
+     * @type {{[key: string]: string}}
+     */
+    @track exportBasenames = { };
 
     /**
      * @description Is something is loading?
@@ -175,13 +181,15 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Internal properties without LWC reactivity
-     * @property {OrgCheckAPI} api - The Org Check API instance
+     * @property {object} api - The Org Check API instance
      * @property {boolean} hasInitialized - This flag prevents double initialization of the API + UI flow
      * @property {boolean} childrenReady - This flag checks that the children components are ready
-     * @property {any} spinner - Spinner component
-     * @property {any} modal - Modal component
-     * @property {any} filters - Global filter component
-     * @property {any} initialNavigationMenuItems - Initial navigation menu items
+     * @property {Element} spinner - Spinner component
+     * @property {Element} modal - Modal component
+     * @property {Element} filters - Global filter component
+     * @property {object[]} initialNavigationMenuItems - Initial navigation menu items
+     * @property {Map<string, { title: string, lastAlias: string, data: any, action: function, recipe: string, refreshButtonVisible: boolean, onlyIf: function }>} appNavItemsByKey - Navigation items by key for quick access when navigating to a page
+     * @property {function} _handleKeyDown - Bound function for handling keydown events
      */
     _private_properties = {
         api: undefined,
@@ -193,8 +201,28 @@ export default class OrgcheckApp extends LightningElement {
         tree: undefined,
         appNavigation: undefined,
         initialNavigationMenuItems: undefined,
-        appNavItemsByKey: undefined
+        appNavItemsByKey: undefined,
+        boundHandleKeyDown: undefined,
+        keyDownProgress: undefined
     };
+
+    /**
+     * @description Called when the component is connected to the DOM
+     * @public
+     */
+    connectedCallback() {
+        this._private_properties.boundHandleKeyDown = this._handleKeyDown.bind(this);
+        this._private_properties.keyDownProgress = 0;
+        window.addEventListener('keydown', this._private_properties.boundHandleKeyDown);
+    }
+
+    /**
+     * @description Called when the component is disconnected from the DOM
+     * @public
+     */
+    disconnectedCallback() {
+        window.removeEventListener('keydown', this._private_properties.boundHandleKeyDown);
+    }
 
     /**
      * @description After the component is fully load let's init some elements and the api
@@ -383,6 +411,7 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Initialize the navigation menu items with the corresponding keys, titles and action names (to link with the API)
+     * @returns {object} The navigation items configuration object
      */
     _initApplicationNavigationItems() {
         const Recipes = __orgcheck__Get()?.Recipes;
@@ -656,7 +685,7 @@ export default class OrgcheckApp extends LightningElement {
                 // needs top be updated
                 // --------------------------------------------------------------------------------
                 // get the current alias depending on the dependency with global filter values
-                let alias = this._private_properties.api.cachestampData(appNavItem.recipe, this.namespace, this.objectType, this.object);
+                const alias = this._private_properties.api.cachestampData(appNavItem.recipe, this.namespace, this.objectType, this.object);
                 if (alias === '-') forceRefresh = true;
 
                 if (forceRefresh === true || appNavItem.lastAlias !== alias) {
@@ -667,18 +696,19 @@ export default class OrgcheckApp extends LightningElement {
                         // If yes we prepare the data
                         const mixture = await this._private_properties.api.prepareData(appNavItem.recipe, this.namespace, this.objectType, this.object);
                         // serve the data
-                        /** @type Table | SfdcObjectAsTable | Table[] */
+                        /** @type {object} */
                         const plate = await this._private_properties.api.serveData(appNavItem.recipe, mixture);
                         // and then export the data
-                        /** @type ExportedTable | ExportedTable[] */
+                        /** @type {object} */
                         const doggyBag = await this._private_properties.api.exportData(appNavItem.recipe, plate);
                         // Save the mixture, the plate and doggybag
                         if (appNavItem.storeData === true) {
                             this.data[appNavItem.data] = mixture;
                         }
                         this.tableData[appNavItem.data] = plate;
-                        this.exports[appNavItem.data] = doggyBag;
-                    }                
+                        this.exportData[appNavItem.data] = doggyBag;
+                        this.exportBasenames[appNavItem.data] = this._private_properties.api.orgId + '-' + appNavItem.title.substring(2).replaceAll(' ', '');
+                    }
                 }
             }
         }
@@ -828,7 +858,7 @@ export default class OrgcheckApp extends LightningElement {
     /**
      * @description Event called when the user search something in the navigation menu on the left. We filter the 
      *              menu with the search term entered.
-     * @param {Event | any} event - The event information
+     * @param {Event} event - The event information
      */
     handleNavigationMenuSearch(event) {
         try {
@@ -856,7 +886,7 @@ export default class OrgcheckApp extends LightningElement {
     /**
      * @description Event called when the user select an item in the navigation menu on the left. We just log it for now 
      *              but we could do some specific action depending on the item selected in the future.
-     * @param {Event | any} event - The event information
+     * @param {Event} event - The event information
      */
     async handleNavigationMenuSelect(event) {
         try {
@@ -953,7 +983,7 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Method called when the user ask to log a specific cache item in the console
-     * @param {Event | any} event - The event information
+     * @param {Event} event - The event information
      * @public
      */ 
     handleLogCacheItem(event) {
@@ -991,7 +1021,7 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Event called when the user clicks on the "View Score" button on a data table
-     * @param {Event | any} event - The event information
+     * @param {Event} event - The event information
      * @public
      */ 
     handleViewScore(event) {
@@ -1064,7 +1094,7 @@ export default class OrgcheckApp extends LightningElement {
                 this._private_properties.spinner?.sectionLog(`${LOG_SECTION}-${classId}`, `Asking to recompile class: ${className}`);
                 apexClassNamesById.set(classId, className);
             });
-            /** @type {Map<string, {isSuccess: boolean, reasons?: string>}[]} */
+            /** @type {Map<string, {isSuccess: boolean, reasons?: string}[]>} */
             const responses = await this._private_properties.api?.compileClasses(Array.from(apexClassNamesById.keys()));
             this._private_properties.spinner?.sectionLog(LOG_SECTION, 'We got the response from the server...');
             let noError = true;
@@ -1095,7 +1125,7 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Method called when the user click on one of the cards in the global view
-     * @param {Event | any} event - The event information
+     * @param {Event} event - The event information
      * @public
      */ 
     async handleOpenPage(event) {
@@ -1110,29 +1140,25 @@ export default class OrgcheckApp extends LightningElement {
     }
 
     /**
-     * @description Method in case we want to explicitely see the showError message dialog box
-     * @param {Event | any} event - The event information
-     * @public
-     */ 
-    handleTestThrowException(event) {
-        try {
-            // Get attribute data-type-error-chain
-            const errorChainString = event?.target?.getAttribute('data-type-error-chain');
-            // Loop over the chain
-            let lastError = undefined;
-            errorChainString.split(',').reverse().forEach((m) => {
-                const error = new TypeError(m, lastError ? { cause: lastError } : {});
-                switch (m) {
-                    case 'RecipeManagerError': error.recipe = 'BliBlaBloo'; error.message = 'This is a test'; break;
-                    case 'DatasetManagerError': error.dataset = 'bim-boo'; error.message = 'This is a test'; break;
-                    case 'SalesforceError': error.code = 'OBLADI-OBLADA'; error.contextInformation = { fruit: 'banana', car: 'ferarri' }; break;
-                }
-                lastError = error;
-            });
-            // Throw the error
-            throw lastError;
-        } catch (error) {
-            this._private_properties.modal?.showErrors('handleTestThrowException', error);
+     * @description Handles the key down event
+     * @param {Event} event - The key down event
+     * @private
+     */
+    _handleKeyDown(event) {
+        if (event.key === z[this._private_properties.keyDownProgress]) {
+            this._private_properties.keyDownProgress++;
+            if (this._private_properties.keyDownProgress === z.length) {
+                this._private_properties.keyDownProgress = 0;
+                this._private_properties.modal?.open(
+                    'And now, for something completely different... 🏰🐇⚔️🧙🏼‍♂️🕊️', 
+                    `We improved the loading time but the jokes still are accessible! <br />
+                    <ul class="slds-list_dotted">${this.jokes.map(joke => `<li>
+                    <b>${joke.question}...</b> &nbsp;&nbsp; <i>${joke.answer}</i></li>`
+                    ).join('')}</ul>`
+                );
+            }
+        } else {
+            this._private_properties.keyDownProgress = event.key === z[0] ? 1 : 0;
         }
     }
 
@@ -1156,7 +1182,7 @@ export default class OrgcheckApp extends LightningElement {
     /** 
      * @description Color decorator for the role hierarchy graphic view.
      * @param {number} depth - The depth of the current role in the hierarchy
-     * @param {any} data - The data of the current role
+     * @param {object} data - The data of the current role
      * @returns {number} The index of the color in the legend
      * @public
      */
@@ -1169,7 +1195,7 @@ export default class OrgcheckApp extends LightningElement {
     /**
      * @description Inner HTML decorator for the role hierarchy graphic view
      * @param {number} depth - The depth of the current role in the hierarchy
-     * @param {any} data - The data of the current role
+     * @param {object} data - The data of the current role
      * @returns {string} The inner HTML to display in the role box
      * @public
      */
@@ -1181,7 +1207,7 @@ export default class OrgcheckApp extends LightningElement {
     /** 
      * @description OnClick handler when clikcing in a role box
      * @param {number} depth - The depth of the current role in the hierarchy
-     * @param {any} data - The data of the current role
+     * @param {object} data - The data of the current role
      * @public
      */ 
     roleBoxOnClickDecorator = (depth, data) => {
@@ -1206,16 +1232,14 @@ export default class OrgcheckApp extends LightningElement {
     }
 }
 
+const a = 'ArrowUp', b = 'ArrowDown';
 const __orgcheck__Get = () => {
     return (typeof window !== 'undefined' ? window?.orgcheck : globalThis?.orgcheck ?? null)
 }
-
+const c = 'ArrowLeft', d = 'ArrowRight';
 const getRuleById = (id) => {
     const method = __orgcheck__Get()?.Rules?.get;
     if (method) return method(id);
     return undefined;
 }
-
-
-const ANY = '*';
-const EMPTY = '';
+const ANY = '*', z = [a, a, b, b, c, d, c, d, 'b', 'a'], EMPTY = '';

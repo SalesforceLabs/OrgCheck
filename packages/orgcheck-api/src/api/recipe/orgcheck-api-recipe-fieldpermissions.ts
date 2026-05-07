@@ -29,7 +29,7 @@ export class RecipeFieldPermissions implements ServedRecipe<DataMatrixIntf, Tabl
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public ingredients(_logger: SimpleLoggerIntf, parameters: Map<string, any>): Array<string | DatasetRunInformation> {
+    public ingredients(_logger: SimpleLoggerIntf, parameters: Map<string, string>): Array<string | DatasetRunInformation> {
         return [
             new DatasetRunInformation(
                 DatasetAliases.FIELDPERMISSIONS,
@@ -59,12 +59,12 @@ export class RecipeFieldPermissions implements ServedRecipe<DataMatrixIntf, Tabl
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<DataMatrixIntf> {
+    public async mix(ingredients: Map<string, unknown>, _logger: SimpleLoggerIntf, parameters: Map<string, string>): Promise<DataMatrixIntf> {
 
         // Get data and parameters
-        const fieldPermissions: Map<string, SfdcFieldPermission> = ingredients.get(DatasetAliases.FIELDPERMISSIONS);
-        const profiles: Map<string, SfdcProfile> = ingredients.get(DatasetAliases.PROFILES);
-        const permissionSets: Map<string, SfdcPermissionSet> = ingredients.get(DatasetAliases.PERMISSIONSETS);
+        const fieldPermissions = ingredients.get(DatasetAliases.FIELDPERMISSIONS) as Map<string, SfdcFieldPermission>;
+        const profiles = ingredients.get(DatasetAliases.PROFILES) as Map<string, SfdcProfile>;
+        const permissionSets = ingredients.get(DatasetAliases.PERMISSIONSETS) as Map<string, SfdcPermissionSet>;
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data

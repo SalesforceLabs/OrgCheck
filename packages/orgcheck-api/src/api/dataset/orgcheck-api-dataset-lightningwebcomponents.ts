@@ -35,16 +35,16 @@ export class DatasetLightningWebComponents implements Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${componentRecords?.length} lightning web components...`);
         const componentsDependencies = await sfdcManager.dependenciesQuery(
-            await MediumProcessor.map(componentRecords, (record: any) => sfdcManager.caseSafeId(record.Id)), 
+            await MediumProcessor.map(componentRecords, (record: Record<string, unknown>) => sfdcManager.caseSafeId(record.Id as string)), 
             logger
         );
 
         // Create the map
         logger?.log(`Parsing ${componentRecords?.length} lightning web components...`);
-        const components: Map<string, SfdcLightningWebComponent> = new Map(await MediumProcessor.map(componentRecords, (record: any) => {
+        const components: Map<string, SfdcLightningWebComponent> = new Map(await MediumProcessor.map(componentRecords, (record: Record<string, unknown>) => {
 
             // Get the ID15 of this custom field
-            const id = sfdcManager.caseSafeId(record.Id);
+            const id = sfdcManager.caseSafeId(record.Id as string);
 
             // Create the instance
             const component: SfdcLightningWebComponent = componentDataFactory.createWithScore({

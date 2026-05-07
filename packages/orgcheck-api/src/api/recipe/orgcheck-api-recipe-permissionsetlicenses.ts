@@ -1,7 +1,6 @@
 import { ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
-import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SfdcPermissionSetLicense }from 'src/api/data/orgcheck-api-data-permissionsetlicense';
@@ -20,11 +19,10 @@ export class RecipePermissionSetLicenses implements ServedRecipe<SfdcPermissionS
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
-     * @param {SimpleLoggerIntf} _logger - Logger
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public ingredients(): Array<string | DatasetRunInformation> {
         return [
             DatasetAliases.PERMISSIONSETLICENSES,
             DatasetAliases.PERMISSIONSETS
@@ -48,11 +46,11 @@ export class RecipePermissionSetLicenses implements ServedRecipe<SfdcPermissionS
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf): Promise<SfdcPermissionSetLicense[]> {
+    public async mix(ingredients: Map<string, unknown>): Promise<SfdcPermissionSetLicense[]> {
 
         // Get data
-        const permissionSetLicenses: Map<string, SfdcPermissionSetLicense> = ingredients.get(DatasetAliases.PERMISSIONSETLICENSES);
-        const permissionSets: Map<string, SfdcPermissionSet> = ingredients.get(DatasetAliases.PERMISSIONSETS);
+        const permissionSetLicenses = ingredients.get(DatasetAliases.PERMISSIONSETLICENSES) as Map<string, SfdcPermissionSetLicense>;
+        const permissionSets = ingredients.get(DatasetAliases.PERMISSIONSETS) as Map<string, SfdcPermissionSet>;
 
         // Checking data
         if (!permissionSetLicenses) throw new Error(`RecipePermissionSetLicenses: Data from dataset alias 'PERMISSIONSETLICENSES' was undefined.`);

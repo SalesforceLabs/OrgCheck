@@ -22,11 +22,10 @@ export class RecipeValidationRules implements ServedRecipe<SfdcValidationRule[],
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
-     * @param {SimpleLoggerIntf} _logger - Logger
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public ingredients(): Array<string | DatasetRunInformation> {
         return [
             DatasetAliases.VALIDATIONRULES,
             DatasetAliases.OBJECTTYPES, 
@@ -52,12 +51,12 @@ export class RecipeValidationRules implements ServedRecipe<SfdcValidationRule[],
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<SfdcValidationRule[]> {
+    public async mix(ingredients: Map<string, unknown>, _logger: SimpleLoggerIntf, parameters: Map<string, string>): Promise<SfdcValidationRule[]> {
 
         // Get data and parameters
-        const types: Map<string, SfdcObjectType> = ingredients.get(DatasetAliases.OBJECTTYPES);
-        const objects: Map<string, SfdcObject> = ingredients.get(DatasetAliases.OBJECTS);
-        const validationRules: Map<string, SfdcValidationRule> = ingredients.get(DatasetAliases.VALIDATIONRULES);
+        const types = ingredients.get(DatasetAliases.OBJECTTYPES) as Map<string, SfdcObjectType>;
+        const objects = ingredients.get(DatasetAliases.OBJECTS) as Map<string, SfdcObject>;
+        const validationRules = ingredients.get(DatasetAliases.VALIDATIONRULES) as Map<string, SfdcValidationRule>;
         const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
         const objecttype = OrgCheckGlobalParameter.getSObjectTypeName(parameters);
         const object = OrgCheckGlobalParameter.getSObjectName(parameters);

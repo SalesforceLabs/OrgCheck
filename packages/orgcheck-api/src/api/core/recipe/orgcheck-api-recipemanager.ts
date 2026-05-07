@@ -36,7 +36,7 @@ export interface RecipeManagerIntf {
      * @async
      * @public
      */
-    prepare(alias: RecipeAliases, parameters: Map<string, any>, logger?: SimpleLoggerIntf): Promise<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]>;
+    prepare(alias: RecipeAliases, parameters: Map<string, unknown>, logger?: SimpleLoggerIntf): Promise<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]>;
 
     /**
      * @description Serve the mixture from a designated recipe to a table
@@ -69,7 +69,7 @@ export interface RecipeManagerIntf {
      * @returns {Promise<string>} Returns the cache stamp
      * @public
      */
-    cachestamp(alias: RecipeAliases, parameters: Map<string, any>): string;
+    cachestamp(alias: RecipeAliases, parameters: Map<string, unknown>): string;
 
     /**
      * @description Cleans a designated recipe (by its alias) and the corresponding datasets.
@@ -80,7 +80,7 @@ export interface RecipeManagerIntf {
      * @throws {RecipeManagerError}
      * @public
      */
-    clean(alias: string, parameters?: Map<string, any>): void;
+    clean(alias: string, parameters?: Map<string, unknown>): void;
 
     /**
      * @description List all available recipe titles

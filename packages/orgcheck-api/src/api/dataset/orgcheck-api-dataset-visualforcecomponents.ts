@@ -36,16 +36,16 @@ export class DatasetVisualForceComponents implements Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${componentRecords?.length} visualforce components...`);
         const componentsDependencies = await sfdcManager.dependenciesQuery(
-            await MediumProcessor.map(componentRecords, (record: any) => sfdcManager.caseSafeId(record.Id)), 
+            await MediumProcessor.map(componentRecords, (record: Record<string, unknown>) => sfdcManager.caseSafeId(record.Id as string)), 
             logger
         );
 
         // Create the map
         logger?.log(`Parsing ${componentRecords?.length} visualforce components...`);
-        const components: Map<string, SfdcVisualForceComponent> = new Map(await MediumProcessor.map(componentRecords, (record: any) => {
+        const components: Map<string, SfdcVisualForceComponent> = new Map(await MediumProcessor.map(componentRecords, (record: Record<string, unknown>) => {
 
             // Get the ID15 of this custom field
-            const id = sfdcManager.caseSafeId(record.Id);
+            const id = sfdcManager.caseSafeId(record.Id as string);
 
             // Create the instance
             const component: SfdcVisualForceComponent = componentDataFactory.create({
@@ -64,7 +64,7 @@ export class DatasetVisualForceComponents implements Dataset {
 
             // Get information directly from the source code (if available)
             if (record.Markup) {
-                const sourceCode = CodeScanner.RemoveCommentsFromCode(record.Markup);
+                const sourceCode = CodeScanner.RemoveCommentsFromCode(record.Markup as string);
                 component.hardCodedURLs = CodeScanner.FindHardCodedURLs(sourceCode);
                 component.hardCodedIDs = CodeScanner.FindHardCodedIDs(sourceCode);
             }

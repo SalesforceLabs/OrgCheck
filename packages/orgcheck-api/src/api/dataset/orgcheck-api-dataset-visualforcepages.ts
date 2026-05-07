@@ -36,16 +36,16 @@ export class DatasetVisualForcePages implements Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${pageRecords?.length} visualforce pages...`);
         const pagesDependencies = await sfdcManager.dependenciesQuery(
-            await MediumProcessor.map(pageRecords, (record: any) => sfdcManager.caseSafeId(record.Id)), 
+            await MediumProcessor.map(pageRecords, (record: Record<string, unknown>) => sfdcManager.caseSafeId(record.Id as string)), 
             logger
         );
 
         // Create the map
         logger?.log(`Parsing ${pageRecords?.length} visualforce pages...`);
-        const pages: Map<string, SfdcVisualForcePage> = new Map(await MediumProcessor.map(pageRecords, (record: any) => {
+        const pages: Map<string, SfdcVisualForcePage> = new Map(await MediumProcessor.map(pageRecords, (record: Record<string, unknown>) => {
 
             // Get the ID15
-            const id = sfdcManager.caseSafeId(record.Id);
+            const id = sfdcManager.caseSafeId(record.Id as string);
 
             // Create the instance
             const page: SfdcVisualForcePage = pageDataFactory.create({
@@ -65,7 +65,7 @@ export class DatasetVisualForcePages implements Dataset {
 
             // Get information directly from the source code (if available)
             if (record.Markup) {
-                const sourceCode = CodeScanner.RemoveCommentsFromCode(record.Markup);
+                const sourceCode = CodeScanner.RemoveCommentsFromCode(record.Markup as string);
                 page.hardCodedURLs = CodeScanner.FindHardCodedURLs(sourceCode);
                 page.hardCodedIDs = CodeScanner.FindHardCodedIDs(sourceCode);
             }

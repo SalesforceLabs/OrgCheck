@@ -83,4 +83,4 @@ export interface DataWithScoreAndDependencies extends DataWithScore {
  * @description This interface represents a set of information around a unique instance of a specific artefact (like User, Profile, UserRole, ...) 
  *   Such interface are created by a "data factory" (see DataFactory) BUT do not need any scoring. 
  */
-export interface DataWithoutScore extends Data {}
+export type DataWithoutScore = Data;

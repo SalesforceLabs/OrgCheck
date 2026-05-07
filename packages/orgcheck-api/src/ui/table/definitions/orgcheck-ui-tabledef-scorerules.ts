@@ -26,9 +26,9 @@ export class ScoreRulesTableDefinition implements TableDefinition {
             { label: 'Rules (or reason why metadata is bad)', type: ColumnType.TXT, data: { value: 'header.description' }}
         ];
         if (this._matrix) {
-            this._matrix.columnHeaders // returns an array of string representing the static 'label' of the org check class
+            (this._matrix.columnHeaders as string[]) // returns an array of string representing the static 'label' of the org check class
                 .sort()
-                .forEach((classLabel: string) => {
+                .forEach((classLabel) => {
                     columns.push({ 
                         label: classLabel, 
                         type: ColumnType.CHK, 

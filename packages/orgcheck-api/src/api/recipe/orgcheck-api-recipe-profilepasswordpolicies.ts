@@ -1,7 +1,6 @@
 import { ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
-import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SfdcProfilePasswordPolicy }from 'src/api/data/orgcheck-api-data-profilepasswordpolicy';
@@ -18,11 +17,10 @@ export class RecipeProfilePasswordPolicies implements ServedRecipe<SfdcProfilePa
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
-     * @param {SimpleLoggerIntf} _logger - Logger
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public ingredients(): Array<string | DatasetRunInformation> {
         return [ DatasetAliases.PROFILEPWDPOLICIES ];
     }
 
@@ -43,10 +41,10 @@ export class RecipeProfilePasswordPolicies implements ServedRecipe<SfdcProfilePa
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf): Promise<SfdcProfilePasswordPolicy[]> {
+    public async mix(ingredients: Map<string, unknown>): Promise<SfdcProfilePasswordPolicy[]> {
 
         // Get data
-        const policies: Map<string, SfdcProfilePasswordPolicy> = ingredients.get(DatasetAliases.PROFILEPWDPOLICIES);
+        const policies = ingredients.get(DatasetAliases.PROFILEPWDPOLICIES) as Map<string, SfdcProfilePasswordPolicy>;
 
         // Checking data
         if (!policies) throw new Error(`RecipeProfilePasswordPolicies: Data from dataset alias 'PROFILEPWDPOLICIES' was undefined.`);

@@ -1,5 +1,4 @@
 import { Recipe } from 'src/api/core/recipe/orgcheck-api-recipe';
-import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SfdcOrganization }from 'src/api/data/orgcheck-api-data-organization';
@@ -15,11 +14,10 @@ export class RecipeOrganization implements Recipe<SfdcOrganization> {
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
-     * @param {SimpleLoggerIntf} _logger - Logger
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public ingredients(): Array<string | DatasetRunInformation> {
         return [DatasetAliases.ORGANIZATION];
     }
     
@@ -40,10 +38,10 @@ export class RecipeOrganization implements Recipe<SfdcOrganization> {
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf): Promise<SfdcOrganization> {
+    public async mix(ingredients: Map<string, unknown>): Promise<SfdcOrganization> {
 
         // Get data
-        const organization: SfdcOrganization = ingredients.get(DatasetAliases.ORGANIZATION);
+        const organization = ingredients.get(DatasetAliases.ORGANIZATION) as SfdcOrganization;
 
         // Checking data
         if (!organization) throw new Error(`RecipeOrganization: Data from dataset alias 'ORGANIZATION' was undefined.`);

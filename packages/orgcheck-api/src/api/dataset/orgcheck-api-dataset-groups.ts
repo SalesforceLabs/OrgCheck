@@ -32,10 +32,10 @@ export class DatasetGroups implements Dataset {
         // Create the map
         const groupRecords = results[0];
         logger?.log(`Parsing ${groupRecords?.length} groups...`);
-        const groups: Map<string, SfdcGroup> = new Map(await MediumProcessor.map(groupRecords, async (record: any) => {
+        const groups: Map<string, SfdcGroup> = new Map(await MediumProcessor.map(groupRecords, async (record: Record<string, unknown>) => {
         
             // Get the ID15 of this custom field
-            const groupId = sfdcManager.caseSafeId(record.Id);
+            const groupId = sfdcManager.caseSafeId(record.Id as string);
 
             // Depending on the type we have some specific properties
             let groupType, groupName, groupDeveloperName, groupIncludesBosses, groupIncludesSubordinates, groupRelatedId;
@@ -52,9 +52,9 @@ export class DatasetGroups implements Dataset {
                 case 'RoleAndSubordinates':
                 case 'RoleAndSubordinatesInternal': {
                     groupType = SalesforceMetadataTypes.ROLE;
-                    groupName = record.Related?.Name ?? '(unknown)';
+                    groupName = (record.Related as { Name?: string } | undefined)?.Name ?? '(unknown)';
                     groupIncludesSubordinates = record.Type !== 'Role';
-                    groupRelatedId = sfdcManager.caseSafeId(record.RelatedId);
+                    groupRelatedId = sfdcManager.caseSafeId(record.RelatedId as string);
                     break;
                 }
                 case 'AllCustomerPortal':
@@ -70,11 +70,12 @@ export class DatasetGroups implements Dataset {
 
             // Handle the direct group membership
             const groupDirectUserIds: string[] = [], groupDirectGroupIds: string[] = [];
-            if (record.GroupMembers && record.GroupMembers.records && record.GroupMembers.records?.length > 0) {
+            const groupMembers = record.GroupMembers as { records?: Record<string, unknown>[] } | undefined;
+            if (groupMembers?.records && groupMembers.records.length > 0) {
                 await MediumProcessor.forEach(
-                    record.GroupMembers.records, 
-                    async (m: any) => {
-                        const groupMemberId = sfdcManager.caseSafeId(m.UserOrGroupId);
+                    groupMembers.records, 
+                    async (m: Record<string, unknown>) => {
+                        const groupMemberId = sfdcManager.caseSafeId(m.UserOrGroupId as string);
                         (groupMemberId.startsWith('005') ? groupDirectUserIds : groupDirectGroupIds).push(groupMemberId);
                     }
                 );

@@ -13,14 +13,14 @@ export default class OrgcheckGraphics extends LightningElement {
 
   /**
    * @description Excel API used to generate documents
-   * @type {any}
+   * @type {object}
    * @private
    */ 
   _api;
 
   /**
    * @description Data to use to render the graphic
-   * @type {any}
+   * @type {object}
    * @private
    */
   _data;
@@ -49,7 +49,7 @@ export default class OrgcheckGraphics extends LightningElement {
 
   /**
    * @description Set the data used in the graphic
-   * @param {any} data - Data to use to render the graphic
+   * @param {object} data - Data to use to render the graphic
    * @public
    */
   @api set source(data) {
@@ -60,7 +60,7 @@ export default class OrgcheckGraphics extends LightningElement {
 
   /**
    * @description Get the data used in the graphic
-   * @returns {any} Data used to render the graphic
+   * @returns {object} Data used to render the graphic
    * @public
    */
   get source() {
@@ -172,21 +172,21 @@ export default class OrgcheckGraphics extends LightningElement {
 
   /**
    * @description Decorator function to get the color of the boxes depending on the depth in the hierarchy and data of the node (in case the graphic is a hierarchical one)
-   * @type {Function}
+   * @type {function(number, object): number}
    * @public
    */
   @api hierarchyBoxColorDecorator = (depth, data) => { console.debug('hierarchyBoxColorDecorator', depth, data); return 0; };
 
   /**
    * @description Decorator function to get the inner HTML content of the boxes depending on the depth in the hierarchy and data of the node (in case the graphic is a hierarchical one)
-   * @type {Function}
+   * @type {function(number, object): string}
    * @public
    */
   @api hierarchyBoxInnerHtmlDecorator = (depth, data) => { console.debug('hierarchyBoxInnerHtmlDecorator', depth, data); return ''; };
 
   /**
    * @description Decorator function to get the onclick function depending on the depth in the hierarchy and data of the node (in case the graphic is a hierarchical one)
-   * @type {Function}
+   * @type {function(number, object): void}
    * @public
    */
   @api hierarchyBoxOnClickDecorator = (depth, data) => { console.debug('hierarchyBoxOnClickDecorator', depth, data); };
@@ -221,7 +221,7 @@ export default class OrgcheckGraphics extends LightningElement {
 
   /**
    * @description Decorator function to get the categories depending on the data (in case the graphic is a pie one) and the optional filter
-   * @type {Function}
+   * @type {function(object, string=): Array}
    * @public
    */
   @api pieCategoriesDecorator = (data, filter) => { console.debug('pieCategoriesDecorator', data, filter); return []; };

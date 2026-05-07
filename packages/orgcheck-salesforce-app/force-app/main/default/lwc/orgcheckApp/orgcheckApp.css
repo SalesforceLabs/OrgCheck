@@ -1,44 +1,25 @@
-.viewCard-no-bad-data {
-    background-color: #00800066;
-}
-
-.viewCard-some-bad-data {
-    background-color: #ff000066;
-}
-
-.viewCard-error {
-    background-color: #ffea0066;
-}
-
-.viewCard {
-    border: 1.5px solid #dddbda;
-    border-radius: 1rem;
-    box-shadow: 0 2px 2px 0 rgba(0,0,0,.1);
-}
-
 .viewCacheItem {
-    border: 8.5px solid #dddbda;
-    border-radius: 1rem;
+    border: var(--slds-g-sizing-border-3, 3px) solid var(--slds-g-color-border-1, #e5e5e5);
+    border-radius: var(--slds-g-radius-border-3, 1rem);
     box-shadow: 0 2px 2px 0 rgba(0,0,0,.1);
 }
 
 .contentTitle {
-    background-color: #4395a590;
+    background-color: var(--slds-g-color-brand-base-80);
 }
 
 div.pleaseAcceptTheTerms {
     width: 80%;
     justify-self: center;
-    background-color: #ffb900;
-    padding: 2em;
-    border-radius: 2em;
+    background-color: var(--slds-g-color-warning-base-80);
+    padding: var(--slds-g-spacing-6, 2rem);
+    border-radius: var(--slds-g-radius-border-4, 1rem);
 }
 
 div.howToSolveApiAccessControlIssue {
     width: 80%;
     justify-self: center;
-    background-color: #eb97f1;
-    padding: 2em;
-    border-radius: 2em;
+    background-color: var(--slds-g-color-error-base-80);
+    padding: var(--slds-g-spacing-6, 2rem);
+    border-radius: var(--slds-g-radius-border-4, 1rem);
 }
-

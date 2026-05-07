@@ -73,10 +73,10 @@ export class DatasetPermissionSets implements Dataset {
 
         // Create the map of permission sets
         logger?.log(`Parsing ${permissionSetRecords?.length} permission sets...`);
-        const permissionSets: Map<string, SfdcPermissionSet> = new Map(await MediumProcessor.map(permissionSetRecords, (record: any) => {
+        const permissionSets: Map<string, SfdcPermissionSet> = new Map(await MediumProcessor.map(permissionSetRecords, (record: Record<string, unknown>) => {
 
             // Get the ID15
-            const id = sfdcManager.caseSafeId(record.Id);
+            const id = sfdcManager.caseSafeId(record.Id as string);
         
             // Is it a permission set or a permission set group?
             const isPermissionSetGroup = (record.Type === 'Group'); // other values can be 'Regular', 'Standard', 'Session'
@@ -87,7 +87,7 @@ export class DatasetPermissionSets implements Dataset {
                     id: id,
                     name: record.Name,
                     description: record.Description,
-                    license: (record.License ? record.License.Name : ''),
+                    license: (record.License ? (record.License as Record<string, unknown>).Name as string : ''),
                     isCustom: record.IsCustom,
                     package: (record.NamespacePrefix || ''),
                     memberCounts: 0, // default value, may be changed in further SOQL
@@ -125,37 +125,37 @@ export class DatasetPermissionSets implements Dataset {
         logger?.log(`Parsing ${permissionSetGroupRecords?.length} permission set groups, ${objectPermissionRecords?.length} object permissions and ${fieldPermissionRecords?.length} field permissions...`);
         const psgToPsIds = new Map();
         await Promise.all([
-            MediumProcessor.forEach(permissionSetGroupRecords, async (record: any) => {
-                const permissionSetId = sfdcManager.caseSafeId(record.Id);
-                const permissionSetGroupId = sfdcManager.caseSafeId(record.PermissionSetGroupId);
+            MediumProcessor.forEach(permissionSetGroupRecords, async (record: Record<string, unknown>) => {
+                const permissionSetId = sfdcManager.caseSafeId(record.Id as string);
+                const permissionSetGroupId = sfdcManager.caseSafeId(record.PermissionSetGroupId as string);
                 const permissionSet = permissionSets.get(permissionSetId);
                 if (permissionSet) {
                     permissionSet.isGroup = true;
                     permissionSet.groupId = permissionSetGroupId;
-                    permissionSet.description = record.PermissionSetGroup?.Description ?? '';
+                    permissionSet.description = (record.PermissionSetGroup as { Description?: string } | undefined)?.Description ?? '';
                     permissionSet.url = sfdcManager.setupUrl(permissionSetGroupId, SalesforceMetadataTypes.PERMISSION_SET_GROUP);
                     psgToPsIds.set(permissionSetGroupId, permissionSetId);
                 }
             }),
-            MediumProcessor.forEach(objectPermissionRecords, async (record: any) => {
-                const permissionSetId = sfdcManager.caseSafeId(record.ParentId);
+            MediumProcessor.forEach(objectPermissionRecords, async (record: Record<string, unknown>) => {
+                const permissionSetId = sfdcManager.caseSafeId(record.ParentId as string);
                 const permissionSet = permissionSets.get(permissionSetId);
                 if (permissionSet) {
-                    permissionSet.nbObjectPermissions += record.CountObject;
+                    permissionSet.nbObjectPermissions += record.CountObject as number;
                 }
             }),
-            MediumProcessor.forEach(fieldPermissionRecords, async (record: any) => {
-                const permissionSetId = sfdcManager.caseSafeId(record.ParentId);
+            MediumProcessor.forEach(fieldPermissionRecords, async (record: Record<string, unknown>) => {
+                const permissionSetId = sfdcManager.caseSafeId(record.ParentId as string);
                 const permissionSet = permissionSets.get(permissionSetId);
                 if (permissionSet) {
-                    permissionSet.nbFieldPermissions += record.CountField;    
+                    permissionSet.nbFieldPermissions += record.CountField as number;    
                 }
             }),
-            MediumProcessor.forEach(userAssignmentRecords, async (record: any) => {
-                const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId);
+            MediumProcessor.forEach(userAssignmentRecords, async (record: Record<string, unknown>) => {
+                const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId as string);
                 const permissionSet = permissionSets.get(permissionSetId);
                 if (permissionSet) {
-                    permissionSet.memberCounts += record.CountAssignment;    
+                    permissionSet.memberCounts += record.CountAssignment as number;    
                 }
             })
         ]);
@@ -163,9 +163,9 @@ export class DatasetPermissionSets implements Dataset {
         // Once all the ps and psg are in the map we can check the following:
         logger?.log(`Checking the ${psAssignmentRecords?.length} permission set assignments to permission set groups...`);
         const psgMemberCountSumByPermissionSetId = new Map();        
-        await MediumProcessor.forEach(psAssignmentRecords, async (record: any) => {
-            const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId);
-            const permissionSetGroupId = sfdcManager.caseSafeId(record.PermissionSetGroupId);
+        await MediumProcessor.forEach(psAssignmentRecords, async (record: Record<string, unknown>) => {
+            const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId as string);
+            const permissionSetGroupId = sfdcManager.caseSafeId(record.PermissionSetGroupId as string);
             const permissionSetGroup_psId = psgToPsIds.get(permissionSetGroupId);
             const permissionSet = permissionSets.get(permissionSetId);
             const permissionSetGroup = permissionSets.get(permissionSetGroup_psId);

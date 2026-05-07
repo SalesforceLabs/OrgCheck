@@ -27,9 +27,9 @@ export class DatasetObject implements Dataset {
      * @param {Map<string, any>} parameters - The parameters
      * @returns {Promise<SfdcObject>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<SfdcObject> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf, parameters: Map<string, unknown>): Promise<SfdcObject> {
 
-        const fullObjectApiName = OrgCheckGlobalParameter.getSObjectName(parameters);
+        const fullObjectApiName = OrgCheckGlobalParameter.getSObjectName(parameters as unknown as Map<string, string>);
 
         // Checking parameters
         if (fullObjectApiName === undefined || typeof fullObjectApiName !== 'string') {
@@ -86,7 +86,7 @@ export class DatasetObject implements Dataset {
         // the first promise was describe
         // so we initialize the object with the first result
         const sobjectDescribed = results[0]; 
-        const sobjectType = sfdcManager.getObjectType(sobjectDescribed.name, sobjectDescribed.customSetting);
+        const sobjectType = sfdcManager.getObjectType(sobjectDescribed.name as string, sobjectDescribed.customSetting as boolean);
 
         // the second promise was three soql queries on EntityDefinition, on FieldDefinition and on WorkflowRule
         // so the first query response should be an EntityDefinition record corresponding to the object we want.
@@ -105,10 +105,11 @@ export class DatasetObject implements Dataset {
         // fields (standard and custom)
         const customFieldIds: string[] = []; 
         const standardFieldsMapper = new Map();
-        await MediumProcessor.forEach(fields, async (f: any) => {
-            if (f && f.DurableId && f.DurableId.split && f.DurableId.includes) {
-                const id = sfdcManager.caseSafeId(f.DurableId.split('.')[1]);
-                if (f.DurableId?.includes('.00N')) {
+        await MediumProcessor.forEach(fields, async (f: Record<string, unknown>) => {
+            if (f && f.DurableId) {
+                const durableId = f.DurableId as string;
+                const id = sfdcManager.caseSafeId(durableId.split('.')[1]);
+                if (durableId.includes('.00N')) {
                     customFieldIds.push(id);
                 } else {
                     standardFieldsMapper.set(f.QualifiedApiName, { 
@@ -120,8 +121,8 @@ export class DatasetObject implements Dataset {
             }
         });
         const standardFields: SfdcField[] = await MediumProcessor.map(
-            sobjectDescribed.fields,
-            (field: any) => {
+            sobjectDescribed.fields as Record<string, unknown>[],
+            (field: Record<string, unknown>) => {
                 const fieldMapper = standardFieldsMapper.get(field.name);
                 return fieldDataFactory.createWithScore({
                     properties: {
@@ -138,48 +139,48 @@ export class DatasetObject implements Dataset {
                         isIndexed: fieldMapper.isIndexed,
                         defaultValue: field.defaultValue,
                         formula: field.calculatedFormula,
-                        url: sfdcManager.setupUrl(fieldMapper.id, SalesforceMetadataTypes.STANDARD_FIELD, entity.DurableId, sobjectType)
+                        url: sfdcManager.setupUrl(fieldMapper.id, SalesforceMetadataTypes.STANDARD_FIELD, entity.DurableId as string, sobjectType)
                     },
                     dependencyData: { records: [], errors: [] }
                 });
             },
-            (field: any) => standardFieldsMapper.has(field.name)
+            (field: Record<string, unknown>) => standardFieldsMapper.has(field.name)
         );
 
         // apex triggers
         const apexTriggerIds: string[] = await MediumProcessor.map(
-            entity.ApexTriggers?.records, 
-            (t: any) => sfdcManager.caseSafeId(t.Id)
+            (entity.ApexTriggers as { records?: Record<string, unknown>[] } | undefined)?.records ?? [], 
+            (t: Record<string, unknown>) => sfdcManager.caseSafeId(t.Id as string)
         );
 
         // workflow rules
         const workflowRuleIds: string[] = await MediumProcessor.map(
             workflowRules, 
-            (wr: any) => sfdcManager.caseSafeId(wr.Id)
+            (wr: Record<string, unknown>) => sfdcManager.caseSafeId(wr.Id as string)
         );
 
         // field sets
         const fieldSets: SfdcFieldSet[] = await MediumProcessor.map(
-            entity.FieldSets?.records,
-            (t: any) => fieldSetDataFactory.createWithScore({ 
+            (entity.FieldSets as { records?: Record<string, unknown>[] } | undefined)?.records ?? [],
+            (t: Record<string, unknown>) => fieldSetDataFactory.createWithScore({ 
                 properties: {
-                    id: sfdcManager.caseSafeId(t.Id), 
+                    id: sfdcManager.caseSafeId(t.Id as string), 
                     label: t.MasterLabel, 
                     description: t.Description,
-                    url: sfdcManager.setupUrl(t.Id, SalesforceMetadataTypes.FIELD_SET, entity.DurableId)
+                    url: sfdcManager.setupUrl(t.Id as string, SalesforceMetadataTypes.FIELD_SET, entity.DurableId as string)
                 }
             })
         );
 
         // page layouts
         const layouts: SfdcPageLayout[] = await MediumProcessor.map(
-            entity.Layouts?.records,
-            (t: any) => layoutDataFactory.createWithScore({ 
+            (entity.Layouts as { records?: Record<string, unknown>[] } | undefined)?.records ?? [],
+            (t: Record<string, unknown>) => layoutDataFactory.createWithScore({ 
                 properties: {
-                    id: sfdcManager.caseSafeId(t.Id), 
+                    id: sfdcManager.caseSafeId(t.Id as string), 
                     name: t.Name, 
                     type: t.LayoutType,
-                    url: sfdcManager.setupUrl(t.Id, SalesforceMetadataTypes.PAGE_LAYOUT, entity.DurableId)
+                    url: sfdcManager.setupUrl(t.Id as string, SalesforceMetadataTypes.PAGE_LAYOUT, entity.DurableId as string)
                 },
                 dependencyData: { records: [], errors: [] }
             })
@@ -187,15 +188,15 @@ export class DatasetObject implements Dataset {
         
         // limits
         const limits: SfdcLimit[] = await MediumProcessor.map(
-            entity.Limits?.records,
-            (t: any) => limitDataFactory.createWithScore({ 
+            (entity.Limits as { records?: Record<string, unknown>[] } | undefined)?.records ?? [],
+            (t: Record<string, unknown>) => limitDataFactory.createWithScore({ 
                 properties: {
-                    id: sfdcManager.caseSafeId(t.DurableId), 
+                    id: sfdcManager.caseSafeId(t.DurableId as string), 
                     label: t.Label, 
                     max: t.Max, 
                     remaining: t.Remaining, 
-                    used: (t.Max-t.Remaining), 
-                    usedPercentage: ((t.Max-t.Remaining)/t.Max),
+                    used: ((t.Max as number) - (t.Remaining as number)), 
+                    usedPercentage: (((t.Max as number) - (t.Remaining as number)) / (t.Max as number)),
                     type: t.Type 
                 }
             })
@@ -203,10 +204,10 @@ export class DatasetObject implements Dataset {
         
         // validation rules
         const validationRules: SfdcValidationRule[] = await MediumProcessor.map(
-            entity.ValidationRules?.records,
-            (t: any) => validationRuleDataFactory.createWithScore({ 
+            (entity.ValidationRules as { records?: Record<string, unknown>[] } | undefined)?.records ?? [],
+            (t: Record<string, unknown>) => validationRuleDataFactory.createWithScore({ 
                 properties: {
-                    id: sfdcManager.caseSafeId(t.Id), 
+                    id: sfdcManager.caseSafeId(t.Id as string), 
                     name: t.ValidationName, 
                     isActive: t.Active,
                     description: t.Description,
@@ -215,27 +216,27 @@ export class DatasetObject implements Dataset {
                     package: (t.NamespacePrefix || ''),
                     createdDate: t.CreatedDate, 
                     lastModifiedDate: t.LastModifiedDate,
-                    url: sfdcManager.setupUrl(t.Id, SalesforceMetadataTypes.VALIDATION_RULE)
+                    url: sfdcManager.setupUrl(t.Id as string, SalesforceMetadataTypes.VALIDATION_RULE)
                 }
             })
         );
         
         // weblinks and actions
         const webLinks: SfdcWebLink[] = await MediumProcessor.map(
-            entity.WebLinks?.records,
-            (t: any) => webLinkDataFactory.createWithScore({ 
+            (entity.WebLinks as { records?: Record<string, unknown>[] } | undefined)?.records ?? [],
+            (t: Record<string, unknown>) => webLinkDataFactory.createWithScore({ 
                 properties: {
-                    id: sfdcManager.caseSafeId(t.Id), 
+                    id: sfdcManager.caseSafeId(t.Id as string), 
                     name: t.Name, 
-                    hardCodedURLs: CodeScanner.FindHardCodedURLs(t.Url),
-                    hardCodedIDs: CodeScanner.FindHardCodedIDs(t.Url),
+                    hardCodedURLs: CodeScanner.FindHardCodedURLs(t.Url as string),
+                    hardCodedIDs: CodeScanner.FindHardCodedIDs(t.Url as string),
                     type: t.LinkType,
                     behavior: t.OpenType,
                     package: (t.NamespacePrefix || ''),
                     createdDate: t.CreatedDate,
                     lastModifiedDate: t.LastModifiedDate,
                     description: t.Description,                
-                    url: sfdcManager.setupUrl(t.Id, SalesforceMetadataTypes.WEB_LINK, entity.DurableId)
+                    url: sfdcManager.setupUrl(t.Id as string, SalesforceMetadataTypes.WEB_LINK, entity.DurableId as string)
                 },
                 dependencyData: { records: [], errors: [] }
             })
@@ -243,25 +244,25 @@ export class DatasetObject implements Dataset {
         
         // record types
         const recordTypes: SfdcRecordType[] = await MediumProcessor.map(
-            sobjectDescribed.recordTypeInfos,
-            (t: any) => recordTypeDataFactory.createWithScore({ 
+            sobjectDescribed.recordTypeInfos as Record<string, unknown>[],
+            (t: Record<string, unknown>) => recordTypeDataFactory.createWithScore({ 
                 properties: {
-                    id: sfdcManager.caseSafeId(t.recordTypeId), 
+                    id: sfdcManager.caseSafeId(t.recordTypeId as string), 
                     name: t.name, 
                     developerName: t.developerName, 
                     isActive: t.active,
                     isAvailable: t.available,
                     isDefault: t.defaultRecordTypeMapping,
                     isMaster: t.master,
-                    url: sfdcManager.setupUrl(t.recordTypeId, SalesforceMetadataTypes.RECORD_TYPE, entity.DurableId)
+                    url: sfdcManager.setupUrl(t.recordTypeId as string, SalesforceMetadataTypes.RECORD_TYPE, entity.DurableId as string)
                 }
             })
         );
         
         // relationships
         const relationships: SfdcObjectRelationShip[] = await MediumProcessor.map(
-            sobjectDescribed.childRelationships,
-            (relationship: any) => relationshipDataFactory.createWithScore({ 
+            sobjectDescribed.childRelationships as Record<string, unknown>[],
+            (relationship: Record<string, unknown>) => relationshipDataFactory.createWithScore({ 
                 properties: {
                     name: relationship.relationshipName,
                     childObject: relationship.childSObject,
@@ -270,7 +271,7 @@ export class DatasetObject implements Dataset {
                     isRestrictedDelete: relationship.restrictedDelete
                 }
             }),
-            (relationship: any) => relationship.relationshipName !== null
+            (relationship: Record<string, unknown>) => relationship.relationshipName !== null
         );
 
         // Create the object
@@ -309,7 +310,7 @@ export class DatasetObject implements Dataset {
                 workflowRuleIds: workflowRuleIds,
                 nbWorkflowRules: workflowRuleIds?.length ?? 0,
                 recordCount: recordCount,
-                url: sfdcManager.setupUrl(entity.Id, sobjectType)
+                url: sfdcManager.setupUrl(entity.Id as string, sobjectType)
             }
         });
 

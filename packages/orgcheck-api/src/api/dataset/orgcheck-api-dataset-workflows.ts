@@ -29,7 +29,7 @@ export class DatasetWorkflows implements Dataset {
         // List of flow ids
         const workflowRuleRecords = results[0];
         logger?.log(`Parsing ${workflowRuleRecords?.length} workflow rules...`);
-        const workflowRuleIds = await MediumProcessor.map(workflowRuleRecords, (record: any) => record.Id);
+        const workflowRuleIds = await MediumProcessor.map(workflowRuleRecords, (record: Record<string, unknown>) => record.Id as string);
 
         // Init the factory and records
         const workflowDataFactory = dataFactory.getInstance(DataAliases.SfdcWorkflow);
@@ -40,18 +40,19 @@ export class DatasetWorkflows implements Dataset {
 
         // Create the map
         logger?.log(`Parsing ${records?.length} workflows...`);
-        const workflows: Map<string, SfdcWorkflow> = new Map(await MediumProcessor.map(records, async (record: any) => {
+        const workflows: Map<string, SfdcWorkflow> = new Map(await MediumProcessor.map(records, async (record: Record<string, unknown>) => {
 
             // Get the ID15 of this user
-            const id = sfdcManager.caseSafeId(record.Id);
+            const id = sfdcManager.caseSafeId(record.Id as string);
 
             // Create the instance
+            const workflowMetadata = record.Metadata as Record<string, unknown>;
             const workflow: SfdcWorkflow = workflowDataFactory.create({
                 properties: {
                     id: id,
                     name: record.FullName,
-                    description: record.Metadata.description,
-                    isActive: record.Metadata.active,
+                    description: workflowMetadata.description,
+                    isActive: workflowMetadata.active,
                     createdDate: record.CreatedDate,
                     lastModifiedDate: record.LastModifiedDate,
                     hasAction: true,
@@ -62,25 +63,26 @@ export class DatasetWorkflows implements Dataset {
             });
 
             // Add information about direction actions
-            const directActions = record.Metadata.actions;
+            const directActions = workflowMetadata.actions as Record<string, unknown>[];
             workflow.actions = await MediumProcessor.map(
                 directActions,
-                (action: any) => { return { name: action.name, type: action.type } }
+                (action: Record<string, unknown>) => { return { name: action.name, type: action.type } }
             );
 
             // Add information about time triggered actions
-            const timeTriggers = record.Metadata.workflowTimeTriggers;
+            const timeTriggers = workflowMetadata.workflowTimeTriggers as Record<string, unknown>[];
             await MediumProcessor.forEach(
                 timeTriggers, 
-                async (tt: any) => {
+                async (tt: Record<string, unknown>) => {
                     const field = tt.offsetFromField || 'TriggerDate';
-                    if (tt.actions?.length === 0) {
+                    const ttActions = tt.actions as Record<string, unknown>[] | undefined;
+                    if (ttActions?.length === 0) {
                         workflow.emptyTimeTriggers.push({
                             field: field,
                             delay: `${tt.timeLength} ${tt.workflowTimeTriggerUnit}`
                         });
                     } else {
-                        tt.actions.forEach((action: any) => {
+                        ttActions?.forEach((action: Record<string, unknown>) => {
                             workflow.futureActions.push({ 
                                 name: action.name, 
                                 type: action.type, 

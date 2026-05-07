@@ -1,19 +1,26 @@
 import { CompressorIntf } from 'src/api/core/cache/orgcheck-api-compressor';
 
+interface FflateAPI {
+    strToU8(data: string): Uint8Array;
+    zlibSync(data: Uint8Array, options: { level: number }): Uint8Array;
+    unzlibSync(data: Uint8Array): Uint8Array;
+    strFromU8(data: Uint8Array): string;
+}
+
 export class Compressor implements CompressorIntf {
 
     /**
      * @description The Fflate API instance
-     * @type {any}
+     * @type {FflateAPI | null}
      * @private
      */
-    private _api: any;
+    private _api: FflateAPI | null;
 
     /**
      * @description Constructor
      */
     constructor() {
-        // @ts-ignore
+        // @ts-expect-error: fflate is a global library injected at runtime and not declared in TypeScript's Window type definitions
         this._api = typeof window !== 'undefined' ? window?.fflate : globalThis?.fflate ?? null;
         if (!this._api) throw new Error("fflate library not found");
     }
@@ -26,8 +33,8 @@ export class Compressor implements CompressorIntf {
      * @public
      */
     public compress(data: string): string { 
-        const encodedValue = this._api?.strToU8(data);
-        const compressedValue = this._api?.zlibSync(encodedValue, { level: 9 })
+        const encodedValue = this._api!.strToU8(data);
+        const compressedValue = this._api!.zlibSync(encodedValue, { level: 9 });
         return FROM_BUFFER_TO_HEX(compressedValue);
     }
 
@@ -39,8 +46,8 @@ export class Compressor implements CompressorIntf {
      */
     public decompress(data: string): string { 
         const bufferValue = FROM_HEX_TO_BUFFER(data);
-        const uncompressedValue = this._api?.unzlibSync(bufferValue);
-        const decodedValue = this._api?.strFromU8(uncompressedValue); 
+        const uncompressedValue = this._api!.unzlibSync(bufferValue);
+        const decodedValue = this._api!.strFromU8(uncompressedValue); 
         return decodedValue;
     }
 }
@@ -69,7 +76,7 @@ for (let n = 0; n < 0x100; n++) {
  * @returns {string} the hexadecimal string representation of the binary array
  * @see https://www.xaymar.com/articles/2020/12/08/fastest-uint8array-to-hex-string-conversion-in-javascript/
  */
-const FROM_BUFFER_TO_HEX: Function = (buffer: Uint8Array): string => {
+const FROM_BUFFER_TO_HEX: (buffer: Uint8Array) => string = (buffer: Uint8Array): string => {
   let out = '';
   for (let idx = 0, edx = buffer?.length; idx < edx; idx++) {
     out += LUT_HEX_8b[buffer[idx]];
@@ -84,7 +91,7 @@ const FROM_BUFFER_TO_HEX: Function = (buffer: Uint8Array): string => {
  * @returns {Uint8Array} the binary array representation of the hexadecimal string
  * @see https://www.xaymar.com/articles/2020/12/08/fastest-uint8array-to-hex-string-conversion-in-javascript/
  */
-const FROM_HEX_TO_BUFFER: Function = (hex: string): Uint8Array => {
+const FROM_HEX_TO_BUFFER: (hex: string) => Uint8Array = (hex: string): Uint8Array => {
     const arr: number[] = [];
     for (let i = 0; i < hex?.length; i += 2) {
         arr.push(parseInt(hex.substring(i, i+2), 16));

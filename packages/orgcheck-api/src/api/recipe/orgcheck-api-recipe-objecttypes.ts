@@ -1,5 +1,4 @@
 import { Recipe } from 'src/api/core/recipe/orgcheck-api-recipe';
-import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SfdcObjectType }from 'src/api/data/orgcheck-api-data-objecttype';
@@ -15,11 +14,10 @@ export class RecipeObjectTypes implements Recipe<SfdcObjectType[]> {
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
-     * @param {SimpleLoggerIntf} _logger - Logger
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public ingredients(_logger: SimpleLoggerIntf): Array<string | DatasetRunInformation> {
+    public ingredients(): Array<string | DatasetRunInformation> {
         return [ DatasetAliases.OBJECTTYPES ];
     }
     
@@ -40,10 +38,10 @@ export class RecipeObjectTypes implements Recipe<SfdcObjectType[]> {
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, any>, _logger: SimpleLoggerIntf): Promise<SfdcObjectType[]> {
+    public async mix(ingredients: Map<string, unknown>): Promise<SfdcObjectType[]> {
 
         // Get data
-        const types: Map<string, SfdcObjectType> = ingredients.get(DatasetAliases.OBJECTTYPES);
+        const types = ingredients.get(DatasetAliases.OBJECTTYPES) as Map<string, SfdcObjectType>;
 
         // Checking data
         if (!types) throw new Error(`RecipeObjectTypes: Data from dataset alias 'OBJECTTYPES' was undefined.`);

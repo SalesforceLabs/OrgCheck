@@ -33,10 +33,10 @@ export class DatasetDocuments implements Dataset {
 
         // Create the map
         logger?.log(`Parsing ${documentRecords?.length} documents...`);
-        const documents: Map<string, SfdcDocument> = new Map(await MediumProcessor.map(documentRecords, (record: any) => {
+        const documents: Map<string, SfdcDocument> = new Map(await MediumProcessor.map(documentRecords, (record) => {
 
             // Get the ID15 of this custom label
-            const id = sfdcManager.caseSafeId(record.Id);
+            const id = sfdcManager.caseSafeId(record.Id as string);
 
             // Create the instance
             const document: SfdcDocument = documentDataFactory.createWithScore({
@@ -44,14 +44,14 @@ export class DatasetDocuments implements Dataset {
                     id: id,
                     name: record.Name,
                     documentUrl: record.Url,
-                    isHardCodedURL: CodeScanner.FindHardCodedURLs(record.Url)?.length > 0 || false,
+                    isHardCodedURL: CodeScanner.FindHardCodedURLs(record.Url as string)?.length > 0 || false,
                     size: record.BodyLength,
                     type: record.ContentType,
                     description: record.Description,
                     createdDate: record.CreatedDate,
                     lastModifiedDate: record.LastModifiedDate,
-                    folderId: record.Folder?.Id,
-                    folderName: record.Folder?.Name,
+                    folderId: (record.Folder as { Id?: string; Name?: string } | undefined)?.Id,
+                    folderName: (record.Folder as { Id?: string; Name?: string } | undefined)?.Name,
                     package: (record.NamespacePrefix || ''),
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.DOCUMENT)
                 }

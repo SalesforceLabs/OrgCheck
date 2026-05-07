@@ -158,7 +158,7 @@ export class API implements ApiIntf {
      * @returns {any} cached item 
      * @public
      */
-    public getCacheItem(itemName: string): any {
+    public getCacheItem(itemName: string): unknown {
         return this._cacheManager.get(itemName);
     }
 
@@ -178,7 +178,7 @@ export class API implements ApiIntf {
         const logger = this._loggerFactory?.create('Get Organization Information', false);
         try {
             logger?.log(`Calling the prepare method for recipe: ${RecipeAliases.ORGANIZATION}`);
-            // @ts-ignore
+            // @ts-expect-error: prepare() returns a broad union type, but ORGANIZATION recipe always resolves to SfdcOrganization at runtime
             const org: SfdcOrganization = (await this._recipeManager.prepare(RecipeAliases.ORGANIZATION, undefined, logger?.toSimpleLogger()));
             this.orgId = org?.id;
             return org;
@@ -215,7 +215,7 @@ export class API implements ApiIntf {
             await this._throwExceptionIfUsageTermsNotAccepted();
             logger?.log(`Passed the terms checking.`);
             logger?.log(`Calling the prepare method for recipe: ${RecipeAliases.CURRENT_USER_PERMISSIONS}`);
-            // @ts-ignore
+            // @ts-expect-error: prepare() returns a broad union type, but CURRENT_USER_PERMISSIONS recipe always resolves to Map<string, boolean> at runtime
             const perms: Map = (await this._recipeManager.prepare(RecipeAliases.CURRENT_USER_PERMISSIONS, new Map([
                 [OrgCheckGlobalParameter.SYSTEM_PERMISSIONS_LIST, [ 'ModifyAllData', 'AuthorApex', 'ApiEnabled', 'InstallPackaging' ]]
             ]), logger?.toSimpleLogger()));
@@ -296,7 +296,7 @@ export class API implements ApiIntf {
         const logger = this._loggerFactory?.create('Check Usage Terms', false);
         try {
             logger?.log(`Checking if usage terms were accepted...`);
-            // @ts-ignore
+            // @ts-expect-error: prepare() returns a broad union type, but ORGANIZATION recipe always resolves to SfdcOrganization at runtime
             const org: SfdcOrganization = (await this._recipeManager.prepare(RecipeAliases.ORGANIZATION, undefined, logger.toSimpleLogger()));
             logger?.log(`Organization info: ${org?.name}, isProduction: ${org?.isProduction}`);
             if (org?.isProduction === true && this._usageTermsAcceptedManually === false) {
@@ -371,7 +371,7 @@ export class API implements ApiIntf {
             await this._throwExceptionIfUsageTermsNotAccepted();
             logger?.log(`Passed the terms checking.`);
             logger?.log(`Calling the prepare method for recipe: ${RecipeAliases.PACKAGES}`);
-            // @ts-ignore
+            // @ts-expect-error: prepare() returns a broad union type, but PACKAGES recipe always resolves to the expected SfdcPackage data at runtime
             return await this._recipeManager.prepare(RecipeAliases.PACKAGES, undefined, logger?.toSimpleLogger());
         } catch (error) {
             logger?.hadError(error);
@@ -397,7 +397,7 @@ export class API implements ApiIntf {
             await this._throwExceptionIfUsageTermsNotAccepted();
             logger?.log(`Passed the terms checking.`);
             logger?.log(`Calling the prepare method for recipe: ${RecipeAliases.OBJECT_TYPES}`);
-            // @ts-ignore
+            // @ts-expect-error: prepare() returns a broad union type, but OBJECT_TYPES recipe always resolves to the expected SfdcObjectType data at runtime
             return await this._recipeManager.prepare(RecipeAliases.OBJECT_TYPES, undefined, logger?.toSimpleLogger());
         } catch (error) {
             logger?.hadError(error);
@@ -425,7 +425,7 @@ export class API implements ApiIntf {
             await this._throwExceptionIfUsageTermsNotAccepted();
             logger?.log(`Passed the terms checking.`);
             logger?.log(`Calling the prepare method for recipe: ${RecipeAliases.OBJECTS_LITE}`);
-            // @ts-ignore
+            // @ts-expect-error: prepare() returns a broad union type, but OBJECTS_LITE recipe always resolves to the expected SfdcObject data at runtime
             return await this._recipeManager.prepare(RecipeAliases.OBJECTS_LITE, new Map([
                 [OrgCheckGlobalParameter.PACKAGE_NAME, namespace],
                 [OrgCheckGlobalParameter.SOBJECT_TYPE_NAME, sobjectType],
@@ -482,7 +482,7 @@ export class API implements ApiIntf {
             await this._throwExceptionIfUsageTermsNotAccepted();
             logger?.log(`Passed the terms checking.`);
             logger?.log(`Calling the prepare method for recipe: ${RecipeAliases.USER_ROLES}`);
-            // @ts-ignore
+            // @ts-expect-error: prepare() returns a broad union type, but USER_ROLES recipe always resolves to Map<string, SfdcUserRole> at runtime
             const allRoles: Map<string, SfdcUserRole> = (await this._recipeManager.prepare(RecipeAliases.USER_ROLES, undefined, logger?.toSimpleLogger()));
             // Key for artificial ROOT
             const ROOT_KEY = '__i am root__';

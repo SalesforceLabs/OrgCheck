@@ -19,9 +19,9 @@ export class DatasetObjects implements Dataset {
      * @param {Map<string, any>} parameters - The parameters
      * @returns {Promise<Map<string, SfdcObject>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf, parameters: Map<string, any>): Promise<Map<string, SfdcObject>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf, parameters: Map<string, unknown>): Promise<Map<string, SfdcObject>> {
 
-        const isFull: boolean = OrgCheckGlobalParameter.getObjectsMode(parameters) === OrgCheckGlobalParameter.OBJECTS_MODE_FULL
+        const isFull: boolean = OrgCheckGlobalParameter.getObjectsMode(parameters as Map<string, string>) === OrgCheckGlobalParameter.OBJECTS_MODE_FULL
 
         // Init the factory and records
         const objectDataFactory = dataFactory.getInstance(DataAliases.SfdcObject);
@@ -62,7 +62,7 @@ export class DatasetObjects implements Dataset {
         const shareableEntities: string[] = [];
         const extraCounters = new Map();
         const qualifiedApiNames = (await MediumProcessor.map(
-            entities, 
+            entities as { DurableId: string; QualifiedApiName: string; }[],
             (record: { DurableId: string, QualifiedApiName: string }) => { 
                 if (isFull === true && record.DurableId?.endsWith('OwnerSharingRule')) {
                     shareableEntities.push(record.DurableId?.replace(/\.?OwnerSharingRule$/,''));
@@ -152,13 +152,13 @@ export class DatasetObjects implements Dataset {
                 }
             }
             await Promise.all([
-                MediumProcessor.forEach(nbCustomFieldsPerEntity, (r: any) => SetCounter(r.EntityDefinitionId, 'cf', r.NbCustomFields)),
-                MediumProcessor.forEach(nbPageLayoutsPerEntity, (r: any) => SetCounter(r.EntityDefinitionId, 'pl', r.NbPageLayouts)),
-                MediumProcessor.forEach(nbRecordTypesPerEntity, (r: any) => SetCounter(r.EntityDefinitionId, 'rt', r.NbRecordTypes)),
-                MediumProcessor.forEach(nbWorkflowRulesPerEntity, (r: any) => SetCounter(r.TableEnumOrId, 'wf', r.NbWorkflowRules)),
-                MediumProcessor.forEach(nbValidationRulesPerEntity, (r: any) => SetCounter(r.EntityDefinitionId, 'vr', r.NbValidationRules)),
-                MediumProcessor.forEach(nbTriggersPerEntity, (r: any) => SetCounter(r.EntityDefinitionId, 'ap', r.NbTriggers)),
-                MediumProcessor.forEach(limitsPerEntity, (r: any) => void extraCounters.set(`${r.EntityDefinitionId}-${r.Type}`, r.Max - r.Remaining))
+                MediumProcessor.forEach(nbCustomFieldsPerEntity, (r: Record<string, unknown>) => SetCounter(r.EntityDefinitionId, 'cf', r.NbCustomFields)),
+                MediumProcessor.forEach(nbPageLayoutsPerEntity, (r: Record<string, unknown>) => SetCounter(r.EntityDefinitionId, 'pl', r.NbPageLayouts)),
+                MediumProcessor.forEach(nbRecordTypesPerEntity, (r: Record<string, unknown>) => SetCounter(r.EntityDefinitionId, 'rt', r.NbRecordTypes)),
+                MediumProcessor.forEach(nbWorkflowRulesPerEntity, (r: Record<string, unknown>) => SetCounter(r.TableEnumOrId, 'wf', r.NbWorkflowRules)),
+                MediumProcessor.forEach(nbValidationRulesPerEntity, (r: Record<string, unknown>) => SetCounter(r.EntityDefinitionId, 'vr', r.NbValidationRules)),
+                MediumProcessor.forEach(nbTriggersPerEntity, (r: Record<string, unknown>) => SetCounter(r.EntityDefinitionId, 'ap', r.NbTriggers)),
+                MediumProcessor.forEach(limitsPerEntity, (r: Record<string, unknown>) => void extraCounters.set(`${r.EntityDefinitionId}-${r.Type}`, (r.Max as number) - (r.Remaining as number)))
             ])
         }
 
@@ -166,10 +166,10 @@ export class DatasetObjects implements Dataset {
         logger?.log(`Parsing ${objectsDescription?.length} objects...`);
         const objects: Map<string, SfdcObject> = new Map(await MediumProcessor.map(
             objectsDescription,
-            (object: any) => {
+            (object: Record<string, unknown>) => {
 
-                const type = sfdcManager.getObjectType(object.name, object.customSetting)
-                const entity = entitiesByName[object.name];
+                const type = sfdcManager.getObjectType(object.name as string, Boolean(object.customSetting))
+                const entity = entitiesByName[object.name as string];
                 const durableId = entity.DurableId;
                 const nbAllSharingRules = extraCounters.get(`${durableId}-SharingRules`) ?? 0;
                 const nbCriteriaSharingRules = extraCounters.get(`${durableId}-CbsSharingRules`) ?? 0;
@@ -201,8 +201,8 @@ export class DatasetObjects implements Dataset {
                 // Add it to the map  
                 return [ obj.id, obj ];
             },
-            (object: any) => {
-                return qualifiedApiNames?.includes(object.name) ? true : false;
+            (object: Record<string, unknown>) => {
+                return qualifiedApiNames?.includes(object.name as string) ? true : false;
             }
         ));
 
