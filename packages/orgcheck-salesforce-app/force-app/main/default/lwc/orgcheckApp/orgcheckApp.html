@@ -254,7 +254,7 @@
                                 <template lwc:if={tableData.globalview}>
                                     <lightning-layout>
                                         <lightning-layout-item alignment-bump="left">
-                                            <c-orgcheck-export-button source={exports.globalview} basename={exports.globalview}></c-orgcheck-export-button>
+                                            <c-orgcheck-export-button source={exportData.globalview} basename={exportBasenames.globalview}></c-orgcheck-export-button>
                                         </lightning-layout-item>
                                     </lightning-layout>
                                     <lightning-layout>
@@ -296,7 +296,7 @@
                                                 <h1 class="slds-text-heading_large">{tableData.object.label} ({tableData.object.apiname})</h1>
                                             </lightning-layout-item>
                                             <lightning-layout-item alignment-bump="left">
-                                                <c-orgcheck-export-button source={exports.object} basename={exports.object}></c-orgcheck-export-button>
+                                                <c-orgcheck-export-button source={exportData.object} basename={exportBasenames.object}></c-orgcheck-export-button>
                                             </lightning-layout-item>
                                         </lightning-layout>
                                         <div class="slds-text-body_small">

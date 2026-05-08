@@ -30,7 +30,7 @@ th.vertical {
 }
 
 tr.bad {
-    background-color: var(--slds-g-color-warning-base-90);
+    background-color: #ffe099;
 }
 
 td.wrapped {
@@ -38,11 +38,12 @@ td.wrapped {
 }
 
 td.bad {
-    background-color: var(--slds-g-color-warning-base-80);
+    background-color: #ffd079;
     background-image: url(/img/msg_icons/warning16.png);
     background-position: left;
     background-repeat: no-repeat;
     background-size: 11px;
+    font-weight: bolder;
     padding-left: var(--slds-g-sizing-5, var(--lwc-squareIconMediumContent, 1rem))!important;
 }
 

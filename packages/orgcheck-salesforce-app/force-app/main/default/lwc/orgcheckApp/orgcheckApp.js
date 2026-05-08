@@ -707,7 +707,11 @@ export default class OrgcheckApp extends LightningElement {
                         }
                         this.tableData[appNavItem.data] = plate;
                         this.exportData[appNavItem.data] = doggyBag;
-                        this.exportBasenames[appNavItem.data] = this._private_properties.api.orgId + '-' + appNavItem.title.substring(2).replaceAll(' ', '');
+                        this.exportBasenames[appNavItem.data] = 
+                            this._private_properties.api.orgId + '-' + appNavItem.title.substring(2).replaceAll(' ', '') + 
+                                (this.namespace === ANY ? '' : ('-' + this.namespace)) +
+                                (this.objectType === ANY ? '' : ('-' + this.objectType)) +
+                                (this.object === ANY ? '' : ('-' + this.object))
                     }
                 }
             }
