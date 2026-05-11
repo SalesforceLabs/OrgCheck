@@ -8,7 +8,7 @@ import { SfdcProfileRestrictions } from 'src/api/data/orgcheck-api-data-profiler
 
 const COMPUTE_NUMBER_FROM_IP = (ip: string) => {
     return ip?.split('.').reduce((prev, currentItem, currentIndex, array) => { 
-        return prev + Number(currentItem) * Math.pow(255, array?.length-1-currentIndex); 
+        return prev + Number(currentItem) * Math.pow(256, array?.length-1-currentIndex); 
     }, 0);
 }
 

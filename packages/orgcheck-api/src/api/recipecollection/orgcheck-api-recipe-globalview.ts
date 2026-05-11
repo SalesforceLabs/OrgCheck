@@ -90,6 +90,10 @@ const LIST_RECIPES_AND_TABLE_DEFINITIONS = [
     { recipe: RecipeAliases.WORKFLOWS, tableDefinition: new WorkflowsTableDefinition() }
 ];
 
+const TABLE_DEFINITIONS_BY_RECIPE = new Map<RecipeAliases, TableDefinition>(
+    LIST_RECIPES_AND_TABLE_DEFINITIONS.map((r) => [ r.recipe, r.tableDefinition ])
+);
+
 export interface GlobalViewAsTable {
 
     /**
@@ -146,7 +150,7 @@ export class RecipeGlobalView implements RecipeCollection {
      * @public
      */
     public ingredients(): RecipeAliases[] {
-        return LIST_RECIPES_AND_TABLE_DEFINITIONS.map(r => r.recipe);
+        return Array.from(TABLE_DEFINITIONS_BY_RECIPE.keys());
     }
 
     /**
@@ -174,12 +178,16 @@ export class RecipeGlobalView implements RecipeCollection {
                 statsByRecipeAndRule.push({ name: item.recipeTitle, ruleName: c.ruleName, countBad: c.count });
             });
         });
-        const allTableDefinitions: TableDefinition[] = LIST_RECIPES_AND_TABLE_DEFINITIONS.map((r) => r.tableDefinition);
         return {
             name: this.title,
             statisticsGoodAndBad: TableFactory.create('Statistics (Good and Bad)', new GlobalViewGlobalTableDefinition(), statsGlobal),
             statisticsReasons: TableFactory.create('Statistics (Reasons)', new GlobalViewPerRuleTableDefinition(), statsByRecipeAndRule),
-            details: mixture.map((m, i) => (m.hadError === false) ? TableFactory.create(m.recipeTitle, allTableDefinitions[i], m.allData) : undefined).filter(m => m !== undefined)
+            details: mixture.filter((m) => (m.hadError === false))
+                            .map((m) => {
+                                const def = TABLE_DEFINITIONS_BY_RECIPE.get(m.recipeAlias as RecipeAliases);
+                                return def ? TableFactory.create(m.recipeTitle, def, m.allData) : undefined
+                            }) 
+                            .filter((m) => m !== undefined)
         }
     }
     

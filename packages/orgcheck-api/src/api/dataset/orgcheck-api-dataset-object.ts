@@ -127,7 +127,7 @@ export class DatasetObject implements Dataset {
                 return fieldDataFactory.createWithScore({
                     properties: {
                         id: fieldMapper.id,
-                        name: field.label, 
+                        name: field.name, 
                         label: field.label, 
                         description: fieldMapper.description,
                         tooltip: field.inlineHelpText,

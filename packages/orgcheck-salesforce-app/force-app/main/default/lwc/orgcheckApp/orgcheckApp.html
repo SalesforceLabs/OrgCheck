@@ -49,7 +49,7 @@
             </lightning-layout-item>
         </lightning-layout>
         <!-- Spinner and modal utilities -->
-        <c-orgcheck-spinner onsectionstop={handleSectionStop}></c-orgcheck-spinner>
+        <c-orgcheck-spinner></c-orgcheck-spinner>
         <c-orgcheck-modal></c-orgcheck-modal>
         <!-- Acceptance screen (if needed) -->
         <div lwc:if={useOrgCheck.needConfirmation} class="pleaseAcceptTheTerms">
@@ -853,10 +853,10 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    table={tableData.chatterroups}
+                                    table={tableData.chattergroups}
                                     show-export-button  
-                                    export-source={exportData.chatterroups} 
-                                    export-basename={exportBasenames.chatterroups}></c-orgcheck-extended-datatable>
+                                    export-source={exportData.chattergroups} 
+                                    export-basename={exportBasenames.chattergroups}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="1C" class="slds-hide slds-var-p-horizontal_small">
                                 <c-orgcheck-extended-datatable 

@@ -129,7 +129,7 @@ export class DatasetApexClasses implements Dataset {
                 apexClass.interfaces = (symbolTable.interfaces as string[] | undefined) ?? [];
                 apexClass.isSchedulable = (symbolTable.interfaces as string[] | undefined)?.includes('System.Schedulable') ?? false;
                 apexClass.methodsCount = (symbolTable.methods as unknown[] | undefined)?.length || 0;
-                apexClass.extends = symbolTable.parentClass ? [symbolTable.parentClass as string] : [];
+                apexClass.extends = symbolTable.parentClass as string;
                 if (symbolTable.tableDeclaration) {
                     const tableDeclaration = symbolTable.tableDeclaration as Record<string, unknown>;
                     apexClass.annotations = ((tableDeclaration.annotations as Array<{ name?: string }> | undefined) ?? []).map((a) => a?.name ?? '');

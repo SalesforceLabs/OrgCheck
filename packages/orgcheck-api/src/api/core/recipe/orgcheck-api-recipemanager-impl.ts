@@ -479,9 +479,10 @@ export class RecipeManager implements RecipeManagerIntf {
                     return a.score > b.score ? -1 : 1; 
                 });
                 const countOfBadRecordsPerRuleId = new Map<number, number>();
-                const badValues = new Set<string>();
+                const allBadValues = new Set<string>();
                 const badItems = new Map<string, { data: DataWithScore, badValues: string[]}>();
                 onlyBadRecords?.forEach((d) => {  // for each bad record...
+                    let badValuesForThisRecord: Set<string> | undefined;
                     d.badReasonIds.filter(id => { // only for the badReason that are part of the rules we want
                         return isRuleFilterOn === true ? listRuleIds.includes(id) : true;
                     }).forEach(id => { 
@@ -489,13 +490,21 @@ export class RecipeManager implements RecipeManagerIntf {
                         countOfBadRecordsPerRuleId.set(id, (countOfBadRecordsPerRuleId.get(id) ?? 0) + 1);
                         // add the bad values in a set
                         const rule = SecretSauce.GetScoreRule(id);
-                        const badValue = d[rule.badField];
-                        if (rule) {
-                            badValues.add(badValue);
+                        if (rule && rule.badField) {
+                            const badValue = d[rule.badField];
+                            // add the bad value to the global list of bad values (only distinct values using Set)
+                            allBadValues.add(badValue as string);
+                            // add the bad value to the list specific to this record (only distinct values using Set)
+                            if (badValuesForThisRecord === undefined) {
+                                badValuesForThisRecord = new Set();
+                            }
+                            badValuesForThisRecord.add(badValue as string);
                         }
-                        // add a reference to this item
-                        if (badItems.has(d.id) === false) badItems.set(d.id, { data: d, badValues: badValue });
                     });
+                    // add a reference to this item and the bad value to the set of bad values
+                    if (badValuesForThisRecord !== undefined) {
+                        badItems.set(d.id, { data: d, badValues: Array.from(badValuesForThisRecord) });
+                    }
                 });
                 const listRulesFound = Array.from(countOfBadRecordsPerRuleId.keys()).map((ruleId) => SecretSauce.GetScoreRule(ruleId));
                 finalData.push(new DataCollectionStatisticsOK(
@@ -512,8 +521,8 @@ export class RecipeManager implements RecipeManagerIntf {
                     })?.sort((a, b) => { // sort by count to have the biggest first
                         return a.count > b.count ? -1 : 1; 
                     }),
-                    /* distinctBadValues: any[] */ Array.from(badValues), 
-                    /* badItems: DataWithScore[] */ Array.from(badItems.values()), 
+                    /* distinctBadValues: any[] */ Array.from(allBadValues), 
+                    /* badItems: DataWithScore[] */ Array.from(badItems.values()),
                     /* allData: DataWithScore[] */ records
                 ));
             });

@@ -456,7 +456,7 @@ export default class OrgcheckApp extends LightningElement {
                     PSETS:          { key: '0F', data: 'permissionsets', recipe: Recipes.PERMISSION_SETS },
                     PSLS:           { key: '10', data: 'permissionsetlicenses', recipe: Recipes.PERMISSION_SET_LICENSES },
                     PROFILE_RSTRS:  { key: '11', data: 'profilerestrictions', recipe: Recipes.PROFILE_RESTRICTIONS },
-                    PROFILE_PWDS:   { key: '12', data: 'profilepasswordpolicies', recipe: Recipes.PROFILE_PASSWORD_POLICIES },
+                    PROFILE_PWDS:   { key: '12', data: 'profilepasswordpolicies', recipe: Recipes.PROFILE_PWD_POLICIES },
                     CRUDS:          { key: '13', data: 'objectpermissions', recipe: Recipes.OBJECT_PERMISSIONS },
                     FLSS:           { key: '14', data: 'fieldpermissions', recipe: Recipes.FIELD_PERMISSIONS, /* get the data only if the object is specified */ onlyIf: (that) => (that.isObjectSpecified) },
                     APP_PERMS:      { key: '15', data: 'apppermissions', recipe: Recipes.APP_PERMISSIONS },
@@ -472,7 +472,7 @@ export default class OrgcheckApp extends LightningElement {
                     ROLES:         { key: '18', data: 'userroles', recipe: Recipes.USER_ROLES },
                     PGS:           { key: '19', data: 'publicgroups', recipe: Recipes.PUBLIC_GROUPS },
                     QUEUES:        { key: '1A', data: 'queues', recipe: Recipes.QUEUES },
-                    CHT_GROUPS:    { key: '1B', data: 'chatterroups', recipe: Recipes.COLLABORATION_GROUPS },
+                    CHT_GROUPS:    { key: '1B', data: 'chattergroups', recipe: Recipes.COLLABORATION_GROUPS },
                 }
             },
             AUTOMATION: { 

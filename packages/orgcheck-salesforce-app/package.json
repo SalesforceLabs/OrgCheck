@@ -1,6 +1,6 @@
 {
     "name": "@orgcheck/salesforce-app",
-    "version": "8.0.0",
+    "version": "8.6.0",
     "license": "MIT",
     "private": true,
     "scripts": {
@@ -39,7 +39,7 @@
         "lwc": "^9.0.2"
     },
     "dependencies": {
-        "@orgcheck/api": "8.0.0"
+        "@orgcheck/api": "8.0.1"
     },
     "lint-staged": {
         "**/*.{cls,cmp,component,css,html,js,json,md,page,trigger,xml,yaml,yml}": [

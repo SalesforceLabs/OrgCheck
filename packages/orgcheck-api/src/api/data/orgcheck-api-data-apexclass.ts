@@ -192,11 +192,11 @@ export interface SfdcApexClass extends DataWithScoreAndDependencies {
     interfaces: string[];
     
     /**
-     * @description List of superclasses that this class extends
-     * @type {string[]}
+     * @description Superclasses that this class extends
+     * @type {string}
      * @public
      */
-   extends: string[];
+   extends: string;
 
     /**
      * @description Number of methods in this class (note: if the class is a test, this includes all methods, not only test methods)

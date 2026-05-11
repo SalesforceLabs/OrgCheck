@@ -1,0 +1,1811 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Code Analyzer Report</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEzLjI4MzEgNy4zOTk0QzEzLjg5MjUgNi43Njk3MyAxNC42NDQ1IDYuMjkwNiAxNS40Nzc5IDYuMDAxMDRDMTYuMzExMiA1LjcxMTQ5IDE3LjIwMjIgNS42MTk3IDE4LjA3ODQgNS43MzMxM0MxOC45NTQ2IDUuODQ2NTcgMTkuNzkxMiA2LjE2MjAzIDIwLjUyIDYuNjUzODNDMjEuMjQ4OSA3LjE0NTYzIDIxLjg0OTMgNy43OTk4NSAyMi4yNzI1IDguNTYzMjJDMjMuMTQ4MSA4LjE3OTUxIDI0LjA5NiA3Ljk4MTI1IDI1LjA1NDUgNy45ODEzMUMyNi44OTY2IDcuOTgxMzEgMjguNjYzMiA4LjcwMTMyIDI5Ljk2NTggOS45ODI5M0MzMS4yNjgzIDExLjI2NDUgMzIgMTMuMDAyOCAzMiAxNC44MTUzQzMyIDE2LjYyNzcgMzEuMjY4MyAxOC4zNjYgMjkuOTY1OCAxOS42NDc2QzI4LjY2MzIgMjAuOTI5MiAyNi44OTY2IDIxLjY0OTIgMjUuMDU0NSAyMS42NDkyQzI0LjYgMjEuNjQ5NSAyNC4xNDY2IDIxLjYwNDMgMjMuNzAxNCAyMS41MTQyQzIzLjI2NDggMjIuMjg0IDIyLjYyNzIgMjIuOTI1IDIxLjg1NDQgMjMuMzcxQzIxLjA4MTcgMjMuODE3MSAyMC4yMDE5IDI0LjA1MTkgMTkuMzA2IDI0LjA1MTNDMTguNTQzNSAyNC4wNTM4IDE3Ljc5MDYgMjMuODgzMyAxNy4xMDU5IDIzLjU1MzJDMTYuNjU3MiAyNC41OTY3IDE1Ljg5OTkgMjUuNDgzMyAxNC45MzI0IDI2LjA5NzdDMTMuOTY0OCAyNi43MTIxIDEyLjgzMTggMjcuMDI1OSAxMS42ODA1IDI2Ljk5ODNDMTAuNTI5MyAyNi45NzA3IDkuNDEzMTQgMjYuNjAzIDguNDc3MTQgMjUuOTQyOUM3LjU0MTE1IDI1LjI4MjggNi44Mjg2IDI0LjM2MSA2LjQzMjE2IDIzLjI5NzJDNi4wNzEyNSAyMy4zNzIxIDUuNzAzMzIgMjMuNDA5NSA1LjMzNDQ2IDIzLjQwODlDNC4xNTQ4NSAyMy4zOTYyIDMuMDEyMDUgMjMuMDAzMyAyLjA4MTA3IDIyLjI5MDRDMS4xNTAwOSAyMS41Nzc1IDAuNDgyMzE5IDIwLjU4MzkgMC4xODAwNjMgMTkuNDYyQy0wLjEyMjE5NCAxOC4zNCAtMC4wNDIzMDg3IDE3LjE1MTQgMC40MDc1NTkgMTYuMDc4NEMwLjg1NzQyOCAxNS4wMDU0IDEuNjUyNDIgMTQuMTA3MSAyLjY3MDc1IDEzLjUyMTFDMi4zMzIyOSAxMi43NTU5IDIuMTU4MzQgMTEuOTMwMiAyLjE1OTc5IDExLjA5NTdDMi4xNjEzNiA5LjgxOTg4IDIuNTY5MjMgOC41NzY2MSAzLjMyNjA5IDcuNTQwNjlDNC4wODI5NSA2LjUwNDc3IDUuMTUwNzIgNS43MjgyNyA2LjM3OTMxIDUuMzIwMzVDNy42MDc5IDQuOTEyNDQgOC45MzU1MiA0Ljg5MzYyIDEwLjE3NTUgNS4yNjY1NEMxMS40MTU2IDUuNjM5NDYgMTIuNTA1NiA2LjM4NTM2IDEzLjI5MjUgNy4zOTk0SDEzLjI4MzFaIiBmaWxsPSIjMEQ5RERBIi8+Cjwvc3ZnPgo="
+    />
+    <script type="module" crossorigin>
+      (function () {
+        const relList = document.createElement("link").relList;
+        if (
+          !(relList && relList.supports && relList.supports("modulepreload"))
+        ) {
+          for (const link of document.querySelectorAll(
+            'link[rel="modulepreload"]',
+          ))
+            processPreload(link);
+          new MutationObserver((mutations) => {
+            for (const mutation of mutations)
+              if ("childList" === mutation.type)
+                for (const node of mutation.addedNodes)
+                  "LINK" === node.tagName &&
+                    "modulepreload" === node.rel &&
+                    processPreload(node);
+          }).observe(document, { childList: true, subtree: true });
+        }
+        function processPreload(link) {
+          if (link.ep) return;
+          link.ep = true;
+          const fetchOpts = (function (link2) {
+            const fetchOpts2 = {};
+            return (
+              link2.integrity && (fetchOpts2.integrity = link2.integrity),
+              link2.referrerPolicy &&
+                (fetchOpts2.referrerPolicy = link2.referrerPolicy),
+              "use-credentials" === link2.crossOrigin
+                ? (fetchOpts2.credentials = "include")
+                : "anonymous" === link2.crossOrigin
+                  ? (fetchOpts2.credentials = "omit")
+                  : (fetchOpts2.credentials = "same-origin"),
+              fetchOpts2
+            );
+          })(link);
+          fetch(link.href, fetchOpts);
+        }
+      })();
+      
+// ==== START OF VIOLATIONS ====
+        const data = {"runDir":"/Users/vfinet/Dev/OrgCheck/packages/orgcheck-salesforce-app/force-app/","violationCounts":{"total":9,"sev1":0,"sev2":1,"sev3":3,"sev4":5,"sev5":0},"versions":{"code-analyzer":"0.47.0","retire-js":"0.34.0","regex":"0.35.0","eslint":"0.42.0","pmd":"0.40.0","cpd":"0.40.0"},"violations":[{"rule":"@salesforce-ux/slds/no-hardcoded-values-slds2","engine":"eslint","severity":4,"tags":["Recommended","SLDS","Design","CSS","Fixable"],"primaryLocationIndex":0,"locations":[{"file":"main/default/lwc/orgcheckApp/orgcheckApp.css","startLine":12,"startColumn":12,"endLine":12,"endColumn":15}],"message":"There&#39;s no replacement styling hook for the 80% static value. Remove the static value.","resources":["https://developer.salesforce.com/docs/platform/slds-linter/guide/reference-rules.html#no-hardcoded-values-slds2"]},{"rule":"@salesforce-ux/slds/no-hardcoded-values-slds2","engine":"eslint","severity":4,"tags":["Recommended","SLDS","Design","CSS","Fixable"],"primaryLocationIndex":0,"locations":[{"file":"main/default/lwc/orgcheckApp/orgcheckApp.css","startLine":20,"startColumn":12,"endLine":20,"endColumn":15}],"message":"There&#39;s no replacement styling hook for the 80% static value. Remove the static value.","resources":["https://developer.salesforce.com/docs/platform/slds-linter/guide/reference-rules.html#no-hardcoded-values-slds2"]},{"rule":"@salesforce-ux/slds/no-hardcoded-values-slds2","engine":"eslint","severity":4,"tags":["Recommended","SLDS","Design","CSS","Fixable"],"primaryLocationIndex":0,"locations":[{"file":"main/default/lwc/orgcheckExtendedDatatable/orgcheckExtendedDatatable.css","startLine":33,"startColumn":23,"endLine":33,"endColumn":30}],"message":"Consider replacing the #ffe099 static value with an SLDS 2 styling hook that has a similar value: \n1. --slds-g-color-warning-base-90\n2. --slds-g-color-warning-container-1\n3. --slds-g-color-palette-yellow-90.","resources":["https://developer.salesforce.com/docs/platform/slds-linter/guide/reference-rules.html#no-hardcoded-values-slds2"]},{"rule":"@salesforce-ux/slds/no-hardcoded-values-slds2","engine":"eslint","severity":4,"tags":["Recommended","SLDS","Design","CSS","Fixable"],"primaryLocationIndex":0,"locations":[{"file":"main/default/lwc/orgcheckExtendedDatatable/orgcheckExtendedDatatable.css","startLine":41,"startColumn":23,"endLine":41,"endColumn":30}],"message":"Consider replacing the #ffd079 static value with an SLDS 2 styling hook that has a similar value: \n1. --slds-g-color-warning-base-80\n2. --slds-g-color-palette-yellow-80.","resources":["https://developer.salesforce.com/docs/platform/slds-linter/guide/reference-rules.html#no-hardcoded-values-slds2"]},{"rule":"@salesforce-ux/slds/no-hardcoded-values-slds2","engine":"eslint","severity":4,"tags":["Recommended","SLDS","Design","CSS","Fixable"],"primaryLocationIndex":0,"locations":[{"file":"main/default/lwc/orgcheckExtendedDatatable/orgcheckExtendedDatatable.css","startLine":46,"startColumn":18,"endLine":46,"endColumn":24}],"message":"There&#39;s no replacement styling hook for the bolder static value. Remove the static value.","resources":["https://developer.salesforce.com/docs/platform/slds-linter/guide/reference-rules.html#no-hardcoded-values-slds2"]},{"rule":"@lwc/lwc-platform/no-inline-disable","engine":"eslint","severity":3,"tags":["Recommended","LWC","BestPractices","JavaScript"],"primaryLocationIndex":0,"locations":[{"file":"main/default/lwc/orgcheckExtendedDatatable/orgcheckExtendedDatatable.js","startLine":259,"startColumn":1,"endLine":259,"endColumn":67}],"message":"Inline rule disablement not allowed: dot-notation","resources":[]},{"rule":"no-unused-vars","engine":"eslint","severity":2,"tags":["Recommended","ErrorProne","JavaScript"],"primaryLocationIndex":0,"locations":[{"file":"main/default/lwc/orgcheckGlobalFilters/orgcheckGlobalFilters.js","startLine":8,"startColumn":7,"endLine":8,"endColumn":13}],"message":"&#39;Option&#39; is defined but never used.","resources":["https://eslint.org/docs/latest/rules/no-unused-vars"]},{"rule":"@lwc/lwc-platform/no-inline-disable","engine":"eslint","severity":3,"tags":["Recommended","LWC","BestPractices","JavaScript"],"primaryLocationIndex":0,"locations":[{"file":"main/default/lwc/orgcheckSpinner/orgcheckSpinner.js","startLine":143,"startColumn":1,"endLine":143,"endColumn":62}],"message":"Inline rule disablement not allowed: @lwc/lwc/no-async-operation","resources":[]},{"rule":"@lwc/lwc-platform/no-inline-disable","engine":"eslint","severity":3,"tags":["Recommended","LWC","BestPractices","JavaScript"],"primaryLocationIndex":0,"locations":[{"file":"main/default/lwc/orgcheckSpinner/orgcheckSpinner.js","startLine":167,"startColumn":1,"endLine":167,"endColumn":64}],"message":"Inline rule disablement not allowed: @lwc/lwc/no-async-operation","resources":[]}]};
+// ==== END OF VIOLATIONS ====
+      
+      class Model {
+        constructor(data2) {
+          (this.violations = this.processViolations(data2)),
+            (this.fileCache = /* @__PURE__ */ new Map());
+        }
+        sanitize(obj, path, defaultValue = "") {
+          return path
+            .split(".")
+            .reduce(
+              (acc, part) =>
+                acc && void 0 !== acc[part] ? acc[part] : defaultValue,
+              obj,
+            );
+        }
+        getFile(fullPath) {
+          return (
+            this.fileCache.has(fullPath) ||
+              this.fileCache.set(fullPath, fullPath.split("/").pop()),
+            this.fileCache.get(fullPath)
+          );
+        }
+        getEngines() {
+          return [...new Set(this.violations.map((v) => v.engine))];
+        }
+        getVersions() {
+          return this.sanitize(data, "versions", {});
+        }
+        processViolations(data2) {
+          return (Array.isArray(data2) ? data2 : data2.violations || []).map(
+            (violation) => {
+              const primaryLocationIndex = violation.primaryLocationIndex || 0,
+                primaryLocation =
+                  Array.isArray(violation.locations) &&
+                  violation.locations.length > 0
+                    ? violation.locations[primaryLocationIndex]
+                    : {};
+              return {
+                file: this.sanitize(primaryLocation, "file", ""),
+                severity: this.sanitize(violation, "severity", ""),
+                rule: this.sanitize(violation, "rule", ""),
+                engine: this.sanitize(violation, "engine", ""),
+                message: this.sanitize(violation, "message", ""),
+                tags: Array.isArray(violation.tags) ? violation.tags : [],
+                startLine: this.sanitize(primaryLocation, "startLine", ""),
+                startColumn: this.sanitize(primaryLocation, "startColumn", ""),
+                endLine: this.sanitize(primaryLocation, "endLine", ""),
+                endColumn: this.sanitize(primaryLocation, "endColumn", ""),
+                resources: Array.isArray(violation.resources)
+                  ? violation.resources
+                  : [],
+                primaryLocationIndex,
+                locations: Array.isArray(violation.locations)
+                  ? violation.locations
+                  : [],
+              };
+            },
+          );
+        }
+        filterViolations(severityFilter, engineFilter, searchTerm) {
+          const searchRegex = searchTerm ? new RegExp(searchTerm, "i") : null;
+          return this.violations.filter(
+            (violation) =>
+              (!severityFilter ||
+                violation.severity.toString() === severityFilter) &&
+              (!engineFilter || violation.engine === engineFilter) &&
+              (!searchRegex ||
+                searchRegex.test(violation.file) ||
+                searchRegex.test(violation.rule) ||
+                searchRegex.test(violation.tags.join(", ")) ||
+                searchRegex.test(violation.message)),
+          );
+        }
+        sortViolations(data2, sortColumn, sortDirection) {
+          return [...data2].sort((a, b) => {
+            let aValue, bValue;
+            if ("file" === sortColumn)
+              (aValue = this.getFile(a[sortColumn])),
+                (bValue = this.getFile(b[sortColumn]));
+            else if ("tags" === sortColumn)
+              (aValue = a[sortColumn].join(", ")),
+                (bValue = b[sortColumn].join(", "));
+            else if (
+              "startLine" === sortColumn ||
+              "startColumn" === sortColumn
+            ) {
+              if (
+                ((aValue = a[sortColumn]),
+                (bValue = b[sortColumn]),
+                aValue === bValue)
+              ) {
+                const endColumn =
+                  "startLine" === sortColumn ? "endLine" : "endColumn";
+                (aValue = a[endColumn] || a[sortColumn]),
+                  (bValue = b[endColumn] || b[sortColumn]);
+              }
+            } else (aValue = a[sortColumn]), (bValue = b[sortColumn]);
+            return "string" == typeof aValue && "string" == typeof bValue
+              ? "asc" === sortDirection
+                ? aValue.localeCompare(bValue, void 0, { sensitivity: "base" })
+                : bValue.localeCompare(aValue, void 0, { sensitivity: "base" })
+              : "asc" === sortDirection
+                ? aValue - bValue
+                : bValue - aValue;
+          });
+        }
+        groupBy(data2, key) {
+          return data2.reduce((acc, item) => {
+            const group = acc.get(item[key]) || [];
+            return group.push(item), acc.set(item[key], group), acc;
+          }, /* @__PURE__ */ new Map());
+        }
+        groupByfile(data2) {
+          return this.groupBy(data2, "file");
+        }
+        groupBySeverity(data2) {
+          return this.groupBy(data2, "severity");
+        }
+        groupByEngine(data2) {
+          return this.groupBy(data2, "engine");
+        }
+        groupByRule(data2) {
+          return this.groupBy(data2, "rule");
+        }
+      }
+      class View {
+        constructor(model) {
+          (this.model = model),
+            (this.defaultSort = { column: "file", direction: "asc" }),
+            (this.currentViolations = []),
+            (this.currentViolationIndex = -1),
+            (this.triggeringElement = null),
+            (this.summary = document.getElementById("summary")),
+            (this.violationsTable = document.getElementById("violationsTable")),
+            (this.tableBody = this.violationsTable.querySelector("tbody")),
+            (this.resetButton = document.getElementById("resetButton")),
+            (this.overlay = document.querySelector(".overlay")),
+            (this.panel = document.querySelector(".panel")),
+            (this.panelContent = document.querySelector(".panel-content")),
+            (this.panelPrev = document.getElementById("prev")),
+            (this.panelNext = document.getElementById("next")),
+            (this.panelClose = document.getElementById("panelClose"));
+        }
+        getSeverityText(severity) {
+          return (
+            {
+              1: "Severity 1: Critical",
+              2: "Severity 2: High",
+              3: "Severity 3: Moderate",
+              4: "Severity 4: Low",
+              5: "Severity 5: Info",
+            }[severity] || ""
+          );
+        }
+        getSeverityValue(severity) {
+          const severityNum = Number(severity);
+          return severityNum >= 1 && severityNum <= 5 ? severityNum : "";
+        }
+        getSeverityContent(severity) {
+          const severityValue = this.getSeverityValue(severity),
+            severityText = this.getSeverityText(severity);
+          return severityValue && severityText
+            ? `<span class="dot sev${severityValue}"></span> ${severityText}`
+            : "";
+        }
+        getResourcesList(resources) {
+          if (!resources || 0 === resources.length) return "";
+          return `<ul>${resources.map((resource) => `<li><a href="${resource}" target="_blank">${resource}</a></li>`).join("")}</ul>`;
+        }
+        getLineDisplay(violation) {
+          return violation.startLine.toString();
+        }
+        getColumnDisplay(violation) {
+          return violation.startColumn.toString();
+        }
+        getPosition(violation) {
+          if (!violation.startLine || !violation.startColumn) return "";
+          let position = `${violation.startLine}:${violation.startColumn}`;
+          return (
+            violation.endLine &&
+              violation.endColumn &&
+              (position += `-${violation.endLine}:${violation.endColumn}`),
+            position
+          );
+        }
+        getLocation(violation) {
+          var _a, _b;
+          const position = this.getPosition(violation),
+            location = position
+              ? `${violation.file} (${position})`
+              : violation.file,
+            comment =
+              (_b = (_a = violation.locations) == null ? void 0 : _a[0]) == null
+                ? void 0
+                : _b.comment;
+          return `<ul class="locations"><li><span class="file">${location}</span>${comment ? `<span class="comment">${comment}</span>` : ""}</li></ul>`;
+        }
+        getLocationsList(violation) {
+          var _a;
+          if (!((_a = violation.locations) == null ? void 0 : _a.length))
+            return "";
+          return `<ul class="locations">${violation.locations
+            .map((location, index) => {
+              const position = this.getPosition(location);
+              return `<li>
+          <span class="file">
+            ${index == violation.primaryLocationIndex ? "<span class='tag'>Main</span> " : ""}
+            ${location.file} (${position})
+          </span>
+        ${location.comment ? `<span class="comment">${location.comment}</span>` : ""}
+      </li>`;
+            })
+            .join("")}</ul>`;
+        }
+        updateSummary(data2) {
+          const uniqueFiles = new Set(data2.map((v) => v.file));
+          0 === data2.length
+            ? (this.summary.textContent = "Found 0 violations")
+            : (this.summary.textContent = `Found ${data2.length} violation${1 !== data2.length ? "s" : ""} across ${uniqueFiles.size} file${1 !== uniqueFiles.size ? "s" : ""}`),
+            this.violationsTable.classList.toggle("hidden", 0 === data2.length);
+        }
+        updateBoxes(data2) {
+          const counts = data2.reduce(
+              (acc, v) => ((acc[v.severity] = (acc[v.severity] || 0) + 1), acc),
+              {},
+            ),
+            severityNames = {
+              1: "Critical",
+              2: "High",
+              3: "Moderate",
+              4: "Low",
+              5: "Info",
+            };
+          for (let i = 1; i <= 5; i++) {
+            const count = counts[i] || 0;
+            document.getElementById(`sev${i}`).textContent = count;
+            const box = document.querySelector(`[data-severity="${i}"]`);
+            box &&
+              box.setAttribute(
+                "aria-label",
+                `Severity ${i}, ${severityNames[i]}: ${count} violations`,
+              );
+          }
+        }
+        updateBoxesAriaLabels(filteredData) {
+          const filteredCounts = filteredData.reduce(
+              (acc, v) => ((acc[v.severity] = (acc[v.severity] || 0) + 1), acc),
+              {},
+            ),
+            severityNames = {
+              1: "Critical",
+              2: "High",
+              3: "Moderate",
+              4: "Low",
+              5: "Info",
+            };
+          for (let i = 1; i <= 5; i++) {
+            const count = filteredCounts[i] || 0,
+              box = document.querySelector(`[data-severity="${i}"]`);
+            box &&
+              box.setAttribute(
+                "aria-label",
+                `Severity ${i}, ${severityNames[i]}: ${count} violations`,
+              );
+          }
+        }
+        toggleBoxes(severity) {
+          document.querySelectorAll(".box").forEach((box) => {
+            box.classList.toggle("selected", box.dataset.severity === severity);
+          });
+        }
+        updateReset() {
+          const severityFilter =
+              document.getElementById("severityFilter").value,
+            engineFilter = document.getElementById("engineFilter").value,
+            searchTerm = document.getElementById("searchInput").value;
+          this.resetButton.disabled = !(
+            severityFilter ||
+            engineFilter ||
+            searchTerm
+          );
+        }
+        clearFilters() {
+          (document.getElementById("severityFilter").value = ""),
+            (document.getElementById("engineFilter").value = ""),
+            (document.getElementById("searchInput").value = ""),
+            this.updateReset(),
+            this.updateTable();
+        }
+        populateEngine(engines) {
+          document.getElementById("engineFilter").innerHTML = `
+      <option value="">All Engines</option>
+      <option disabled>───</option>
+      ${engines
+        .filter((engine) => "" !== engine.trim())
+        .sort()
+        .map((engine) => `<option value="${engine}">${engine}</option>`)
+        .join("")}
+    `;
+        }
+        populateRow(violation) {
+          const row = this.tableBody.insertRow();
+          (row.dataset.index = this.model.violations.indexOf(violation)),
+            (row.tabIndex = 0),
+            (row.innerHTML = `
+      <td class="file">${this.model.getFile(violation.file)}</td>
+      <td class="severity">
+        <span class="dot sev${this.getSeverityValue(violation.severity)}"></span>
+        ${this.getSeverityText(violation.severity)}
+      </td>
+      <td class="rule">${violation.rule}</td>
+      <td class="engine">${violation.engine}</td>
+      <td class="message">${violation.message}</td>
+      <td class="tags">${violation.tags.sort().join(", ")}</td>
+      <td class="startLine">${this.getLineDisplay(violation)}</td>
+      <td class="startColumn">${this.getColumnDisplay(violation)}</td>
+    `);
+        }
+        populateTable(data2, groupBy) {
+          (this.tableBody.innerHTML = ""),
+            this.violationsTable.classList.toggle("ungrouped", "" === groupBy),
+            "file" === groupBy
+              ? this.populateGroupedTable(this.model.groupByfile(data2), false)
+              : "severity" === groupBy
+                ? this.populateGroupedTable(
+                    this.model.groupBySeverity(data2),
+                    true,
+                  )
+                : "engine" === groupBy
+                  ? this.populateGroupedTable(
+                      this.model.groupByEngine(data2),
+                      false,
+                    )
+                  : "rule" === groupBy
+                    ? this.populateGroupedTable(
+                        this.model.groupByRule(data2),
+                        false,
+                      )
+                    : data2.forEach((violation) => this.populateRow(violation)),
+            this.updateSummary(data2);
+        }
+        populateGroupedTable(groupedData, isSeverity) {
+          groupedData.forEach((violations, groupKey) => {
+            (this.tableBody.insertRow().innerHTML = `<td colspan="8" class="group">
+        ${isSeverity ? `<span class="dot sev${this.getSeverityValue(parseInt(groupKey))}"></span>` : ""}
+        ${isSeverity ? this.getSeverityText(parseInt(groupKey)) : groupKey}
+        <span class="count">(${violations.length})</span>
+      </td>`),
+              violations.forEach((violation) => this.populateRow(violation));
+          });
+        }
+        updateTable() {
+          const severityFilter =
+              document.getElementById("severityFilter").value,
+            engineFilter = document.getElementById("engineFilter").value,
+            searchTerm = document
+              .getElementById("searchInput")
+              .value.toLowerCase(),
+            groupBy = document.getElementById("groupBy").value,
+            filteredViolations = this.model.filterViolations(
+              severityFilter,
+              engineFilter,
+              searchTerm,
+            ),
+            sortedViolations = this.model.sortViolations(
+              filteredViolations,
+              this.defaultSort.column,
+              this.defaultSort.direction,
+            );
+          (this.currentViolations = sortedViolations),
+            this.populateTable(sortedViolations, groupBy),
+            this.updateSummary(sortedViolations),
+            this.updateBoxesAriaLabels(sortedViolations),
+            this.toggleBoxes(severityFilter),
+            this.updateReset();
+        }
+        updateSorting(column) {
+          this.defaultSort.column === column
+            ? (this.defaultSort.direction =
+                "asc" === this.defaultSort.direction ? "desc" : "asc")
+            : ((this.defaultSort.column = column),
+              (this.defaultSort.direction = "asc")),
+            this.updateArrow();
+        }
+        updateArrow() {
+          document.querySelectorAll("#violationsTable th").forEach((th) => {
+            th.classList.remove("asc", "desc"),
+              th.dataset.sort === this.defaultSort.column
+                ? (th.classList.add(this.defaultSort.direction),
+                  th.setAttribute(
+                    "aria-sort",
+                    "asc" === this.defaultSort.direction
+                      ? "ascending"
+                      : "descending",
+                  ))
+                : th.setAttribute("aria-sort", "none");
+          });
+        }
+        updatePagination() {
+          (this.panelPrev.disabled = this.currentViolationIndex <= 0),
+            (this.panelNext.disabled =
+              this.currentViolationIndex >= this.currentViolations.length - 1);
+          const contextText = `Violation ${this.currentViolationIndex + 1} of ${this.currentViolations.length}`;
+          document.getElementById("panel-title").textContent = contextText;
+        }
+        populatePanel(violation) {
+          const panelFields = [
+              { label: "Rule", content: violation.rule },
+              {
+                label: "Severity",
+                content: this.getSeverityContent(violation.severity),
+              },
+              { label: "Engine", content: violation.engine },
+              { label: "Message", content: violation.message },
+              {
+                label:
+                  violation.locations.length <= 1 ? "Location" : "Locations",
+                content:
+                  violation.locations.length <= 1
+                    ? this.getLocation(violation)
+                    : this.getLocationsList(violation),
+              },
+              {
+                label: "Tags",
+                content:
+                  violation.tags.length > 0 ? violation.tags.join(", ") : "",
+              },
+              {
+                label: "Resources",
+                content: this.getResourcesList(violation.resources),
+              },
+            ],
+            dl = document.createElement("dl");
+          panelFields.forEach(({ label, content }) => {
+            content && (dl.innerHTML += `<dt>${label}</dt><dd>${content}</dd>`);
+          }),
+            (this.panelContent.innerHTML = ""),
+            this.panelContent.appendChild(dl);
+        }
+        getFocusableElements() {
+          return this.panel.querySelectorAll(
+            'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+          );
+        }
+        trapFocus(event) {
+          const focusableElements = this.getFocusableElements(),
+            firstElement = focusableElements[0],
+            lastElement = focusableElements[focusableElements.length - 1];
+          "Tab" === event.key &&
+            (event.shiftKey
+              ? document.activeElement === firstElement &&
+                (event.preventDefault(), lastElement.focus())
+              : document.activeElement === lastElement &&
+                (event.preventDefault(), firstElement.focus()));
+        }
+        showPanel(violation, triggeringElement = null) {
+          (this.currentViolationIndex = this.currentViolations.findIndex(
+            (v) => v === violation,
+          )),
+            (this.triggeringElement = triggeringElement),
+            this.populatePanel(violation),
+            this.overlay.classList.add("visible"),
+            this.panel.classList.add("visible"),
+            this.updatePagination(),
+            (document.body.style.overflow = "hidden"),
+            setTimeout(() => {
+              this.panel.focus();
+            }, 100);
+        }
+        paginatePanel(direction) {
+          const newIndex = this.currentViolationIndex + direction;
+          if (newIndex >= 0 && newIndex < this.currentViolations.length) {
+            this.currentViolationIndex = newIndex;
+            const violation =
+              this.currentViolations[this.currentViolationIndex];
+            this.populatePanel(violation), this.updatePagination();
+          }
+        }
+        hidePanel() {
+          this.overlay.classList.remove("visible"),
+            this.panel.classList.remove("visible"),
+            setTimeout(() => {
+              (document.body.style.overflow = ""),
+                this.triggeringElement &&
+                  this.triggeringElement.focus &&
+                  this.triggeringElement.focus();
+            }, 300);
+        }
+        populateVersions(versions) {
+          if (!versions || 0 === Object.keys(versions).length) return;
+          const footer = document.querySelector(".footer");
+          footer.innerHTML =
+            `<p>Versions: <span class="versions">${Object.entries(versions)
+              .map(
+                ([key, value]) => `<span class="version">
+              <span class="version-name">${key}</span>
+              <span class="version-number">v${value}</span>
+            </span>`,
+              )
+              .join("")}</p>` + footer.innerHTML;
+        }
+      }
+      new (class {
+        constructor(data2) {
+          const parsedData =
+            "string" == typeof data2 ? JSON.parse(data2) : data2;
+          (this.model = new Model(parsedData)),
+            (this.view = new View(this.model));
+          const engines = this.model.getEngines();
+          this.view.populateEngine(engines);
+          const violations = this.model.violations;
+          this.view.updateSummary(violations),
+            this.view.updateBoxes(violations),
+            this.view.toggleBoxes(""),
+            this.view.updateTable(),
+            this.view.updateArrow(),
+            this.view.updateReset(),
+            this.view.populateVersions(this.model.getVersions()),
+            this.eventListeners();
+        }
+        handleSeverityBoxClick(event) {
+          const severity = event.currentTarget.dataset.severity,
+            severityFilter = document.getElementById("severityFilter");
+          (severityFilter.value =
+            severityFilter.value === severity ? "" : severity),
+            this.view.updateTable();
+        }
+        handleResetClick() {
+          this.view.updateTable(), this.view.clearFilters();
+        }
+        handleTableHeaderClick(event) {
+          const th = event.target.closest("th");
+          th &&
+            th.dataset.sort &&
+            (this.view.updateSorting(th.dataset.sort), this.view.updateTable());
+        }
+        handleTableRowClick(event) {
+          const row = event.target.closest("tr");
+          if (row) {
+            const violationIndex = row.dataset.index,
+              violation = this.model.violations[violationIndex];
+            this.view.showPanel(violation, row);
+          }
+        }
+        handleGroupBy(value) {
+          (document.getElementById("groupBy").value = value),
+            this.view.updateTable();
+        }
+        handleShortcuts(event) {
+          if (this.view.overlay.classList.contains("visible"))
+            return (
+              this.view.trapFocus(event),
+              "Escape" === event.key
+                ? (event.preventDefault(), void this.handleEscapeKey())
+                : "ArrowLeft" === event.key || "ArrowUp" === event.key
+                  ? (event.preventDefault(), void this.handleArrowKey(-1))
+                  : "ArrowRight" === event.key || "ArrowDown" === event.key
+                    ? (event.preventDefault(), void this.handleArrowKey(1))
+                    : void 0
+            );
+          if ("INPUT" === document.activeElement.tagName) return;
+          if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey)
+            return;
+          const action = {
+            n: () => this.handleGroupBy("file"),
+            e: () => this.handleGroupBy("engine"),
+            s: () => this.handleGroupBy("severity"),
+            r: () => this.handleGroupBy("rule"),
+            u: () => this.handleGroupBy(""),
+            escape: () => this.handleEscapeKey(),
+            arrowup: () => this.handleArrowKey(-1),
+            arrowleft: () => this.handleArrowKey(-1),
+            arrowdown: () => this.handleArrowKey(1),
+            arrowright: () => this.handleArrowKey(1),
+          }[event.key.toLowerCase()];
+          action && (event.preventDefault(), action());
+        }
+        handleEscapeKey() {
+          this.view.overlay.classList.contains("visible")
+            ? this.view.hidePanel()
+            : this.view.clearFilters();
+        }
+        handleArrowKey(direction) {
+          this.view.overlay.classList.contains("visible") &&
+            this.view.paginatePanel(direction);
+        }
+        eventListeners() {
+          document.querySelectorAll(".box").forEach((box) => {
+            box.addEventListener(
+              "click",
+              this.handleSeverityBoxClick.bind(this),
+            );
+          }),
+            ["severityFilter", "engineFilter", "groupBy"].forEach((id) => {
+              document
+                .getElementById(id)
+                .addEventListener(
+                  "change",
+                  this.view.updateTable.bind(this.view),
+                );
+            }),
+            document
+              .getElementById("searchInput")
+              .addEventListener("input", this.view.updateTable.bind(this.view)),
+            this.view.resetButton.addEventListener(
+              "click",
+              this.handleResetClick.bind(this),
+            ),
+            document
+              .querySelector("#violationsTable thead")
+              .addEventListener(
+                "click",
+                this.handleTableHeaderClick.bind(this),
+              ),
+            document
+              .querySelector("#violationsTable tbody")
+              .addEventListener("click", this.handleTableRowClick.bind(this)),
+            this.view.overlay.addEventListener("click", (e) => {
+              e.target === this.view.overlay && this.view.hidePanel();
+            }),
+            this.view.panelPrev.addEventListener("click", () =>
+              this.view.paginatePanel(-1),
+            ),
+            this.view.panelNext.addEventListener("click", () =>
+              this.view.paginatePanel(1),
+            ),
+            this.view.panelClose.addEventListener("click", (e) => {
+              e.preventDefault(), this.view.hidePanel();
+            }),
+            document.addEventListener(
+              "keydown",
+              this.handleShortcuts.bind(this),
+            );
+        }
+      })(data);
+    </script>
+    <style rel="stylesheet" crossorigin>
+      /* Light Theme */
+
+      :root {
+        --color-text: #181818;
+        --color-link: #0176d3;
+        --color-link-hover: #014486;
+
+        --color-shade-1: #ffffff;
+        --color-shade-2: #fbfbfb;
+        --color-shade-3: #f3f3f3;
+        --color-shade-4: #e5e5e5;
+        --color-shade-5: #c9c9c9;
+        --color-shade-6: #999999;
+        --color-shade-7: #747474;
+
+        --color-severity-1: #aa3001;
+        --color-severity-2: #ea001e;
+        --color-severity-3: #f38303;
+        --color-severity-4: #fcc003;
+        --color-severity-5: #41b658;
+
+        --color-focus: rgba(0, 119, 204, 0.2);
+        --color-shadow: rgba(0, 0, 0, 0.1);
+        --color-overlay: rgba(0, 0, 0, 0.25);
+
+        --font-body: system-ui, sans-serif;
+        --font-code: monospace, sans-serif;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      body {
+        font-family: var(--font-body);
+        background-color: var(--color-shade-1);
+        margin: 0;
+        transition: color 1s ease;
+      }
+
+      .page {
+        min-width: 980px;
+        margin: 0 auto;
+        background-color: var(--color-shade-1);
+      }
+
+      .page a {
+        color: var(--color-link);
+        text-decoration: none;
+      }
+
+      .page a:hover {
+        text-decoration: underline;
+        color: var(--color-link-hover);
+      }
+
+      .page .filter-link {
+        color: var(--color-text);
+        cursor: help;
+      }
+
+      .page .filter-link:hover {
+        text-decoration: none;
+        border-bottom: 1px dotted var(--color-text);
+        color: var(--color-text);
+      }
+
+      .header {
+        margin: 0;
+        border-bottom: 1px solid var(--color-shade-4);
+        display: flex;
+        justify-content: space-between;
+        margin: 0;
+        padding: 0 20px;
+        background-color: var(--color-shade-2);
+      }
+
+      .header h1.logo {
+        background-position: left center;
+        background-repeat: no-repeat;
+        background-size: 35px 24px;
+        color: var(--color-text);
+        font-size: 16px;
+        font-weight: normal;
+        margin: 0;
+        padding: 20px 0 20px 36px;
+        text-align: center;
+      }
+
+      .header h2.title {
+        background-position: left center;
+        background-repeat: no-repeat;
+        background-size: 26px 26px;
+        color: var(--color-text);
+        font-size: 16px;
+        font-weight: normal;
+        margin: 0;
+        padding: 20px 0 20px 36px;
+        text-align: center;
+      }
+
+      .header a.help {
+        font-size: 16px;
+        margin: 0;
+        padding: 20px 0 20px 0;
+        display: inline-block;
+      }
+
+      .boxes {
+        display: flex;
+        gap: 20px;
+        justify-content: space-between;
+        margin: 50px 20px;
+      }
+
+      .box {
+        align-items: center;
+        background: var(--color-shade-1);
+        border-radius: 8px;
+        border: 1px solid var(--color-shade-5);
+        box-shadow: 0px 2px 2px 0px var(--color-shade-4);
+        cursor: pointer;
+        display: flex;
+        flex-direction: row-reverse;
+        flex: 1 1 0;
+        gap: 10px;
+        justify-content: space-evenly;
+        padding: 20px;
+        transition: all 0.1s ease;
+      }
+
+      .box:hover {
+        border: 1px solid var(--color-shade-7);
+        background-color: var(--color-shade-2);
+      }
+
+      .box:active,
+      .box.selected {
+        border: 1px solid var(--color-link);
+        box-shadow: 0px 0px 0px 2px var(--color-focus);
+      }
+
+      .box h4 {
+        color: var(--color-text);
+        line-height: 24px;
+        padding: 0;
+        margin: 0;
+        min-width: 80px;
+      }
+
+      .box h4 span {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .box h4 span:first-child {
+        font-size: 14px;
+        font-weight: bold;
+      }
+
+      .box h4 span:last-child {
+        font-size: 16px;
+        font-weight: normal;
+      }
+
+      .box p {
+        font-size: 44px;
+        margin: 0;
+        padding: 0;
+      }
+
+      .box .sev1 {
+        color: var(--color-severity-1);
+      }
+
+      .box .sev2 {
+        color: var(--color-severity-2);
+      }
+
+      .box .sev3 {
+        color: var(--color-severity-3);
+      }
+
+      .box .sev4 {
+        color: var(--color-severity-4);
+      }
+
+      .box .sev5 {
+        color: var(--color-severity-5);
+      }
+
+      #summary {
+        color: var(--color-text);
+        font-size: 18px;
+        font-weight: bold;
+        margin: 20px 20px;
+      }
+
+      .toolbar {
+        display: flex;
+        justify-content: space-between;
+        margin: 20px 20px;
+      }
+
+      .toolbar h4 {
+        color: var(--color-text);
+        font-size: 14px;
+      }
+
+      @media screen and (max-width: 1200px) {
+        .toolbar h4 {
+          display: none;
+        }
+      }
+
+      .toolbar form {
+        display: flex;
+        gap: 20px;
+      }
+
+      .toolbar .filter {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-right: 20px;
+      }
+
+      .toolbar .view {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .toolbar input,
+      .toolbar select,
+      .toolbar button {
+        font-size: 16px;
+      }
+
+      .toolbar select {
+        appearance: none;
+        background-color: var(--color-shade-1);
+        background-position: right 10px top 50%;
+        background-repeat: no-repeat;
+        background-size: 10px auto;
+        border-radius: 4px;
+        border: 1px solid var(--color-shade-7);
+        color: var(--color-text);
+        cursor: pointer;
+        font-size: 14px;
+        padding: 8px 30px 8px 10px;
+        transition: all 0.1s ease;
+        min-width: 160px;
+      }
+
+      .toolbar select:hover {
+        border-color: var(--color-text);
+      }
+
+      .toolbar select:focus {
+        outline: none;
+        border-color: var(--color-link);
+        box-shadow: 0 0 0 2px var(--color-focus);
+      }
+
+      .toolbar input {
+        appearance: none;
+        background-color: var(--color-shade-1);
+        background-position: left 10px top 50%;
+        background-repeat: no-repeat;
+        background-size: 16px auto;
+        border-radius: 4px;
+        border: 1px solid var(--color-shade-7);
+        color: var(--color-text);
+        cursor: pointer;
+        font-size: 14px;
+        padding: 8px 8px 8px 34px;
+        transition: all 0.1s ease;
+        min-width: 260px;
+      }
+
+      .toolbar input::placeholder {
+        color: var(--color-shade-6);
+      }
+
+      .toolbar input:hover {
+        border-color: var(--color-text);
+      }
+
+      .toolbar input:focus {
+        outline: none;
+        border-color: var(--color-link);
+        box-shadow: 0 0 0 2px var(--color-focus);
+      }
+
+      .toolbar button,
+      .panel button {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        padding: 0;
+        background-color: transparent;
+        background-clip: border-box;
+        border: 1px solid var(--color-shade-7);
+        border-radius: 4px;
+        box-shadow: none;
+        text-decoration: none;
+        color: var(--color-link);
+        appearance: none;
+        white-space: normal;
+        user-select: none;
+        padding: 8px 16px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      .toolbar button:hover,
+      .panel button:hover {
+        background-color: var(--color-shade-3);
+        border-color: var(--color-text);
+      }
+
+      .toolbar button:active,
+      .panel button:active {
+        background-color: var(--color-shade-3);
+        border-color: var(--color-link-hover);
+        box-shadow: 0 0 0 2px var(--color-focus);
+        color: var(--color-link-hover);
+        outline: none;
+      }
+
+      .toolbar button:focus,
+      .panel button:focus {
+        outline: none;
+        border-color: var(--color-link);
+        box-shadow: 0 0 0 2px var(--color-focus);
+      }
+
+      .toolbar button:disabled,
+      .toolbar button[disabled],
+      .panel button:disabled,
+      .panel button[disabled] {
+        background-color: transparent;
+        border-color: transparent;
+        color: var(--color-shade-5);
+        cursor: default;
+        border: 1px solid var(--color-shade-5);
+      }
+
+      .toolbar button:disabled *,
+      .toolbar button[disabled] *,
+      .panel button:disabled *,
+      .panel button[disabled] * {
+        pointer-events: none;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+
+      table th,
+      table td {
+        text-align: left;
+        padding: 8px 14px;
+        height: 16px;
+      }
+
+      table th {
+        background-color: var(--color-shade-4);
+        border-top: 1px solid var(--color-shade-5);
+        border-bottom: 1px solid var(--color-shade-5);
+        cursor: pointer;
+      }
+
+      table.ungrouped th {
+        background-color: var(--color-shade-3);
+      }
+
+      table th.asc::after,
+      table th.desc::after {
+        content: "";
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        margin-left: 5px;
+        background-repeat: no-repeat;
+        background-position: center;
+        vertical-align: middle;
+        opacity: 1;
+      }
+
+      table th.desc::after {
+        transform: rotate(180deg);
+      }
+
+      table tr {
+        background-color: var(--color-shade-1);
+        border-top: 1px solid var(--color-shade-5);
+        border-bottom: 1px solid var(--color-shade-5);
+      }
+
+      table tr:hover {
+        background-color: var(--color-shade-2);
+        cursor: pointer;
+      }
+
+      table td.group {
+        background-color: var(--color-shade-3);
+        font-size: 14px;
+        cursor: default;
+      }
+
+      table .severity {
+        min-width: 160px;
+      }
+
+      table .engine,
+      table .rule,
+      table .tags {
+        min-width: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      table .message {
+        max-width: 250px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      table .count {
+        color: var(--color-shade-7);
+      }
+
+      table .startLine,
+      table .startColumn {
+        min-width: 80px;
+      }
+
+      @media screen and (max-width: 1600px) {
+        table .tags {
+          display: none;
+        }
+      }
+
+      @media screen and (max-width: 1400px) {
+        table .engine {
+          display: none;
+        }
+      }
+
+      @media screen and (max-width: 1300px) {
+        table .message {
+          display: none;
+        }
+      }
+
+      .footer {
+        font-family: var(--font-body);
+        font-size: 14px;
+        padding: 20px 0 40px 0;
+        text-align: center;
+      }
+
+      .footer p {
+        display: flex;
+        flex-direction: row;
+        gap: 0;
+        justify-content: center;
+        align-items: center;
+        color: var(--color-shade-7);
+        padding-bottom: 10px;
+        font-size: 12px;
+      }
+
+      .footer code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: normal;
+      }
+
+      .versions {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        justify-content: center;
+        align-items: center;
+        margin-left: 10px;
+      }
+
+      .version {
+        display: flex;
+        vertical-align: middle;
+        border: 1px solid var(--color-shade-5);
+        border-radius: 20px;
+        font-size: 12px;
+        line-height: 1.8;
+        padding: 0 10px;
+        margin: 0;
+      }
+
+      .version .version-name {
+        font-weight: 500;
+        color: var(--color-shade-7);
+        border-right: 1px solid var(--color-shade-5);
+        padding: 0 8px 0 0;
+      }
+
+      .version .version-number {
+        color: var(--color-shade-7);
+        padding: 0 0 0 8px;
+      }
+
+      .rundir {
+        margin-left: 5px;
+        font-weight: 500;
+      }
+
+      .dot {
+        font-weight: bold;
+        border-radius: 50%;
+        margin-right: 4px;
+        color: var(--color-shade-1);
+        text-align: center;
+        font-size: 12px;
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+      }
+
+      .dot.sev {
+        display: none;
+      }
+
+      .dot.sev1 {
+        background-color: var(--color-severity-1);
+      }
+
+      .dot.sev2 {
+        background-color: var(--color-severity-2);
+      }
+
+      .dot.sev3 {
+        background-color: var(--color-severity-3);
+      }
+
+      .dot.sev4 {
+        background-color: var(--color-severity-4);
+      }
+
+      .dot.sev5 {
+        background-color: var(--color-severity-5);
+      }
+
+      .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: var(--color-overlay);
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition:
+          opacity 0.3s ease,
+          visibility 0.3s ease;
+      }
+
+      .overlay.visible {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .panel {
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 0;
+        right: -800px;
+        width: 800px;
+        height: 100%;
+        background-color: var(--color-shade-1);
+        border-left: 1px solid var(--color-shade-5);
+        box-shadow: -2px 0 5px var(--color-shadow);
+        transition: all 0.3s ease;
+      }
+
+      @media screen and (max-width: 1400px) {
+        .panel {
+          right: -600px;
+          width: 600px;
+        }
+      }
+
+      @media screen and (max-width: 800px) {
+        .panel {
+          right: -100%;
+          width: 100%;
+        }
+      }
+
+      .panel.visible {
+        right: 0;
+      }
+
+      .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid var(--color-shade-4);
+        background-color: var(--color-shade-2);
+      }
+
+      .panel-header h3 {
+        margin: 0;
+        font-size: 16px;
+      }
+
+      .panel-header a {
+        display: block;
+        width: 12px;
+        height: 12px;
+        background-color: transparent;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 12px 12px;
+      }
+
+      .panel-content {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 20px;
+      }
+
+      .panel-content dl {
+        margin: 0;
+      }
+
+      .panel-content dt {
+        font-size: 14px;
+        font-weight: bold;
+        line-height: 1.5;
+        margin-bottom: 5px;
+      }
+
+      .panel-content dd {
+        font-size: 14px;
+        margin-left: 0;
+        margin-bottom: 25px;
+      }
+
+      .panel-content dd#panelFile,
+      .panel-content dd#panelResources {
+        word-break: break-all;
+      }
+
+      .panel-content ul,
+      .panel-content ol {
+        padding-left: 20px;
+      }
+
+      .panel-content li {
+        padding-left: 5px;
+        margin-bottom: 10px;
+      }
+
+      .panel-content .severity {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 5px;
+      }
+
+      .panel-content .locations {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .panel-content .locations li {
+        margin: 15px 0 0 0;
+        padding: 0;
+        background: var(--color-shade-1);
+        border-radius: 6px;
+        border: 1px solid var(--color-shade-5);
+        box-shadow: 0px 2px 2px 0px var(--color-shade-4);
+      }
+
+      .panel-content .tag {
+        text-transform: uppercase;
+        font-family: var(--font-mono);
+        font-weight: 400;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 10px;
+        margin-right: 2px;
+        border: 1px solid var(--color-shade-5);
+        letter-spacing: 0.5px;
+      }
+
+      .panel-content .file {
+        display: block;
+        font-family: var(--font-code);
+        font-size: 12px;
+        padding: 8px 10px;
+        line-height: 1.6;
+        border-radius: 6px;
+      }
+
+      .panel-content .comment {
+        display: block;
+        border-top: 1px solid var(--color-shade-5);
+        padding: 8px 10px;
+        background-color: var(--color-shade-2);
+        border-radius: 0 0 6px 6px;
+        line-height: 1.6;
+      }
+
+      .panel-footer {
+        padding: 20px;
+        background-color: var(--color-shade-1);
+        border-top: 1px solid var(--color-shade-4);
+        display: flex;
+        justify-content: space-between;
+      }
+
+      /* Images */
+
+      .header h1.logo {
+        background-image: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEzLjI4MzEgNy4zOTk0QzEzLjg5MjUgNi43Njk3MyAxNC42NDQ1IDYuMjkwNiAxNS40Nzc5IDYuMDAxMDRDMTYuMzExMiA1LjcxMTQ5IDE3LjIwMjIgNS42MTk3IDE4LjA3ODQgNS43MzMxM0MxOC45NTQ2IDUuODQ2NTcgMTkuNzkxMiA2LjE2MjAzIDIwLjUyIDYuNjUzODNDMjEuMjQ4OSA3LjE0NTYzIDIxLjg0OTMgNy43OTk4NSAyMi4yNzI1IDguNTYzMjJDMjMuMTQ4MSA4LjE3OTUxIDI0LjA5NiA3Ljk4MTI1IDI1LjA1NDUgNy45ODEzMUMyNi44OTY2IDcuOTgxMzEgMjguNjYzMiA4LjcwMTMyIDI5Ljk2NTggOS45ODI5M0MzMS4yNjgzIDExLjI2NDUgMzIgMTMuMDAyOCAzMiAxNC44MTUzQzMyIDE2LjYyNzcgMzEuMjY4MyAxOC4zNjYgMjkuOTY1OCAxOS42NDc2QzI4LjY2MzIgMjAuOTI5MiAyNi44OTY2IDIxLjY0OTIgMjUuMDU0NSAyMS42NDkyQzI0LjYgMjEuNjQ5NSAyNC4xNDY2IDIxLjYwNDMgMjMuNzAxNCAyMS41MTQyQzIzLjI2NDggMjIuMjg0IDIyLjYyNzIgMjIuOTI1IDIxLjg1NDQgMjMuMzcxQzIxLjA4MTcgMjMuODE3MSAyMC4yMDE5IDI0LjA1MTkgMTkuMzA2IDI0LjA1MTNDMTguNTQzNSAyNC4wNTM4IDE3Ljc5MDYgMjMuODgzMyAxNy4xMDU5IDIzLjU1MzJDMTYuNjU3MiAyNC41OTY3IDE1Ljg5OTkgMjUuNDgzMyAxNC45MzI0IDI2LjA5NzdDMTMuOTY0OCAyNi43MTIxIDEyLjgzMTggMjcuMDI1OSAxMS42ODA1IDI2Ljk5ODNDMTAuNTI5MyAyNi45NzA3IDkuNDEzMTQgMjYuNjAzIDguNDc3MTQgMjUuOTQyOUM3LjU0MTE1IDI1LjI4MjggNi44Mjg2IDI0LjM2MSA2LjQzMjE2IDIzLjI5NzJDNi4wNzEyNSAyMy4zNzIxIDUuNzAzMzIgMjMuNDA5NSA1LjMzNDQ2IDIzLjQwODlDNC4xNTQ4NSAyMy4zOTYyIDMuMDEyMDUgMjMuMDAzMyAyLjA4MTA3IDIyLjI5MDRDMS4xNTAwOSAyMS41Nzc1IDAuNDgyMzE5IDIwLjU4MzkgMC4xODAwNjMgMTkuNDYyQy0wLjEyMjE5NCAxOC4zNCAtMC4wNDIzMDg3IDE3LjE1MTQgMC40MDc1NTkgMTYuMDc4NEMwLjg1NzQyOCAxNS4wMDU0IDEuNjUyNDIgMTQuMTA3MSAyLjY3MDc1IDEzLjUyMTFDMi4zMzIyOSAxMi43NTU5IDIuMTU4MzQgMTEuOTMwMiAyLjE1OTc5IDExLjA5NTdDMi4xNjEzNiA5LjgxOTg4IDIuNTY5MjMgOC41NzY2MSAzLjMyNjA5IDcuNTQwNjlDNC4wODI5NSA2LjUwNDc3IDUuMTUwNzIgNS43MjgyNyA2LjM3OTMxIDUuMzIwMzVDNy42MDc5IDQuOTEyNDQgOC45MzU1MiA0Ljg5MzYyIDEwLjE3NTUgNS4yNjY1NEMxMS40MTU2IDUuNjM5NDYgMTIuNTA1NiA2LjM4NTM2IDEzLjI5MjUgNy4zOTk0SDEzLjI4MzFaIiBmaWxsPSIjMEQ5RERBIi8+Cjwvc3ZnPgo=");
+      }
+
+      .header h2.title {
+        background-image: url('data:image/svg+xml,<svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" rx="4" fill="%23107CAD"/><path fill-rule="evenodd" clip-rule="evenodd" d="M18.1096 5.37199C16.5949 5.37199 15.3626 6.61286 15.3626 8.13812C15.3626 9.66337 16.5949 10.904 18.1096 10.904C19.6245 10.904 20.8568 9.66337 20.8568 8.13812C20.8568 6.61286 19.6245 5.37199 18.1096 5.37199ZM21.4798 10.4994L22.8004 11.829C23.0665 12.097 23.0665 12.5311 22.8004 12.7991C22.6675 12.933 22.4931 13 22.3188 13C22.1444 13 21.9699 12.933 21.837 12.7991L20.5252 11.4782C19.8463 11.9775 19.0128 12.276 18.1096 12.276C15.8435 12.276 14 10.4196 14 8.13812C14 5.85632 15.8435 4 18.1096 4C20.3757 4 22.2194 5.85632 22.2194 8.13812C22.2194 9.01581 21.9445 9.82904 21.4798 10.4994ZM12.7757 18.3979H15.7174C16.202 18.3979 16.595 18.021 16.595 17.5561C16.595 17.0912 16.202 16.7143 15.7174 16.7143H12.7757C12.2911 16.7143 11.8981 17.0912 11.8981 17.5561C11.8981 18.021 12.2911 18.3979 12.7757 18.3979ZM7.31383 13.8826C7.31383 14.3475 7.70683 14.7245 8.1915 14.7245H11.3624C11.8471 14.7245 12.24 14.3475 12.24 13.8826C12.24 13.4178 11.8471 13.0408 11.3624 13.0408H8.1915C7.70683 13.0408 7.31383 13.4178 7.31383 13.8826ZM8.1915 18.3979H9.6328C10.1174 18.3979 10.5105 18.021 10.5105 17.5561C10.5105 17.0912 10.1174 16.7143 9.6328 16.7143H8.1915C7.70683 16.7143 7.31383 17.0912 7.31383 17.5561C7.31383 18.021 7.70683 18.3979 8.1915 18.3979ZM11.8114 11.051C12.7963 13.426 15.2094 15.1071 18.0363 15.1071C18.7198 15.1071 19.3788 15.0077 20 14.8254V19.7755C20 20.4517 19.4284 21 18.7234 21H6.2766C5.5716 21 5 20.4517 5 19.7755V7.22451C5 6.54821 5.5716 6 6.2766 6H11.9494C11.5583 6.8163 11.3342 7.72136 11.3342 8.67858C11.3342 8.91145 11.3487 9.14087 11.3738 9.36739H8.1915C7.70683 9.36739 7.31383 9.74429 7.31383 10.2092C7.31383 10.674 7.70683 11.051 8.1915 11.051H11.8114Z" fill="white"/></svg>');
+      }
+
+      .toolbar select {
+        background-image: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAxMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTEuNTk2MzIgMTIuNjkyNEg4LjQwNDAxQzguNTk2MzEgMTIuNjkyNCA4LjczMDkzIDEyLjk0MjQgOC41NzcwOCAxMy4xMTU1TDUuMjUwMTYgMTcuMTkyNEM1LjEzNDc4IDE3LjM0NjIgNC44ODQ3OCAxNy4zNDYyIDQuNzY5MzkgMTcuMTkyNEwxLjQwNDAxIDEzLjExNTVDMS4yNjkzOSAxMi45NDI0IDEuMzg0NzggMTIuNjkyNCAxLjU5NjMyIDEyLjY5MjRaIiBmaWxsPSIjNzQ3NDc0Ii8+PHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik04LjQwMzY4IDcuMzA3NjJMMS41OTU5OSA3LjMwNzYyQzEuNDAzNjggNy4zMDc2MiAxLjI2OTA3IDcuMDU3NjIgMS40MjI5MiA2Ljg4NDU0TDQuNzQ5ODQgMi44MDc2MkM0Ljg2NTIyIDIuNjUzNzcgNS4xMTUyMiAyLjY1Mzc3IDUuMjMwNjEgMi44MDc2Mkw4LjU5NTk5IDYuODg0NTRDOC43MzA2MSA3LjA1NzYyIDguNjE1MjIgNy4zMDc2MiA4LjQwMzY4IDcuMzA3NjJaIiBmaWxsPSIjNzQ3NDc0Ii8+PC9zdmc+");
+      }
+
+      .toolbar input {
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M15.26 13.94l-4.12-4.1a6.43 6.43 0 001.05-4.23c-.37-2.65-2.52-4.75-5.19-5A6.43 6.43 0 00.67 7c.25 2.65 2.34 4.84 4.98 5.21a6.43 6.43 0 004.21-1.05l4.08 4.11c.18.19.46.19.65 0l.64-.65c.18-.18.18-.49.03-.67zM2.49 6.41a3.96 3.96 0 117.92 0 3.96 3.96 0 01-7.92 0z' fill='%23747474'/%3E%3C/svg%3E");
+      }
+
+      table th.asc::after,
+      table th.desc::after {
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 12 12' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.554 4.85a.4.4 0 000-.623L6.092.837a.4.4 0 00-.646 0L1.985 4.227a.4.4 0 000 .623l.646.623a.4.4 0 00.554 0l1.085-1.06c.184-.185.507-.046.507.207v6.227c0 .23.208.46.462.46h.923c.254 0 .461-.253.461-.46V4.619c0-.276.323-.392.508-.207l1.084 1.06a.4.4 0 00.554 0l.6-.622z' fill='%23747474'/%3E%3C/svg%3E");
+      }
+
+      .panel-header a {
+        background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M7.53863 5.81555L11.5386 1.78478C11.7232 1.60017 11.7232 1.32324 11.5386 1.13863L10.9232 0.492473C10.7386 0.307858 10.4617 0.307858 10.2771 0.492473L6.24632 4.52324C6.12324 4.64632 5.93863 4.64632 5.81555 4.52324L1.78478 0.461704C1.60017 0.277088 1.32324 0.277088 1.13863 0.461704L0.492473 1.10786C0.307858 1.29247 0.307858 1.5694 0.492473 1.75401L4.52324 5.78478C4.64632 5.90786 4.64632 6.09247 4.52324 6.21555L0.461704 10.2771C0.277088 10.4617 0.277088 10.7386 0.461704 10.9232L1.10786 11.5694C1.29247 11.754 1.5694 11.754 1.75401 11.5694L5.78478 7.53863C5.90786 7.41555 6.09247 7.41555 6.21555 7.53863L10.2463 11.5694C10.4309 11.754 10.7079 11.754 10.8925 11.5694L11.5386 10.9232C11.7232 10.7386 11.7232 10.4617 11.5386 10.2771L7.53863 6.24632C7.41555 6.12324 7.41555 5.93863 7.53863 5.81555Z' fill='%23747474'/%3E%3C/svg%3E");
+      }
+
+      /* Dark Theme */
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --color-text: #bbbbbb;
+          --color-link: #0099ee;
+          --color-link-hover: #55bbee;
+
+          --color-shade-1: #0a0a0a;
+          --color-shade-2: #161616;
+          --color-shade-3: #202020;
+          --color-shade-4: #2e2e2e;
+          --color-shade-5: #424242;
+          --color-shade-6: #666666;
+          --color-shade-7: #969696;
+
+          --color-severity-1: #ff3355;
+          --color-severity-2: #ff5533;
+          --color-severity-3: #ff9933;
+          --color-severity-4: #ffd633;
+          --color-severity-5: #55cc66;
+
+          --color-focus: rgba(77, 184, 255, 0.4);
+          --color-shadow: rgba(0, 0, 0, 0.5);
+          --color-overlay: rgba(0, 0, 0, 0.6);
+        }
+
+        body {
+          background-color: var(--color-shade-1);
+          color: var(--color-text);
+        }
+
+        .page {
+          background-color: var(--color-shade-1);
+        }
+
+        .header {
+          background-color: var(--color-shade-2);
+          border-bottom-color: var(--color-shade-4);
+        }
+
+        .box {
+          background-color: var(--color-shade-2);
+          border-color: var(--color-shade-5);
+          box-shadow: 0px 2px 2px 0px var(--color-shadow);
+        }
+
+        .box:hover {
+          background-color: var(--color-shade-3);
+          border-color: var(--color-link);
+        }
+
+        .box:active,
+        .box.selected {
+          background-color: var(--color-shade-3);
+          border-color: var(--color-link);
+          box-shadow: none;
+        }
+
+        .toolbar select,
+        .toolbar input {
+          background-color: var(--color-shade-2);
+          border-color: var(--color-shade-5);
+          color: var(--color-text);
+        }
+
+        .toolbar select:hover,
+        .toolbar input:hover {
+          border-color: var(--color-link);
+        }
+
+        .toolbar select:focus,
+        .toolbar input:focus {
+          border-color: var(--color-link);
+          box-shadow: 0 0 0 1px var(--color-link);
+        }
+
+        .toolbar button,
+        .panel button {
+          background-color: var(--color-shade-3);
+          border-color: var(--color-shade-6);
+          color: var(--color-link);
+        }
+
+        .toolbar button:hover,
+        .panel button:hover {
+          background-color: var(--color-shade-4);
+          border-color: var(--color-shade-7);
+        }
+
+        .toolbar button:active,
+        .panel button:active,
+        .toolbar button:focus,
+        .panel button:focus {
+          background-color: var(--color-shade-4);
+          border-color: var(--color-link);
+          box-shadow: 0 0 0 2px var(--color-focus);
+          color: var(--color-link-hover);
+        }
+
+        table th {
+          background-color: var(--color-shade-4);
+          border-color: var(--color-shade-5);
+        }
+
+        table.ungrouped th {
+          background-color: var(--color-shade-3);
+        }
+
+        table tr {
+          background-color: var(--color-shade-2);
+          border-color: var(--color-shade-4);
+        }
+
+        table tr:hover {
+          background-color: var(--color-shade-3);
+        }
+
+        table td.group {
+          background-color: var(--color-shade-3);
+        }
+
+        .panel {
+          background-color: var(--color-shade-2);
+          border-left-color: var(--color-shade-5);
+          box-shadow: -2px 0 5px var(--color-shadow);
+        }
+
+        .panel-header {
+          background-color: var(--color-shade-3);
+          border-bottom-color: var(--color-shade-5);
+        }
+
+        .panel-content .locations li {
+          background-color: var(--color-shade-2);
+          border-color: var(--color-shade-5);
+          box-shadow: 0px 2px 2px 0px var(--color-shadow);
+        }
+
+        .panel-content .locations .file {
+          background-color: var(--color-shade-3);
+        }
+
+        .panel-footer {
+          background-color: var(--color-shade-2);
+          border-top-color: var(--color-shade-4);
+        }
+
+        .toolbar input::placeholder {
+          color: var(--color-shade-6);
+        }
+
+        .footer {
+          color: var(--color-shade-7);
+        }
+
+        .toolbar button:disabled,
+        .toolbar button[disabled],
+        .panel button:disabled,
+        .panel button[disabled] {
+          background-color: var(--color-shade-2);
+          border-color: var(--color-shade-4);
+          color: var(--color-shade-6);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="overlay">
+        <div
+          class="panel"
+          role="dialog"
+          tabindex="-1"
+          aria-labelledby="panel-title"
+          aria-modal="true"
+        >
+          <div class="panel-header">
+            <h3 id="panel-title">Details</h3>
+            <a
+              href="#"
+              id="panelClose"
+              class="panel-close"
+              aria-label="Close violation details"
+            ></a>
+          </div>
+          <div class="panel-content" aria-live="polite"></div>
+          <div class="panel-footer">
+            <button id="prev" aria-label="Previous violation">
+              &larr; Prev
+            </button>
+            <button id="next" aria-label="Next violation">Next &rarr;</button>
+          </div>
+        </div>
+      </div>
+
+      <header class="header" role="none">
+        <h1 class="logo">Salesforce</h1>
+        <h2 class="title">
+          <strong class="text">Code Analyzer Report</strong> –
+          
+<!-- START OF TIMESTAMP -->
+        <span class="timestamp">May 8, 2026, 11:39 AM</span>
+<!-- END OF TIMESTAMP -->
+      
+        </h2>
+        <a
+          class="help"
+          href="https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/overview"
+          aria-label="Developer Documentation"
+          >Developer Docs</a
+        >
+      </header>
+
+      <aside class="boxes" aria-label="Report summary">
+        <div
+          class="box"
+          data-severity="1"
+          aria-label="Severity 1, Critical: 0 violations"
+          role="button"
+          tabindex="0"
+        >
+          <h4 aria-hidden="true">
+            <span>Severity 1</span> <span>Critical</span>
+          </h4>
+          <p class="sev1" id="sev1" aria-hidden="true">0</p>
+        </div>
+        <div
+          class="box"
+          data-severity="2"
+          aria-label="Severity 2, High: 0 violations"
+          role="button"
+          tabindex="0"
+        >
+          <h4 aria-hidden="true"><span>Severity 2</span> <span>High</span></h4>
+          <p class="sev2" id="sev2" aria-hidden="true">0</p>
+        </div>
+        <div
+          class="box"
+          data-severity="3"
+          aria-label="Severity 3, Moderate: 0 violations"
+          role="button"
+          tabindex="0"
+        >
+          <h4 aria-hidden="true">
+            <span>Severity 3</span> <span>Moderate</span>
+          </h4>
+          <p class="sev3" id="sev3" aria-hidden="true">0</p>
+        </div>
+        <div
+          class="box"
+          data-severity="4"
+          aria-label="Severity 4, Low: 0 violations"
+          role="button"
+          tabindex="0"
+        >
+          <h4 aria-hidden="true"><span>Severity 4</span> <span>Low</span></h4>
+          <p class="sev4" id="sev4" aria-hidden="true">0</p>
+        </div>
+        <div
+          class="box"
+          data-severity="5"
+          aria-label="Severity 5, Info: 0 violations"
+          role="button"
+          tabindex="0"
+        >
+          <h4 aria-hidden="true"><span>Severity 5</span> <span>Info</span></h4>
+          <p class="sev5" id="sev5" aria-hidden="true">0</p>
+        </div>
+      </aside>
+
+      <main class="content" aria-label="Report table">
+        <h3 id="summary" aria-live="polite">Found 0 violations</h3>
+
+        <div class="toolbar">
+          <div class="filter">
+            <h4 aria-hidden="true">Filter</h4>
+
+            <form aria-label="Filter violations">
+              <select id="severityFilter" aria-label="Filter by severity">
+                <option value="">All Severities</option>
+                <option disabled>───</option>
+                <option value="1">Severity 1: Critical</option>
+                <option value="2">Severity 2: High</option>
+                <option value="3">Severity 3: Moderate</option>
+                <option value="4">Severity 4: Low</option>
+                <option value="5">Severity 5: Info</option>
+              </select>
+
+              <select id="engineFilter" aria-label="Filter by engine">
+                <option value="">All Engines</option>
+              </select>
+
+              <input
+                type="text"
+                id="searchInput"
+                placeholder="Filter files, rules, tags & messages"
+                aria-label="Filter files, rules, tags & messages"
+              />
+
+              <button id="resetButton" aria-label="Reset filters" disabled>
+                Reset
+              </button>
+            </form>
+          </div>
+
+          <div class="view">
+            <h4 aria-hidden="true">Group</h4>
+
+            <form>
+              <select id="groupBy" aria-label="Group by property">
+                <option value="">Ungrouped</option>
+                <option disabled>───</option>
+                <option value="engine">Engine</option>
+                <option value="file">Filename</option>
+                <option value="rule">Rule</option>
+                <option value="severity">Severity</option>
+              </select>
+            </form>
+          </div>
+        </div>
+
+        <table id="violationsTable" aria-label="Sortable violations table">
+          <thead>
+            <tr>
+              <th data-sort="file" class="file" aria-sort="none">Filename</th>
+              <th data-sort="severity" class="severity" aria-sort="none">
+                Severity
+              </th>
+              <th data-sort="rule" class="rule" aria-sort="none">Rule</th>
+              <th data-sort="engine" class="engine" aria-sort="none">Engine</th>
+              <th data-sort="message" class="message" aria-sort="none">
+                Message
+              </th>
+              <th data-sort="tags" class="tags" aria-sort="none">Tags</th>
+              <th data-sort="startLine" class="startLine" aria-sort="none">
+                Line
+              </th>
+              <th data-sort="startColumn" class="startColumn" aria-sort="none">
+                Column
+              </th>
+            </tr>
+          </thead>
+
+          <tbody></tbody>
+        </table>
+      </main>
+
+      <footer class="footer" role="contentinfo">
+        <p>
+          Generated by Code Analyzer from path:
+
+<!-- START OF RUNDIR -->
+        <code class="rundir">/Users/vfinet/Dev/OrgCheck/packages/orgcheck-salesforce-app/force-app/</code>
+<!-- END OF RUNDIR -->
+
+        </p>
+      </footer>
+    </div>
+  </body>
+</html>

@@ -157,7 +157,7 @@ export class DatasetObjects implements Dataset {
                 MediumProcessor.forEach(nbRecordTypesPerEntity, (r: Record<string, unknown>) => SetCounter(r.EntityDefinitionId, 'rt', r.NbRecordTypes)),
                 MediumProcessor.forEach(nbWorkflowRulesPerEntity, (r: Record<string, unknown>) => SetCounter(r.TableEnumOrId, 'wf', r.NbWorkflowRules)),
                 MediumProcessor.forEach(nbValidationRulesPerEntity, (r: Record<string, unknown>) => SetCounter(r.EntityDefinitionId, 'vr', r.NbValidationRules)),
-                MediumProcessor.forEach(nbTriggersPerEntity, (r: Record<string, unknown>) => SetCounter(r.EntityDefinitionId, 'ap', r.NbTriggers)),
+                MediumProcessor.forEach(nbTriggersPerEntity, (r: Record<string, unknown>) => SetCounter(r.EntityDefinitionId, 'at', r.NbTriggers)),
                 MediumProcessor.forEach(limitsPerEntity, (r: Record<string, unknown>) => void extraCounters.set(`${r.EntityDefinitionId}-${r.Type}`, (r.Max as number) - (r.Remaining as number)))
             ])
         }

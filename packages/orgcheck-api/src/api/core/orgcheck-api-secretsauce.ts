@@ -356,15 +356,15 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 30,
         description: 'No max login attempts set',
-        formula: ((d: SfdcProfilePasswordPolicy) => d?.maxLoginAttempts === undefined) as (data: unknown) => boolean,
+        formula: ((d: SfdcProfilePasswordPolicy) => Number.isNaN(d?.maxLoginAttempts)) as (data: unknown) => boolean,
         errorMessage: `This profile password policy allows users to try infinitely to log in without locking the access. Please review this setting.`,
-        badField: 'passwordExpiration',
+        badField: 'maxLoginAttempts',
         applicable: [ DataAliases.SfdcProfilePasswordPolicy ],
         category: SCORE_RULE_CATEGORIES.SECURITY
     }, {
         id: 31,
         description: 'No lockout period set',
-        formula: ((d: SfdcProfilePasswordPolicy) => d?.lockoutInterval === undefined) as (data: unknown) => boolean,
+        formula: ((d: SfdcProfilePasswordPolicy) => Number.isNaN(d?.lockoutInterval)) as (data: unknown) => boolean,
         errorMessage: `This profile password policy does not set a value for any locked out period. Please review this setting.`,
         badField: 'lockoutInterval',
         applicable: [ DataAliases.SfdcProfilePasswordPolicy ],
