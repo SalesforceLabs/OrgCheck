@@ -1,7 +1,7 @@
 {
   "name": "@orgcheck/sfdx-plugin",
   "description": "Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt.",
-  "version": "8.0.5",
+  "version": "8.0.6",
   "private": false,
   "dependencies": {
     "@oclif/core": "^4",
