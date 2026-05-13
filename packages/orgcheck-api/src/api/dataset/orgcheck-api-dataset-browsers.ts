@@ -37,6 +37,7 @@ export class DatasetBrowsers implements Dataset {
         const browsers = new Map();
         await MediumProcessor.forEach(browserRecords, async (record) => {
 
+            if (!record.Browser) return;   // ← guard against null Browser (and undefined)
             const browserElements = (record.Browser as string).split(' ', 2);
             const name = browserElements && browserElements?.length > 0 ? browserElements[0] : record.Browser as string;
             const versionAsText = browserElements && browserElements?.length > 1 ? browserElements[1] : '';
