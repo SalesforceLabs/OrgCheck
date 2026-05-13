@@ -316,7 +316,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 25,
         description: 'Password policy with too big expiration',
-        formula: ((d: SfdcProfilePasswordPolicy) => d?.passwordExpiration > 90) as (data: unknown) => boolean,
+        formula: ((d: SfdcProfilePasswordPolicy) => Number.isNaN(d?.passwordExpiration) || d?.passwordExpiration > 90) as (data: unknown) => boolean,
         errorMessage: `This profile password policy allows passwords to expire after 90 days. Please consider using a shorter expiration period in your policy.`,
         badField: 'passwordExpiration',
         applicable: [ DataAliases.SfdcProfilePasswordPolicy ],
@@ -324,7 +324,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 26,
         description: 'Password policy with no expiration',
-        formula: ((d: SfdcProfilePasswordPolicy) => d?.passwordExpiration === 0) as (data: unknown) => boolean,
+        formula: ((d: SfdcProfilePasswordPolicy) => Number.isNaN(d?.passwordExpiration) || d?.passwordExpiration === 0) as (data: unknown) => boolean,
         errorMessage: `This profile password policy allows you to have a password that never expires. Why is that? Do you have this profile for technical users? Please reconsider this setting and use JWT authentication instead for technical users.`,
         badField: 'passwordExpiration',
         applicable: [ DataAliases.SfdcProfilePasswordPolicy ],
@@ -332,7 +332,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 27,
         description: 'Password history too small',
-        formula: ((d: SfdcProfilePasswordPolicy) => d?.passwordHistory < 3) as (data: unknown) => boolean,
+        formula: ((d: SfdcProfilePasswordPolicy) => Number.isNaN(d?.passwordHistory) || d?.passwordHistory < 3) as (data: unknown) => boolean,
         errorMessage: `This profile password policy allows users to set their password with a too-short memory. For example, they can keep on using the same different password every time you ask them to change it. Please increase this setting.`,
         badField: 'passwordHistory',
         applicable: [ DataAliases.SfdcProfilePasswordPolicy ],
@@ -340,7 +340,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 28,
         description: 'Password minimum size too small',
-        formula: ((d: SfdcProfilePasswordPolicy) => d?.minimumPasswordLength < 8) as (data: unknown) => boolean,
+        formula: ((d: SfdcProfilePasswordPolicy) => Number.isNaN(d?.minimumPasswordLength) || d?.minimumPasswordLength < 8) as (data: unknown) => boolean,
         errorMessage: `This profile password policy allows users to set passwords with less than 8 characters. That minimum length is not strong enough. Please increase this setting.`,
         badField: 'minimumPasswordLength',
         applicable: [ DataAliases.SfdcProfilePasswordPolicy ],
@@ -348,7 +348,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 29,
         description: 'Password complexity too weak',
-        formula: ((d: SfdcProfilePasswordPolicy) => d?.passwordComplexity < 3) as (data: unknown) => boolean,
+        formula: ((d: SfdcProfilePasswordPolicy) => Number.isNaN(d?.passwordComplexity) || d?.passwordComplexity < 3) as (data: unknown) => boolean,
         errorMessage: `This profile password policy allows users to set too-easy passwords. The complexity you choose is not strong enough. Please increase this setting.`,
         badField: 'passwordComplexity',
         applicable: [ DataAliases.SfdcProfilePasswordPolicy ],
@@ -644,7 +644,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 66,
         description: 'Custom profile with low number of active members',
-        formula: ((d: SfdcProfile) => d?.isCustom === true && d?.memberCounts <= 10) as (data: unknown) => boolean,
+        formula: ((d: SfdcProfile) => d?.isCustom === true && d?.memberCounts > 0 && d?.memberCounts <= 10) as (data: unknown) => boolean,
         errorMessage: `This custom profile has a low number of active members (<= 10). Maybe you should review its use in your org...`,
         badField: 'memberCounts',
         applicable: [ DataAliases.SfdcProfile ],
@@ -652,7 +652,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 67,
         description: 'Custom permission set with low number of active members and only assigned to empty group(s)',
-        formula: ((d: SfdcPermissionSet) => d?.isCustom === true && d?.isGroup === false && d?.memberCounts <= 10 && d?.allIncludingGroupsAreEmpty === true) as (data: unknown) => boolean,
+        formula: ((d: SfdcPermissionSet) => d?.isCustom === true && d?.isGroup === false && d?.memberCounts > 0 && d?.memberCounts <= 10 && d?.allIncludingGroupsAreEmpty === true) as (data: unknown) => boolean,
         errorMessage: `This custom permission set has a low number of active members (<= 10) and is only included in empty permission set groups. Is it on purpose? Maybe you should review its use in your org...`,
         badField: 'allIncludingGroupsAreEmpty',
         applicable: [ DataAliases.SfdcPermissionSet ],
@@ -660,7 +660,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 68,
         description: 'Custom permission set group with low number of active members',
-        formula: ((d: SfdcPermissionSet) => d?.isCustom === true && d?.isGroup === true && d?.memberCounts <= 10) as (data: unknown) => boolean,
+        formula: ((d: SfdcPermissionSet) => d?.isCustom === true && d?.isGroup === true && d?.memberCounts > 0 && d?.memberCounts <= 10) as (data: unknown) => boolean,
         errorMessage: `This custom permission set group has a low number of active members (<= 10). Is it empty on purpose? Maybe you should review its use in your org...`,
         badField: 'memberCounts',
         applicable: [ DataAliases.SfdcPermissionSet ],
@@ -668,7 +668,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 69,
         description: 'Custom permission set with low number of active members and not even assigned to group',
-        formula: ((d: SfdcPermissionSet) => d?.isCustom === true && d?.isGroup === false && d?.memberCounts <= 10 && d?.permissionSetGroupIds?.length === 0) as (data: unknown) => boolean,
+        formula: ((d: SfdcPermissionSet) => d?.isCustom === true && d?.isGroup === false && d?.memberCounts > 0 && d?.memberCounts <= 10 && d?.permissionSetGroupIds?.length === 0) as (data: unknown) => boolean,
         errorMessage: `This custom permission set has a low number of active members (<= 10) and is not even assigned to a permission set group. Is it on purpose? Maybe you should review its use in your org...`,
         badField: 'memberCounts',
         applicable: [ DataAliases.SfdcPermissionSet ],
