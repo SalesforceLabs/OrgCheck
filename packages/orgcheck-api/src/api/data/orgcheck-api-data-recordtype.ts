@@ -47,13 +47,6 @@ export interface SfdcRecordType extends DataWithScore {
     isDefault: boolean;
 
     /**
-     * @description Is this the master record type?
-     * @type {boolean}
-     * @public
-     */
-    isMaster: boolean;
-
-    /**
      * @description Object Id of thid record type
      * @type {string}
      * @public

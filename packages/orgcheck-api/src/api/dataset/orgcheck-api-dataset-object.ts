@@ -253,7 +253,6 @@ export class DatasetObject implements Dataset {
                     isActive: t.active,
                     isAvailable: t.available,
                     isDefault: t.defaultRecordTypeMapping,
-                    isMaster: t.master,
                     url: sfdcManager.setupUrl(t.recordTypeId as string, SalesforceMetadataTypes.RECORD_TYPE, entity.DurableId as string)
                 }
             })

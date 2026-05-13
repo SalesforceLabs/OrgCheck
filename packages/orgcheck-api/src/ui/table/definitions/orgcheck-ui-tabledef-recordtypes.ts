@@ -19,7 +19,6 @@ class AbstractRecordTypesTableDefinition implements TableDefinition {
             { label: 'Is Active',      type: ColumnType.CHK, data: { value: 'isActive' }},
             { label: 'Is Available',   type: ColumnType.CHK, data: { value: 'isAvailable' }},
             { label: 'Is Default',     type: ColumnType.CHK, data: { value: 'isDefault' }},
-            { label: 'Is Master',      type: ColumnType.CHK, data: { value: 'isMaster' }}
         ];
         if (isObjectInformationNeeded === true) {
             this.columns.splice(4, 0, // Bewteen package and is active column
