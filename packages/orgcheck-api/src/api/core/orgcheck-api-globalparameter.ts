@@ -13,6 +13,9 @@ const GROUP_TYPE_QUEUE = 'queue';
 const OBJECTS_MODE = 'objectsmode';
 const OBJECTS_MODE_FULL = 'full';
 const OBJECTS_MODE_LITE = 'lite';
+const LFS_BETA_MODE = 'lfsbetamode';
+const LFS_MIN_SEVERITY = 'lfsminseverity';
+const LFS_SEVERITY_ALL = '*';
 
 export class OrgCheckGlobalParameter {
 
@@ -195,5 +198,48 @@ export class OrgCheckGlobalParameter {
      */
     static getObjectsMode(parameters: Map<string, string>): string {
         return parameters?.get(OBJECTS_MODE) ?? OBJECTS_MODE_FULL;
+    }
+
+    /**
+     * @description Key to enable Lightning Flow Scanner beta rules
+     * @returns {string} The value of the constant
+     * @static
+     */
+    static get LFS_BETA_MODE(): string { return LFS_BETA_MODE; }
+
+    /**
+     * @description Key for the minimum LFS violation severity to display ('error', 'warning', 'note', or '*' for all)
+     * @returns {string} The value of the constant
+     * @static
+     */
+    static get LFS_MIN_SEVERITY(): string { return LFS_MIN_SEVERITY; }
+
+    /**
+     * @description Wildcard value meaning all severities
+     * @returns {string} The value of the constant
+     * @static
+     */
+    static get LFS_SEVERITY_ALL(): string { return LFS_SEVERITY_ALL; }
+
+    /**
+     * @description Get the LFS beta mode setting from the parameters
+     * @param {Map<string, unknown>} parameters - Map of parameters
+     * @returns {boolean} true if beta rules should be included
+     * @static
+     * @public
+     */
+    static getLfsBetaMode(parameters: Map<string, unknown>): boolean {
+        return (parameters?.get(LFS_BETA_MODE) as boolean) ?? false;
+    }
+
+    /**
+     * @description Get the LFS minimum severity from the parameters
+     * @param {Map<string, unknown>} parameters - Map of parameters
+     * @returns {string} The minimum severity or '*' (all)
+     * @static
+     * @public
+     */
+    static getLfsMinSeverity(parameters: Map<string, unknown>): string {
+        return (parameters?.get(LFS_MIN_SEVERITY) as string) ?? LFS_SEVERITY_ALL;
     }
 }

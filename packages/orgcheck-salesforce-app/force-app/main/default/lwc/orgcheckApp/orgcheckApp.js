@@ -145,6 +145,13 @@ export default class OrgcheckApp extends LightningElement {
     @track exportBasenames = { };
 
     /**
+     * @description LFS options for the Flows section
+     * @type {{ betaMode: boolean, minSeverity: string }}
+     * @public
+     */
+    @track lfsOptions = { betaMode: false, minSeverity: '*' }
+
+    /**
      * @description Is something is loading?
      * @type {boolean}
      * @public
@@ -479,7 +486,7 @@ export default class OrgcheckApp extends LightningElement {
                 key: 'F', 
                 title: '🤖 Automations',
                 items: { 
-                    FLOWS:         { key: '1C', data: 'flows', recipe: Recipes.FLOWS },
+                    FLOWS:         { key: '1C', data: 'flows', recipe: Recipes.FLOWS, storeData: true, getExtraParams: (that) => that._getLfsExtraParams() },
                     PBS:           { key: '1D', data: 'processbuilders', recipe: Recipes.PROCESS_BUILDERS },
                     WORKFLOWS:     { key: '1E', data: 'workflows', recipe: Recipes.WORKFLOWS },
                 }
@@ -671,21 +678,22 @@ export default class OrgcheckApp extends LightningElement {
 
             if (appNavItem.recipe) {
                 // --------------------------------------------------------------------------------
-                // Potentially we need to refresh the data 
+                // Potentially we need to refresh the data
                 // --------------------------------------------------------------------------------
-                // if forceRefresh = true, we want to refresh the data from the API 
+                // if forceRefresh = true, we want to refresh the data from the API
+                const extraParams = appNavItem.getExtraParams ? appNavItem.getExtraParams(this) : undefined;
                 if (forceRefresh === true) {
-                    this._private_properties.api.cleanData(appNavItem.recipe, this.namespace, this.objectType, this.object);
+                    this._private_properties.api.cleanData(appNavItem.recipe, this.namespace, this.objectType, this.object, extraParams);
                 }
-                
+
                 // --------------------------------------------------------------------------------
                 // Alias is useful to check if the data has potentially changed
-                // Each data may have a dependency with global filters, so if one of the filter 
-                // changed and the value has dependency with it, it's more likely that the data 
+                // Each data may have a dependency with global filters, so if one of the filter
+                // changed and the value has dependency with it, it's more likely that the data
                 // needs top be updated
                 // --------------------------------------------------------------------------------
                 // get the current alias depending on the dependency with global filter values
-                const alias = this._private_properties.api.cachestampData(appNavItem.recipe, this.namespace, this.objectType, this.object);
+                const alias = this._private_properties.api.cachestampData(appNavItem.recipe, this.namespace, this.objectType, this.object, extraParams);
                 if (alias === '-') forceRefresh = true;
 
                 if (forceRefresh === true || appNavItem.lastAlias !== alias) {
@@ -694,7 +702,7 @@ export default class OrgcheckApp extends LightningElement {
                     // shall we proceed getting the data for this item? It depends if there is a onlyIf condition or not, and if yes if it is validated or not
                     if (appNavItem.onlyIf ? appNavItem.onlyIf(this) === true : true) {
                         // If yes we prepare the data
-                        const mixture = await this._private_properties.api.prepareData(appNavItem.recipe, this.namespace, this.objectType, this.object);
+                        const mixture = await this._private_properties.api.prepareData(appNavItem.recipe, this.namespace, this.objectType, this.object, extraParams);
                         // serve the data
                         /** @type {object} */
                         const plate = await this._private_properties.api.serveData(appNavItem.recipe, mixture);
@@ -983,6 +991,48 @@ export default class OrgcheckApp extends LightningElement {
         } catch (error) {
             this._private_properties.modal?.showErrors('handleRefreshCurrentData', error);
         }
+    }
+
+    /**
+     * @description Handle the LFS beta mode toggle in the Flows section
+     * @param {Event} event - Change event from the checkbox
+     * @public
+     * @async
+     */
+    async handleLfsBetaModeChange(event) {
+        try {
+            this.lfsOptions = { ...this.lfsOptions, betaMode: event.target.checked };
+            await this._async_updateCurrentData(true);
+        } catch (error) {
+            this._private_properties.modal?.showErrors('handleLfsBetaModeChange', error);
+        }
+    }
+
+    /**
+     * @description Handle the LFS minimum severity filter change in the Flows section
+     * @param {Event} event - Change event from the select
+     * @public
+     * @async
+     */
+    async handleLfsMinSeverityChange(event) {
+        try {
+            this.lfsOptions = { ...this.lfsOptions, minSeverity: event.target.value };
+            await this._async_updateCurrentData(false);
+        } catch (error) {
+            this._private_properties.modal?.showErrors('handleLfsMinSeverityChange', error);
+        }
+    }
+
+    /**
+     * @description Build the LFS extra params Map for prepareData / cleanData / cachestampData
+     * @returns {Map<string, unknown>}
+     * @private
+     */
+    _getLfsExtraParams() {
+        return new Map([
+            ['lfsbetamode', this.lfsOptions.betaMode],
+            ['lfsminseverity', this.lfsOptions.minSeverity]
+        ]);
     }
 
     /**

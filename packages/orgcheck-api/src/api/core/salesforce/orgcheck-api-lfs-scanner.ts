@@ -1,6 +1,20 @@
 /**
  * @description Lightning Flow Scanner integration for OrgCheck. Scans flows using the LFS_Core.js static resource
  */
+
+const SEVERITY_ORDER: Record<string, number> = { error: 3, warning: 2, note: 1 };
+
+/**
+ * @description Returns true if violationSeverity meets or exceeds the minimum required severity
+ * @param {string} violationSeverity - The severity of the individual violation
+ * @param {string} minSeverity - The minimum severity threshold ('error', 'warning', 'note', or '*' for all)
+ * @returns {boolean}
+ */
+export function meetsMinSeverity(violationSeverity: string, minSeverity: string): boolean {
+    if (!minSeverity || minSeverity === '*') return true;
+    return (SEVERITY_ORDER[violationSeverity] ?? 0) >= (SEVERITY_ORDER[minSeverity] ?? 0);
+}
+
 export class LFSScanner {
 
     /**
@@ -39,9 +53,10 @@ export class LFSScanner {
      * @description Scan flows using Lightning Flow Scanner
      * @param {any[]} flowRecords - Flow metadata records from Tooling API
      * @param {Function} CaseSafeId - Function to convert 18-char IDs to 15-char
+     * @param {boolean} [betaMode] - Whether to include beta rules in the scan
      * @returns {Promise<Map<string, any[]>>} Map of flow version ID to LFS violations
      */
-    static async scanFlows(flowRecords: Record<string, unknown>[], CaseSafeId: (id: string) => string): Promise<Map<string, unknown[]>> {
+    static async scanFlows(flowRecords: Record<string, unknown>[], CaseSafeId: (id: string) => string, betaMode = false): Promise<Map<string, unknown[]>> {
         let results = new Map();
         try {
             // @ts-expect-error: lightningflowscanner is a global library injected at runtime and not declared in TypeScript's Window type definitions
@@ -57,8 +72,8 @@ export class LFSScanner {
                         };
                     });
 
-                // Scan flows
-                const scanResults = lfsCore.scan(lfsFlows);
+                // Scan flows, passing betaMode option to include/exclude beta rules
+                const scanResults = lfsCore.scan(lfsFlows, { betaMode });
 
                 // Map results: flowVersionId -> violations
                 results = this.mapResults(scanResults);
@@ -73,15 +88,15 @@ export class LFSScanner {
     /**
      * @description Map LFS scan results to OrgCheck format
      * @param {any[]} scanResults - LFS scan results
-     * @returns {Map<string, string[]>} Map of flow version ID to violations
+     * @returns {Map<string, {name: string, severity: string}[]>} Map of flow version ID to violations
      */
-    static mapResults(scanResults: Record<string, unknown>[]): Map<string, string[]> {
+    static mapResults(scanResults: Record<string, unknown>[]): Map<string, { name: string; severity: string }[]> {
         const violationsMap = new Map();
         for (const result of scanResults) {
-            const ruleResults = result.ruleResults as { occurs: boolean; ruleName: string }[];
+            const ruleResults = result.ruleResults as { occurs: boolean; ruleName: string; severity?: string }[];
             const violations = ruleResults
                 .filter((ruleResult) => ruleResult.occurs === true)
-                .map((ruleResult) => ruleResult.ruleName);
+                .map((ruleResult) => ({ name: ruleResult.ruleName, severity: ruleResult.severity ?? 'error' }));
             if (violations?.length > 0) {
                 violationsMap.set((result.flow as { uri: string }).uri, violations);
             }

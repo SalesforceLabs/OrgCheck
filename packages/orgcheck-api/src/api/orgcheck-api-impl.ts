@@ -538,14 +538,15 @@ export class API implements ApiIntf {
      * @returns {string} cachestamp of the data
      * @public
      */
-    public cachestampData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string): string {
+    public cachestampData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string, extraParams?: Map<string, unknown>): string {
         const logger = this._loggerFactory?.create('Cache Stamp Data', false);
         try {
             logger?.log(`Calling the cachestamp method for recipe: ${alias} with namespace: ${namespace}, sobjectType: ${sobjectType} and sobject: ${sobject}`);
             const results = this._recipeManager.cachestamp(alias, new Map([
                 [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
                 [OrgCheckGlobalParameter.PACKAGE_NAME, namespace],
-                [OrgCheckGlobalParameter.SOBJECT_TYPE_NAME, sobjectType]
+                [OrgCheckGlobalParameter.SOBJECT_TYPE_NAME, sobjectType],
+                ...(extraParams ?? [])
             ]));
             logger?.log(`Done.`);
             return results;
@@ -569,7 +570,7 @@ export class API implements ApiIntf {
      * @async
      * @public
      */
-    public async prepareData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string): Promise<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]> {
+    public async prepareData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string, extraParams?: Map<string, unknown>): Promise<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]> {
         const logger = this._loggerFactory?.create(`Preparing data for recipe: ${alias}`, false);
         try {
             // Check if usage terms were accepted
@@ -581,7 +582,8 @@ export class API implements ApiIntf {
             const results = await this._recipeManager.prepare(alias, new Map([
                 [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
                 [OrgCheckGlobalParameter.PACKAGE_NAME, namespace],
-                [OrgCheckGlobalParameter.SOBJECT_TYPE_NAME, sobjectType]
+                [OrgCheckGlobalParameter.SOBJECT_TYPE_NAME, sobjectType],
+                ...(extraParams ?? [])
             ]), logger?.toSimpleLogger());
             logger?.log(`Done.`);
             return results;
@@ -665,7 +667,7 @@ export class API implements ApiIntf {
      * @param sobject 
      * @public
      */
-    public cleanData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string): void {
+    public cleanData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string, extraParams?: Map<string, unknown>): void {
         const logger = this._loggerFactory?.create(`Clean Data for recipe: ${alias}`, false);
         try {
             // Clean the data
@@ -673,7 +675,8 @@ export class API implements ApiIntf {
             const results = this._recipeManager.clean(alias, new Map([
                 [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
                 [OrgCheckGlobalParameter.PACKAGE_NAME, namespace],
-                [OrgCheckGlobalParameter.SOBJECT_TYPE_NAME, sobjectType]
+                [OrgCheckGlobalParameter.SOBJECT_TYPE_NAME, sobjectType],
+                ...(extraParams ?? [])
             ]));
             logger?.log(`Done.`);
             return results;

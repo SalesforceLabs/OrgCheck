@@ -7,6 +7,7 @@ import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-sa
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 import { SfdcFlow, SfdcFlowVersion } from 'src/api/data/orgcheck-api-data-flow';
 import { LFSScanner } from 'src/api/core/salesforce/orgcheck-api-lfs-scanner';
+import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
 // Limited list of known types of Flow ProcessType
 // see all the list at https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_visual_workflow.htm
@@ -29,7 +30,7 @@ export class DatasetFlows implements Dataset {
      * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Map<string, SfdcFlow>>} The result of the dataset
      */
-    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcFlow>> {
+    async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf, parameters?: Map<string, unknown>): Promise<Map<string, SfdcFlow>> {
 
         // First SOQL query
         logger?.log(`Querying Tooling API about FlowDefinition in the org...`);            
@@ -125,8 +126,9 @@ export class DatasetFlows implements Dataset {
         const records = await sfdcManager.readMetadataAtScale('Flow', activeFlowIds, [ 'UNKNOWN_EXCEPTION' ], logger); // There are GACKs throwing that errors for some flows!
 
         // Scan flow versions with Lightning Flow Scanner
-        logger?.log(`Scanning ${records?.length} flows with Lightning Flow Scanner...`);
-        const lfsViolations = await LFSScanner.scanFlows(records, sfdcManager.caseSafeId);
+        const betaMode = OrgCheckGlobalParameter.getLfsBetaMode(parameters);
+        logger?.log(`Scanning ${records?.length} flows with Lightning Flow Scanner (betaMode=${betaMode})...`);
+        const lfsViolations = await LFSScanner.scanFlows(records, sfdcManager.caseSafeId, betaMode);
         logger?.log(`LFS gave us ${lfsViolations.size} violations.`);
 
         // Lets parse the flow versions by ourselves

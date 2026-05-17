@@ -99,6 +99,22 @@ export interface SfdcFlow extends DataWithScoreAndDependencies {
 }
 
 /**
+ * Represents a single LFS rule violation with its name and severity
+ */
+export interface LfsViolation {
+    /**
+     * @description The rule name (e.g. 'SOQLQueryInLoop')
+     * @type {string}
+     */
+    name: string;
+    /**
+     * @description The severity of the violation: 'error', 'warning', or 'note'
+     * @type {string}
+     */
+    severity: string;
+}
+
+/**
  * Represents a Flow Version
  */
 export interface SfdcFlowVersion extends DataWithoutScore {
@@ -237,9 +253,9 @@ export interface SfdcFlowVersion extends DataWithoutScore {
     recordTriggerType: string;
 
     /**
-     * @description LFS Violations (list of rule names) for this flow version
-     * @type {string[]}
+     * @description LFS Violations (list of violations with rule name and severity) for this flow version
+     * @type {LfsViolation[]}
      * @public
      */
-    lfsViolations: string[];
+    lfsViolations: LfsViolation[];
 }

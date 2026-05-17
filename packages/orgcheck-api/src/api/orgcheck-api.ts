@@ -234,7 +234,7 @@ export interface ApiIntf {
      * @returns {string} cachestamp of the data
      * @public
      */
-    cachestampData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string): string;
+    cachestampData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string, extraParams?: Map<string, unknown>): string;
 
     /**
      * @description Prepare data for a specific recipe. This method will retrieve the data from the org, compute the 
@@ -248,7 +248,7 @@ export interface ApiIntf {
      * @async
      * @public
      */
-    prepareData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string): Promise<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]>;
+    prepareData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string, extraParams?: Map<string, unknown>): Promise<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]>;
 
     /**
      * @description Serve data for a specific recipe. This method will format the data in a way that can be used by the UI.
@@ -287,5 +287,5 @@ export interface ApiIntf {
      * @param sobject 
      * @public
      */
-    cleanData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string): void;
+    cleanData(alias: RecipeAliases, namespace: string, sobjectType: string, sobject: string, extraParams?: Map<string, unknown>): void;
 }

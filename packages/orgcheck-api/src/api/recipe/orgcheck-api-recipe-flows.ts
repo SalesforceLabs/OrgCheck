@@ -4,8 +4,11 @@ import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
 import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
-import { SfdcFlow }from 'src/api/data/orgcheck-api-data-flow';
+import { SfdcFlow } from 'src/api/data/orgcheck-api-data-flow';
 import { FlowsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-flows';
+import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
+import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
+import { meetsMinSeverity } from 'src/api/core/salesforce/orgcheck-api-lfs-scanner';
 
 export class RecipeFlows implements ServedRecipe<SfdcFlow[], Table> {
 
@@ -18,31 +21,38 @@ export class RecipeFlows implements ServedRecipe<SfdcFlow[], Table> {
 
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
+     * @param {SimpleLoggerIntf} _logger - Logger
+     * @param {Map<string, unknown>} parameters - Parameters including LFS options
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
-    public ingredients(): Array<string | DatasetRunInformation> {
-        return [DatasetAliases.FLOWS];
+    public ingredients(_logger: SimpleLoggerIntf, parameters: Map<string, unknown>): Array<string | DatasetRunInformation> {
+        return [new DatasetRunInformation(
+            DatasetAliases.FLOWS,
+            `${DatasetAliases.FLOWS}-${OrgCheckGlobalParameter.getLfsBetaMode(parameters) ? 'beta' : 'stable'}`,
+            new Map([[OrgCheckGlobalParameter.LFS_BETA_MODE, OrgCheckGlobalParameter.getLfsBetaMode(parameters)]])
+        )];
     }
 
     /**
-     * @description List the parameters that this mix depends on on
-     * @returns {string[]} List of parameters that this mix dependes on
+     * @description List the parameters that this mix depends on
+     * @returns {string[]} List of parameters that this mix depends on
      * @public
      */
     public mixDependencies(): string[] {
-        return [];
+        return [OrgCheckGlobalParameter.LFS_BETA_MODE, OrgCheckGlobalParameter.LFS_MIN_SEVERITY];
     }
 
     /**
      * @description mix the ingredients all together and return the result
      * @param {Map<string, any>} ingredients - Records or information grouped by their alias in a Map
      * @param {SimpleLoggerIntf} _logger - Logger
+     * @param {Map<string, unknown>} parameters - Parameters including LFS severity filter
      * @returns {Promise<SfdcFlow[]>} Returns the mixture
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, unknown>): Promise<SfdcFlow[]> {
+    public async mix(ingredients: Map<string, unknown>, _logger: SimpleLoggerIntf, parameters: Map<string, unknown>): Promise<SfdcFlow[]> {
 
         // Get data
         const flows = ingredients.get(DatasetAliases.FLOWS) as Map<string, SfdcFlow>;
@@ -50,11 +60,19 @@ export class RecipeFlows implements ServedRecipe<SfdcFlow[], Table> {
         // Checking data and filter
         if (!flows) throw new Error(`RecipeFlows: Data from dataset alias 'FLOWS' was undefined.`);
 
+        const minSeverity = OrgCheckGlobalParameter.getLfsMinSeverity(parameters);
+
         // Filter data
         const array: SfdcFlow[] = [];
         await MediumProcessor.forEach(flows, async (flow: SfdcFlow) => {
             if (flow.isProcessBuilder === false) {
-                array.push(flow);
+                // Apply severity filter: keep the flow if it has no LFS violations, or if at least
+                // one violation meets the minimum severity threshold
+                if (minSeverity === OrgCheckGlobalParameter.LFS_SEVERITY_ALL ||
+                    !flow.currentVersionRef?.lfsViolations?.length ||
+                    flow.currentVersionRef.lfsViolations.some(v => meetsMinSeverity(v.severity, minSeverity))) {
+                    array.push(flow);
+                }
             }
         });
 
