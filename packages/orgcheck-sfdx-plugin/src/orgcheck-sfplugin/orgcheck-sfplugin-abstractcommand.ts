@@ -318,7 +318,7 @@ export abstract class OrgCheckSfPluginAbstractCommand extends SfCommand<CheckRes
       const jsonFilename = flags['json-file'];
       try {
         // Export JSON file
-        createFile(jsonFilename, JSON.stringify(output));
+        createFile(jsonFilename, JSON.stringify(output, (key, value) => { if (key.endsWith('Refs')) return undefined; return value; }, 2));
         // Log the success
         this.logSuccess(`File ${jsonFilename} created successfully with JSON format.`);
       } catch (error) {
