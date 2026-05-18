@@ -73,7 +73,7 @@ export class SalesforceError extends Error {
      * @public
      */
     constructor(message: string, public readonly code: string, public readonly contextInformation: unknown) {
-        super(message)
+        super(`[Code: ${code}] ${message}`);
     }
 }
 

@@ -1,7 +1,10 @@
+import { jest } from '@jest/globals';
+
 const jsforce: any = jest.mock('jsforce');
 
 let orgcheck_nbRecordsSoFarForCustomQueryMore = 0;
 let orgcheck_isProduction = true;
+let orgcheck_dailyApiUsage = 0;
 
 const __queryMock = jest.fn(async function (soql: string) {
 
@@ -103,12 +106,12 @@ const __queryMoreMock = jest.fn(async function (locator: string) {
   });
 });
 
-const __requestMock = jest.fn(async function (httpRequest) {
+const __requestMock = jest.fn(async function (httpRequest: { url?: string; body?: string }) {
   if (httpRequest?.url?.includes('.0/limits/recordCount')) {
     return Promise.resolve(0);
   }
   if (httpRequest?.url?.includes('.0/tooling/composite') || httpRequest?.url?.includes('.0/composite')) {
-    const body = JSON.parse(httpRequest.body);
+    const body = JSON.parse(httpRequest?.body ?? '{}') as { compositeRequest: { url: string }[] };
     return Promise.resolve({ 
       compositeResponse: body.compositeRequest.map((c: any) => {
         const parts = c.url.split('/');
@@ -125,19 +128,22 @@ const __requestMock = jest.fn(async function (httpRequest) {
       })
     });
   }
-  return Promise.reject('Request not supported')
+  if (httpRequest?.url?.includes('.0/tooling/runTestsAsynchronous')) {
+    return Promise.resolve('OK');
+  }
+  return Promise.reject(`Request not supported: ${httpRequest?.url ?? ''}`)
 });
 
 const __describeGlobalMock = jest.fn(async function () {
   return Promise.resolve({ sobjects: [] });
 });
 
-const __describeMock = jest.fn(async function (type: string) {
+const __describeMock = jest.fn(async function (sobjectDevName: string) {
   return Promise.resolve({
-    "keyPrefix": "001",
-    "label": `${type}`,
-    "labelPlural": `${type}s`,
-    "name": "Account",
+    "keyPrefix": "xyz",
+    "label": `Label`,
+    "labelPlural": `Labels`,
+    "name": sobjectDevName,
   });
 });
 
@@ -163,7 +169,8 @@ const __metadata_readMock = jest.fn(function (type: string, members: string[]) {
 
 jsforce.Connection = jest.fn().mockImplementation(() => {
   return {
-    setOrgType: (isProduction: boolean) => { orgcheck_isProduction = isProduction},
+    setOrgType: (isProduction: boolean) => { orgcheck_isProduction = isProduction },
+    setDailyApiUsage: (dailyApiUsage: number) => { orgcheck_dailyApiUsage = dailyApiUsage },
     query: __queryMock,
     queryMore: __queryMoreMock,
     request: __requestMock,
@@ -177,7 +184,8 @@ jsforce.Connection = jest.fn().mockImplementation(() => {
       query: __queryMock,
       queryMore: __queryMoreMock,
       request: __requestMock
-    }
+    },
+    get limitInfo() { return { apiUsage: { used: orgcheck_dailyApiUsage, limit: 100 } }; },
   };
 });
 

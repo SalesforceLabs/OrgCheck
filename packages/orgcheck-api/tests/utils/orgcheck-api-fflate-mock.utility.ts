@@ -1,3 +1,5 @@
+import { jest } from '@jest/globals';
+
 const fflate: any = jest.mock('fflate');
 
 fflate.zlibSync = jest.fn(function (input, _options) {

@@ -12,7 +12,7 @@ describe('tests.api.API', () => {
 
     it('should be instantiable and usable in production', async () => {
       let hadError = false;
-      let err;
+      let err: Error | undefined = undefined;
       try {
         const api = createAPIforUnitTests(true);
         expect(api).not.toBeNull();
@@ -75,7 +75,7 @@ describe('tests.api.API', () => {
 
       // Trying to call a getter and it should not fail
       let hadError = false;
-      let err;
+      let err: Error | undefined = undefined;
       try {
         await api.getPackages();
       } catch(error) {
@@ -98,7 +98,7 @@ describe('tests.api.API', () => {
 
       // Trying to call a getter at this point and it SHOULD fail
       let hadError = false;
-      let err;
+      let err: Error | undefined = undefined;
       try {
         await api.getPackages();
       } catch(error) {
@@ -108,7 +108,7 @@ describe('tests.api.API', () => {
       }
       expect(hadError).toBe(true);
       expect(err).toBeDefined();
-      expect(err.message).toBe('You must accept the usage terms before using Org Check in this environment.');
+      expect(err?.message).toBe('You must accept the usage terms before using Org Check in this environment.');
 
       // We then accept the terms explicitely
       api.acceptUsageTermsManually();
@@ -131,6 +131,58 @@ describe('tests.api.API', () => {
       }
       expect(hadError).toBe(false);
       expect(err).not.toBeDefined();
+    });
+  });
+
+  describe('Test API with different daily API limits', () => {
+    globalThis.jsforce = jsforce;
+    globalThis.fflate = fflate;
+
+    it('should be instantiable and usable with a green daily API limit', async () => {
+      const api = createAPIforUnitTests(false, 20);
+      expect(api).toBeDefined();
+      // measure number 1 before calling anything
+      const measure1 = api.dailyApiRequestLimitInformation;
+      expect(measure1).toBeDefined();
+      expect(measure1.currentUsageRatio).toBe(0);
+      expect(measure1.currentUsageRatio < measure1.yellowThresholdPercentage).toBeTruthy();
+      expect(measure1.currentUsageRatio < measure1.redThresholdPercentage).toBeTruthy();
+      expect(measure1.isGreenZone).toBeTruthy();
+      expect(measure1.isYellowZone).toBeFalsy();
+      expect(measure1.isRedZone).toBeFalsy();
+      // Use the api hoping that Daily API Limit will not be reached (all green)
+      await api.getOrganizationInformation();
+      // measure number 2 before calling anything
+      const measure2 = api.dailyApiRequestLimitInformation;
+      expect(measure2).toBeDefined();
+      expect(measure2.currentUsageRatio).toBe(0.20);
+      expect(measure2.currentUsageRatio < measure2.yellowThresholdPercentage).toBeTruthy();
+      expect(measure2.currentUsageRatio < measure2.redThresholdPercentage).toBeTruthy();
+      expect(measure2.isGreenZone).toBeTruthy();
+      expect(measure2.isYellowZone).toBeFalsy();
+      expect(measure2.isRedZone).toBeFalsy();
+    });
+
+    it('should NOT be instantiable and usable with a red daily API limit (should throw an error)', async () => {
+      const api = createAPIforUnitTests(false, 95);
+      expect(api).toBeDefined();
+      // measure number 1 before calling anything
+      const measure1 = api.dailyApiRequestLimitInformation;
+      expect(measure1).toBeDefined();
+      expect(measure1.currentUsageRatio).toBe(0);
+      expect(measure1.currentUsageRatio < measure1.yellowThresholdPercentage).toBeTruthy();
+      expect(measure1.currentUsageRatio < measure1.redThresholdPercentage).toBeTruthy();
+      expect(measure1.isGreenZone).toBeTruthy();
+      expect(measure1.isYellowZone).toBeFalsy();
+      expect(measure1.isRedZone).toBeFalsy();
+      // Use the api hoping that Daily API Limit will be reached (all red)
+      try {
+        await api.getOrganizationInformation();
+      } catch(error) {
+        expect(error).toBeDefined();
+        expect(error.message).toBe('[Code: WATCH_DOG] The Daily API Request limit has been reached. We cannot continue.');
+        expect(error.contextInformation).toBeDefined();
+      }
     });
   });
 });

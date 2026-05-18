@@ -7,13 +7,13 @@ describe('tests.api.unit.SalesforceManager', () => {
 
   globalThis.jsforce = jsforce;
   const simpleLogger = new SimpleLoggerMock_DoingNothing();
-  
+  const manager = new SalesforceManager({
+    authenticationOptions: {
+      accessToken: 'ABC'
+    }
+  });
+
   describe('soqlQuery use cases', () => {
-    const manager = new SalesforceManager({
-      authenticationOptions: {
-        accessToken: 'ABC'
-      }
-    });
     it('checks if the salesforce manager implementation runs soqlQuery correctly with a good query', async () => {
       const results = await manager.soqlQuery([{ string: 'SELECT Id FROM Account #Records=10# #Wait900ms#' }], simpleLogger);
       expect(results).toBeDefined();
@@ -120,12 +120,6 @@ describe('tests.api.unit.SalesforceManager', () => {
   });
 
   describe('metadataApi use cases', () => {
-    const manager = new SalesforceManager({
-      authenticationOptions: {
-        accessToken: 'ABC'
-      }
-    });
-
     it('checks if the salesforce manager implementation runs readMetadata correctly with explicit members', async () => {
       const results = await manager.readMetadata([{ type: 'ProfilePasswordPolicy #Members=4#', members: [ 'member0', 'member999' ] }], simpleLogger);
       expect(results).toBeDefined();
@@ -148,17 +142,44 @@ describe('tests.api.unit.SalesforceManager', () => {
   });
 
   describe('readMetadataAtScale use cases', () => {
-    const manager = new SalesforceManager({
-      authenticationOptions: {
-        accessToken: 'ABC'
-      }
-    });
-
     it('checks if the salesforce manager implementation runs readMetadataAtScale correctly', async () => {
       const results = await manager.readMetadataAtScale('PageLayout', ['A','B','C'], [], simpleLogger);
       expect(results).toBeDefined();
       expect(results instanceof Array).toBeTruthy();
       expect(results?.length).toBe(3);
+    });
+  });
+
+  describe('describe use cases', () => {
+    it('checks if the salesforce manager implementation runs describe correctly', async () => {
+      const result = await manager.describe('Account', simpleLogger);
+      expect(result).toBeDefined();
+      expect(result.name).toBe('Account');
+    });
+  });
+
+  describe('describeGlobal use cases', () => {
+    it('checks if the salesforce manager implementation runs describeGlobal correctly', async () => {
+      const results = await manager.describeGlobal(simpleLogger);
+      expect(results).toBeDefined();
+      expect(results instanceof Array).toBeTruthy();
+      expect(results?.length).toBe(1); // mock is returning an empty array but we artificially added the Activity object
+      expect(results[0].name).toBe('Activity');
+    });
+  });
+
+  describe('recordCount use cases', () => {
+    it('checks if the salesforce manager implementation runs recordCount correctly', async () => {
+      const result = await manager.recordCount('Account', simpleLogger);
+      expect(result).toBeDefined();
+      expect(result).toBe(0);
+    });
+  });
+
+  describe('runAllTests use cases', () => {
+    it('checks if the salesforce manager implementation runs runAllTests correctly', async () => {
+      const result = await manager.runAllTests(simpleLogger);
+      expect(result).toBeDefined();
     });
   });
 });

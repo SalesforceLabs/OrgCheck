@@ -8,12 +8,20 @@ import { SalesforceManagerSetup } from 'src/api/core/setup/orgcheck-api-setup-sa
 import { LargeProcessor } from 'src/api/core/orgcheck-api-processor';
 import { DataDependencies, DataDependency } from 'src/api/core/data/orgcheck-api-data-dependencies';
 
+/**
+ * @description JsForce Query Result
+ * @private
+ */
 interface JsForceQueryResult {
     records: Record<string, unknown>[];
     done: boolean;
     nextRecordsUrl?: string;
 }
 
+/**
+ * @description JsForce Connection
+ * @private
+ */
 interface JsForceConnection {
     limitInfo?: { apiUsage?: { used?: number; limit?: number } };
     query(soql: string, opts?: { autoFetch?: boolean; headers?: Record<string, string> }): Promise<JsForceQueryResult>;
@@ -34,6 +42,10 @@ interface JsForceConnection {
     };
 }
 
+/**
+ * @description JsForce Library
+ * @private
+ */
 interface JsForceLib {
     Connection: new(opts: Record<string, unknown>) => JsForceConnection;
 }
@@ -385,18 +397,16 @@ export class SalesforceManager implements SalesforceManagerIntf {
                 // by pass this error! and return an empty array
                 return [];
             } else {
+                // Add some context information to the error
+                error.contextInformation = {
+                    'SoqlQuery': query ?? '(empty)',
+                    'Tooling': useTooling,
+                    'ByPasses': byPasses?.join(', ') ?? '(empty)',
+                    'Cause': error?.message ?? '(empty)',
+                    'Where': 'SalesforceManagerImpl.soqlQuery/_standardSOQLQuery'
+                };
                 // Throw the error
-                throw new SalesforceError(
-                    `There was an error while running a SOQL query with the standard queryMore`,
-                    error.errorCode,
-                    { 
-                        'SoqlQuery': query ?? '(empty)',
-                        'Tooling': useTooling,
-                        'ByPasses': byPasses?.join(', ') ?? '(empty)',
-                        'Cause': error?.message ?? '(empty)',
-                        'Where': 'SalesforceManagerImpl.soqlQuery/_standardSOQLQuery'
-                    }
-                );
+                throw error;
             }
         }
     }
@@ -497,18 +507,16 @@ export class SalesforceManager implements SalesforceManagerIntf {
             // return the records
             return allRecords;
         } catch (error) {
+            // Add some context information to the error
+            error.contextInformation = {
+                'SoqlQuery': query ?? '(empty)',
+                'Tooling': useTooling,
+                'Field': field ?? '(empty)',
+                'Cause': error?.message ?? '(empty)',
+                'Where': 'SalesforceManagerImpl.soqlQuery/_customSOQLQuery'
+            };
             // Throw the error
-            throw new SalesforceError(
-                `There was an error while running a SOQL query with the custom queryMore`,
-                error.errorCode,
-                { 
-                    'SoqlQuery': query ?? '(empty)',
-                    'Tooling': useTooling,
-                    'Field': field ?? '(empty)',
-                    'Cause': error?.message ?? '(empty)',
-                    'Where': 'SalesforceManagerImpl.soqlQuery/_customSOQLQuery'
-                }
-            );
+            throw error;
         }
     }
 
@@ -597,17 +605,15 @@ export class SalesforceManager implements SalesforceManagerIntf {
                     // by pass this error! and return an empty array
                     return [];
                 } else {
+                    // Add some context information to the error
+                    error.contextInformation = {
+                        'SoslQuery': query.string ?? '(empty)',
+                        'ByPasses': query.byPasses?.join(', ') ?? '(empty)',
+                        'Cause': error?.message ?? '(empty)',
+                        'Where': 'SalesforceManagerImpl.soslQuery'
+                    };
                     // Throw the error
-                    throw new SalesforceError(
-                        `There was an error while running a SOSL query`,
-                        error.errorCode,
-                        { 
-                            'SoslQuery': query.string ?? '(empty)',
-                            'ByPasses': query.byPasses?.join(', ') ?? '(empty)',
-                            'Cause': error?.message ?? '(empty)',
-                            'Where': 'SalesforceManagerImpl.soslQuery'
-                        }
-                    );
+                    throw error;
                 }
             }
             return records?.searchRecords || []; // return the records or an empty array if no records found
@@ -778,17 +784,14 @@ export class SalesforceManager implements SalesforceManagerIntf {
                 } catch (error) {
                     logger?.log(`Metadata.list error: ${JSON.stringify(error ?? {})}`);
                     // We reject the promise with the current error and additional context information
+                    error.contextInformation = {
+                        'Type': metadata.type ?? '(empty)',
+                        'ApiVersion': this.apiVersion,
+                        'Cause': error?.message ?? '(empty)',
+                        'Where': 'SalesforceManagerImpl.readMetadata'
+                    };
                     // Throw the error
-                    throw new SalesforceError(
-                        `There was an error while calling Metadata API to get a list of metadata.`,
-                        'METADATA_LIST',
-                        { 
-                            'Type': metadata.type ?? '(empty)', 
-                            'ApiVersion': this.apiVersion,
-                            'Cause': JSON.stringify(error ?? {}) || 'N/A',
-                            'Where': 'SalesforceManagerImpl.readMetadata'
-                        }
-                    );
+                    throw error;
                 }
             })
         );
@@ -818,17 +821,16 @@ export class SalesforceManager implements SalesforceManagerIntf {
                         response.get(metadata.type).push(... MAKE_IT_AN_ARRAY(members));
                     } catch (error) {
                         logger?.log(`Metadata.read error: ${JSON.stringify(error ?? {})}`);
-                        throw new SalesforceError(
-                            `There was an error while calling Metadata API to read a list of metadata.`,
-                            'METADATA_READ',
-                            { 
-                                'Type': metadata.type ?? '(empty)', 
-                                'PendingMembers': JSON.stringify(metadata?.members ?? []) || '[]',
-                                'MembersInProcess': JSON.stringify(currentMembers ?? []) || '[]',
-                                'Cause': JSON.stringify(error ?? {}) || 'N/A',
-                                'Where': 'SalesforceManagerImpl.readMetadata'
-                            }
-                        );
+                        // Add some context information to the error
+                        error.contextInformation = {
+                            'Type': metadata.type ?? '(empty)',
+                            'PendingMembers': JSON.stringify(metadata?.members ?? []) || '[]',
+                            'MembersInProcess': JSON.stringify(currentMembers ?? []) || '[]',
+                            'Cause': error?.message ?? '(empty)',
+                            'Where': 'SalesforceManagerImpl.readMetadata'
+                        };
+                        // Throw the error
+                        throw error;
                     }
                 });
             }

@@ -98,18 +98,10 @@ export class SalesforceWatchDog {
      * @param {() => { used: number, max: number }} apiLimitExtractor - How we extract the API Limit information from Salesforce.
      * @public
      */
-    constructor(apiLimitExtractor: () => { used: number; max: number; }) {
-        this._apiLimitExtractor = apiLimitExtractor;
+    constructor(private readonly apiLimitExtractor: () => { used: number; max: number; }) {
         this._lastRequestToSalesforce = undefined;
         this._lastApiUsage = new SalesforceUsageInformation();
     }
-
-    /**
-     * @description Function that knows how to return the current API limit usage
-     * @type {() => { used: number, max: number }}
-     * @private
-     */
-    private _apiLimitExtractor: () => { used: number; max: number; };
 
     /**
      * @description Timestamp of the last request we have made to Salesforce.
@@ -159,7 +151,7 @@ export class SalesforceWatchDog {
      * @public
      */
     public afterRequest(callback?: (error: Error) => void) {
-        const apiUsage = this._apiLimitExtractor();
+        const apiUsage = this.apiLimitExtractor();
         if (apiUsage) {
             this._lastApiUsage.currentUsageRatio = apiUsage.used / apiUsage.max;
             this._lastApiUsage.currentUsagePercentage = RATIO_TO_PERCENTAGE(this._lastApiUsage.currentUsageRatio); 

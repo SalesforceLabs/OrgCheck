@@ -8,16 +8,6 @@ import { GlobalViewAsTable } from 'src/api/recipecollection/orgcheck-api-recipe-
 import { SimpleLoggerIntf } from '../logger/orgcheck-api-logger';
 
 /**
- * @description Recipe manager error class
- */
-export class RecipeManagerError extends Error {
-    
-    constructor(public readonly recipe: RecipeAliases, message: string, public readonly cause?: Error) {
-        super(message);
-    }
-}
-
-/**
  * @description Recipe Manager interface
  */ 
 export interface RecipeManagerIntf {
@@ -32,7 +22,7 @@ export interface RecipeManagerIntf {
      * @param {Map<string, any>} parameters - List of values to pass to the recipe
      * @param {SimpleLoggerIntf} [logger] - Simple logger for this task (optional)
      * @returns {Promise<DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean>| DataCollectionStatisticsIntf[]>} Returns the mixture
-     * @throws {RecipeManagerError}
+     * @throws {TypeError}
      * @async
      * @public
      */
@@ -44,7 +34,7 @@ export interface RecipeManagerIntf {
      * @param {DataWithScore | DataWithScore[] | DataMatrixIntf | Map<string, boolean> | DataCollectionStatisticsIntf[]} [mixture] - The mixture
      * @param {SimpleLoggerIntf} [logger] - Simple logger for this task (optional)
      * @returns {Promise<Table | SfdcObjectAsTable | GlobalViewAsTable | Table[]>} Returns the mixture as a table
-     * @throws {RecipeManagerError}
+     * @throws {TypeError}
      * @async
      * @public
      */
@@ -56,7 +46,7 @@ export interface RecipeManagerIntf {
      * @param {Table | SfdcObjectAsTable | GlobalViewAsTable | Table[]} plate - The plate to serve to go
      * @param {SimpleLoggerIntf} [logger] - Simple logger for this task (optional)
      * @returns {Promise<ExportedTable | ExportedTable[]>} Returns the mixture as to go
-     * @throws {RecipeManagerError}
+     * @throws {TypeError}
      * @async
      * @public
      */
@@ -77,7 +67,7 @@ export interface RecipeManagerIntf {
      *    - Step 2. Clean the given datasets
      * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map<string, any>} [parameters] - List of values to pass to the recipe
-     * @throws {RecipeManagerError}
+     * @throws {TypeError}
      * @public
      */
     clean(alias: string, parameters?: Map<string, unknown>): void;

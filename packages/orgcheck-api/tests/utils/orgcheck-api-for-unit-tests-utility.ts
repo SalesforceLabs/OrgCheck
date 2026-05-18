@@ -3,9 +3,10 @@ import { LoggerSetupMock_DoingNothing } from 'tests/utils/orgcheck-api-logger-mo
 import { StorageSetupMock_BasedOnMap } from 'tests/utils/orgcheck-api-storage-mock.utility';
 import jsforce from './orgcheck-api-jsforce-mock.utility';
 
-export const createAPIforUnitTests = (isProduction: boolean) => {
+export const createAPIforUnitTests = (isProduction: boolean, dailyApiLimit?: number) => {
   const connection = jsforce.Connection();
   connection.setOrgType(isProduction);
+  connection.setDailyApiUsage(dailyApiLimit ?? 0);
   const api = ApiFactory.create({ 
     logSettings: new LoggerSetupMock_DoingNothing(),
     salesforce: { connection },
