@@ -8,7 +8,10 @@ import { SfdcFlow } from 'src/api/data/orgcheck-api-data-flow';
 import { FlowsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-tabledef-flows';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
-import { meetsMinSeverity } from 'src/api/core/salesforce/orgcheck-api-lfs-scanner';
+
+const SEVERITY_ORDER: Record<string, number> = { error: 3, warning: 2, note: 1 };
+const meetsMinSeverity = (severity: string, min: string) =>
+    !min || min === '*' || (SEVERITY_ORDER[severity] ?? 0) >= (SEVERITY_ORDER[min] ?? 0);
 
 export class RecipeFlows implements ServedRecipe<SfdcFlow[], Table> {
 

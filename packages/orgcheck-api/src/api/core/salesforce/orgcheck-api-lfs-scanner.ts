@@ -1,20 +1,6 @@
 /**
  * @description Lightning Flow Scanner integration for OrgCheck. Scans flows using the LFS_Core.js static resource
  */
-
-const SEVERITY_ORDER: Record<string, number> = { error: 3, warning: 2, note: 1 };
-
-/**
- * @description Returns true if violationSeverity meets or exceeds the minimum required severity
- * @param {string} violationSeverity - The severity of the individual violation
- * @param {string} minSeverity - The minimum severity threshold ('error', 'warning', 'note', or '*' for all)
- * @returns {boolean}
- */
-export function meetsMinSeverity(violationSeverity: string, minSeverity: string): boolean {
-    if (!minSeverity || minSeverity === '*') return true;
-    return (SEVERITY_ORDER[violationSeverity] ?? 0) >= (SEVERITY_ORDER[minSeverity] ?? 0);
-}
-
 export class LFSScanner {
 
     /**
