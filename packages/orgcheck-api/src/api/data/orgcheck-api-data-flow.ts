@@ -99,6 +99,14 @@ export interface SfdcFlow extends DataWithScoreAndDependencies {
 }
 
 /**
+ * Represents a single LFS rule violation with its name and severity
+ */
+export interface LfsViolation {
+    name: string;
+    severity: string;
+}
+
+/**
  * Represents a Flow Version
  */
 export interface SfdcFlowVersion extends DataWithoutScore {
@@ -237,9 +245,9 @@ export interface SfdcFlowVersion extends DataWithoutScore {
     recordTriggerType: string;
 
     /**
-     * @description LFS Violations (list of rule names) for this flow version
-     * @type {string[]}
+     * @description LFS Violations for this flow version, filtered to warning severity and above by the LFS core
+     * @type {LfsViolation[]}
      * @public
      */
-    lfsViolations: string[];
+    lfsViolations: LfsViolation[];
 }
