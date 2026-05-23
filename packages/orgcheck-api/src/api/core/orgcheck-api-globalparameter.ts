@@ -240,6 +240,6 @@ export class OrgCheckGlobalParameter {
      * @public
      */
     static getLfsMinSeverity(parameters: Map<string, unknown>): string {
-        return (parameters?.get(LFS_MIN_SEVERITY) as string) ?? LFS_SEVERITY_ALL;
+        return (parameters?.get(LFS_MIN_SEVERITY) as string) ?? 'warning';
     }
 }

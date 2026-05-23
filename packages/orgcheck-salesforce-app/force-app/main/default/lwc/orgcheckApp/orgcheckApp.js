@@ -145,13 +145,6 @@ export default class OrgcheckApp extends LightningElement {
     @track exportBasenames = { };
 
     /**
-     * @description LFS options for the Flows section
-     * @type {{ betaMode: boolean, minSeverity: string }}
-     * @public
-     */
-    @track lfsOptions = { betaMode: false, minSeverity: '*' }
-
-    /**
      * @description Is something is loading?
      * @type {boolean}
      * @public
@@ -486,7 +479,7 @@ export default class OrgcheckApp extends LightningElement {
                 key: 'F', 
                 title: '🤖 Automations',
                 items: { 
-                    FLOWS:         { key: '1C', data: 'flows', recipe: Recipes.FLOWS, storeData: true, getExtraParams: (that) => that._getLfsExtraParams() },
+                    FLOWS:         { key: '1C', data: 'flows', recipe: Recipes.FLOWS },
                     PBS:           { key: '1D', data: 'processbuilders', recipe: Recipes.PROCESS_BUILDERS },
                     WORKFLOWS:     { key: '1E', data: 'workflows', recipe: Recipes.WORKFLOWS },
                 }
@@ -993,47 +986,6 @@ export default class OrgcheckApp extends LightningElement {
         }
     }
 
-    /**
-     * @description Handle the LFS beta mode toggle in the Flows section
-     * @param {Event} event - Change event from the checkbox
-     * @public
-     * @async
-     */
-    async handleLfsBetaModeChange(event) {
-        try {
-            this.lfsOptions = { ...this.lfsOptions, betaMode: event.target.checked };
-            await this._async_updateCurrentData(true);
-        } catch (error) {
-            this._private_properties.modal?.showErrors('handleLfsBetaModeChange', error);
-        }
-    }
-
-    /**
-     * @description Handle the LFS minimum severity filter change in the Flows section
-     * @param {Event} event - Change event from the select
-     * @public
-     * @async
-     */
-    async handleLfsMinSeverityChange(event) {
-        try {
-            this.lfsOptions = { ...this.lfsOptions, minSeverity: event.target.value };
-            await this._async_updateCurrentData(false);
-        } catch (error) {
-            this._private_properties.modal?.showErrors('handleLfsMinSeverityChange', error);
-        }
-    }
-
-    /**
-     * @description Build the LFS extra params Map for prepareData / cleanData / cachestampData
-     * @returns {Map<string, unknown>}
-     * @private
-     */
-    _getLfsExtraParams() {
-        return new Map([
-            ['lfsbetamode', this.lfsOptions.betaMode],
-            ['lfsminseverity', this.lfsOptions.minSeverity]
-        ]);
-    }
 
     /**
      * @description Method called when the user ask to log a specific cache item in the console

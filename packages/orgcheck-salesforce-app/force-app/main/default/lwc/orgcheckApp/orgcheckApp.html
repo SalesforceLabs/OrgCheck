@@ -859,34 +859,6 @@
                                     export-basename={exportBasenames.chattergroups}></c-orgcheck-extended-datatable>
                             </div>
                             <div data-key="1C" class="slds-hide slds-var-p-horizontal_small">
-                                <div class="slds-grid slds-grid_vertical-align-center slds-var-m-bottom_small slds-gutters_small">
-                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-3">
-                                        <div class="slds-form-element">
-                                            <label class="slds-form-element__label slds-text-body_small">
-                                                Lightning Flow Scanner options
-                                            </label>
-                                            <div class="slds-form-element__control slds-grid slds-grid_vertical-align-center slds-gutters_x-small">
-                                                <div class="slds-col">
-                                                    <span class="slds-checkbox">
-                                                        <input type="checkbox" id="lfs-beta-mode" checked={lfsOptions.betaMode} onchange={handleLfsBetaModeChange} />
-                                                        <label class="slds-checkbox__label" for="lfs-beta-mode">
-                                                            <span class="slds-checkbox_faux"></span>
-                                                            <span class="slds-form-element__label slds-text-body_small">Include beta rules</span>
-                                                        </label>
-                                                    </span>
-                                                </div>
-                                                <div class="slds-col">
-                                                    <select class="slds-select" onchange={handleLfsMinSeverityChange}>
-                                                        <option value="*" selected={lfsOptions.minSeverity === '*'}>All severities</option>
-                                                        <option value="error" selected={lfsOptions.minSeverity === 'error'}>Errors only</option>
-                                                        <option value="warning" selected={lfsOptions.minSeverity === 'warning'}>Warnings &amp; above</option>
-                                                        <option value="note" selected={lfsOptions.minSeverity === 'note'}>Notes &amp; above</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                                 <c-orgcheck-extended-datatable
                                     empty-message="There is no flow to show."
                                     show-search
