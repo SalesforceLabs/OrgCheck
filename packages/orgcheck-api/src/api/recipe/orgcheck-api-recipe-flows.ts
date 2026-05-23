@@ -9,10 +9,6 @@ import { FlowsTableDefinition } from 'src/ui/table/definitions/orgcheck-ui-table
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { OrgCheckGlobalParameter } from 'src/api/core/orgcheck-api-globalparameter';
 
-const SEVERITY_ORDER: Record<string, number> = { error: 3, warning: 2, note: 1 };
-const meetsMinSeverity = (severity: string, min: string) =>
-    !min || min === '*' || (SEVERITY_ORDER[severity] ?? 0) >= (SEVERITY_ORDER[min] ?? 0);
-
 export class RecipeFlows implements ServedRecipe<SfdcFlow[], Table> {
 
     /**
@@ -25,7 +21,7 @@ export class RecipeFlows implements ServedRecipe<SfdcFlow[], Table> {
     /**
      * @description List all ingredients (aka dataset aliases or datasetRunInfos) that Org Check will use in this recipe
      * @param {SimpleLoggerIntf} _logger - Logger
-     * @param {Map<string, unknown>} parameters - Parameters including LFS options
+     * @param {Map<string, unknown>} parameters - Parameters
      * @returns {Array<string | DatasetRunInformation>} The ingredients to use in this recipe
      * @public
      */
@@ -43,19 +39,18 @@ export class RecipeFlows implements ServedRecipe<SfdcFlow[], Table> {
      * @public
      */
     public mixDependencies(): string[] {
-        return [OrgCheckGlobalParameter.LFS_BETA_MODE, OrgCheckGlobalParameter.LFS_MIN_SEVERITY];
+        return [OrgCheckGlobalParameter.LFS_BETA_MODE];
     }
 
     /**
      * @description mix the ingredients all together and return the result
      * @param {Map<string, any>} ingredients - Records or information grouped by their alias in a Map
      * @param {SimpleLoggerIntf} _logger - Logger
-     * @param {Map<string, unknown>} parameters - Parameters including LFS severity filter
      * @returns {Promise<SfdcFlow[]>} Returns the mixture
      * @async
      * @public
      */
-    public async mix(ingredients: Map<string, unknown>, _logger: SimpleLoggerIntf, parameters: Map<string, unknown>): Promise<SfdcFlow[]> {
+    public async mix(ingredients: Map<string, unknown>, _logger: SimpleLoggerIntf): Promise<SfdcFlow[]> {
 
         // Get data
         const flows = ingredients.get(DatasetAliases.FLOWS) as Map<string, SfdcFlow>;
@@ -63,19 +58,11 @@ export class RecipeFlows implements ServedRecipe<SfdcFlow[], Table> {
         // Checking data and filter
         if (!flows) throw new Error(`RecipeFlows: Data from dataset alias 'FLOWS' was undefined.`);
 
-        const minSeverity = OrgCheckGlobalParameter.getLfsMinSeverity(parameters);
-
         // Filter data
         const array: SfdcFlow[] = [];
         await MediumProcessor.forEach(flows, async (flow: SfdcFlow) => {
             if (flow.isProcessBuilder === false) {
-                // Apply severity filter: keep the flow if it has no LFS violations, or if at least
-                // one violation meets the minimum severity threshold
-                if (minSeverity === OrgCheckGlobalParameter.LFS_SEVERITY_ALL ||
-                    !flow.currentVersionRef?.lfsViolations?.length ||
-                    flow.currentVersionRef.lfsViolations.some(v => meetsMinSeverity(v.severity, minSeverity))) {
-                    array.push(flow);
-                }
+                array.push(flow);
             }
         });
 
