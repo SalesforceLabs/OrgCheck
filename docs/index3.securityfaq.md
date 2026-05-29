@@ -9,27 +9,30 @@ permalink: /security/
 ## What data is stored in Org Check?
 
 - At this point of time, the Org Check application is only analyzing configuration data in the Salesforce org where it is installed.
-- We usually call this data as “metadata” such as list of Apex Classes, SObjects definition, Custom fields, etc. 
+- We usually call this data as "metadata" such as list of Apex Classes, SObjects definition, Custom fields, etc.
 - We do not collect your data such as Account, Contact, Opportunity or any custom object you may have created in your org.
-- The metadata types that are gathered (as of April 2026) by the application using Salesforce APIs from the org where the app is installed are:
-  * Home: InstalledSubscriberPackage, Organization
-  * ⚽ Data model: Field, FieldSet, Layout, Limit, ValidationRule, WebLink, CustomField, EntityDefinition, SharingRules
-  * 👮 Security and Access: User, UserPermissionAccess, Profile, PermissionSet, PermissionSetAssignment, AppMenuItem, SetupEntityAccess, ReleaseUpdate
-  * 🐇 Boxes: UserRole, Group
+- The metadata types that are gathered (as of May 2026) by the application using Salesforce APIs from the org where the app is installed are:
+  * 🏠 Home: InstalledSubscriberPackage, Organization
+  * ⚽ Data model: CustomField, CustomObject, EntityDefinition, Field, FieldDefinition, FieldSet, Layout, Limit, ProfileLayout, RecordType, SharingRules, ValidationRule, WebLink
+  * 👮 Security and Access: AppMenuItem, FieldPermissions, ObjectPermissions, PermissionSet, PermissionSetAssignment, PermissionSetGroupComponent, PermissionSetLicense, Profile, ProfilePasswordPolicy, ReleaseUpdate, SetupEntityAccess, User, UserPermissionAccess
+  * 🐇 Boxes: Group, LoginHistory, UserRole
   * 🤖 Automations: Flow, FlowDefinition, WorkflowRule
   * 🎁 Setting: ExternalString
-  * 🥐 User Interface: ApexComponent, ApexPage, AuraDefinitionBundle, LightningComponentBundle, FlexiPage
-  * 🔥 Programmatic: ApexClass, ApexCodeCoverage, ApexCodeCoverageAggregate, AsyncApexJob, ApexTrigger
+  * 🥐 User Interface: ApexComponent, ApexPage, AuraDefinitionBundle, CustomTab, FlexiPage, Homepagecomponent, LightningComponentBundle
+  * 🔥 Programmatic: ApexClass, ApexCodeCoverage, ApexCodeCoverageAggregate, ApexTestResult, ApexTrigger, AsyncApexJob, MetadataComponentDependency
+  * 💬 Collaboration: CollaborationGroup
+  * 📚 Knowledge: KnowledgeArticleVersion
+  * 📊 Content and Analytics: Dashboard, Document, EmailTemplate, Report, StaticResource
 
 ## Is the data processed outside of my region or Country?
 
-- The metadata (and not the data) is gathered from the user’s browser using Javascript library that is nested in the Org Check application, and then processed by the user’s browser and potentially cached in the same browser.
+- The metadata (and not the data) is gathered from the user's browser using Javascript library that is nested in the Org Check application, and then processed by the user's browser and potentially cached in the same browser.
 - No external storage is used, not even a custom object in the org.
 - If the metadata is processed outside of your region or country it is because the user you gave access to your org and the app comes from another region or country.
 
 ## What are the flow in Org Check (data processing) ? Can you share a flow / Architecture diagram ?
 
-- Org Check is using a Javascript library called “JSForce” (v3.10.14) to connect to the local Salesforce org where it is installed. Note that this library is also used by Salesforce for its own SF CLI plugin technology.
+- Org Check is using a Javascript library called "JSForce" (v3.10.14) to connect to the local Salesforce org where it is installed. Note that this library is also used by Salesforce for its own SF CLI plugin technology.
 - This library is part of the package so there is no dependencies with other external site that may host this library. Once the application is installed in your org, the library is hosted in your org.
 - Then Org Check uses the following standard Salesforce APIs (limited to the org where it is installed) via the JSForce library:
   * REST API
@@ -46,10 +49,11 @@ permalink: /security/
   * InstallPackaging
 - So basically the flows are rather the same from on tab to the other:
   * get a list of metadata from the Salesforce org using the appropriate Salesforce API
-  * if the data is cached and not to “old” then use it (to avoid impacting the Request API limit)
-  * compute on the fly the aggregated data that is needed in the tab. The process is within the Javascript code in the user’s browser. Important: we do not alter the org metadata nor data at this point or any point at all.
-  * our secret sauce is to compute a score based on best practices and anti-pattern detection so that we show the configuration that needs to be “corrected”. A blank score or `0` means the item is considered good by Org Check. Each detected anti-pattern increments the score by `1`, so a score of `4` means there are `4` anti-patterns worth reviewing on that item.
-- Export feature is available in some tabs. This uses a library called “SheetJS” also part of the package. That data is not leaving your org or your browser. The Excel file is generated by Javascript on your browser and once finished available in your Download folder of your browser.
+  * if the data is cached and not to "old" then use it (to avoid impacting the Request API limit)
+  * compute on the fly the aggregated data that is needed in the tab. The process is within the Javascript code in the user's browser. Important: we do not alter the org metadata nor data at this point or any point at all.
+  * our secret sauce is to compute a score based on best practices and anti-pattern detection so that we show the configuration that needs to be "corrected". A blank score or `0` means the item is considered good by Org Check. Each detected anti-pattern increments the score by `1`, so a score of `4` means there are `4` anti-patterns worth reviewing on that item.
+- Export feature is available in some tabs. This uses a library called "SheetJS" also part of the package. That data is not leaving your org or your browser. The Excel file is generated by Javascript on your browser and once finished available in your Download folder of your browser.
+- For Flow violation scanning, Org Check uses the open-source "Lightning Flow Scanner" (LFS) library, also bundled as part of the package. It runs entirely in your browser and does not send any data outside your org.
 
 ### What about the Org Check sf CLI plugin?
 
@@ -62,7 +66,7 @@ permalink: /security/
 
 ## How org check is impacting my own org ? API Limits, Objects, Apex,...
 
-- The usage of this application impacts only one limit in your salesforce org which is called '“Daily API Request limit”.
+- The usage of this application impacts only one limit in your salesforce org which is called '"Daily API Request limit".
 - All calls to the Salesforce APIs on your org by the application is preceded with a check if that Daily API Request limit has reached a certain percentage.
 - From 0% to 70%, the application will call the API.
 - When the limit reaches 70% up to 90%, the application will call the API but will also show a warning to the user.
@@ -75,14 +79,16 @@ permalink: /security/
 - Org Check is open source.
 - The code is available on GitHub: https://github.com/SalesforceLabs/OrgCheck
 - Under the MIT license: https://github.com/SalesforceLabs/OrgCheck?tab=MIT-1-ov-file#readme
-- If you install the application from the AppExchange, the code is locked because the store forces us to use a “managed package”. So in short you won’t be able to change the code directly from the Salesforce org where it is installed.
-- Same if you installed the application for the “unlocked package” that allows you to install the application in a sandbox without having the right to install apps in production (which is the case when you install application from AppExchange).
+- If you install the application from the AppExchange, the code is locked because the store forces us to use a "managed package". So in short you won't be able to change the code directly from the Salesforce org where it is installed.
+- Same if you installed the application for the "unlocked package" that allows you to install the application in a sandbox without having the right to install apps in production (which is the case when you install application from AppExchange).
 - As the code is open source, you are free to fork the project, and make your own modifications to it. In this case, we believe that it would be great to share your modifications to the community by doing Pull Request to the main project. To do so you will need to sign a digital agreement (this is because our repository is hosted in the Salesforce Labs project owned by Salesforce). This is own team members can contribute to the project even thought they are not part of Salesforce.
 - Of course before considering doing your own fork of the project, you could just create an issue in the main project and we will be happy to work with you on a fix or a new feature you will want in future releases.
 
 ## What are the security check-in related to Org Check ? past, current and future ?
 
 - The Org Check application has been validated by a Security Review from the ISV Salesforce internal team.
-- That team is validating ALL applications that are hosted in the AppExchange. 
-- By “ALL” we mean salesforce labs or not, free or not, etc...
-- We got our validation back in September 2022:
+- That team is validating ALL applications that are hosted in the AppExchange.
+- By "ALL" we mean salesforce labs or not, free or not, etc...
+- Our first validation was in **September 2022**. At that time, Org Check was reviewed as a Salesforce Labs application and passed successfully.
+- Our second validation was in **May 2026**. After a major refactoring and the addition of many new features since 2022, Org Check went through a full security re-review and passed again, confirming that the application still meets all AppExchange security requirements. The full code analyzer reports from that review are available in the [Security Review / Code Scan Reports](reports) page.
+- Future reviews will be triggered whenever a new major version is submitted to the AppExchange, as required by the Salesforce ISV process.
