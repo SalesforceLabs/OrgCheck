@@ -44,7 +44,7 @@ You can log any issues and new ideas in our [tracker](https://github.com/Salesfo
 ## Development Setup
 
 To set up a development environment and deploy Org Check as your own unlocked package, follow 
-the steps outlined in the [Development Setup Guide](docs/development.md).
+the steps outlined in the [Development Setup Guide]([docs/development.md](https://github.com/SalesforceLabs/OrgCheck/blob/main/docs/index6.development.md)).
 
 Once done when you want to send a Pull Request just do so from Github and we will review it.
 Please note that you will need to sign the Salesforce CLA to do this.
