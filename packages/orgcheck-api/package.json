@@ -4,7 +4,7 @@
     "license": "MIT",
     "private": false,
     "devDependencies": {
-        "@babel/preset-env": "^7.29.0",
+        "@babel/preset-env": "^8.0.2",
         "@eslint/js": "^10.0.1",
         "@jest/globals": "^30.2.0",
         "@rollup/plugin-commonjs": "^29.0.0",
