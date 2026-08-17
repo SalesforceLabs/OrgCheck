@@ -6,7 +6,7 @@
   "dependencies": {
     "@oclif/core": "^4",
     "@orgcheck/api": "^8.0.1",
-    "@salesforce/core": "^8.2.7",
+    "@salesforce/core": "^9.0.0",
     "@salesforce/sf-plugins-core": "^13",
     "fflate": "^0.8.2",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
