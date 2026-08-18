@@ -15,7 +15,7 @@
     "@eslint/js": "^10.0.1",
     "@oclif/plugin-command-snapshot": "^5.2.3",
     "@salesforce/cli-plugins-testkit": "^5.3.20",
-    "@salesforce/dev-scripts": "^11",
+    "@salesforce/dev-scripts": "^13",
     "@types/jest": "^29.5.14",
     "eslint": "^10.1.0",
     "eslint-plugin-sf-plugin": "^1.18.8",
