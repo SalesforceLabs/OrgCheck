@@ -62,6 +62,25 @@ Analyze Apex Classes in your Salesforce org for technical debt and best practice
 
 
 
+# check.internal-user-roles.summary
+Check Internal User Roles in the org using Org Check command line
+
+# check.internal-user-roles.description
+Analyze Internal User Roles in your Salesforce org for best practices.
+
+# check.internal-user-roles.examples
+- Check all internal user roles in the org
+  sf check internal-user-roles --target-org MyOrg
+- Check internal user roles and export the result as an excel file
+  sf check internal-user-roles --target-org MyOrg --xlsx-file /tmp/results.xlsx
+- Check internal user roles and export the result as a CSV file
+  sf check internal-user-roles --target-org MyOrg --csv-file /tmp/results.csv
+- Check internal user roles and export the result as a JSON file
+  sf check internal-user-roles --target-org MyOrg --json-file /tmp/results.json
+
+
+
+
 # check.hardcoded-urls.summary
 Check Hardcoded URLs in the org across multiple metadata types using Org Check command line
 
