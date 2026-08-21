@@ -36,8 +36,7 @@ export class DatasetInternalActiveUsers implements Dataset {
                         'PermissionSet.PermissionsModifyAllData, ' +
                         'PermissionSet.PermissionsViewAllData, ' +
                         'PermissionSet.PermissionsManageUsers, ' +
-                        'PermissionSet.PermissionsCustomizeApplication, ' +
-                        'PermissionSet.PermissionsBypassMFAForUiLogins ' +
+                        'PermissionSet.PermissionsCustomizeApplication ' +
                     'FROM PermissionSetAssignment ' +
                     'WHERE Assignee.IsActive = true ' +
                     'AND Assignee.ContactId = NULL ' +
@@ -84,7 +83,6 @@ export class DatasetInternalActiveUsers implements Dataset {
                     profileId: sfdcManager.caseSafeId(record.ProfileId as string),
                     permissionSetIds: [],
                     isAdminLike: false,
-                    hasMfaByPass: false,
                     hasDebugMode: record.UserPreferencesUserDebugModePref === true,
                     nbDirectLogins: 0,
                     nbDirectLoginsWithMFA: 0,
@@ -117,10 +115,6 @@ export class DatasetInternalActiveUsers implements Dataset {
                     permissionSet?.PermissionsManageUsers === true ||
                     permissionSet?.PermissionsCustomizeApplication === true) {
                     user.isAdminLike = true;                    
-                }
-                // Check user has MFA bypass via this Permission Set / PSG / Profile
-                if (permissionSet?.PermissionsBypassMFAForUiLogins === true) {
-                    user.hasMfaByPass = true;
                 }
             }
         });

@@ -694,10 +694,12 @@ const ALL_SCORE_RULES: ScoreRule[] = [
         applicable: [ DataAliases.SfdcBrowser ],
         category: SCORE_RULE_CATEGORIES.USER_ADOPTION
     }, {
-        id: 72,
+        id: 72, 
+        // hasMfaByPass was removed because Salesforce retired the user permission called "Bypass Multi-Factor Authentication for User Interface Logins". 
+        // So we will not use it anymore in this rule.
         description: 'User is logging directly without MFA',
-        formula: ((d: SfdcUser) => d.nbDirectLoginsWithoutMFA > 0 && d.hasMfaByPass !== true) as (data: unknown) => boolean,
-        errorMessage: `This user is logging in directly to Salesforce without using MFA (Multi-Factor Authentication). And this user has not the MFA bypass enabled. Please work with your user to make them use MFA for better security.`,
+        formula: ((d: SfdcUser) => d.nbDirectLoginsWithoutMFA > 0 /*&& d.hasMfaByPass !== true*/) as (data: unknown) => boolean,
+        errorMessage: `This user is logging in directly to Salesforce without using MFA (Multi-Factor Authentication). Please work with your user to make them use MFA for better security.`,
         badField: 'nbDirectLoginsWithoutMFA',
         applicable: [ DataAliases.SfdcUser ],
         category: SCORE_RULE_CATEGORIES.SECURITY

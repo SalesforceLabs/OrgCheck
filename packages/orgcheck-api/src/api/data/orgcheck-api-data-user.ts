@@ -76,13 +76,6 @@ export interface SfdcUser extends DataWithScore {
     isAdminLike: boolean;
 
     /**
-     * @description Does this user have MFA bypass activated
-     * @type {boolean}
-     * @public
-     */
-    hasMfaByPass: boolean;
-
-    /**
      * @description Does this user have debug mode activated
      * @type {boolean}
      * @public

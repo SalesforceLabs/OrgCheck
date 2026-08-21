@@ -16,7 +16,6 @@ export class UsersTableDefinition implements TableDefinition {
         { label: 'Under LEX?',             type: ColumnType.CHK,  data: { value: 'onLightningExperience' }},
         { label: 'Last login',             type: ColumnType.DTM,  data: { value: 'lastLogin' }, modifier: { valueIfEmpty: 'Never logged!' }},
         { label: 'Failed logins',          type: ColumnType.NUM,  data: { value: 'numberFailedLogins' }},
-        { label: 'Has MFA by-pass?',       type: ColumnType.CHK,  data: { value: 'hasMfaByPass' }},
         { label: 'Has Debug mode?',        type: ColumnType.CHK,  data: { value: 'hasDebugMode' }},
         { label: '#SF Logins w/o MFA',     type: ColumnType.NUM,  data: { value: 'nbDirectLoginsWithoutMFA' }},
         { label: '#SF Logins w/ MFA',      type: ColumnType.NUM,  data: { value: 'nbDirectLoginsWithMFA' }},

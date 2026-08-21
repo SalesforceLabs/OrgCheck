@@ -542,8 +542,7 @@ AND Profile.Id != NULL
 ```
 SELECT Id, AssigneeId, PermissionSetId, PermissionSet.IsOwnedByProfile, 
    PermissionSet.PermissionsModifyAllData, PermissionSet.PermissionsViewAllData, 
-   PermissionSet.PermissionsManageUsers, PermissionSet.PermissionsCustomizeApplication, 
-   PermissionSet.PermissionsBypassMFAForUiLogins 
+   PermissionSet.PermissionsManageUsers, PermissionSet.PermissionsCustomizeApplication
 FROM PermissionSetAssignment 
 WHERE Assignee.IsActive = true 
 AND Assignee.ContactId = NULL 

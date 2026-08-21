@@ -687,7 +687,6 @@ Notes:
 | Under LEX? | Boolean | Indicates if the user is under Lightning Experience |
 | Last login | Date Time | Date when the user last logged in |
 | Failed logins | Numeric | Number of failed logins |
-| Has MFA by-pass? | Boolean | Indicates if the user has MFA bypass |
 | Has Debug mode? | Boolean | Indicates if the user has debug mode |
 | #SF Logins w/o MFA | Numeric | Number of Salesforce logins without MFA |
 | #SF Logins w/ MFA | Numeric | Number of Salesforce logins with MFA |
