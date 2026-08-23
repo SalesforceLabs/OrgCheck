@@ -118,17 +118,11 @@ Alternatively, you can also create and test the OrgCheck App as a Managed packag
 sf package create --name "Org Check" --package-type Managed --path force-app --target-dev-hub <devhubalias>
 ```
 
-## Step 6: Create the Static Resource
+## Step 6: Build everything locally
 
-From the `@orgcheck/salesforce-app` package, run the build script to generate the static resource at `force-app/main/default/staticresources/OrgCheck_SR.resource`:
-
+From the root of the main repo, launch the following command to build the api, the static resource in the salesforce app and the sf plugin locally:
 ```bash
-yarn workspace @orgcheck/salesforce-app build
-```
-
-Or from the salesforce-app directory:
-```bash
-cd packages/orgcheck-salesforce-app && node ./build/static-resource/build-static-resource.js
+npx lerna run build
 ```
 
 ## Step 7: Create a Package Version
