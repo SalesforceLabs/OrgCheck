@@ -1,5 +1,5 @@
 ============================================================
-List of usefull commands for packaging
+List of usefull commands for packaging from a DevHUB
 ============================================================
 
 ## list all available packages
@@ -24,20 +24,41 @@ sf package version delete --target-dev-hub vfinet.devhub@salesforce.com --packag
 
 
 ============================================================
-List of usefull commands for pushing updates
+List of usefull commands for pushing / monitoring updates from a DevHub
 ============================================================
 
-## List the push request to update to a newer package version
-sfdx force:data:soql:query --targetusername=vfinet.devhub@salesforce.com --query "SELECT Id, PackageVersionId, ScheduledStartTime, Status, SystemModstamp, StartTime, EndTime, DurationSeconds FROM PackagePushRequest WHERE SystemModstamp = TODAY" --resultformat=csv
+## List the all the push requests of today
+sf data query --targetusername=vfinet.devhub@salesforce.com --query "SELECT Id, PackageVersionId, ScheduledStartTime, Status, SystemModstamp, StartTime, EndTime, DurationSeconds FROM PackagePushRequest WHERE SystemModstamp = TODAY" --resultformat=csv
 
-## List all the subscriber part of the previous push request
-sfdx force:data:soql:query --targetusername=vfinet.devhub@salesforce.com --query "SELECT Id, PackagePushRequestId, SubscriberOrganizationKey, Status, SystemModstamp, StartTime, EndTime, DurationSeconds FROM PackagePushJob WHERE SystemModstamp = TODAY" --resultformat=csv
+## List all the subscribers where we push a request today (whatever the result of the request)
+sf data query --targetusername=vfinet.devhub@salesforce.com --query "SELECT Id, PackagePushRequestId, SubscriberOrganizationKey, Status, SystemModstamp, StartTime, EndTime, DurationSeconds FROM PackagePushJob WHERE SystemModstamp = TODAY" --resultformat=csv
 
-## CHeck the pending and in progress
-sfdx force:data:soql:query --targetusername=vfinet.devhub@salesforce.com --query "SELECT Id, PackagePushRequestId, SubscriberOrganizationKey, Status, SystemModstamp, StartTime, EndTime, DurationSeconds FROM PackagePushJob WHERE SystemModstamp = TODAY AND status != 'Succeeded' AND status != 'failed'" --resultformat=csv
+## Check the pending and in progress requests for today
+sf data query --targetusername=vfinet.devhub@salesforce.com --query "SELECT Id, PackagePushRequestId, SubscriberOrganizationKey, Status, SystemModstamp, StartTime, EndTime, DurationSeconds FROM PackagePushJob WHERE SystemModstamp = TODAY AND status != 'Succeeded' AND status != 'failed'" --resultformat=csv
 
-## List all error you had during the previous push
-sfdx force:data:soql:query --targetusername=vfinet.devhub@salesforce.com --query "SELECT Id, PackagePushJobId, ErrorMessage, ErrorDetails, ErrorTitle, ErrorSeverity, ErrorType, SystemModstamp FROM PackagePushError WHERE SystemModstamp = TODAY" --resultformat=csv
+## Check the requests in error for today
+sf data query --targetusername=vfinet.devhub@salesforce.com --query "SELECT Id, PackagePushJobId, ErrorMessage, ErrorDetails, ErrorTitle, ErrorSeverity, ErrorType, SystemModstamp FROM PackagePushError WHERE SystemModstamp = TODAY" --resultformat=csv
+
+## List all the subscribers that are not using a specific package version (potentially to push pugrades for them)
+sf data query --query "SELECT InstanceName, MetadataPackageId, MetadataPackageVersionId, OrgKey, OrgName, OrgStatus, OrgType, ParentOrg, SystemModstamp, InstalledStatus FROM PackageSubscriber WHERE MetadataPackageVersionId <= '04tQy000000VPrl' " --resultformat=csv
+
+## script to update subscribers using a version (or lower) to another version
+targetOrg=vincent@orgcheck.com
+oldVersion=04tQy000000VPrl
+newVersion=04tQy000000VhYX
+sf data create record --target-org "${targetOrg}" --sobjecttype=PackagePushRequest "--values=PackageVersionId=${newVersion}" --json > /tmp/out.txt
+if [[ $(grep -c 'success": true' /tmp/out.txt) -ne 1 ]]; then
+   echo 'PackagePushRequest record not created.'
+else
+   id=$(grep 'id": ' /tmp/out.txt | cut -d'"' -f4) ;
+   csvFile=/tmp/packagePushJob-${id}.csv ;
+   echo "PackagePushRequestId,SubscriberOrganizationKey" > "${csvFile}" ;
+   sf data query --query "SELECT OrgKey FROM PackageSubscriber WHERE MetadataPackageVersionId <= '${oldVersion}' " --resultformat=csv | awk 'NR > 1 { print "'${id}'," $1 }' >> "${csvFile}" ;
+   sf data upsert bulk --target-org "${targetOrg}" --sobject PackagePushJob --file "${csvFile}" -i Id ;
+   echo "When bulk job if done, please run the following command:" ;
+   echo "sf data update record --target-org ${targetOrg} --sobject PackagePushRequest --record-id ${id} \"--values=Status=Pending\"";
+fi
+
 
 
 ============================================================
