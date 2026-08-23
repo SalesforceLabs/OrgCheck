@@ -2,6 +2,22 @@ import { LightningElement, api, track } from 'lwc';
 import OrgCheckStaticResource from '@salesforce/resourceUrl/OrgCheck_SR';
 import { loadScript } from 'lightning/platformResourceLoader';
 
+/**
+ * @description Escape HTML special characters in a string to prevent XSS attacks
+ * @param {string} unsafe - The string to escape
+ * @returns {string} The escaped string
+ */
+const ESCAPE_DATA = (unsafe) => {
+    if (unsafe === undefined || Number.isNaN(unsafe) || unsafe === null) return '';
+    if (typeof(unsafe) !== 'string') return unsafe;
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 export default class OrgcheckApp extends LightningElement {
 
     /** 
@@ -1205,7 +1221,7 @@ export default class OrgcheckApp extends LightningElement {
      */
     roleBoxInnerHtmlDecorator = (depth, data) => {
         if (depth === 0) return `<center><b>Role Hierarchy</b></center>`;
-        return `<center><b>${data.record.name}</b><br />${data.record.apiname}</center>`;
+        return `<center><b>${ESCAPE_DATA(data.record.name)}</b><br />${ESCAPE_DATA(data.record.apiname)}</center>`;
     }
 
     /** 
@@ -1216,19 +1232,19 @@ export default class OrgcheckApp extends LightningElement {
      */ 
     roleBoxOnClickDecorator = (depth, data) => {
         if (depth === 0) return;
-        let htmlContent = `Role Name: <b>${data.record.name}</b><br />`;
-        htmlContent += `Salesforce Id: <b>${data.record.id}</b><br />`;
-        htmlContent += `Developer Name: <b>${data.record.apiname}</b><br />`;
+        let htmlContent = `Role Name: <b>${ESCAPE_DATA(data.record.name)}</b><br />`;
+        htmlContent += `Salesforce Id: <b>${ESCAPE_DATA(data.record.id)}</b><br />`;
+        htmlContent += `Developer Name: <b>${ESCAPE_DATA(data.record.apiname)}</b><br />`;
         htmlContent += '<br />';
         htmlContent += `Level in hierarchy: <b>${depth}</b><br />`;
         htmlContent += '<br />';
         htmlContent += `This role has ${data.record.activeMembersCount} active user(s)<br /><ul>`;
-        data.record.activeMemberRefs?.forEach(activeMember => { htmlContent += `<li>${activeMember.name}</li>`; });
+        data.record.activeMemberRefs?.forEach(activeMember => { htmlContent += `<li>${ESCAPE_DATA(activeMember.name)}</li>`; });
         htmlContent += '</ul><br />';
         if (data.record.parentRef) {
-            htmlContent += `Parent Role Name: <b>${data.record.parentRef.name}</b><br />`;
-            htmlContent += `Parent Salesforce Id: <b>${data.record.parentRef.id}</b><br />`;
-            htmlContent += `Parent Developer Name: <b>${data.record.parentRef.apiname}</b><br />`;
+            htmlContent += `Parent Role Name: <b>${ESCAPE_DATA(data.record.parentRef.name)}</b><br />`;
+            htmlContent += `Parent Salesforce Id: <b>${ESCAPE_DATA(data.record.parentRef.id)}</b><br />`;
+            htmlContent += `Parent Developer Name: <b>${ESCAPE_DATA(data.record.parentRef.apiname)}</b><br />`;
         } else {
             htmlContent += 'No parent';
         }

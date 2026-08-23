@@ -1,5 +1,10 @@
 import { LightningElement, api } from 'lwc';
 
+/**
+ * @description Escape HTML special characters in a string to prevent XSS attacks
+ * @param {string} unsafe - The string to escape
+ * @returns {string} The escaped string
+ */
 const ESCAPE_DATA = (unsafe) => {
     if (unsafe === undefined || Number.isNaN(unsafe) || unsafe === null) return '';
     if (typeof(unsafe) !== 'string') return unsafe;
