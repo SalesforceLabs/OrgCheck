@@ -36,10 +36,6 @@ export class DatasetObject implements Dataset {
             throw new Error(`DatasetObject: No object were provided in the parameters.`);
         }
 
-        // split name and namespace frpm object api name
-        const splittedApiName = fullObjectApiName.split('__');
-        const packageName = splittedApiName?.length === 3 ? splittedApiName[0] : '';
-
         // Init the factories
         const fieldDataFactory = dataFactory.getInstance(DataAliases.SfdcField);
         const fieldSetDataFactory = dataFactory.getInstance(DataAliases.SfdcFieldSet);
@@ -64,20 +60,17 @@ export class DatasetObject implements Dataset {
                             '(SELECT Id, Name, Url, LinkType, OpenType, Description, CreatedDate, LastModifiedDate, NamespacePrefix FROM WebLinks) ' +
                         'FROM EntityDefinition ' +
                         `WHERE QualifiedApiName = '${fullObjectApiName}' ` +
-                        (packageName ? `AND NamespacePrefix = '${packageName}' ` : '') +
                         'LIMIT 1' // We should get zero or one record, not more!
             }, {
                 tooling: true,
                 string: 'SELECT DurableId, QualifiedApiName, Description, IsIndexed ' +
                         'FROM FieldDefinition '+
-                        `WHERE EntityDefinition.QualifiedApiName = '${fullObjectApiName}' ` +
-                        (packageName ? `AND EntityDefinition.NamespacePrefix = '${packageName}' ` : ''),
+                        `WHERE EntityDefinition.QualifiedApiName = '${fullObjectApiName}' `,
                 queryMoreField: 'DurableId' // FieldDefinition does not support calling QueryMore, use the custom instead
             }, {
                 string: 'SELECT TableEnumOrId, Id ' + // TableEnumOrId = EntityDefinition.QualifiedApiName
                         'FROM WorkflowRule ' +
-                        `WHERE TableEnumOrId = '${fullObjectApiName}' ` +
-                        (packageName ? `AND EntityDefinition.NamespacePrefix = '${packageName}' ` : ''),
+                        `WHERE TableEnumOrId = '${fullObjectApiName}' `,
                 tooling: true,
             }], logger),
             sfdcManager.recordCount(fullObjectApiName, logger)
