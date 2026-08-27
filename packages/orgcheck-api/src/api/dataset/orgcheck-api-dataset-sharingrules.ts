@@ -20,22 +20,9 @@ export class DatasetSharingRules implements Dataset {
      */
     async run(sfdcManager: SalesforceManagerIntf, dataFactory: DataFactoryIntf, logger: SimpleLoggerIntf): Promise<Map<string, SfdcSharingRule>> {
 
-        // List all custom object which can have a sharing model
-        logger?.log(`Listing all custom objects that can have a sharing model...`);
-        const customObjectsResults = await sfdcManager.soqlQuery([{
-            tooling: true,
-            string: 'SELECT NamespacePrefix, DeveloperName ' +
-                   'FROM CustomObject ' +
-                   `WHERE SharingModel != ''`
-        }], logger);
-        const customObjectNames: Record<string, unknown>[] = customObjectsResults[0];
-
         // Read all SharingRules metadata
         logger?.log(`Reading sharing rules metadata via Metadata API...`);
-        const results = await sfdcManager.readMetadata([{
-            type: SalesforceMetadataTypes.SHARING_RULE,
-            members: ['*', ...(customObjectNames?.map((r) => `${r.NamespacePrefix ? `${r.NamespacePrefix}__`: ''}${r.DeveloperName}__c`) ?? [])]
-        }], logger);
+        const results = await sfdcManager.readMetadata([{ type: SalesforceMetadataTypes.SHARING_RULE, members: ['*'] }], true, logger);
 
         // Init the factory and records
         const sharingRuleDataFactory = dataFactory.getInstance(DataAliases.SfdcSharingRule);

@@ -754,13 +754,14 @@ export class SalesforceManager implements SalesforceManagerIntf {
     /**
      * @see SalesforceManagerIntf.readMetadata
      * @param {SalesforceMetadataRequest[]} metadatas - Information of what metadata you want to retrieve
+     * @param {boolean} expandWildcard - true if you want to expand the wildcard, false otherwise
      * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Map<string, any[]>} Information by metadata type
      * @throws {SalesforceError} If an error occurs during the metadata read
      * @public
      * @async
      */
-    public async readMetadata(metadatas: SalesforceMetadataRequest[], logger: SimpleLoggerIntf): Promise<Map<string, Array<Record<string, unknown>>>> {
+    public async readMetadata(metadatas: SalesforceMetadataRequest[], expandWildcard: boolean, logger: SimpleLoggerIntf): Promise<Map<string, Array<Record<string, unknown>>>> {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         // Now we can start, log some message
@@ -768,7 +769,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
         // First, if the metadatas contains an item with member='*' we want to list for this type and substitute the '*' with the fullNames
         await LargeProcessor.runAll<void>(
             // only get the types that have at least '*' once
-            metadatas.filter((m) => m.members?.includes('*'))
+            metadatas.filter((m) => expandWildcard === true && m.members?.includes('*'))
             // then turn this filtered list into a list of promises
             .map((metadata) => async () => { // using async as we just want to run parallel processes without manipulating their return values
                 try {

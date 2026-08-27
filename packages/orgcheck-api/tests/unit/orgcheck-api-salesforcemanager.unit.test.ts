@@ -121,7 +121,7 @@ describe('tests.api.unit.SalesforceManager', () => {
 
   describe('metadataApi use cases', () => {
     it('checks if the salesforce manager implementation runs readMetadata correctly with explicit members', async () => {
-      const results = await manager.readMetadata([{ type: 'ProfilePasswordPolicy #Members=4#', members: [ 'member0', 'member999' ] }], simpleLogger);
+      const results = await manager.readMetadata([{ type: 'ProfilePasswordPolicy #Members=4#', members: [ 'member0', 'member999' ] }], false,simpleLogger);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(1);
@@ -130,14 +130,24 @@ describe('tests.api.unit.SalesforceManager', () => {
       expect(policies?.length).toBe(1); // member0 exists, but member999 does not
     });
 
-    it('checks if the salesforce manager implementation runs readMetadata correctly with star (*)', async () => {
-      const results = await manager.readMetadata([{ type: 'ProfilePasswordPolicy #Members=4#', members: [ '*' ] }], simpleLogger);
+    it('checks if the salesforce manager implementation runs readMetadata correctly with star (*) with expandWildcard=true', async () => {
+      const results = await manager.readMetadata([{ type: 'ProfilePasswordPolicy #Members=4#', members: [ '*' ] }], true, simpleLogger);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(1);
       const policies: any[] | undefined = results.get('ProfilePasswordPolicy #Members=4#');
       expect(policies instanceof Array).toBeTruthy();
-      expect(policies?.length).toBe(4); // you put '*' !
+      expect(policies?.length).toBe(4); // you put '*' with 4 members expected when expanding wildcards
+    });
+
+    it('checks if the salesforce manager implementation runs readMetadata correctly with star (*) with expandWildcard=false', async () => {
+      const results = await manager.readMetadata([{ type: 'ProfilePasswordPolicy #Members=4#', members: [ '*' ] }], false, simpleLogger);
+      expect(results).toBeDefined();
+      expect(results instanceof Map).toBeTruthy();
+      expect(results.size).toBe(1);
+      const policies: any[] | undefined = results.get('ProfilePasswordPolicy #Members=4#');
+      expect(policies instanceof Array).toBeTruthy();
+      expect(policies?.length).toBe(0); // you put '*' with 4 members expected when expanding wildcards, but expandWildcard=false, so we should have zero!
     });
   });
 

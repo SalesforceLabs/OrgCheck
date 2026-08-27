@@ -159,13 +159,14 @@ export interface SalesforceManagerIntf {
     /**
      * @description Method to retrieve a list of metadata types
      * @param {SalesforceMetadataRequest[]} metadatas - Information of what metadata you want to retrieve
+     * @param {boolean} expandWildcard - true if you want to expand the wildcard, false otherwise
      * @param {SimpleLoggerIntf} logger - Logger to use
      * @returns {Promise<Map<string, any[]>} Information by metadata type
      * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @public
      */
-    readMetadata(metadatas: SalesforceMetadataRequest[], logger: SimpleLoggerIntf): Promise<Map<string, Array<Record<string, unknown>>>>;
+    readMetadata(metadatas: SalesforceMetadataRequest[], expandWildcard: boolean, logger: SimpleLoggerIntf): Promise<Map<string, Array<Record<string, unknown>>>>;
     
     /**
      * @description Method to retrieve a list of metadata types by at Scale (using composite tooling api)
