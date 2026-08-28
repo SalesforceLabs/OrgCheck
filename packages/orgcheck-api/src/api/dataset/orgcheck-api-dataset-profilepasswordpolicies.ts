@@ -19,10 +19,7 @@ export class DatasetProfilePasswordPolicies implements Dataset {
 
         // First Metadata API query
         logger?.log(`Querying Metadata API about ProfilePasswordPolicy...`);
-        const results = await sfdcManager.readMetadata([{ 
-            type: 'ProfilePasswordPolicy',
-            members: [ '*' ]
-        }], logger);
+        const results = await sfdcManager.readMetadata([{ type: 'ProfilePasswordPolicy', members: [ '*' ] }], true, logger);
             
         // List of policies
         const profilePasswordPolicies = results?.get('ProfilePasswordPolicy') || [];

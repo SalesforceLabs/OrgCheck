@@ -13,7 +13,7 @@ export class SalesforceManagerMock_DoingNothing implements SalesforceManagerIntf
     async soqlQuery(_queries: SalesforceQueryRequest | any[], _logger: SimpleLoggerIntf): Promise<Array<Array<any>>> { return [[]]; }
     async soslQuery(_queries: SalesforceQueryRequest | any[], _logger: SimpleLoggerIntf): Promise<Array<Array<any>>> { return [[]]; }
     async dependenciesQuery(_ids: string[], _logger: SimpleLoggerIntf): Promise<{ records: Array<any>; errors: Array<string>; }> { return { records: [], errors: [] }; }
-    async readMetadata(_metadatas: SalesforceMetadataRequest[], _logger: SimpleLoggerIntf): Promise<Map<string, Array<any>>> { return new Map(); }
+    async readMetadata(_metadatas: SalesforceMetadataRequest[], _expandWildcard: boolean, _logger: SimpleLoggerIntf): Promise<Map<string, Array<any>>> { return new Map(); }
     async readMetadataAtScale(_type: string, _ids: any[], _byPasses: string[], _logger: SimpleLoggerIntf): Promise<any[]> { return []; }
     async describeGlobal(_logger: SimpleLoggerIntf): Promise<any[]> { return []; }
     async describe(_sobjectDevName: string, _logger: SimpleLoggerIntf): Promise<any> { return {}; }
