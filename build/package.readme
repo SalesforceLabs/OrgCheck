@@ -44,8 +44,8 @@ sf data query --query "SELECT InstanceName, MetadataPackageId, MetadataPackageVe
 
 ## script to update subscribers using a version (or lower) to another version
 targetOrg=vincent@orgcheck.com
-oldVersion=04tQy000000VPrl
-newVersion=04tQy000000VhYX
+oldVersion=04tQy000000VhYX
+newVersion=04tQy000000Z76f
 sf data create record --target-org "${targetOrg}" --sobjecttype=PackagePushRequest "--values=PackageVersionId=${newVersion}" --json > /tmp/out.txt
 if [[ $(grep -c 'success": true' /tmp/out.txt) -ne 1 ]]; then
    echo 'PackagePushRequest record not created.'
@@ -53,7 +53,7 @@ else
    id=$(grep 'id": ' /tmp/out.txt | cut -d'"' -f4) ;
    csvFile=/tmp/packagePushJob-${id}.csv ;
    echo "PackagePushRequestId,SubscriberOrganizationKey" > "${csvFile}" ;
-   sf data query --query "SELECT OrgKey FROM PackageSubscriber WHERE MetadataPackageVersionId <= '${oldVersion}' " --resultformat=csv | awk 'NR > 1 { print "'${id}'," $1 }' >> "${csvFile}" ;
+   sf data query --query "SELECT OrgKey FROM PackageSubscriber WHERE MetadataPackageVersionId <= '${oldVersion}' LIMIT 9000 " --resultformat=csv | awk 'NR > 1 { print "'${id}'," $1 }' >> "${csvFile}" ;
    sf data upsert bulk --target-org "${targetOrg}" --sobject PackagePushJob --file "${csvFile}" -i Id ;
    echo "When bulk job if done, please run the following command:" ;
    echo "sf data update record --target-org ${targetOrg} --sobject PackagePushRequest --record-id ${id} \"--values=Status=Pending\"";

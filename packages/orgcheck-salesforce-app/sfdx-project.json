@@ -5,7 +5,7 @@
       "default": false,
       "package": "Org Check",
       "versionName": "Oxygen",
-      "versionNumber": "8.8.0.NEXT",
+      "versionNumber": "8.9.0.NEXT",
       "versionDescription": "Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt.",
       "ancestorVersion": "HIGHEST"
     },
@@ -14,7 +14,7 @@
       "default": true,
       "package": "Org Check (unlocked)",
       "versionName": "Oxygen",
-      "versionNumber": "8.8.0.NEXT",
+      "versionNumber": "8.9.0.NEXT",
       "versionDescription": "Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt."
     }
   ],
@@ -32,6 +32,7 @@
     "Org Check (unlocked)@8.3.0-1": "04tKB000000DdYGYA0",
     "Org Check (unlocked)@8.6.0-1": "04tKB000000De1KYAS",
     "Org Check (unlocked)@8.7.0-1": "04tKB000000DeYWYA0",
-    "Org Check (unlocked)@8.8.0-1": "04tQy000000Z753IAC"
+    "Org Check (unlocked)@8.8.0-1": "04tQy000000Z753IAC",
+    "Org Check (unlocked)@8.9.0-1": "04tQy000000ZEEbIAO"
   }
 }
