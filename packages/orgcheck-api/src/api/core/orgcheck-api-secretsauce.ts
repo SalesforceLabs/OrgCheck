@@ -738,7 +738,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     {
         id: 100,
         description: '[LFS] Inactive Flow',
-        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.includes('InactiveFlow') || false) as (data: unknown) => boolean,
+        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.some(v => v.name === 'InactiveFlow') || false) as (data: unknown) => boolean,
         errorMessage: `This flow is inactive. Consider activating it or removing it from your org.`,
         badField: 'currentVersionRef.lfsViolations',
         applicable: [ DataAliases.SfdcFlow ],
@@ -746,7 +746,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 101,
         description: '[LFS] Process Builder',
-        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.includes('ProcessBuilder') || false) as (data: unknown) => boolean,
+        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.some(v => v.name === 'ProcessBuilder') || false) as (data: unknown) => boolean,
         errorMessage: `Time to migrate this process builder to flow!`,
         badField: 'currentVersionRef.lfsViolations',
         applicable: [ DataAliases.SfdcFlow ],
@@ -754,7 +754,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 102,
         description: '[LFS] Missing Flow Description',
-        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.includes('FlowDescription') || false) as (data: unknown) => boolean,
+        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.some(v => v.name === 'FlowDescription') || false) as (data: unknown) => boolean,
         errorMessage: `This flow does not have a description. Add documentation about its purpose and usage.`,
         badField: 'currentVersionRef.lfsViolations',
         applicable: [ DataAliases.SfdcFlow ],
@@ -762,7 +762,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 103,
         description: '[LFS] Outdated API Version',
-        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.includes('APIVersion') || false) as (data: unknown) => boolean,
+        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.some(v => v.name === 'APIVersion') || false) as (data: unknown) => boolean,
         errorMessage: `The API version of this flow is outdated. Update it to the newest version.`,
         badField: 'currentVersionRef.lfsViolations',
         applicable: [ DataAliases.SfdcFlow ],
@@ -770,7 +770,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 104,
         description: '[LFS] Unsafe Running Context',
-        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.includes('UnsafeRunningContext') || false) as (data: unknown) => boolean,
+        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.some(v => v.name === 'UnsafeRunningContext') || false) as (data: unknown) => boolean,
         errorMessage: `This flow runs in System Mode without Sharing, which can lead to unsafe data access.`,
         badField: 'currentVersionRef.lfsViolations',
         applicable: [ DataAliases.SfdcFlow ],
@@ -778,7 +778,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 105,
         description: '[LFS] SOQL Query In Loop',
-        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.includes('SOQLQueryInLoop') || false) as (data: unknown) => boolean,
+        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.some(v => v.name === 'SOQLQueryInLoop') || false) as (data: unknown) => boolean,
         errorMessage: `This flow has SOQL queries inside loops. Consolidate queries at the end of the flow to avoid governor limits.`,
         badField: 'currentVersionRef.lfsViolations',
         applicable: [ DataAliases.SfdcFlow ],
@@ -786,7 +786,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 106,
         description: '[LFS] DML Statement In Loop',
-        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.includes('DMLStatementInLoop') || false) as (data: unknown) => boolean,
+        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.some(v => v.name === 'DMLStatementInLoop') || false) as (data: unknown) => boolean,
         errorMessage: `This flow has DML operations inside loops. Consolidate DML at the end to avoid governor limits.`,
         badField: 'currentVersionRef.lfsViolations',
         applicable: [ DataAliases.SfdcFlow ],
@@ -794,7 +794,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 107,
         description: '[LFS] Action Calls In Loop',
-        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.includes('ActionCallsInLoop') || false) as (data: unknown) => boolean,
+        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.some(v => v.name === 'ActionCallsInLoop') || false) as (data: unknown) => boolean,
         errorMessage: `This flow has action calls inside loops. Bulkify apex calls using collection variables.`,
         badField: 'currentVersionRef.lfsViolations',
         applicable: [ DataAliases.SfdcFlow ],
@@ -802,7 +802,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 108,
         description: '[LFS] Hardcoded Id',
-        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.includes('HardcodedId') || false) as (data: unknown) => boolean,
+        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.some(v => v.name === 'HardcodedId') || false) as (data: unknown) => boolean,
         errorMessage: `This flow contains hardcoded IDs which are org-specific. Use variables or merge fields instead.`,
         badField: 'currentVersionRef.lfsViolations',
         applicable: [ DataAliases.SfdcFlow ],
@@ -810,7 +810,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 109,
         description: '[LFS] Hardcoded Url',
-        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.includes('HardcodedUrl') || false) as (data: unknown) => boolean,
+        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.some(v => v.name === 'HardcodedUrl') || false) as (data: unknown) => boolean,
         errorMessage: `This flow contains hardcoded URLs. Use $API formulas or custom labels instead.`,
         badField: 'currentVersionRef.lfsViolations',
         applicable: [ DataAliases.SfdcFlow ],
@@ -818,7 +818,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 110,
         description: '[LFS] Missing Null Handler',
-        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.includes('MissingNullHandler') || false) as (data: unknown) => boolean,
+        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.some(v => v.name === 'MissingNullHandler') || false) as (data: unknown) => boolean,
         errorMessage: `This flow has Get Records operations without null checks. Use decision elements to validate results.`,
         badField: 'currentVersionRef.lfsViolations',
         applicable: [ DataAliases.SfdcFlow ],
@@ -826,7 +826,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 111,
         description: '[LFS] Missing Fault Path',
-        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.includes('MissingFaultPath') || false) as (data: unknown) => boolean,
+        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.some(v => v.name === 'MissingFaultPath') || false) as (data: unknown) => boolean,
         errorMessage: `This flow has DML or action operations without fault handlers. Add fault paths for better error handling.`,
         badField: 'currentVersionRef.lfsViolations',
         applicable: [ DataAliases.SfdcFlow ],
@@ -834,7 +834,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 112,
         description: '[LFS] Recursive After Update',
-        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.includes('RecursiveAfterUpdate') || false) as (data: unknown) => boolean,
+        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.some(v => v.name === 'RecursiveAfterUpdate') || false) as (data: unknown) => boolean,
         errorMessage: `This after-update flow modifies the same record that triggered it, risking recursion. Use before-save flows instead.`,
         badField: 'currentVersionRef.lfsViolations',
         applicable: [ DataAliases.SfdcFlow ],
@@ -842,7 +842,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 113,
         description: '[LFS] Duplicate DML Operation',
-        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.includes('DuplicateDMLOperation') || false) as (data: unknown) => boolean,
+        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.some(v => v.name === 'DuplicateDMLOperation') || false) as (data: unknown) => boolean,
         errorMessage: `This flow allows navigation back after DML operations, which may cause duplicate changes.`,
         badField: 'currentVersionRef.lfsViolations',
         applicable: [ DataAliases.SfdcFlow ],
@@ -850,7 +850,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 114,
         description: '[LFS] Get Record All Fields',
-        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.includes('GetRecordAllFields') || false) as (data: unknown) => boolean,
+        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.some(v => v.name === 'GetRecordAllFields') || false) as (data: unknown) => boolean,
         errorMessage: `This flow uses Get Records with "all fields". Specify only needed fields for better performance.`,
         badField: 'currentVersionRef.lfsViolations',
         applicable: [ DataAliases.SfdcFlow ],
@@ -858,7 +858,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 115,
         description: '[LFS] Record ID as String',
-        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.includes('RecordIdAsString') || false) as (data: unknown) => boolean,
+        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.some(v => v.name === 'RecordIdAsString') || false) as (data: unknown) => boolean,
         errorMessage: `This flow uses a String recordId variable. Modern flows can receive the entire record object, eliminating Get Records queries.`,
         badField: 'currentVersionRef.lfsViolations',
         applicable: [ DataAliases.SfdcFlow ],
@@ -866,7 +866,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 116,
         description: '[LFS] Unconnected Element',
-        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.includes('UnconnectedElement') ||  false) as (data: unknown) => boolean,
+        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.some(v => v.name === 'UnconnectedElement') ||  false) as (data: unknown) => boolean,
         errorMessage: `This flow has unconnected elements that are not in use. Remove them to maintain clarity.`,
         badField: 'currentVersionRef.lfsViolations',
         applicable: [ DataAliases.SfdcFlow ],
@@ -874,7 +874,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 117,
         description: '[LFS] Unused Variable',
-        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.includes('UnusedVariable') || false) as (data: unknown) => boolean,
+        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.some(v => v.name === 'UnusedVariable') || false) as (data: unknown) => boolean,
         errorMessage: `This flow has unused variables. Remove them to maintain efficiency.`,
         badField: 'currentVersionRef.lfsViolations',
         applicable: [ DataAliases.SfdcFlow ],
@@ -882,7 +882,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 118,
         description: '[LFS] Copy API Name',
-        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.includes('CopyAPIName') || false) as (data: unknown) => boolean,
+        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.some(v => v.name === 'CopyAPIName') || false) as (data: unknown) => boolean,
         errorMessage: `This flow has elements with copy-paste naming patterns like "Copy_X_Of_Element". Update API names for readability.`,
         badField: 'currentVersionRef.lfsViolations',
         applicable: [ DataAliases.SfdcFlow ],
@@ -890,7 +890,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 120,
         description: '[LFS] Same Record Field Updates',
-        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.includes('SameRecordFieldUpdates') || false) as (data: unknown) => boolean,
+        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.some(v => v.name === 'SameRecordFieldUpdates') || false) as (data: unknown) => boolean,
         errorMessage: `This before-save flow uses Update Records on $Record. Use direct assignment instead for better performance.`,
         badField: 'currentVersionRef.lfsViolations',
         applicable: [ DataAliases.SfdcFlow ],
@@ -898,7 +898,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 122,
         description: '[LFS] Missing Metadata Description',
-        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.includes('MissingMetadataDescription') || false) as (data: unknown) => boolean,
+        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.some(v => v.name === 'MissingMetadataDescription') || false) as (data: unknown) => boolean,
         errorMessage: `This flow has elements or variables without descriptions. Add documentation for better maintainability.`,
         badField: 'currentVersionRef.lfsViolations',
         applicable: [ DataAliases.SfdcFlow ],
@@ -906,7 +906,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 123,
         description: '[LFS] Missing Filter Record Trigger',
-        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.includes('MissingFilterRecordTrigger') || false) as (data: unknown) => boolean,
+        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.some(v => v.name === 'MissingFilterRecordTrigger') || false) as (data: unknown) => boolean,
         errorMessage: `This record-triggered flow lacks filters on changed fields or entry conditions, causing unnecessary executions.`,
         badField: 'currentVersionRef.lfsViolations',
         applicable: [ DataAliases.SfdcFlow ],
@@ -914,7 +914,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 124,
         description: '[LFS] Transform Instead of Loop',
-        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.includes('TransformInsteadOfLoop') || false) as (data: unknown) => boolean,
+        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.some(v => v.name === 'TransformInsteadOfLoop') || false) as (data: unknown) => boolean,
         errorMessage: `This flow uses Loop + Assignment which could be replaced with Transform element (10x faster).`,
         badField: 'currentVersionRef.lfsViolations',
         applicable: [ DataAliases.SfdcFlow ],
@@ -922,7 +922,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 125,
         description: '[LFS] Missing Auto Layout',
-        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.includes('AutoLayout') || false) as (data: unknown) => boolean,
+        formula: ((d: SfdcFlow) => d?.currentVersionRef?.lfsViolations?.some(v => v.name === 'AutoLayout') || false) as (data: unknown) => boolean,
         errorMessage: `This flow doesn't use Auto-Layout mode. Enable it to keep your flow organized automatically.`,
         badField: 'currentVersionRef.lfsViolations',
         applicable: [ DataAliases.SfdcFlow ],
