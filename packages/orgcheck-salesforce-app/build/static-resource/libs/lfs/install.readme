@@ -1,6 +1,14 @@
 Name: Lightning Flow Scanner
 Website: https://lightningflowscanner.org/
-Version: 6.19.2
-Release: unknown
+Version: 6.19.4
+Release: https://github.com/Flow-Scanner/lightning-flow-scanner/releases/tag/core-v6.19.4
 Source: https://github.com/Flow-Scanner/lightning-flow-scanner
-Comment: UMD distribution of Lightning Flow Scanner Core
+Package: https://www.npmjs.com/package/@flow-scanner/lightning-flow-scanner-core/v/6.19.4
+Comment: UMD distribution of Lightning Flow Scanner Core, bundled from the published
+         package so it is self contained in the browser. Reproduce with:
+           npm i @flow-scanner/lightning-flow-scanner-core@6.19.4 esbuild path-browserify
+           echo "export * from '@flow-scanner/lightning-flow-scanner-core';" > entry.js
+           npx esbuild entry.js --bundle --format=iife --global-name=lightningflowscanner \
+             --minify --platform=browser --alias:path=path-browserify --alias:fs=./stub-fs.js \
+             --outfile=lfscore.js
+         The fs alias is a stub that throws, since the browser build never reads from disk.
