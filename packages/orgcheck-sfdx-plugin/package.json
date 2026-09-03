@@ -4,7 +4,7 @@
   "version": "8.0.6",
   "private": false,
   "dependencies": {
-    "@oclif/core": "^4",
+    "@oclif/core": "^5",
     "@orgcheck/api": "^8.0.1",
     "@salesforce/core": "^9.0.0",
     "@salesforce/sf-plugins-core": "^13",
