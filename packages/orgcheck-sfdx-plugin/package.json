@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@oclif/plugin-command-snapshot": "^5.2.3",
+    "@oclif/plugin-command-snapshot": "^6.0.0",
     "@salesforce/cli-plugins-testkit": "^5.3.20",
     "@salesforce/dev-scripts": "^13",
     "@types/jest": "^29.5.14",
