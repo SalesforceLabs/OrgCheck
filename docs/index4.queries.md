@@ -400,7 +400,7 @@ Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-dashboards.t
 #### Query on Dashboard
 ```
 SELECT Id, FolderName, FolderId, Title, DeveloperName, NamespacePrefix, 
-       Description, CreatedDate, LastModifiedDate, 
+       Description, CreatedById, CreatedDate, LastModifiedDate, 
        Type, LastViewedDate, LastReferencedDate, 
        DashboardResultRefreshedDate
 FROM Dashboard
@@ -1088,7 +1088,7 @@ Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-reports.ts](
 #### Query on Report
 ```
 SELECT Id, Description, DeveloperName, FolderName, Format, Name, 
-   NamespacePrefix, CreatedDate, LastModifiedDate, LastRunDate, 
+   NamespacePrefix, CreatedById, CreatedDate, LastModifiedDate, LastRunDate, 
    LastViewedDate, LastReferencedDate 
 FROM Report
 ```

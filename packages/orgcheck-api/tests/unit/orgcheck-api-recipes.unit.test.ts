@@ -7,6 +7,7 @@ import { RecipeCurrentUserPermissions } from 'src/api/recipe/orgcheck-api-recipe
 import { RecipeCustomFields } from 'src/api/recipe/orgcheck-api-recipe-customfields';
 import { RecipeCustomLabels } from 'src/api/recipe/orgcheck-api-recipe-customlabels';
 import { RecipeCustomTabs } from 'src/api/recipe/orgcheck-api-recipe-customtabs';
+import { RecipeDashboards } from 'src/api/recipe/orgcheck-api-recipe-dashboards';
 import { RecipeDocuments } from 'src/api/recipe/orgcheck-api-recipe-documents';
 import { RecipeEmailTemplates } from 'src/api/recipe/orgcheck-api-recipe-emailtemplates';
 import { RecipeFieldPermissions } from 'src/api/recipe/orgcheck-api-recipe-fieldpermissions';
@@ -31,6 +32,7 @@ import { RecipeProfileRestrictions } from 'src/api/recipe/orgcheck-api-recipe-pr
 import { RecipeProfiles } from 'src/api/recipe/orgcheck-api-recipe-profiles';
 import { RecipePublicGroups, RecipeQueues } from 'src/api/recipe/orgcheck-api-recipe-groups';
 import { RecipeReleaseUpdates } from 'src/api/recipe/orgcheck-api-recipe-releaseupdates';
+import { RecipeReports } from 'src/api/recipe/orgcheck-api-recipe-reports';
 import { RecipeGlobalView } from 'src/api/recipecollection/orgcheck-api-recipe-globalview';
 import { RecipeHardcodedURLsView } from 'src/api/recipecollection/orgcheck-api-recipe-hardcodedurlsview';
 import { RecipeUserRoles } from 'src/api/recipe/orgcheck-api-recipe-userroles';
@@ -39,6 +41,10 @@ import { RecipeVisualForceComponents } from 'src/api/recipe/orgcheck-api-recipe-
 import { RecipeVisualForcePages } from 'src/api/recipe/orgcheck-api-recipe-visualforcepages';
 import { RecipeWebLinks } from 'src/api/recipe/orgcheck-api-recipe-weblinks';
 import { RecipeWorkflows } from 'src/api/recipe/orgcheck-api-recipe-workflows';
+import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
+import { SfdcDashboard } from 'src/api/data/orgcheck-api-data-dashboard';
+import { SfdcReport } from 'src/api/data/orgcheck-api-data-report';
+import { SfdcUser } from 'src/api/data/orgcheck-api-data-user';
 import { SimpleLoggerMock_DoingNothing } from 'tests/utils/orgcheck-api-logger-mock.utility';
 
 describe('tests.api.unit.Recipes', () => {
@@ -54,6 +60,7 @@ describe('tests.api.unit.Recipes', () => {
       RecipeCustomFields,
       RecipeCustomLabels,
       RecipeCustomTabs,
+      RecipeDashboards,
       RecipeDocuments,
       RecipeEmailTemplates,
       RecipeFieldPermissions,
@@ -79,6 +86,7 @@ describe('tests.api.unit.Recipes', () => {
       RecipePublicGroups,
       RecipeQueues,
       RecipeReleaseUpdates,
+      RecipeReports,
       RecipeUserRoles,
       RecipeValidationRules,
       RecipeVisualForceComponents,
@@ -120,6 +128,38 @@ describe('tests.api.unit.Recipes', () => {
           expect(typeof dataset).toBe('string');
         });
       });
+    });
+  });
+
+  describe('Specific test for RecipeReports', () => {
+    it('attaches createdByRef when the user exists and omits it when the user does not', async () => {
+      const recipe = new RecipeReports();
+      const user = { id: '005000000000001', name: 'Alice', url: '/005000000000001' } as SfdcUser;
+      const withUser = { id: 'r1', createdById: '005000000000001' } as SfdcReport;
+      const withoutUser = { id: 'r2', createdById: '005000000000002' } as SfdcReport;
+      const ingredients = new Map<string, unknown>([
+        [DatasetAliases.REPORTS, new Map([['r1', withUser], ['r2', withoutUser]])],
+        [DatasetAliases.INTERNALACTIVEUSERS, new Map([['005000000000001', user]])]
+      ]);
+      const results = await recipe.mix(ingredients);
+      expect(results.find(r => r.id === 'r1')?.createdByRef).toBe(user);
+      expect(results.find(r => r.id === 'r2')?.createdByRef).toBeUndefined();
+    });
+  });
+
+  describe('Specific test for RecipeDashboards', () => {
+    it('attaches createdByRef when the user exists and omits it when the user does not', async () => {
+      const recipe = new RecipeDashboards();
+      const user = { id: '005000000000001', name: 'Alice', url: '/005000000000001' } as SfdcUser;
+      const withUser = { id: 'd1', createdById: '005000000000001' } as SfdcDashboard;
+      const withoutUser = { id: 'd2', createdById: '005000000000002' } as SfdcDashboard;
+      const ingredients = new Map<string, unknown>([
+        [DatasetAliases.DASHBOARDS, new Map([['d1', withUser], ['d2', withoutUser]])],
+        [DatasetAliases.INTERNALACTIVEUSERS, new Map([['005000000000001', user]])]
+      ]);
+      const results = await recipe.mix(ingredients);
+      expect(results.find(d => d.id === 'd1')?.createdByRef).toBe(user);
+      expect(results.find(d => d.id === 'd2')?.createdByRef).toBeUndefined();
     });
   });
 });

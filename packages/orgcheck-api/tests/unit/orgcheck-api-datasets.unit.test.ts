@@ -8,6 +8,7 @@ import { DatasetAppPermissions } from 'src/api/dataset/orgcheck-api-dataset-appp
 import { DatasetCurrentUserPermissions } from 'src/api/dataset/orgcheck-api-dataset-currentuserpermissions';
 import { DatasetCustomFields } from 'src/api/dataset/orgcheck-api-dataset-customfields';
 import { DatasetCustomLabels } from 'src/api/dataset/orgcheck-api-dataset-customlabels';
+import { DatasetDashboards } from 'src/api/dataset/orgcheck-api-dataset-dashboards';
 import { DatasetDocuments } from 'src/api/dataset/orgcheck-api-dataset-documents';
 import { DatasetFieldPermissions } from 'src/api/dataset/orgcheck-api-dataset-fieldpermissions';
 import { DatasetFlows } from 'src/api/dataset/orgcheck-api-dataset-flows';
@@ -28,6 +29,7 @@ import { DatasetProfilePasswordPolicies } from 'src/api/dataset/orgcheck-api-dat
 import { DatasetProfileRestrictions } from 'src/api/dataset/orgcheck-api-dataset-profilerestrictions';
 import { DatasetProfiles } from 'src/api/dataset/orgcheck-api-dataset-profiles';
 import { SfdcProfile } from 'src/api/data/orgcheck-api-data-profile';
+import { DatasetReports } from 'src/api/dataset/orgcheck-api-dataset-reports';
 import { DatasetUserRoles } from 'src/api/dataset/orgcheck-api-dataset-userroles';
 import { DatasetInternalActiveUsers } from 'src/api/dataset/orgcheck-api-dataset-internalactiveusers';
 import { DatasetValidationRules } from 'src/api/dataset/orgcheck-api-dataset-validationrules';
@@ -54,14 +56,14 @@ describe('tests.api.unit.Datasets', () => {
     [
       DatasetApexClasses, DatasetApexTriggers, DatasetAppPermissions, 
       DatasetCurrentUserPermissions, DatasetCustomFields, 
-      DatasetCustomLabels, DatasetDocuments, DatasetFieldPermissions, 
+      DatasetCustomLabels, DatasetDashboards, DatasetDocuments, DatasetFieldPermissions, 
       DatasetFlows, DatasetGroups, DatasetLightningAuraComponents, 
       DatasetLightningPages, DatasetLightningWebComponents, 
       /*DatasetObject, */ DatasetObjectPermissions, DatasetObjects, 
       DatasetObjectTypes, DatasetOrganization, DatasetPackages, 
       DatasetPageLayouts, DatasetPermissionSetLicenses, 
       DatasetPermissionSets, DatasetProfilePasswordPolicies, 
-      DatasetProfileRestrictions, DatasetProfiles, DatasetUserRoles, 
+      DatasetProfileRestrictions, DatasetProfiles, DatasetReports, DatasetUserRoles, 
       DatasetInternalActiveUsers, DatasetValidationRules, 
       DatasetVisualForceComponents, DatasetVisualForcePages, 
       DatasetWorkflows, DatasetRecordTypes, DatasetCollaborationGroups, 
@@ -697,6 +699,61 @@ describe('tests.api.unit.Datasets', () => {
       expect(results.get('002').nbDirectLoginsWithMFA).toBe(0);
       expect(results.get('002').nbDirectLoginsWithoutMFA).toBe(0);
       expect(results.get('002').nbSSOLogins).toBe(2);
+    });
+  });
+
+  describe('Specific test for DatasetReports', () => {
+    const dataset = new DatasetReports();
+    it('stores CreatedById as a case-safe id', async () => {
+      const sfdcManager = new SalesforceManagerMock_SoqlQuery();
+      sfdcManager.caseSafeId = (id: string) => id?.length === 18 ? id.substring(0, 15) : id;
+      sfdcManager.addSoqlQueryResponse('FROM Report ', [{
+        Id: '00O000000000001AAA',
+        Name: 'My Report',
+        DeveloperName: 'My_Report',
+        Description: 'desc',
+        Format: 'Tabular',
+        FolderName: 'Public',
+        NamespacePrefix: '',
+        CreatedById: '005000000000001AAA',
+        CreatedDate: 1,
+        LastModifiedDate: 2,
+        LastRunDate: 3,
+        LastViewedDate: 4,
+        LastReferencedDate: 5
+      }]);
+      const results: Map<string, any> = await dataset.run(sfdcManager, new DataFactoryMock_AllIsOK(), new SimpleLoggerMock_DoingNothing());
+      expect(results.size).toBe(1);
+      expect(results.get('00O000000000001').createdById).toBe('005000000000001');
+      expect(results.get('00O000000000001').createdByRef).toBeUndefined();
+    });
+  });
+
+  describe('Specific test for DatasetDashboards', () => {
+    const dataset = new DatasetDashboards();
+    it('stores CreatedById as a case-safe id', async () => {
+      const sfdcManager = new SalesforceManagerMock_SoqlQuery();
+      sfdcManager.caseSafeId = (id: string) => id?.length === 18 ? id.substring(0, 15) : id;
+      sfdcManager.addSoqlQueryResponse('FROM Dashboard ', [{
+        Id: '01Z000000000001AAA',
+        Title: 'My Dashboard',
+        DeveloperName: 'My_Dashboard',
+        Description: 'desc',
+        FolderName: 'Public',
+        FolderId: '00l000000000001',
+        NamespacePrefix: '',
+        Type: 'SpecifiedUser',
+        CreatedById: '005000000000001AAA',
+        CreatedDate: 1,
+        LastModifiedDate: 2,
+        LastViewedDate: 3,
+        LastReferencedDate: 4,
+        DashboardResultRefreshedDate: 5
+      }]);
+      const results: Map<string, any> = await dataset.run(sfdcManager, new DataFactoryMock_AllIsOK(), new SimpleLoggerMock_DoingNothing());
+      expect(results.size).toBe(1);
+      expect(results.get('01Z000000000001').createdById).toBe('005000000000001');
+      expect(results.get('01Z000000000001').createdByRef).toBeUndefined();
     });
   });
 

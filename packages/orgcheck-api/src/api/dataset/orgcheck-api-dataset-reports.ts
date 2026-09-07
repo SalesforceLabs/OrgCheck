@@ -22,7 +22,7 @@ export class DatasetReports implements Dataset {
         logger?.log(`Querying REST API about reports in the org...`);            
         const results = await sfdcManager.soqlQuery([{
             string: 'SELECT Id, Description, DeveloperName, FolderName, Format, Name, ' +
-                        'NamespacePrefix, CreatedDate, LastModifiedDate, LastRunDate, ' +
+                        'NamespacePrefix, CreatedById, CreatedDate, LastModifiedDate, LastRunDate, ' +
                         'LastViewedDate, LastReferencedDate ' +
                     'FROM Report '
         }], logger);
@@ -48,6 +48,7 @@ export class DatasetReports implements Dataset {
                     format: record.Format,
                     folderName: record.FolderName,
                     package: (record.NamespacePrefix || ''),
+                    createdById: sfdcManager.caseSafeId(record.CreatedById as string),
                     createdDate: record.CreatedDate,
                     lastModifiedDate: record.LastModifiedDate,
                     lastRunDate: record.LastRunDate,

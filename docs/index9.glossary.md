@@ -250,6 +250,7 @@ Notes:
 | Last viewed | Date Time | Date when the dashboard was last viewed |
 | Last referenced | Date Time | Date when the dashboard was last referenced |
 | Refreshed | Date Time | Date when the dashboard was refreshed |
+| Created by | Link | User who created the dashboard |
 | Created date | Date Time | Date when the dashboard was created |
 | Modified date | Date Time | Date when the dashboard was last modified |
 | Description | String | Description of the dashboard |
@@ -612,6 +613,7 @@ Notes:
 | Last run | Date Time | Date when the report was last run |
 | Last viewed | Date Time | Date when the report was last viewed |
 | Last referenced | Date Time | Date when the report was last referenced |
+| Created by | Link | User who created the report |
 | Created date | Date Time | Date when the report was created |
 | Modified date | Date Time | Date when the report was last modified |
 | Description | String | Description of the report |

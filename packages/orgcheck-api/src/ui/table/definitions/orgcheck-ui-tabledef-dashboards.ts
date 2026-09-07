@@ -19,6 +19,7 @@ export class DashboardsTableDefinition implements TableDefinition {
         { label: 'Last viewed',     type: ColumnType.DTM, data: { value: 'lastViewedDate' }},
         { label: 'Last referenced', type: ColumnType.DTM, data: { value: 'lastReferencedDate' }},
         { label: 'Refreshed',       type: ColumnType.DTM, data: { value: 'resultRefreshedDate' }},
+        { label: 'Created by',      type: ColumnType.URL, data: { value: 'createdByRef.url', label: 'createdByRef.name' }, modifier: { valueIfEmpty: 'Unknown / inactive user.' }},
         { label: 'Created date',    type: ColumnType.DTM, data: { value: 'createdDate' }},
         { label: 'Modified date',   type: ColumnType.DTM, data: { value: 'lastModifiedDate' }},
         { label: 'Description',     type: ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},

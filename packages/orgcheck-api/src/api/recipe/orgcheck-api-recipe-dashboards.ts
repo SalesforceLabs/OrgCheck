@@ -1,6 +1,7 @@
 import { ServedRecipe } from 'src/api/core/recipe/orgcheck-api-recipe';
 import { ExportedTable, Table } from 'src/ui/table/orgcheck-ui-table';
 import { TableFactory } from 'src/ui/table/orgcheck-ui-table-factory';
+import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { DatasetRunInformation } from 'src/api/core/dataset/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from 'src/api/core/dataset/orgcheck-api-datasets-aliases';
 import { SfdcUser }from 'src/api/data/orgcheck-api-data-user';
@@ -52,8 +53,16 @@ export class RecipeDashboards implements ServedRecipe<SfdcDashboard[], Table> {
         if (!dashboards) throw new Error(`RecipeDashboards: Data from dataset alias 'DASHBOARDS' was undefined.`);
         if (!users) throw new Error(`RecipeDashboards: Data from dataset alias 'INTERNALACTIVEUSERS' was undefined.`);
 
+        // Augment data
+        await MediumProcessor.forEach(dashboards, async (dashboard: SfdcDashboard) => {
+            const createdByRef = users.get(dashboard.createdById);
+            if (createdByRef) {
+                dashboard.createdByRef = createdByRef;
+            }
+        });
+
         // Return data
-        return [... dashboards.values()];        
+        return [... dashboards.values()];
     }
 
     /**

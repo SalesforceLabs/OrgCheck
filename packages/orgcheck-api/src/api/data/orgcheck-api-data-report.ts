@@ -1,6 +1,7 @@
 
 import { DataAliases } from 'src/api/core/data/orgcheck-api-data-aliases';
 import { DataWithScore } from 'src/api/core/data/orgcheck-api-data';
+import { SfdcUser } from 'src/api/data/orgcheck-api-data-user';
 
 export interface SfdcReport extends DataWithScore {
     
@@ -38,6 +39,20 @@ export interface SfdcReport extends DataWithScore {
      * @public
      */
     createdDate: number;
+
+    /**
+     * @description Salesforce Id of the user who created this report.
+     * @type {string}
+     * @public
+     */
+    createdById: string;
+
+    /**
+     * @description Reference of the user who created this report. Filled in the recipe from INTERNALACTIVEUSERS.
+     * @type {SfdcUser}
+     * @public
+     */
+    createdByRef: SfdcUser;
     
     /**
      * @description Date/Time when this item was last modified in the org. Information stored as a Unix timestamp.

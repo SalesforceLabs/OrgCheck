@@ -22,7 +22,7 @@ export class DatasetDashboards implements Dataset {
         logger?.log(`Querying REST API about dashboards in the org...`);            
         const results = await sfdcManager.soqlQuery([{
             string: 'SELECT Id, FolderName, FolderId, Title, DeveloperName, NamespacePrefix, ' +
-                        'Description, CreatedDate, LastModifiedDate, ' +
+                        'Description, CreatedById, CreatedDate, LastModifiedDate, ' +
                         'Type, LastViewedDate, LastReferencedDate, ' +
                         'DashboardResultRefreshedDate ' +
                     'FROM Dashboard '
@@ -49,6 +49,7 @@ export class DatasetDashboards implements Dataset {
                     developerName: record.DeveloperName, 
                     package: (record.NamespacePrefix || ''),
                     description: record.Description, 
+                    createdById: sfdcManager.caseSafeId(record.CreatedById as string),
                     createdDate: record.CreatedDate, 
                     lastModifiedDate: record.LastModifiedDate, 
                     type: record.Type, 
