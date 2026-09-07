@@ -446,6 +446,39 @@ describe('tests.api.unit.Datasets', () => {
       expect(results.has('0__c')).toBeTruthy();
       expect(results.has('9__c')).toBeTruthy();
     });
+    it('checks if apex trigger counts are split by status for issue #730', async () => {
+      const sfdcManager = new SalesforceManagerMock_SoqlQuery();
+      sfdcManager.setDescribeGolbal([
+        { name: 'Account', customSetting: false, label: 'Account' },
+        { name: 'Contact', customSetting: false, label: 'Contact' }
+      ]);
+      sfdcManager.addSoqlQueryResponse('FROM EntityDefinition', [
+        { DurableId: 'AccountId', NamespacePrefix: null, DeveloperName: 'Account', QualifiedApiName: 'Account', ExternalSharingModel: 'private', InternalSharingModel: 'private' },
+        { DurableId: 'ContactId', NamespacePrefix: null, DeveloperName: 'Contact', QualifiedApiName: 'Contact', ExternalSharingModel: 'private', InternalSharingModel: 'private' }
+      ]);
+      sfdcManager.addSoqlQueryResponse('FROM ApexTrigger', [
+        { EntityDefinitionId: 'AccountId', Status: 'Active', NbTriggers: 2 },
+        { EntityDefinitionId: 'AccountId', Status: 'Inactive', NbTriggers: 1 },
+        { EntityDefinitionId: 'ContactId', Status: 'Active', NbTriggers: 3 }
+      ]);
+      const results = await dataset.run(
+        sfdcManager,
+        new DataFactoryMock_AllIsOK(),
+        new SimpleLoggerMock_DoingNothing(),
+        new Map([[ OrgCheckGlobalParameter.OBJECTS_MODE, OrgCheckGlobalParameter.OBJECTS_MODE_FULL]])
+      );
+      expect(results.size).toBe(2);
+      const account = results.get('Account');
+      expect(account).toBeDefined();
+      expect(account?.nbApexTriggers).toBe(3);
+      expect(account?.nbActiveApexTriggers).toBe(2);
+      expect(account?.nbInactiveApexTriggers).toBe(1);
+      const contact = results.get('Contact');
+      expect(contact).toBeDefined();
+      expect(contact?.nbApexTriggers).toBe(3);
+      expect(contact?.nbActiveApexTriggers).toBe(3);
+      expect(contact?.nbInactiveApexTriggers).toBe(0);
+    });
   });
 
   describe('Specific test for DatasetOrganization', () => {

@@ -143,6 +143,20 @@ export interface SfdcObject extends DataWithScore {
      * @public
      */
     nbApexTriggers: number;
+
+    /**
+     * @description Number of active apex triggers for this object
+     * @type {number}
+     * @public
+     */
+    nbActiveApexTriggers: number;
+
+    /**
+     * @description Number of inactive apex triggers for this object
+     * @type {number}
+     * @public
+     */
+    nbInactiveApexTriggers: number;
     
     /**
      * @description List of field Sets for this object

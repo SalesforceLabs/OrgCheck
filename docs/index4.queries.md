@@ -633,7 +633,7 @@ Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-object.ts](h
 ```
 SELECT Id, DurableId, DeveloperName, Description, NamespacePrefix, 
    ExternalSharingModel, InternalSharingModel, 
-   (SELECT Id FROM ApexTriggers), 
+   (SELECT Id, Status FROM ApexTriggers), 
    (SELECT Id, MasterLabel, Description FROM FieldSets), 
    (SELECT Id, Name, LayoutType FROM Layouts), 
    (SELECT DurableId, Label, Max, Remaining, Type FROM Limits), 
@@ -727,9 +727,9 @@ GROUP BY EntityDefinitionId
 
 #### Query on ApexTrigger
 ```
-SELECT EntityDefinitionId, COUNT(Id) NbTriggers 
+SELECT EntityDefinitionId, Status, COUNT(Id) NbTriggers 
 FROM ApexTrigger 
-GROUP BY EntityDefinitionId
+GROUP BY EntityDefinitionId, Status
 ```
 
 #### Query on EntityDefinition Limits

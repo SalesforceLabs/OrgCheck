@@ -91,5 +91,27 @@ describe('orgcheck-api-datafactory', () => {
             expect(err.message).toBeDefined();
             expect(err.message.endsWith('is defined as without dependencies, but some dependencies were provided.')).toBeTruthy();
         });
-    })
+    });
+    describe('checks if datafactoryinstance scores objects with inactive Apex Triggers (issue #730)', () => {
+        const factory = new DataFactory().getInstance(DataAliases.SfdcObject);
+        it('should increase the score when nbInactiveApexTriggers is greater than zero', () => {
+            const data: any = factory.createWithScore({
+                properties: {
+                    nbInactiveApexTriggers: 1
+                }
+            });
+            expect(data.score).toBeGreaterThan(0);
+            expect(data.badFields).toContain('nbInactiveApexTriggers');
+            expect(data.badReasonIds).toContain(127);
+        });
+        it('should not flag inactive Apex Triggers when the counter is zero', () => {
+            const data: any = factory.createWithScore({
+                properties: {
+                    nbInactiveApexTriggers: 0
+                }
+            });
+            expect(data.badFields).not.toContain('nbInactiveApexTriggers');
+            expect(data.badReasonIds).not.toContain(127);
+        });
+    });
 })

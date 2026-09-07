@@ -20,6 +20,7 @@ export class ObjectsTableDefinition implements TableDefinition {
         { label: 'Record types',            type: ColumnType.NUM, data: { value: 'nbRecordTypes' }},
         { label: 'Workflows',               type: ColumnType.NUM, data: { value: 'nbWorkflowRules' }},
         { label: 'Apex Triggers',           type: ColumnType.NUM, data: { value: 'nbApexTriggers' }},
+        { label: 'Inactive Apex Triggers',  type: ColumnType.NUM, data: { value: 'nbInactiveApexTriggers' }},
         { label: 'Validation Rules',        type: ColumnType.NUM, data: { value: 'nbValidationRules' }},
         { label: 'Ownership Sharing Rules', type: ColumnType.NUM, data: { value: 'nbOwnershipBasedSharingRules' }},
         { label: 'Criteria Sharing Rules',  type: ColumnType.NUM, data: { value: 'nbCriteriaBasedSharingRules' }},

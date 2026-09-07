@@ -125,10 +125,10 @@ export class DatasetObjects implements Dataset {
                     tooling: true,
                     queryMoreField: 'CreatedDate' // entityDef does not support calling QueryMore, use the custom instead
                 }, {
-                    // Get the number of all the apex triggers per object
-                    string: 'SELECT EntityDefinitionId, COUNT(Id) NbTriggers ' + // EntityDefinitionId = EntityDefinition.DurableId
+                    // Get the number of apex triggers per object and status (Active / not Active)
+                    string: 'SELECT EntityDefinitionId, Status, COUNT(Id) NbTriggers ' + // EntityDefinitionId = EntityDefinition.DurableId
                             'FROM ApexTrigger ' +
-                            'GROUP BY EntityDefinitionId',
+                            'GROUP BY EntityDefinitionId, Status',
                     tooling: true,
                     queryMoreField: 'CreatedDate' // entityDef does not support calling QueryMore, use the custom instead
                 }, 
@@ -157,7 +157,14 @@ export class DatasetObjects implements Dataset {
                 MediumProcessor.forEach(nbRecordTypesPerEntity, (r: Record<string, unknown>) => SetCounter(r.EntityDefinitionId, 'rt', r.NbRecordTypes)),
                 MediumProcessor.forEach(nbWorkflowRulesPerEntity, (r: Record<string, unknown>) => SetCounter(r.TableEnumOrId, 'wf', r.NbWorkflowRules)),
                 MediumProcessor.forEach(nbValidationRulesPerEntity, (r: Record<string, unknown>) => SetCounter(r.EntityDefinitionId, 'vr', r.NbValidationRules)),
-                MediumProcessor.forEach(nbTriggersPerEntity, (r: Record<string, unknown>) => SetCounter(r.EntityDefinitionId, 'at', r.NbTriggers)),
+                MediumProcessor.forEach(nbTriggersPerEntity, (r: Record<string, unknown>) => {
+                    SetCounter(r.EntityDefinitionId, 'at', r.NbTriggers);
+                    if (r.Status === 'Active') {
+                        SetCounter(r.EntityDefinitionId, 'ata', r.NbTriggers);
+                    } else {
+                        SetCounter(r.EntityDefinitionId, 'ati', r.NbTriggers);
+                    }
+                }),
                 MediumProcessor.forEach(limitsPerEntity, (r: Record<string, unknown>) => void extraCounters.set(`${r.EntityDefinitionId}-${r.Type}`, (r.Max as number) - (r.Remaining as number)))
             ])
         }
@@ -192,6 +199,8 @@ export class DatasetObjects implements Dataset {
                         nbWorkflowRules: extraCounters.get(`${object.name}-wf`) ?? 0,
                         nbValidationRules: extraCounters.get(`${durableId}-vr`) ?? 0,
                         nbApexTriggers: extraCounters.get(`${durableId}-at`) ?? 0,
+                        nbActiveApexTriggers: extraCounters.get(`${durableId}-ata`) ?? 0,
+                        nbInactiveApexTriggers: extraCounters.get(`${durableId}-ati`) ?? 0,
                         nbOwnershipBasedSharingRules: nbOwnerSharingRules,
                         nbCriteriaBasedSharingRules: nbCriteriaSharingRules,
                         url: sfdcManager.setupUrl(durableId, type)

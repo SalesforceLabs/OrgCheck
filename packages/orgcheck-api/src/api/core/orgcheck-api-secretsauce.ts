@@ -936,6 +936,14 @@ const ALL_SCORE_RULES: ScoreRule[] = [
         badField: 'dependencies.referenced.length',
         applicable: [ DataAliases.SfdcFlow ],
         category: SCORE_RULE_CATEGORIES.DEPENDENCY
+    }, {
+        id: 127,
+        description: 'Object with inactive Apex Triggers',
+        formula: ((d: SfdcObject) => d?.nbInactiveApexTriggers > 0) as (data: unknown) => boolean,
+        errorMessage: `This object has inactive Apex Triggers. Inactive triggers should be removed from the org.`,
+        badField: 'nbInactiveApexTriggers',
+        applicable: [ DataAliases.SfdcObject ],
+        category: SCORE_RULE_CATEGORIES.USELESS
     }
 ];
 Object.freeze(ALL_SCORE_RULES);

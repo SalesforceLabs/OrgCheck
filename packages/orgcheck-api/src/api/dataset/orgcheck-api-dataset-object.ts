@@ -52,7 +52,7 @@ export class DatasetObject implements Dataset {
             sfdcManager.soqlQuery([{
                 tooling: true, // We need the tooling to get the Description, ApexTriggers, FieldSets, ... which are not accessible from REST API)
                 string: 'SELECT Id, DurableId, DeveloperName, Description, NamespacePrefix, ExternalSharingModel, InternalSharingModel, ' +
-                            '(SELECT Id FROM ApexTriggers), ' +
+                            '(SELECT Id, Status FROM ApexTriggers), ' +
                             '(SELECT Id, MasterLabel, Description FROM FieldSets), ' +
                             '(SELECT Id, Name, LayoutType FROM Layouts), ' +
                             '(SELECT DurableId, Label, Max, Remaining, Type FROM Limits), ' +
@@ -141,10 +141,13 @@ export class DatasetObject implements Dataset {
         );
 
         // apex triggers
+        const apexTriggerRecords = (entity.ApexTriggers as { records?: Record<string, unknown>[] } | undefined)?.records ?? [];
         const apexTriggerIds: string[] = await MediumProcessor.map(
-            (entity.ApexTriggers as { records?: Record<string, unknown>[] } | undefined)?.records ?? [], 
+            apexTriggerRecords, 
             (t: Record<string, unknown>) => sfdcManager.caseSafeId(t.Id as string)
         );
+        const nbActiveApexTriggers = apexTriggerRecords.filter((t) => t.Status === 'Active').length;
+        const nbInactiveApexTriggers = apexTriggerRecords.length - nbActiveApexTriggers;
 
         // workflow rules
         const workflowRuleIds: string[] = await MediumProcessor.map(
@@ -286,6 +289,8 @@ export class DatasetObject implements Dataset {
                 internalSharingModel: entity.InternalSharingModel,
                 apexTriggerIds: apexTriggerIds,
                 nbApexTriggers: apexTriggerIds?.length ?? 0,
+                nbActiveApexTriggers: nbActiveApexTriggers,
+                nbInactiveApexTriggers: nbInactiveApexTriggers,
                 fieldSets: fieldSets,
                 limits: limits,
                 layouts: layouts,
