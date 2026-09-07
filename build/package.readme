@@ -53,7 +53,7 @@ else
    id=$(grep 'id": ' /tmp/out.txt | cut -d'"' -f4) ;
    csvFile=/tmp/packagePushJob-${id}.csv ;
    echo "PackagePushRequestId,SubscriberOrganizationKey" > "${csvFile}" ;
-   sf data query --query "SELECT OrgKey FROM PackageSubscriber WHERE MetadataPackageVersionId <= '${oldVersion}' LIMIT 9000 " --resultformat=csv | awk 'NR > 1 { print "'${id}'," $1 }' >> "${csvFile}" ;
+   sf data query --target-org "${targetOrg}" --query "SELECT OrgKey FROM PackageSubscriber WHERE MetadataPackageVersionId <= '${oldVersion}' LIMIT 9000 " --resultformat=csv | awk 'NR > 1 { print "'${id}'," $1 }' >> "${csvFile}" ;
    sf data upsert bulk --target-org "${targetOrg}" --sobject PackagePushJob --file "${csvFile}" -i Id ;
    echo "When bulk job if done, please run the following command:" ;
    echo "sf data update record --target-org ${targetOrg} --sobject PackagePushRequest --record-id ${id} \"--values=Status=Pending\"";
