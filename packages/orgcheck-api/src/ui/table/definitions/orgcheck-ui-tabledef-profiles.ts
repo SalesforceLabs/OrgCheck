@@ -16,6 +16,8 @@ export class ProfilesTableDefinition implements TableDefinition {
         { label: 'Custom',                 type: ColumnType.CHK, data: { value: 'isCustom' }},
         { label: '#FLSs',                  type: ColumnType.NUM, data: { value: 'nbFieldPermissions' }},
         { label: '#Object CRUDs',          type: ColumnType.NUM, data: { value: 'nbObjectPermissions' }},
+        { label: '#Writable Objects',      type: ColumnType.NUM, data: { value: 'nbWritableObjectPermissions' }},
+        { label: 'Read-only objects?',     type: ColumnType.CHK, data: { value: 'isFullyReadOnlyObjects' }},
         { label: 'Is Admin-like?',         type: ColumnType.CHK, data: { value: 'isAdminLike' }},
         { label: 'Api Enabled',            type: ColumnType.CHK, data: { value: 'importantPermissions.apiEnabled' }},
         { label: 'View Setup',             type: ColumnType.CHK, data: { value: 'importantPermissions.viewSetup' }},

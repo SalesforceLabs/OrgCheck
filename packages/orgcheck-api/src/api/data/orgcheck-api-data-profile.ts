@@ -74,6 +74,20 @@ export interface SfdcProfile extends DataWithScore {
     nbObjectPermissions: number;
 
     /**
+     * @description Number of object permissions with Create, Edit, Delete, or Modify All
+     * @type {number}
+     * @public
+     */
+    nbWritableObjectPermissions: number;
+
+    /**
+     * @description True if this profile has no object with Create, Edit, Delete, or Modify All
+     * @type {boolean}
+     * @public
+     */
+    isFullyReadOnlyObjects: boolean;
+
+    /**
      * @description Type of this item
      * @type {number}
      * @public

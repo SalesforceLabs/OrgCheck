@@ -27,6 +27,7 @@ import { DatasetPermissionSets } from 'src/api/dataset/orgcheck-api-dataset-perm
 import { DatasetProfilePasswordPolicies } from 'src/api/dataset/orgcheck-api-dataset-profilepasswordpolicies';
 import { DatasetProfileRestrictions } from 'src/api/dataset/orgcheck-api-dataset-profilerestrictions';
 import { DatasetProfiles } from 'src/api/dataset/orgcheck-api-dataset-profiles';
+import { SfdcProfile } from 'src/api/data/orgcheck-api-data-profile';
 import { DatasetUserRoles } from 'src/api/dataset/orgcheck-api-dataset-userroles';
 import { DatasetInternalActiveUsers } from 'src/api/dataset/orgcheck-api-dataset-internalactiveusers';
 import { DatasetValidationRules } from 'src/api/dataset/orgcheck-api-dataset-validationrules';
@@ -281,6 +282,68 @@ describe('tests.api.unit.Datasets', () => {
       sfdcManager.addSoqlQueryResponse('SELECT PermissionsZ FROM UserPermissionAccess', []); // PermissionsZ is an invalid field for this org but as we byPass 'INVALID_FIELD', the manager return an empty array
       const resultsKO = await dataset.run(sfdcManager, new DataFactoryMock_AllIsOK(), new SimpleLoggerMock_DoingNothing(), new Map([ ['permissions', ['A', 'Z']] ]));
       expect(resultsKO).toBeDefined();
+    });
+  });
+
+  describe('Specific test for DatasetProfiles', () => {
+    const dataset = new DatasetProfiles();
+    const profileRecord = (id: string, name: string) => ({
+      ProfileId: id,
+      Profile: { Name: name, Description: `${name} description` },
+      IsCustom: true,
+      License: { Name: 'Salesforce' },
+      NamespacePrefix: '',
+      PermissionsApiEnabled: false,
+      PermissionsViewSetup: false,
+      PermissionsModifyAllData: false,
+      PermissionsViewAllData: false,
+      PermissionsManageUsers: false,
+      PermissionsCustomizeApplication: false,
+      CreatedDate: 0,
+      LastModifiedDate: 0
+    });
+
+    it('computes read-only object flags from aggregates', async () => {
+      const sfdcManager = new SalesforceManagerMock_SoqlQuery();
+      sfdcManager.addSoqlQueryResponse('SELECT ProfileId, Profile.Name', [
+        profileRecord('00eRO1', 'Read Only Profile'),
+        profileRecord('00eWR1', 'Writable Objects Profile'),
+        profileRecord('00eNP1', 'No Permissions Profile')
+      ]);
+      sfdcManager.addSoqlQueryResponse('COUNT(SobjectType) CountObject', [
+        { ProfileId: '00eRO1', CountObject: 5 },
+        { ProfileId: '00eWR1', CountObject: 8 }
+      ]);
+      sfdcManager.addSoqlQueryResponse('COUNT(SobjectType) CountWritableObject', [
+        { ProfileId: '00eWR1', CountWritableObject: 3 }
+      ]);
+      sfdcManager.addSoqlQueryResponse('FROM FieldPermissions', [
+        { ProfileId: '00eRO1', CountField: 10 },
+        { ProfileId: '00eWR1', CountField: 2 }
+      ]);
+      sfdcManager.addSoqlQueryResponse('FROM PermissionSetAssignment', []);
+
+      const results = await dataset.run(sfdcManager, new DataFactoryMock_AllIsOK(), new SimpleLoggerMock_DoingNothing()) as Map<string, SfdcProfile>;
+      expect(results).toBeDefined();
+      expect(results.size).toBe(3);
+
+      const readOnly = results.get('00eRO1');
+      expect(readOnly?.nbObjectPermissions).toBe(5);
+      expect(readOnly?.nbWritableObjectPermissions).toBe(0);
+      expect(readOnly?.isFullyReadOnlyObjects).toBe(true);
+      expect(readOnly?.nbFieldPermissions).toBe(10);
+
+      const writableObjects = results.get('00eWR1');
+      expect(writableObjects?.nbObjectPermissions).toBe(8);
+      expect(writableObjects?.nbWritableObjectPermissions).toBe(3);
+      expect(writableObjects?.isFullyReadOnlyObjects).toBe(false);
+      expect(writableObjects?.nbFieldPermissions).toBe(2);
+
+      const noPermissions = results.get('00eNP1');
+      expect(noPermissions?.nbObjectPermissions).toBe(0);
+      expect(noPermissions?.nbWritableObjectPermissions).toBe(0);
+      expect(noPermissions?.isFullyReadOnlyObjects).toBe(true);
+      expect(noPermissions?.nbFieldPermissions).toBe(0);
     });
   });
 

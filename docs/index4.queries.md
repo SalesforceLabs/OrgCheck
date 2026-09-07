@@ -994,18 +994,28 @@ ORDER BY ProfileId
 
 #### Query on ObjectPermissions
 ```
-SELECT Parent.ProfileId, COUNT(SobjectType) CountObject 
-FROM ObjectPermissions 
-WHERE Parent.IsOwnedByProfile = TRUE 
-GROUP BY Parent.ProfileId 
+SELECT Parent.ProfileId, COUNT(SobjectType) CountObject
+FROM ObjectPermissions
+WHERE Parent.IsOwnedByProfile = TRUE
+GROUP BY Parent.ProfileId
+```
+
+#### Query on ObjectPermissions (writable)
+```
+SELECT Parent.ProfileId, COUNT(SobjectType) CountWritableObject
+FROM ObjectPermissions
+WHERE Parent.IsOwnedByProfile = TRUE
+AND (PermissionsCreate = TRUE OR PermissionsEdit = TRUE
+OR PermissionsDelete = TRUE OR PermissionsModifyAllRecords = TRUE)
+GROUP BY Parent.ProfileId
 ```
 
 #### Query on FieldPermissions
 ```
-SELECT Parent.ProfileId, COUNT(Field) CountField 
-FROM FieldPermissions 
-WHERE Parent.IsOwnedByProfile = TRUE 
-GROUP BY Parent.ProfileId 
+SELECT Parent.ProfileId, COUNT(Field) CountField
+FROM FieldPermissions
+WHERE Parent.IsOwnedByProfile = TRUE
+GROUP BY Parent.ProfileId
 ```
 
 #### Query on PermissionSetAssignment

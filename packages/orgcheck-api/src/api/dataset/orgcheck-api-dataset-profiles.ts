@@ -34,13 +34,21 @@ export class DatasetProfiles implements Dataset {
                     'WHERE Parent.IsOwnedByProfile = TRUE '+
                     'GROUP BY Parent.ProfileId ',
             queryMoreField: 'CreatedDate' // aggregate does not support calling QueryMore, use the custom instead
-        },{
+        }, {
+            string: 'SELECT Parent.ProfileId, COUNT(SobjectType) CountWritableObject '+ // warning: 'ProfileId' will be used as 'Parent.ProfileId' (bc aggregate query)
+                    'FROM ObjectPermissions '+
+                    'WHERE Parent.IsOwnedByProfile = TRUE '+
+                    'AND (PermissionsCreate = TRUE OR PermissionsEdit = TRUE '+
+                    'OR PermissionsDelete = TRUE OR PermissionsModifyAllRecords = TRUE) '+
+                    'GROUP BY Parent.ProfileId ',
+            queryMoreField: 'CreatedDate' // aggregate does not support calling QueryMore, use the custom instead
+        }, {
             string: 'SELECT Parent.ProfileId, COUNT(Field) CountField '+ // warning: 'ProfileId' will be used as 'Parent.ProfileId' (bc aggregate query)
                     'FROM FieldPermissions '+
                     'WHERE Parent.IsOwnedByProfile = TRUE '+
                     'GROUP BY Parent.ProfileId ',
             queryMoreField: 'SystemModstamp' // aggregate does not support calling QueryMore, use the custom instead
-        },{
+        }, {
             string: 'SELECT PermissionSet.ProfileId, COUNT(Id) CountAssignment '+ // warning: 'ProfileId' will be used as 'PermissionSet.ProfileId' (bc aggregate query)
                     'FROM PermissionSetAssignment '+
                     'WHERE PermissionSet.IsOwnedByProfile = TRUE '+
@@ -52,8 +60,9 @@ export class DatasetProfiles implements Dataset {
         // All salesforce records
         const profileRecords = results[0];
         const objectPermissionRecords = results[1];
-        const fieldPermissionRecords = results[2];
-        const assignmentRecords = results[3];
+        const writableObjectPermissionRecords = results[2];
+        const fieldPermissionRecords = results[3];
+        const assignmentRecords = results[4];
 
         // Init the factory and records
         const profileDataFactory = dataFactory.getInstance(DataAliases.SfdcProfile);
@@ -79,6 +88,8 @@ export class DatasetProfiles implements Dataset {
                     lastModifiedDate: record.LastModifiedDate,
                     nbFieldPermissions: 0, // default value, may be changed in further SOQL
                     nbObjectPermissions: 0, // default value, may be changed in further SOQL
+                    nbWritableObjectPermissions: 0, // default value, may be changed in further SOQL
+                    isFullyReadOnlyObjects: true, // default value, may be changed in further SOQL
                     type: 'Profile',
                     importantPermissions: {
                         apiEnabled: record.PermissionsApiEnabled === true,
@@ -102,7 +113,7 @@ export class DatasetProfiles implements Dataset {
             return [ profile.id, profile ];
         }));
 
-        logger?.log(`Parsing ${objectPermissionRecords?.length} object permissions, ${fieldPermissionRecords?.length} field permissions and ${assignmentRecords?.length} assignments...`);
+        logger?.log(`Parsing ${objectPermissionRecords?.length} object permissions, ${writableObjectPermissionRecords?.length} writable object permissions, ${fieldPermissionRecords?.length} field permissions and ${assignmentRecords?.length} assignments...`);
         await Promise.all([
             MediumProcessor.forEach(objectPermissionRecords, async (record: Record<string, unknown>) => {
                 const profileId = sfdcManager.caseSafeId(record.ProfileId as string); // see warning in the SOQL query (this is not a bug we use ProfileId instead of Parent.ProfileId)
@@ -111,11 +122,18 @@ export class DatasetProfiles implements Dataset {
                     profile.nbObjectPermissions += record.CountObject as number;
                 }
             }),
+            MediumProcessor.forEach(writableObjectPermissionRecords, async (record: Record<string, unknown>) => {
+                const profileId = sfdcManager.caseSafeId(record.ProfileId as string); // see warning in the SOQL query (this is not a bug we use ProfileId instead of Parent.ProfileId)
+                const profile = profiles.get(profileId);
+                if (profile) {
+                    profile.nbWritableObjectPermissions += record.CountWritableObject as number;
+                }
+            }),
             MediumProcessor.forEach(fieldPermissionRecords, async (record: Record<string, unknown>) => {
                 const profileId = sfdcManager.caseSafeId(record.ProfileId as string); // see warning in the SOQL query (this is not a bug we use ProfileId instead of Parent.ProfileId)
                 const profile = profiles.get(profileId);
                 if (profile) {
-                    profile.nbFieldPermissions += record.CountField as number;    
+                    profile.nbFieldPermissions += record.CountField as number;
                 }
             }),
             MediumProcessor.forEach(assignmentRecords, async (record: Record<string, unknown>) => {
@@ -127,9 +145,10 @@ export class DatasetProfiles implements Dataset {
             })
         ]);
 
-        // Compute scores for all permission sets
+        // Compute read-only flags and scores for all profiles
         logger?.log(`Computing the score for ${profiles.size} profiles...`);
         await MediumProcessor.forEach(profiles, async (profile: SfdcProfile) => {
+            profile.isFullyReadOnlyObjects = profile.nbWritableObjectPermissions === 0;
             profileDataFactory.computeScore(profile);
         });
 

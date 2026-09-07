@@ -551,6 +551,8 @@ Notes:
 | Custom | Boolean | Indicates if the profile is custom |
 | #FLSs | Numeric | Number of field-level security settings |
 | #Object CRUDs | Numeric | Number of object CRUD permissions |
+| #Writable Objects | Numeric | Number of objects with Create, Edit, Delete, or Modify All |
+| Read-only objects? | Boolean | True if the profile has no object with Create, Edit, Delete, or Modify All |
 | Is Admin-like? | Boolean | Indicates if the profile is admin-like |
 | Api Enabled | Boolean | Indicates if API is enabled |
 | View Setup | Boolean | Indicates if view setup is enabled |
