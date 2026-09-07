@@ -114,4 +114,26 @@ describe('orgcheck-api-datafactory', () => {
             expect(data.badReasonIds).not.toContain(127);
         });
     });
+    describe('checks if datafactoryinstance scores objects with inactive Validation Rules (issue #729)', () => {
+        const factory = new DataFactory().getInstance(DataAliases.SfdcObject);
+        it('should increase the score when nbInactiveValidationRules is greater than zero', () => {
+            const data: any = factory.createWithScore({
+                properties: {
+                    nbInactiveValidationRules: 1
+                }
+            });
+            expect(data.score).toBeGreaterThan(0);
+            expect(data.badFields).toContain('nbInactiveValidationRules');
+            expect(data.badReasonIds).toContain(128);
+        });
+        it('should not flag inactive Validation Rules when the counter is zero', () => {
+            const data: any = factory.createWithScore({
+                properties: {
+                    nbInactiveValidationRules: 0
+                }
+            });
+            expect(data.badFields).not.toContain('nbInactiveValidationRules');
+            expect(data.badReasonIds).not.toContain(128);
+        });
+    });
 })

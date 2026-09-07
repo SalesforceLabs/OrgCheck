@@ -216,6 +216,8 @@ export class DatasetObject implements Dataset {
                 }
             })
         );
+        const nbActiveValidationRules = validationRules.filter((t) => t.isActive === true).length;
+        const nbInactiveValidationRules = validationRules.length - nbActiveValidationRules;
         
         // weblinks and actions
         const webLinks: SfdcWebLink[] = await MediumProcessor.map(
@@ -288,7 +290,7 @@ export class DatasetObject implements Dataset {
                 externalSharingModel: entity.ExternalSharingModel,
                 internalSharingModel: entity.InternalSharingModel,
                 apexTriggerIds: apexTriggerIds,
-                nbApexTriggers: apexTriggerIds?.length ?? 0,
+                nbApexTriggers: nbActiveApexTriggers + nbInactiveApexTriggers,
                 nbActiveApexTriggers: nbActiveApexTriggers,
                 nbInactiveApexTriggers: nbInactiveApexTriggers,
                 fieldSets: fieldSets,
@@ -296,7 +298,9 @@ export class DatasetObject implements Dataset {
                 layouts: layouts,
                 nbPageLayouts: layouts?.length ?? 0,
                 validationRules: validationRules,
-                nbValidationRules: validationRules?.length ?? 0,
+                nbValidationRules: nbActiveApexTriggers + nbInactiveApexTriggers,
+                nbActiveValidationRules: nbActiveValidationRules,
+                nbInactiveValidationRules: nbInactiveValidationRules,
                 webLinks: webLinks,
                 standardFields: standardFields,
                 customFieldIds: customFieldIds,

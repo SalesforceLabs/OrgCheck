@@ -479,6 +479,39 @@ describe('tests.api.unit.Datasets', () => {
       expect(contact?.nbActiveApexTriggers).toBe(3);
       expect(contact?.nbInactiveApexTriggers).toBe(0);
     });
+    it('checks if validation rule counts are split by activation for issue #729', async () => {
+      const sfdcManager = new SalesforceManagerMock_SoqlQuery();
+      sfdcManager.setDescribeGolbal([
+        { name: 'Account', customSetting: false, label: 'Account' },
+        { name: 'Contact', customSetting: false, label: 'Contact' }
+      ]);
+      sfdcManager.addSoqlQueryResponse('FROM EntityDefinition', [
+        { DurableId: 'AccountId', NamespacePrefix: null, DeveloperName: 'Account', QualifiedApiName: 'Account', ExternalSharingModel: 'private', InternalSharingModel: 'private' },
+        { DurableId: 'ContactId', NamespacePrefix: null, DeveloperName: 'Contact', QualifiedApiName: 'Contact', ExternalSharingModel: 'private', InternalSharingModel: 'private' }
+      ]);
+      sfdcManager.addSoqlQueryResponse('FROM ValidationRule', [
+        { EntityDefinitionId: 'AccountId', Active: true, NbValidationRules: 2 },
+        { EntityDefinitionId: 'AccountId', Active: false, NbValidationRules: 1 },
+        { EntityDefinitionId: 'ContactId', Active: true, NbValidationRules: 3 }
+      ]);
+      const results = await dataset.run(
+        sfdcManager,
+        new DataFactoryMock_AllIsOK(),
+        new SimpleLoggerMock_DoingNothing(),
+        new Map([[ OrgCheckGlobalParameter.OBJECTS_MODE, OrgCheckGlobalParameter.OBJECTS_MODE_FULL]])
+      );
+      expect(results.size).toBe(2);
+      const account = results.get('Account');
+      expect(account).toBeDefined();
+      expect(account?.nbValidationRules).toBe(3);
+      expect(account?.nbActiveValidationRules).toBe(2);
+      expect(account?.nbInactiveValidationRules).toBe(1);
+      const contact = results.get('Contact');
+      expect(contact).toBeDefined();
+      expect(contact?.nbValidationRules).toBe(3);
+      expect(contact?.nbActiveValidationRules).toBe(3);
+      expect(contact?.nbInactiveValidationRules).toBe(0);
+    });
   });
 
   describe('Specific test for DatasetOrganization', () => {

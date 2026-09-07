@@ -720,9 +720,9 @@ GROUP BY TableEnumOrId
 
 #### Query on ValidationRule
 ```
-SELECT EntityDefinitionId, COUNT(Id) NbValidationRules 
+SELECT EntityDefinitionId, Active, COUNT(Id) NbValidationRules 
 FROM ValidationRule 
-GROUP BY EntityDefinitionId
+GROUP BY EntityDefinitionId, Active
 ```
 
 #### Query on ApexTrigger

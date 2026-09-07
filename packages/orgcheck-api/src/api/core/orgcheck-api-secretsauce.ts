@@ -944,6 +944,14 @@ const ALL_SCORE_RULES: ScoreRule[] = [
         badField: 'nbInactiveApexTriggers',
         applicable: [ DataAliases.SfdcObject ],
         category: SCORE_RULE_CATEGORIES.USELESS
+    }, {
+        id: 128,
+        description: 'Object with inactive Validation Rules',
+        formula: ((d: SfdcObject) => d?.nbInactiveValidationRules > 0) as (data: unknown) => boolean,
+        errorMessage: `This object has inactive Validation Rules. Inactive validation rules should be removed from the org.`,
+        badField: 'nbInactiveValidationRules',
+        applicable: [ DataAliases.SfdcObject ],
+        category: SCORE_RULE_CATEGORIES.USELESS
     }
 ];
 Object.freeze(ALL_SCORE_RULES);

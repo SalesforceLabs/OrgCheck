@@ -450,6 +450,7 @@ Notes:
 | Apex Triggers | Numeric | Number of Apex triggers |
 | Inactive Apex Triggers | Numeric | Number of inactive Apex triggers |
 | Validation Rules | Numeric | Number of validation rules |
+| Inactive Validation Rules | Numeric | Number of inactive validation rules |
 | Ownership Sharing Rules | Numeric | Number of owner-based sharing rules |
 | Criteria Sharing Rules | Numeric | Number of criteria-based sharing rules |
 | Internal OWD | String | Internal organization-wide default |

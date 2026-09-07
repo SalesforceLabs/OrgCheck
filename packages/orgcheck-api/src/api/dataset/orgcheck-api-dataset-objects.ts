@@ -118,10 +118,10 @@ export class DatasetObjects implements Dataset {
                     tooling: true,
                     queryMoreField: 'CreatedDate' // entityDef does not support calling QueryMore, use the custom instead
                 }, {
-                    // Get the number of validation rules per object
-                    string: 'SELECT EntityDefinitionId, COUNT(Id) NbValidationRules ' + // EntityDefinitionId = EntityDefinition.DurableId
+                    // Get the number of validation rules per object and activation state
+                    string: 'SELECT EntityDefinitionId, Active, COUNT(Id) NbValidationRules ' + // EntityDefinitionId = EntityDefinition.DurableId
                             'FROM ValidationRule ' +
-                            'GROUP BY EntityDefinitionId',
+                            'GROUP BY EntityDefinitionId, Active',
                     tooling: true,
                     queryMoreField: 'CreatedDate' // entityDef does not support calling QueryMore, use the custom instead
                 }, {
@@ -156,7 +156,14 @@ export class DatasetObjects implements Dataset {
                 MediumProcessor.forEach(nbPageLayoutsPerEntity, (r: Record<string, unknown>) => SetCounter(r.EntityDefinitionId, 'pl', r.NbPageLayouts)),
                 MediumProcessor.forEach(nbRecordTypesPerEntity, (r: Record<string, unknown>) => SetCounter(r.EntityDefinitionId, 'rt', r.NbRecordTypes)),
                 MediumProcessor.forEach(nbWorkflowRulesPerEntity, (r: Record<string, unknown>) => SetCounter(r.TableEnumOrId, 'wf', r.NbWorkflowRules)),
-                MediumProcessor.forEach(nbValidationRulesPerEntity, (r: Record<string, unknown>) => SetCounter(r.EntityDefinitionId, 'vr', r.NbValidationRules)),
+                MediumProcessor.forEach(nbValidationRulesPerEntity, (r: Record<string, unknown>) => {
+                    SetCounter(r.EntityDefinitionId, 'vr', r.NbValidationRules);
+                    if (r.Active === true) {
+                        SetCounter(r.EntityDefinitionId, 'vra', r.NbValidationRules);
+                    } else {
+                        SetCounter(r.EntityDefinitionId, 'vri', r.NbValidationRules);
+                    }
+                }),
                 MediumProcessor.forEach(nbTriggersPerEntity, (r: Record<string, unknown>) => {
                     SetCounter(r.EntityDefinitionId, 'at', r.NbTriggers);
                     if (r.Status === 'Active') {
@@ -198,6 +205,8 @@ export class DatasetObjects implements Dataset {
                         nbRecordTypes: extraCounters.get(`${durableId}-rt`) ?? 0,
                         nbWorkflowRules: extraCounters.get(`${object.name}-wf`) ?? 0,
                         nbValidationRules: extraCounters.get(`${durableId}-vr`) ?? 0,
+                        nbActiveValidationRules: extraCounters.get(`${durableId}-vra`) ?? 0,
+                        nbInactiveValidationRules: extraCounters.get(`${durableId}-vri`) ?? 0,
                         nbApexTriggers: extraCounters.get(`${durableId}-at`) ?? 0,
                         nbActiveApexTriggers: extraCounters.get(`${durableId}-ata`) ?? 0,
                         nbInactiveApexTriggers: extraCounters.get(`${durableId}-ati`) ?? 0,

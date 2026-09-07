@@ -201,11 +201,25 @@ export interface SfdcObject extends DataWithScore {
     validationRules: SfdcValidationRule[];
 
     /**
-     * @description Number of validation rules for this object
+     * @description Number of validation rules (active or not) for this object
      * @type {number}
      * @public
      */ 
     nbValidationRules: number;
+
+    /**
+     * @description Number of active validation rules for this object
+     * @type {number}
+     * @public
+     */
+    nbActiveValidationRules: number;
+
+    /**
+     * @description Number of inactive validation rules for this object
+     * @type {number}
+     * @public
+     */
+    nbInactiveValidationRules: number;
     
     /**
      * @description List of web links for this object
