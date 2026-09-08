@@ -53,7 +53,7 @@ classDiagram
         +salesforceApiVersion number
         +orgId string
         +clearCache() void
-        +listCacheItems() Array~CacheItem~
+        +listCacheItems(boolean includeEmptyItems) Array~CacheItem~
         +getCacheItem(string itemName) any
         +dailyApiRequestLimitInformation SalesforceUsageInformationIntf
         +getOrganizationInformation() Promise~SfdcOrganization~

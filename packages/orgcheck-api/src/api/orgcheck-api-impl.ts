@@ -145,11 +145,13 @@ export class API implements ApiIntf {
 
     /**
      * @description List all the items in the cache manager
+     * @param {boolean} [includeEmptyItems] - do we include the items that are empty? (true by default)
      * @returns {CacheItem[]} list of cache information 
      * @public
      */
-    public listCacheItems(): CacheItem[] {
-        return this._cacheManager.details();
+    public listCacheItems(includeEmptyItems: boolean = true): CacheItem[] {
+        const items = this._cacheManager.details();
+        return includeEmptyItems === false ? items.filter((item: CacheItem) => item.isEmpty === false) : items;
     }
 
     /**

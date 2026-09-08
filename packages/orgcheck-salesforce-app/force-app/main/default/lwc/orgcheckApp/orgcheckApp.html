@@ -200,38 +200,44 @@
                                         <lightning-button label="Clear" variant="destructive" onclick={handleRemoveAllCache}></lightning-button>
                                     </lightning-layout-item>
                                 </lightning-layout>
-                                <lightning-layout multiple-rows>
-                                    <template lwc:if={tableData.cacheitems} for:each={tableData.cacheitems} for:item="item">
-                                        <lightning-layout-item size="2" large-device-size="3" medium-device-size="4" small-device-size="12" key={item.name} padding="around-small">
-                                            <div class="viewCacheItem">
-                                                <lightning-card>
-                                                    <lightning-button-icon icon-name="utility:zoomin" alternative-text="Show details" slot="actions" onclick={handleLogCacheItem} data-item-name={item.name}></lightning-button-icon>
-                                                    <h3 slot="title">
-                                                        <lightning-layout vertical-align="center">
-                                                            <lightning-layout-item>
-                                                                <lightning-icon icon-name="utility:database" size="small"></lightning-icon>
-                                                                &nbsp;
-                                                            </lightning-layout-item>
-                                                            <lightning-layout-item>
-                                                                <div class="slds-line-clamp">{item.name}</div>
-                                                            </lightning-layout-item>
-                                                        </lightning-layout>
-                                                    </h3>
-                                                    <div slot="footer">
-                                                        <lightning-badge class="slds-badge_lightest" lwc:if={item.created} icon-name="utility:date_time" label={item.created}></lightning-badge>
-                                                        <lightning-badge class="slds-badge_lightest" lwc:if={item.isMap} icon-name="action:map" label="Map"></lightning-badge>
-                                                        <lightning-badge class="slds-badge_lightest" lwc:else label="Object" icon-name="utility:sparkles" ></lightning-badge>
-                                                    </div>
-                                                    <div class="slds-var-p-horizontal_small">
-                                                        <h1 class="slds-text-heading_large slds-align_absolute-center">
-                                                            <lightning-formatted-number value={item.length}></lightning-formatted-number>
-                                                        </h1>
-                                                    </div>
-                                                </lightning-card>
-                                            </div>
-                                        </lightning-layout-item>  
-                                    </template>
-                                </lightning-layout>
+                                <template lwc:if={hasCacheItems}>
+                                    <lightning-layout multiple-rows>
+                                        <template for:each={tableData.cacheitems} for:item="item">
+                                            <lightning-layout-item size="2" large-device-size="3" medium-device-size="4" small-device-size="12" key={item.renderKey} padding="around-small">
+                                                <div class="viewCacheItem">
+                                                    <lightning-card>
+                                                        <lightning-button-icon icon-name="utility:zoomin" alternative-text="Show details" slot="actions" onclick={handleLogCacheItem} data-item-name={item.name}></lightning-button-icon>
+                                                        <h3 slot="title">
+                                                            <lightning-layout vertical-align="center">
+                                                                <lightning-layout-item>
+                                                                    <lightning-icon icon-name="utility:database" size="small"></lightning-icon>
+                                                                    &nbsp;
+                                                                </lightning-layout-item>
+                                                                <lightning-layout-item>
+                                                                    <div class="slds-line-clamp">{item.name}</div>
+                                                                </lightning-layout-item>
+                                                            </lightning-layout>
+                                                        </h3>
+                                                        <div slot="footer">
+                                                            <lightning-badge class="slds-badge_lightest" lwc:if={item.created} icon-name="utility:date_time" label={item.created}></lightning-badge>
+                                                            <lightning-badge class="slds-badge_lightest" lwc:if={item.isMap} icon-name="action:map" label="Map"></lightning-badge>
+                                                            <lightning-badge class="slds-badge_lightest" lwc:elseif={item.isArray} icon-name="utility:list" label="Array"></lightning-badge>
+                                                            <lightning-badge class="slds-badge_lightest" lwc:else icon-name="utility:sparkles" label="Object"></lightning-badge>
+                                                        </div>
+                                                        <div class="slds-var-p-horizontal_small">
+                                                            <h1 class="slds-text-heading_large slds-align_absolute-center">
+                                                                <lightning-formatted-number value={item.length}></lightning-formatted-number>
+                                                            </h1>
+                                                        </div>
+                                                    </lightning-card>
+                                                </div>
+                                            </lightning-layout-item>  
+                                        </template>
+                                    </lightning-layout>
+                                </template>
+                                <template lwc:else>
+                                    There is no cached data to display.
+                                </template>
                             </div>
                             <div data-key="03" class="slds-hide slds-var-p-horizontal_small">
                                 <p>

@@ -21,6 +21,7 @@ describe('tests.api.unit.DataCacheManager', () => {
     manager.set('undefined', undefined);
     manager.set('emptyMap', new Map());
     manager.set('emptyArray', [ ]);
+    manager.get('string'); // reading an object back should not alter its length
     manager.details().forEach((item) => {
       expect(item).toBeDefined();
       expect(item.name).toBeDefined();
@@ -54,6 +55,16 @@ describe('tests.api.unit.DataCacheManager', () => {
           expect(item.isMap).toBe(false);
           expect(item?.length).toBe(0); // undefined means nothing right so length should be zero?! right?? 
           expect(item.created).toBe(0);
+          break;
+        case 'emptyMap':
+          expect(item.isEmpty).toBe(true);
+          expect(item.isMap).toBe(true);
+          expect(item?.length).toBe(0); // a map with no entry is empty
+          break;
+        case 'emptyArray':
+          expect(item.isEmpty).toBe(true);
+          expect(item.isArray).toBe(true);
+          expect(item?.length).toBe(0); // an array with no element is empty
           break;
         default:
       }

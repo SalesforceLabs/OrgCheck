@@ -65,8 +65,8 @@ export class DataCacheManager implements DataCacheManagerIntf {
             this._storage.removeItem(metadataPhysicalKey);
             return null;
         }
-        // Make sure the metadata is up to date with the data
-        metadataEntry.length = dataEntry.content?.length ?? 0;
+        // Make sure the metadata is up to date with the data (a plain object has no length, it always counts as one item)
+        metadataEntry.length = metadataEntry.type === TYPE.OBJECT ? 1 : (dataEntry.content?.length ?? 0);
         // ... and is saved encrypted!
         this._setItemToCache(metadataPhysicalKey, JSON.stringify(metadataEntry));
         // if the data is a map

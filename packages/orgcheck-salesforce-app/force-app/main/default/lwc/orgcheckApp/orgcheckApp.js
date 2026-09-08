@@ -437,7 +437,7 @@ export default class OrgcheckApp extends LightningElement {
                 title: 'Home',
                 items: { 
                     WELCOME:       { key: '01', refreshButtonVisible: false, title: '👋​ Welcome!' },
-                    CACHE:         { key: '02', refreshButtonVisible: false, data: 'cacheitems', action: (api) => api.listCacheItems(), title: '🧹 Cache' },
+                    CACHE:         { key: '02', refreshButtonVisible: false, data: 'cacheitems', action: (api) => api.listCacheItems(false).map((item) => ({ ...item, renderKey: `${item.name}-${Date.now()}` })), title: '🧹 Cache' },
                     HELP:          { key: '03', refreshButtonVisible: false, data: 'scorerules', recipe: Recipes.SCORE_RULES }
                 }
             },
@@ -606,6 +606,15 @@ export default class OrgcheckApp extends LightningElement {
      */ 
     get isThereAnyApexUncompiled() {
         return this.tabs.selectedSubTab === this._private_properties.appNavigation.CODE.items.UNCOMPILEDS.key && this.apexUncompiledTableData?.length > 0 || false;
+    }
+
+    /**
+     * @description Whether the Cache tab has any non-empty items to show as cards
+     * @type {boolean}
+     * @public
+     */
+    get hasCacheItems() {
+        return Array.isArray(this.tableData?.cacheitems) && this.tableData.cacheitems.length > 0;
     }
 
     // ----------------------------------------------------------------------------------------------------------------

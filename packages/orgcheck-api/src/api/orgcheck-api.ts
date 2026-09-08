@@ -75,10 +75,11 @@ export interface ApiIntf {
 
     /**
      * @description List all the items in the cache manager
+     * @param {boolean} [includeEmptyItems] - do we include the items that are empty? (true by default)
      * @returns {CacheItem[]} list of cache information 
      * @public
      */
-    listCacheItems(): CacheItem[];
+    listCacheItems(includeEmptyItems?: boolean): CacheItem[];
 
     /**
      * @description Get cache item from cache manager
