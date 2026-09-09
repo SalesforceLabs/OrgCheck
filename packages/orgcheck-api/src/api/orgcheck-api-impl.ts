@@ -446,8 +446,16 @@ export class API implements ApiIntf {
      */
     public clearObjects() {
         const logger = this._loggerFactory?.create('Clear Objects from Cache', false);
-        logger?.log(`Calling the clean method for recipe: ${RecipeAliases.OBJECTS_LITE}`);
-        this._recipeManager.clean(RecipeAliases.OBJECTS_LITE);
+        try {
+            logger?.log(`Calling the clean method for recipe: ${RecipeAliases.OBJECTS_LITE}`);
+            this._recipeManager.clean(RecipeAliases.OBJECTS_LITE);
+            logger?.log(`Done.`);
+        } catch (error) {
+            logger?.hadError(error);
+            throw error;
+        } finally {
+            logger?.end();
+        }
     }
 
     /**
