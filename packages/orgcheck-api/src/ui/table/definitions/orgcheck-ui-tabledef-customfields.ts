@@ -17,6 +17,7 @@ class AbstractCustomFieldsTableDefinition implements TableDefinition {
             { label: 'Field',               type: ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'Label',               type: ColumnType.TXT, data: { value: 'label' }},
             { label: 'Package',             type: ColumnType.TXT, data: { value: 'package' }},
+            { label: 'Editable?',           type: ColumnType.CHK, data: { value: 'isEditable' }},
             { label: 'Type',                type: ColumnType.TXT, data: { value: 'type' }},
             { label: 'Length',              type: ColumnType.TXT, data: { value: 'length' }},
             { label: 'Unique?',             type: ColumnType.CHK, data: { value: 'isUnique' }},
@@ -40,7 +41,7 @@ class AbstractCustomFieldsTableDefinition implements TableDefinition {
             { label: 'Description',         type: ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
         ];
         if (isObjectInformationNeeded === true) {
-            this.columns.splice(5, 0, // between package and type
+            this.columns.splice(6, 0, // between editable and type
                 { label: 'Object API Name',     type: ColumnType.TXT, data: { value: 'objectId' }}, 
                 { label: 'Object Name',         type: ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }, modifier: { valueIfEmpty: 'N/A' }}, 
                 { label: 'Object Type',         type: ColumnType.TXT, data: { value: 'objectRef.typeRef.label' }, modifier: { valueIfEmpty: 'N/A' }}

@@ -115,17 +115,17 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     // So please continue to increment IDs values and ADD NEW RULES AT THE END of the array !!
     { 
         id: 0,
-        description: 'Not referenced anywhere',
+        description: 'Not referenced anywhere (only when the component is editable)',
         formula: ((d: SfdcApexTrigger | SfdcCustomTab | SfdcPageLayout | SfdcWebLink | SfdcHomePageComponent | SfdcCustomLabel | SfdcLightningPage | SfdcLightningAuraComponent | SfdcLightningWebComponent | SfdcVisualForceComponent | SfdcVisualForcePage | SfdcStaticResource) => d?.isEditable !== false && d?.dependencies?.hadError === false && IS_EMPTY(d.dependencies?.referenced)) as (data: unknown) => boolean, 
-        errorMessage: `This component is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.`,
+        errorMessage: `This component is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org. Note that this rule only applies when the component is editable.`,
         badField: 'dependencies.referenced.length',
         applicable: [ DataAliases.SfdcApexTrigger, DataAliases.SfdcCustomTab, DataAliases.SfdcPageLayout, DataAliases.SfdcWebLink, DataAliases.SfdcHomePageComponent, DataAliases.SfdcCustomLabel, DataAliases.SfdcLightningPage, DataAliases.SfdcLightningAuraComponent, DataAliases.SfdcLightningWebComponent, DataAliases.SfdcVisualForceComponent, DataAliases.SfdcVisualForcePage, DataAliases.SfdcStaticResource ],
         category: SCORE_RULE_CATEGORIES.DEPENDENCY
     }, {
         id: 1,
-        description: 'No reference anywhere for custom field',
+        description: 'No reference anywhere for custom field (only when the component is editable)',
         formula: ((d: SfdcField) => d?.isEditable !== false && d?.isCustom === true && d?.dependencies?.hadError === false && IS_EMPTY(d.dependencies?.referenced)) as (data: unknown) => boolean, 
-        errorMessage: `This custom field is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.`,
+        errorMessage: `This custom field is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org. Note that this rule only applies when the component is editable.`,
         badField: 'dependencies.referenced.length',
         applicable: [ DataAliases.SfdcField ],
         category: SCORE_RULE_CATEGORIES.DEPENDENCY
@@ -139,9 +139,9 @@ const ALL_SCORE_RULES: ScoreRule[] = [
         category: SCORE_RULE_CATEGORIES.DEPENDENCY
     }, {
         id: 3,
-        description: 'Sorry, we had an issue with the Dependency API to gather the dependencies of this item',
+        description: 'Sorry, we had an issue with the Dependency API to gather the dependencies of this editable item',
         formula: ((d: DataWithScoreAndDependencies) => d?.isEditable !== false && d?.dependencies && d?.dependencies.hadError === true) as (data: unknown) => boolean, 
-        errorMessage: `Sorry, we had an issue with the Dependency API to gather the dependencies of this item.`,
+        errorMessage: `Sorry, we had an issue with the Dependency API to gather the dependencies of this editable item.`,
         badField: 'dependencies',
         applicable: [ DataAliases.SfdcField, DataAliases.SfdcApexClass, DataAliases.SfdcCustomLabel, DataAliases.SfdcFlow, DataAliases.SfdcLightningPage, DataAliases.SfdcLightningAuraComponent, DataAliases.SfdcLightningWebComponent, DataAliases.SfdcVisualForceComponent, DataAliases.SfdcVisualForcePage ],
         category: SCORE_RULE_CATEGORIES.DEPENDENCY
@@ -163,17 +163,17 @@ const ALL_SCORE_RULES: ScoreRule[] = [
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
         id: 6,
-        description: 'No description',
+        description: 'No description for this editable component',
         formula: ((d: SfdcLightningPage | SfdcLightningAuraComponent | SfdcLightningWebComponent | SfdcVisualForcePage | SfdcVisualForceComponent | SfdcWorkflow | SfdcWebLink | SfdcFieldSet | SfdcValidationRule | SfdcDocument | SfdcCustomTab | SfdcEmailTemplate | SfdcStaticResource | SfdcReport | SfdcDashboard) => d?.isEditable !== false && IS_EMPTY(d?.description)) as (data: unknown) => boolean,
-        errorMessage: `This component does not have a description. Best practices force you to use the Description field to give some informative context about why and how it is used/set/govern.`,
+        errorMessage: `This component does not have a description. Best practices force you to use the Description field to give some informative context about why and how it is used/set/govern. Note that this rule only applies when the component is editable.`,
         badField: 'description',
         applicable: [ DataAliases.SfdcLightningPage, DataAliases.SfdcLightningAuraComponent, DataAliases.SfdcLightningWebComponent, DataAliases.SfdcVisualForcePage, DataAliases.SfdcVisualForceComponent, DataAliases.SfdcWorkflow, DataAliases.SfdcWebLink, DataAliases.SfdcFieldSet, DataAliases.SfdcValidationRule, DataAliases.SfdcDocument, DataAliases.SfdcCustomTab, DataAliases.SfdcEmailTemplate, DataAliases.SfdcStaticResource, DataAliases.SfdcReport, DataAliases.SfdcDashboard ],
         category: SCORE_RULE_CATEGORIES.DOCUMENTATION
     }, {
         id: 7,
-        description: 'No description for custom component',
+        description: 'No description for this editable custom component',
         formula: ((d: SfdcField | SfdcPermissionSet | SfdcProfile) => d?.isEditable !== false && d?.isCustom === true && IS_EMPTY(d?.description)) as (data: unknown) => boolean,
-        errorMessage: `This custom component does not have a description. Best practices force you to use the Description field to give some informative context about why and how it is used/set/govern.`,
+        errorMessage: `This custom component does not have a description. Best practices force you to use the Description field to give some informative context about why and how it is used/set/govern. Note that this rule only applies when the component is editable.`,
         badField: 'description',
         applicable: [ DataAliases.SfdcField, DataAliases.SfdcPermissionSet, DataAliases.SfdcProfile ],
         category: SCORE_RULE_CATEGORIES.DOCUMENTATION
@@ -483,17 +483,17 @@ const ALL_SCORE_RULES: ScoreRule[] = [
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
         id: 46,
-        description: 'Hard-coded URL suspicion in this item',
+        description: 'Hard-coded URL suspicion in this editable item',
         formula: ((d: SfdcApexClass | SfdcApexTrigger | SfdcCollaborationGroup | SfdcField | SfdcHomePageComponent | SfdcVisualForceComponent | SfdcVisualForcePage | SfdcWebLink | SfdcCustomTab | SfdcEmailTemplate) => d?.isEditable !== false && (d?.hardCodedURLs?.length > 0 || false)) as (data: unknown) => boolean,
-        errorMessage: `The source code of this item contains one or more hard coded URLs pointing to domains like salesforce.com or force.*`,
+        errorMessage: `The source code of this item contains one or more hard coded URLs pointing to domains like salesforce.com or force.*. Note that this rule only applies when the item is editable.`,
         badField: 'hardCodedURLs',
         applicable: [ DataAliases.SfdcApexClass, DataAliases.SfdcApexTrigger, DataAliases.SfdcCollaborationGroup, DataAliases.SfdcField, DataAliases.SfdcHomePageComponent, DataAliases.SfdcVisualForceComponent, DataAliases.SfdcVisualForcePage, DataAliases.SfdcWebLink, DataAliases.SfdcCustomTab, DataAliases.SfdcEmailTemplate ],
         category: SCORE_RULE_CATEGORIES.HARDCODED_URL
     }, {
         id: 47,
-        description: 'Hard-coded Salesforce IDs suspicion in this item',
+        description: 'Hard-coded Salesforce IDs suspicion in this editable item',
         formula: ((d: SfdcApexClass | SfdcApexTrigger | SfdcCollaborationGroup | SfdcField | SfdcHomePageComponent | SfdcVisualForceComponent | SfdcVisualForcePage | SfdcWebLink | SfdcCustomTab | SfdcEmailTemplate) => d?.isEditable !== false && (d?.hardCodedIDs?.length > 0 || false)) as (data: unknown) => boolean,
-        errorMessage: `The source code of this item contains one or more hard coded Salesforce IDs`,
+        errorMessage: `The source code of this item contains one or more hard coded Salesforce IDs. Note that this rule only applies when the item is editable.`,
         badField: 'hardCodedIDs',
         applicable: [ DataAliases.SfdcApexClass, DataAliases.SfdcApexTrigger, DataAliases.SfdcCollaborationGroup, DataAliases.SfdcField, DataAliases.SfdcHomePageComponent, DataAliases.SfdcVisualForceComponent, DataAliases.SfdcVisualForcePage, DataAliases.SfdcWebLink, DataAliases.SfdcCustomTab, DataAliases.SfdcEmailTemplate ],
         category: SCORE_RULE_CATEGORIES.HARDCODED_ID
@@ -703,9 +703,9 @@ const ALL_SCORE_RULES: ScoreRule[] = [
         category: SCORE_RULE_CATEGORIES.SECURITY
     }, {
         id: 73,
-        description: 'Lightning page with Notes and Attachments related list',
+        description: 'Lightning page with Notes and Attachments related list (only when the component is editable)',
         formula: ((d: SfdcLightningPage) => d?.isEditable !== false && d?.isAttachmentRelatedListIncluded === true) as (data: unknown) => boolean,
-        errorMessage: `This lightning page has the Notes and Attachments related list in it. Please consider using the Files related list instead.`,
+        errorMessage: `This lightning page has the Notes and Attachments related list in it. Please consider using the Files related list instead. Note that this rule only applies when the component is editable.`,
         badField: 'isAttachmentRelatedListIncluded',
         applicable: [ DataAliases.SfdcLightningPage ],
         category: SCORE_RULE_CATEGORIES.USER_ADOPTION
@@ -727,9 +727,9 @@ const ALL_SCORE_RULES: ScoreRule[] = [
         category: SCORE_RULE_CATEGORIES.SECURITY
     }, {
         id: 76,
-        description: 'JavaScript code suspicion in this formula field',
+        description: 'JavaScript code suspicion in this editable formula field',
         formula: ((d: SfdcField) => d?.isEditable !== false && (d?.formula?.includes('javascript') === true || d?.formula?.includes('<script>') === true)) as (data: unknown) => boolean,
-        errorMessage: `We suspect this custom field contains a formula with javascript code inside..`,
+        errorMessage: `We suspect this custom field contains a formula with javascript code inside. Note that this rule only applies when the component is editable.`,
         badField: 'formula',
         applicable: [ DataAliases.SfdcField ],
         category: SCORE_RULE_CATEGORIES.SECURITY
