@@ -6,6 +6,7 @@ export class SalesforceManagerMock_DoingNothing implements SalesforceManagerIntf
     get apiVersion() { return 53; }
     get orgId() { return '00D00000000TEST000'; }
     caseSafeId(id: string) { return id; }
+    isEditableManageableState(state: string) { return [ 'unmanaged', 'installedEditable' ].includes(state); }
     setupUrl(_id: string, _type: string, _parentId?: string, _parentType?: string): string { return '/'; }
     getObjectType(_objectName: any, isCustomSetting: any) { return isCustomSetting ? 'CustomSetting' : 'StandardObject'; }
     get dailyApiRequestLimitInformation(): SalesforceUsageInformation { return { currentUsageRatio: 0, currentUsagePercentage: "0%", 

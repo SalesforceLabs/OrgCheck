@@ -1,6 +1,7 @@
 import { describe, it, expect } from '@jest/globals';
 import { SimpleLoggerMock_DoingNothing } from 'tests/utils/orgcheck-api-logger-mock.utility';
 import { DataFactoryMock_AllIsOK } from 'tests/utils/orgcheck-api-datafactory-mock.utility';
+import { DataFactory } from 'src/api/core/data/orgcheck-api-datafactory-impl';
 import { SalesforceManagerMock_SoqlQuery } from 'tests/utils/orgcheck-api-salesforce-mock.utility';
 import { DatasetApexClasses } from 'src/api/dataset/orgcheck-api-dataset-apexclasses';
 import { DatasetApexTriggers } from 'src/api/dataset/orgcheck-api-dataset-apextriggers';
@@ -754,6 +755,52 @@ describe('tests.api.unit.Datasets', () => {
       expect(results.size).toBe(1);
       expect(results.get('01Z000000000001').createdById).toBe('005000000000001');
       expect(results.get('01Z000000000001').createdByRef).toBeUndefined();
+    });
+  });
+
+  describe('Specific test for DatasetCustomTabs about items from a package', () => {
+    const dataset = new DatasetCustomTabs();
+    it('returns the packaged items but does not flag them', async () => {
+      const sfdcManager = new SalesforceManagerMock_SoqlQuery();
+      // None of these tabs have a description nor any dependency, so the editable ones are 
+      // expected to be flagged, whereas the one from a locked installed package is not.
+      sfdcManager.addSoqlQueryResponse('FROM CustomTab ', [
+        { Id: '001', DeveloperName: 'Unmanaged', ManageableState: 'unmanaged' },
+        { Id: '002', DeveloperName: 'Editable', ManageableState: 'installedEditable', NamespacePrefix: 'pkg' },
+        { Id: '003', DeveloperName: 'Locked', ManageableState: 'installed', NamespacePrefix: 'pkg' }
+      ]);
+      const results: Map<string, any> = await dataset.run(sfdcManager, new DataFactory(), new SimpleLoggerMock_DoingNothing());
+      expect(results.size).toBe(3);
+      expect(results.get('001').isEditable).toBeTruthy();
+      expect(results.get('001').score).toBeGreaterThan(0);
+      expect(results.get('002').isEditable).toBeTruthy();
+      expect(results.get('002').score).toBeGreaterThan(0);
+      expect(results.get('003').isEditable).toBeFalsy();
+      expect(results.get('003').score).toBe(0);
+      expect(results.get('003').badFields.length).toBe(0);
+    });
+  });
+
+  describe('Specific test for DatasetCustomFields about items from a package', () => {
+    const dataset = new DatasetCustomFields();
+    it('returns the packaged items but does not flag them', async () => {
+      const sfdcManager = new SalesforceManagerMock_SoqlQuery();
+      sfdcManager.addSoqlQueryResponse('FROM CustomField ', [
+        { Id: '001', ManageableState: 'unmanaged', EntityDefinition: { QualifiedApiName: 'Account', IsCustomSetting: false, KeyPrefix: '001' }},
+        { Id: '002', ManageableState: 'installed', EntityDefinition: { QualifiedApiName: 'Account', IsCustomSetting: false, KeyPrefix: '001' }}
+      ]);
+      // The instances are built from the metadata records, not from the SOQL records
+      sfdcManager.readMetadataAtScale = async () => [
+        { Id: '001', DeveloperName: 'Unmanaged__c', Metadata: { label: 'Unmanaged', type: 'Text' }},
+        { Id: '002', DeveloperName: 'Locked__c', NamespacePrefix: 'pkg', Metadata: { label: 'Locked', type: 'Text' }}
+      ];
+      const results: Map<string, any> = await dataset.run(sfdcManager, new DataFactory(), new SimpleLoggerMock_DoingNothing(), new Map());
+      expect(results.size).toBe(2);
+      expect(results.get('001').isEditable).toBeTruthy();
+      expect(results.get('001').score).toBeGreaterThan(0);
+      expect(results.get('002').isEditable).toBeFalsy();
+      expect(results.get('002').score).toBe(0);
+      expect(results.get('002').badFields.length).toBe(0);
     });
   });
 

@@ -239,10 +239,13 @@ Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-customfields
 
 #### Query on CustomField
 ```
-SELECT Id, EntityDefinition.QualifiedApiName, EntityDefinition.IsCustomSetting,
-   EntityDefinition.KeyPrefix 
+SELECT Id, ManageableState, EntityDefinition.QualifiedApiName,
+   EntityDefinition.IsCustomSetting, EntityDefinition.KeyPrefix 
 FROM CustomField 
-WHERE ManageableState IN ('installedEditable', 'unmanaged')
+```
+When a specific object is selected, the following clause is added:
+```
+WHERE EntityDefinition.QualifiedApiName = '<object_api_name>'
 ```
 
 ### Tooling Composite + Tooling SOQL
@@ -304,9 +307,8 @@ Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-customlabels
 #### Query on ExternalString
 ```
 SELECT Id, Name, NamespacePrefix, Category, IsProtected, Language, MasterLabel, 
-   Value, CreatedDate, LastModifiedDate
+   Value, CreatedDate, LastModifiedDate, ManageableState
 FROM ExternalString
-WHERE ManageableState IN ('installedEditable', 'unmanaged')
 ```
 
 ### Tooling Composite + Tooling SOQL
@@ -352,9 +354,8 @@ Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-customtabs.t
 #### Query on CustomTab
 ```
 SELECT Id, DeveloperName, Type, Url, CreatedDate, Description, 
-       LastModifiedDate, NamespacePrefix
+       LastModifiedDate, NamespacePrefix, ManageableState
 FROM CustomTab
-WHERE ManageableState IN ('installedEditable', 'unmanaged')
 ```
 
 ### Tooling Composite + Tooling SOQL
@@ -600,9 +601,8 @@ Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-lightningpag
 #### Query on FlexiPage
 ```
 SELECT Id, MasterLabel, EntityDefinition.QualifiedApiName, Type, 
-   NamespacePrefix, Description, CreatedDate, LastModifiedDate 
+   NamespacePrefix, Description, ManageableState, CreatedDate, LastModifiedDate 
 FROM FlexiPage 
-WHERE ManageableState IN ('installedEditable', 'unmanaged')
 ```
 
 ---
@@ -1183,7 +1183,8 @@ Source: [packages/orgcheck-api/src/api/dataset/orgcheck-api-dataset-weblinks.ts]
 
 #### Query on WebLink
 ```
-SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate 
+SELECT Id, Name, Url, LinkType, OpenType, Description, CreatedDate, 
+   LastModifiedDate, NamespacePrefix, ManageableState, EntityDefinition.DurableId
 FROM WebLink
 ```
 

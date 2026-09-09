@@ -23,9 +23,8 @@ export class DatasetWeblinks implements Dataset {
         logger?.log(`Querying REST API about WebLinks in the org...`);            
         const results = await sfdcManager.soqlQuery([{
             string: 'SELECT Id, Name, Url, LinkType, OpenType, Description, CreatedDate, ' +
-                    'LastModifiedDate, NamespacePrefix, EntityDefinition.DurableId '+
-                    'FROM WebLink '+
-                    `WHERE ManageableState IN ('installedEditable', 'unmanaged') `,
+                    'LastModifiedDate, NamespacePrefix, ManageableState, EntityDefinition.DurableId '+
+                    'FROM WebLink ',
             tooling: true
         }], logger);
         
@@ -59,6 +58,7 @@ export class DatasetWeblinks implements Dataset {
                     type: record.LinkType,
                     behavior: record.OpenType,
                     package: (record.NamespacePrefix || ''),
+                    isEditable: sfdcManager.isEditableManageableState(record.ManageableState as string),
                     createdDate: record.CreatedDate,
                     lastModifiedDate: record.LastModifiedDate,
                     description: record.Description,

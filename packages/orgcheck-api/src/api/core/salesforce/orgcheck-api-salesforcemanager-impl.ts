@@ -98,6 +98,13 @@ const MAX_MEMBERS_IN_METADATAAPI_REQUEST_SIZE: number = 10;
  */
 const MAX_COMPOSITE_REQUEST_SIZE: number = 5;
 
+/**
+ * @description List of the ManageableState values of an item that can still be modified 
+ *              in the org (ie. it is not part of a locked installed package)
+ * @private
+ */
+const EDITABLE_MANAGEABLE_STATES: string[] = [ 'unmanaged', 'installedEditable' ];
+
 /** 
  * @description Salesforce APIs Manager Implementation with JsForce Connection
  * @public
@@ -230,6 +237,16 @@ export class SalesforceManager implements SalesforceManagerIntf {
     public caseSafeId(id: string): string {
         if (id && id?.length === 18) return id.substr(0, 15);
         return id;
+    }
+
+    /**
+     * @description Tells if an item can be modified in the org based on its ManageableState field
+     * @param {string} state - The ManageableState value of the item as returned by the API
+     * @returns {boolean} True if the item is editable in the org
+     * @public
+     */
+    public isEditableManageableState(state: string): boolean {
+        return EDITABLE_MANAGEABLE_STATES.includes(state);
     }
 
     /**

@@ -36,6 +36,15 @@ export interface Data {
      * @public
      */
     url: string;
+
+    /**
+     * @description Tells if this item can be modified in the org. False means it belongs to a locked
+     *   installed package, so best practice rules must not flag it as technical debt.
+     *   Undefined means the information is not relevant for this data type, ie. it is editable.
+     * @type {boolean}
+     * @public
+     */
+    isEditable?: boolean;
 }
 
 /**

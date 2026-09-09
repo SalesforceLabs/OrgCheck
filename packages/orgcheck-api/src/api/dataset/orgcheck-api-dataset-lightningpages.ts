@@ -23,10 +23,9 @@ export class DatasetLightningPages implements Dataset {
         const results = await sfdcManager.soqlQuery([{
             tooling: true,
             string: 'SELECT Id, MasterLabel, EntityDefinition.QualifiedApiName, ' +
-                        'Type, NamespacePrefix, Description, ' +
+                        'Type, NamespacePrefix, Description, ManageableState, ' +
                         'CreatedDate, LastModifiedDate ' +
-                    'FROM FlexiPage ' +
-                    `WHERE ManageableState IN ('installedEditable', 'unmanaged') `
+                    'FROM FlexiPage '
         }], logger);
 
         // Init the factory and records
@@ -54,6 +53,7 @@ export class DatasetLightningPages implements Dataset {
                     name: record.MasterLabel,
                     type: record.Type,
                     package: (record.NamespacePrefix || ''),
+                    isEditable: sfdcManager.isEditableManageableState(record.ManageableState as string),
                     createdDate: record.CreatedDate,
                     lastModifiedDate: record.LastModifiedDate,
                     description: record.Description,

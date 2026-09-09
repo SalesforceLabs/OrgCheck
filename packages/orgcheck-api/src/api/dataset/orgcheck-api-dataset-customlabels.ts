@@ -23,9 +23,8 @@ export class DatasetCustomLabels implements Dataset {
         const results = await sfdcManager.soqlQuery([{
             tooling: true,
             string: 'SELECT Id, Name, NamespacePrefix, Category, IsProtected, Language, '+
-                        'MasterLabel, Value, CreatedDate, LastModifiedDate ' +
-                    'FROM ExternalString ' +
-                    `WHERE ManageableState IN ('installedEditable', 'unmanaged') `
+                        'MasterLabel, Value, CreatedDate, LastModifiedDate, ManageableState ' +
+                    'FROM ExternalString '
         }], logger);
 
         // Init the factory and records
@@ -52,6 +51,7 @@ export class DatasetCustomLabels implements Dataset {
                     id: id,
                     name: record.Name,
                     package: (record.NamespacePrefix || ''),
+                    isEditable: sfdcManager.isEditableManageableState(record.ManageableState as string),
                     category: record.Category,
                     isProtected: record.IsProtected === true,
                     language: record.Language,

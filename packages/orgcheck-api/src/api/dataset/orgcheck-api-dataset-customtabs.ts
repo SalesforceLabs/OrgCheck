@@ -24,9 +24,8 @@ export class DatasetCustomTabs implements Dataset {
         const results = await sfdcManager.soqlQuery([{
             tooling: true,
             string: 'SELECT Id, DeveloperName, Type, Url, CreatedDate, Description, ' +
-                        'LastModifiedDate, NamespacePrefix '+
-                    'FROM CustomTab '+
-                    `WHERE ManageableState IN ('installedEditable', 'unmanaged')`
+                        'LastModifiedDate, NamespacePrefix, ManageableState '+
+                    'FROM CustomTab '
         }], logger);
 
         // Init the factory and records
@@ -54,6 +53,7 @@ export class DatasetCustomTabs implements Dataset {
                     id: id,
                     name: record.DeveloperName || `${id} (No name from API!)`,
                     package: (record.NamespacePrefix || ''),
+                    isEditable: sfdcManager.isEditableManageableState(record.ManageableState as string),
                     type: record.Type,
                     description: record.Description,
                     createdDate: record.CreatedDate,

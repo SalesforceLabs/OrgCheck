@@ -116,7 +116,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     { 
         id: 0,
         description: 'Not referenced anywhere',
-        formula: ((d: SfdcApexTrigger | SfdcCustomTab | SfdcPageLayout | SfdcWebLink | SfdcHomePageComponent | SfdcCustomLabel | SfdcLightningPage | SfdcLightningAuraComponent | SfdcLightningWebComponent | SfdcVisualForceComponent | SfdcVisualForcePage | SfdcStaticResource) => d?.dependencies?.hadError === false && IS_EMPTY(d.dependencies?.referenced)) as (data: unknown) => boolean, 
+        formula: ((d: SfdcApexTrigger | SfdcCustomTab | SfdcPageLayout | SfdcWebLink | SfdcHomePageComponent | SfdcCustomLabel | SfdcLightningPage | SfdcLightningAuraComponent | SfdcLightningWebComponent | SfdcVisualForceComponent | SfdcVisualForcePage | SfdcStaticResource) => d?.isEditable !== false && d?.dependencies?.hadError === false && IS_EMPTY(d.dependencies?.referenced)) as (data: unknown) => boolean, 
         errorMessage: `This component is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.`,
         badField: 'dependencies.referenced.length',
         applicable: [ DataAliases.SfdcApexTrigger, DataAliases.SfdcCustomTab, DataAliases.SfdcPageLayout, DataAliases.SfdcWebLink, DataAliases.SfdcHomePageComponent, DataAliases.SfdcCustomLabel, DataAliases.SfdcLightningPage, DataAliases.SfdcLightningAuraComponent, DataAliases.SfdcLightningWebComponent, DataAliases.SfdcVisualForceComponent, DataAliases.SfdcVisualForcePage, DataAliases.SfdcStaticResource ],
@@ -124,7 +124,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 1,
         description: 'No reference anywhere for custom field',
-        formula: ((d: SfdcField) => d?.isCustom === true && d?.dependencies?.hadError === false && IS_EMPTY(d.dependencies?.referenced)) as (data: unknown) => boolean, 
+        formula: ((d: SfdcField) => d?.isEditable !== false && d?.isCustom === true && d?.dependencies?.hadError === false && IS_EMPTY(d.dependencies?.referenced)) as (data: unknown) => boolean, 
         errorMessage: `This custom field is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.`,
         badField: 'dependencies.referenced.length',
         applicable: [ DataAliases.SfdcField ],
@@ -140,7 +140,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 3,
         description: 'Sorry, we had an issue with the Dependency API to gather the dependencies of this item',
-        formula: ((d: DataWithScoreAndDependencies) => d?.dependencies && d?.dependencies.hadError === true) as (data: unknown) => boolean, 
+        formula: ((d: DataWithScoreAndDependencies) => d?.isEditable !== false && d?.dependencies && d?.dependencies.hadError === true) as (data: unknown) => boolean, 
         errorMessage: `Sorry, we had an issue with the Dependency API to gather the dependencies of this item.`,
         badField: 'dependencies',
         applicable: [ DataAliases.SfdcField, DataAliases.SfdcApexClass, DataAliases.SfdcCustomLabel, DataAliases.SfdcFlow, DataAliases.SfdcLightningPage, DataAliases.SfdcLightningAuraComponent, DataAliases.SfdcLightningWebComponent, DataAliases.SfdcVisualForceComponent, DataAliases.SfdcVisualForcePage ],
@@ -164,7 +164,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 6,
         description: 'No description',
-        formula: ((d: SfdcLightningPage | SfdcLightningAuraComponent | SfdcLightningWebComponent | SfdcVisualForcePage | SfdcVisualForceComponent | SfdcWorkflow | SfdcWebLink | SfdcFieldSet | SfdcValidationRule | SfdcDocument | SfdcCustomTab | SfdcEmailTemplate | SfdcStaticResource | SfdcReport | SfdcDashboard) => IS_EMPTY(d?.description)) as (data: unknown) => boolean,
+        formula: ((d: SfdcLightningPage | SfdcLightningAuraComponent | SfdcLightningWebComponent | SfdcVisualForcePage | SfdcVisualForceComponent | SfdcWorkflow | SfdcWebLink | SfdcFieldSet | SfdcValidationRule | SfdcDocument | SfdcCustomTab | SfdcEmailTemplate | SfdcStaticResource | SfdcReport | SfdcDashboard) => d?.isEditable !== false && IS_EMPTY(d?.description)) as (data: unknown) => boolean,
         errorMessage: `This component does not have a description. Best practices force you to use the Description field to give some informative context about why and how it is used/set/govern.`,
         badField: 'description',
         applicable: [ DataAliases.SfdcLightningPage, DataAliases.SfdcLightningAuraComponent, DataAliases.SfdcLightningWebComponent, DataAliases.SfdcVisualForcePage, DataAliases.SfdcVisualForceComponent, DataAliases.SfdcWorkflow, DataAliases.SfdcWebLink, DataAliases.SfdcFieldSet, DataAliases.SfdcValidationRule, DataAliases.SfdcDocument, DataAliases.SfdcCustomTab, DataAliases.SfdcEmailTemplate, DataAliases.SfdcStaticResource, DataAliases.SfdcReport, DataAliases.SfdcDashboard ],
@@ -172,7 +172,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 7,
         description: 'No description for custom component',
-        formula: ((d: SfdcField | SfdcPermissionSet | SfdcProfile) => d?.isCustom === true && IS_EMPTY(d?.description)) as (data: unknown) => boolean,
+        formula: ((d: SfdcField | SfdcPermissionSet | SfdcProfile) => d?.isEditable !== false && d?.isCustom === true && IS_EMPTY(d?.description)) as (data: unknown) => boolean,
         errorMessage: `This custom component does not have a description. Best practices force you to use the Description field to give some informative context about why and how it is used/set/govern.`,
         badField: 'description',
         applicable: [ DataAliases.SfdcField, DataAliases.SfdcPermissionSet, DataAliases.SfdcProfile ],
@@ -484,7 +484,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 46,
         description: 'Hard-coded URL suspicion in this item',
-        formula: ((d: SfdcApexClass | SfdcApexTrigger | SfdcCollaborationGroup | SfdcField | SfdcHomePageComponent | SfdcVisualForceComponent | SfdcVisualForcePage | SfdcWebLink | SfdcCustomTab | SfdcEmailTemplate) => d?.hardCodedURLs?.length > 0 || false) as (data: unknown) => boolean,
+        formula: ((d: SfdcApexClass | SfdcApexTrigger | SfdcCollaborationGroup | SfdcField | SfdcHomePageComponent | SfdcVisualForceComponent | SfdcVisualForcePage | SfdcWebLink | SfdcCustomTab | SfdcEmailTemplate) => d?.isEditable !== false && (d?.hardCodedURLs?.length > 0 || false)) as (data: unknown) => boolean,
         errorMessage: `The source code of this item contains one or more hard coded URLs pointing to domains like salesforce.com or force.*`,
         badField: 'hardCodedURLs',
         applicable: [ DataAliases.SfdcApexClass, DataAliases.SfdcApexTrigger, DataAliases.SfdcCollaborationGroup, DataAliases.SfdcField, DataAliases.SfdcHomePageComponent, DataAliases.SfdcVisualForceComponent, DataAliases.SfdcVisualForcePage, DataAliases.SfdcWebLink, DataAliases.SfdcCustomTab, DataAliases.SfdcEmailTemplate ],
@@ -492,7 +492,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 47,
         description: 'Hard-coded Salesforce IDs suspicion in this item',
-        formula: ((d: SfdcApexClass | SfdcApexTrigger | SfdcCollaborationGroup | SfdcField | SfdcHomePageComponent | SfdcVisualForceComponent | SfdcVisualForcePage | SfdcWebLink | SfdcCustomTab | SfdcEmailTemplate) => d?.hardCodedIDs?.length > 0 || false) as (data: unknown) => boolean,
+        formula: ((d: SfdcApexClass | SfdcApexTrigger | SfdcCollaborationGroup | SfdcField | SfdcHomePageComponent | SfdcVisualForceComponent | SfdcVisualForcePage | SfdcWebLink | SfdcCustomTab | SfdcEmailTemplate) => d?.isEditable !== false && (d?.hardCodedIDs?.length > 0 || false)) as (data: unknown) => boolean,
         errorMessage: `The source code of this item contains one or more hard coded Salesforce IDs`,
         badField: 'hardCodedIDs',
         applicable: [ DataAliases.SfdcApexClass, DataAliases.SfdcApexTrigger, DataAliases.SfdcCollaborationGroup, DataAliases.SfdcField, DataAliases.SfdcHomePageComponent, DataAliases.SfdcVisualForceComponent, DataAliases.SfdcVisualForcePage, DataAliases.SfdcWebLink, DataAliases.SfdcCustomTab, DataAliases.SfdcEmailTemplate ],
@@ -704,7 +704,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 73,
         description: 'Lightning page with Notes and Attachments related list',
-        formula: ((d: SfdcLightningPage) => d?.isAttachmentRelatedListIncluded === true) as (data: unknown) => boolean,
+        formula: ((d: SfdcLightningPage) => d?.isEditable !== false && d?.isAttachmentRelatedListIncluded === true) as (data: unknown) => boolean,
         errorMessage: `This lightning page has the Notes and Attachments related list in it. Please consider using the Files related list instead.`,
         badField: 'isAttachmentRelatedListIncluded',
         applicable: [ DataAliases.SfdcLightningPage ],
@@ -728,7 +728,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
     }, {
         id: 76,
         description: 'JavaScript code suspicion in this formula field',
-        formula: ((d: SfdcField) => d?.formula?.includes('javascript') === true || d?.formula?.includes('<script>') === true) as (data: unknown) => boolean,
+        formula: ((d: SfdcField) => d?.isEditable !== false && (d?.formula?.includes('javascript') === true || d?.formula?.includes('<script>') === true)) as (data: unknown) => boolean,
         errorMessage: `We suspect this custom field contains a formula with javascript code inside..`,
         badField: 'formula',
         applicable: [ DataAliases.SfdcField ],

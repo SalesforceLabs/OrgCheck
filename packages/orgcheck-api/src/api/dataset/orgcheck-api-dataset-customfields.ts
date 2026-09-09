@@ -35,10 +35,9 @@ export class DatasetCustomFields implements Dataset {
         logger?.log(`Querying Tooling API about CustomField in the org...`);            
         const results = await sfdcManager.soqlQuery([{
             tooling: true,
-            string: 'SELECT Id, EntityDefinition.QualifiedApiName, EntityDefinition.IsCustomSetting, EntityDefinition.KeyPrefix ' +
+            string: 'SELECT Id, ManageableState, EntityDefinition.QualifiedApiName, EntityDefinition.IsCustomSetting, EntityDefinition.KeyPrefix ' +
                     'FROM CustomField ' +
-                    `WHERE ManageableState IN ('installedEditable', 'unmanaged') ` +
-                    (fullObjectApiName === OrgCheckGlobalParameter.ALL_VALUES ? '' : `AND EntityDefinition.QualifiedApiName = '${fullObjectApiName}'`)
+                    (fullObjectApiName === OrgCheckGlobalParameter.ALL_VALUES ? '' : `WHERE EntityDefinition.QualifiedApiName = '${fullObjectApiName}'`)
         }], logger);
 
         // Init the factory and records
@@ -47,13 +46,14 @@ export class DatasetCustomFields implements Dataset {
 
         logger?.log(`Parsing ${customFieldRecords?.length} custom fields...`);        
         
-        const entityInfoByCustomFieldId: Map<string, { qualifiedApiName: string; isCustomSetting: boolean }> = new Map(await MediumProcessor.map(
+        const entityInfoByCustomFieldId: Map<string, { qualifiedApiName: string; isCustomSetting: boolean; isEditable: boolean }> = new Map(await MediumProcessor.map(
             customFieldRecords, 
             (record) => [ 
                 sfdcManager.caseSafeId(record.Id as string), 
                 { 
                     qualifiedApiName: (record.EntityDefinition as Record<string, unknown>).QualifiedApiName as string, 
-                    isCustomSetting: (record.EntityDefinition as Record<string, unknown>).IsCustomSetting as boolean
+                    isCustomSetting: (record.EntityDefinition as Record<string, unknown>).IsCustomSetting as boolean,
+                    isEditable: sfdcManager.isEditableManageableState(record.ManageableState as string)
                 }
             ],
             (record) => {
@@ -97,6 +97,7 @@ export class DatasetCustomFields implements Dataset {
                     name: record.DeveloperName,
                     label: metadata.label,
                     package: (record.NamespacePrefix || ''),
+                    isEditable: entityInfo!.isEditable,
                     description: record.Description,
                     isCustom: true,
                     createdDate: record.CreatedDate,

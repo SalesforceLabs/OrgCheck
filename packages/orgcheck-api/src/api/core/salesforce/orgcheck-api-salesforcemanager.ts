@@ -98,6 +98,14 @@ export interface SalesforceManagerIntf {
     caseSafeId(id: string): string;
 
     /**
+     * @description Tells if an item can be modified in the org based on its ManageableState field
+     * @param {string} state - The ManageableState value of the item as returned by the API
+     * @returns {boolean} True if the item is editable in the org
+     * @public
+     */
+    isEditableManageableState(state: string): boolean;
+
+    /**
      * @description Returns the setup URL if a given item
      * @param {string} id - Identification of the data to be used in the Setup URL. 
      * @param {string} type - Type of the data to be used to choose the correct URL template
