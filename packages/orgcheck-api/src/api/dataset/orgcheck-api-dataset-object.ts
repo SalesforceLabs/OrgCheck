@@ -51,7 +51,7 @@ export class DatasetObject implements Dataset {
             sfdcManager.describe(fullObjectApiName, logger),
             sfdcManager.soqlQuery([{
                 tooling: true, // We need the tooling to get the Description, ApexTriggers, FieldSets, ... which are not accessible from REST API)
-                string: 'SELECT Id, DurableId, DeveloperName, Description, NamespacePrefix, ExternalSharingModel, InternalSharingModel, ' +
+                string: 'SELECT Id, DurableId, DeveloperName, Description, NamespacePrefix, ExternalSharingModel, InternalSharingModel, LastModifiedDate,' +
                             '(SELECT Id, Status FROM ApexTriggers), ' +
                             '(SELECT Id, MasterLabel, Description FROM FieldSets), ' +
                             '(SELECT Id, Name, LayoutType FROM Layouts), ' +
@@ -113,10 +113,16 @@ export class DatasetObject implements Dataset {
                 }
             }
         });
+        const standardSystemIndexedDateFields: string[] = [];
         const standardFields: SfdcField[] = await MediumProcessor.map(
             sobjectDescribed.fields as Record<string, unknown>[],
             (field: Record<string, unknown>) => {
+                // Get information from the standard fields mapper (description, isIndexed and id)
                 const fieldMapper = standardFieldsMapper.get(field.name);
+                // We are looking for the system datetime standard field that is indexed and is not nullable.
+                if (field.nillable === false && field.type === 'datetime' && fieldMapper.isIndexed === true) {
+                    standardSystemIndexedDateFields.push(fieldMapper.id);
+                }
                 return fieldDataFactory.createWithScore({
                     properties: {
                         id: fieldMapper.id,
@@ -139,6 +145,14 @@ export class DatasetObject implements Dataset {
             },
             (field: Record<string, unknown>) => standardFieldsMapper.has(field.name)
         );
+        if (standardSystemIndexedDateFields.length > 1) {
+            // If multiple fields i will not consider CreatedDate (if it exists)
+            const createdDateIndex = standardSystemIndexedDateFields.indexOf('CreatedDate');
+            if (createdDateIndex > 0) {
+                // Remove the CreatedDate from that list if other fields can be used
+                standardSystemIndexedDateFields.splice(createdDateIndex, 1);
+            }
+        }
 
         // apex triggers
         const apexTriggerRecords = (entity.ApexTriggers as { records?: Record<string, unknown>[] } | undefined)?.records ?? [];
@@ -271,6 +285,21 @@ export class DatasetObject implements Dataset {
             (relationship: Record<string, unknown>) => relationship.relationshipName !== null
         );
 
+        logger?.log(`Getting usage information about: ${fullObjectApiName}...`);
+        let lastModifiedRecordDate: number | undefined = undefined;
+        if ((recordCount > 0 && standardSystemIndexedDateFields.length > 0)) {
+            // extract the last field (should be the last modified field / sysmoddate, or if not present/indexed created date at least)
+            const dateField: string = standardSystemIndexedDateFields.pop() as string;
+            const usageResults = await sfdcManager.soqlQuery([{
+                string: `SELECT ${dateField} ` +
+                        `FROM ${fullObjectApiName} ` +
+                        `ORDER BY ${dateField} DESC ` +
+                        'LIMIT 1',
+                byPasses: '*'
+            }], logger);
+            lastModifiedRecordDate = usageResults[0]?.[0]?.[dateField] as number | undefined;
+        }
+
         // Create the object
         const object: SfdcObject = objectDataFactory.createWithScore({
             properties: {
@@ -311,6 +340,8 @@ export class DatasetObject implements Dataset {
                 workflowRuleIds: workflowRuleIds,
                 nbWorkflowRules: workflowRuleIds?.length ?? 0,
                 recordCount: recordCount,
+                lastModifiedRecordDate: lastModifiedRecordDate,
+                lastModifiedDate: entity.LastModifiedDate,
                 url: sfdcManager.setupUrl(entity.Id as string, sobjectType)
             }
         });

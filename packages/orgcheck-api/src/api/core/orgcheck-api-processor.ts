@@ -1,7 +1,7 @@
 
 class Processor {
-
-    constructor(private readonly concurrencyLimit: number) {
+   
+    constructor(public readonly concurrencyLimit: number) {
         if (concurrencyLimit !== Infinity) {
             if (Number.isInteger(concurrencyLimit) === false) throw new TypeError(`Given concurrencyLimit is not a proper integer.`);
             if (concurrencyLimit < 1) throw new TypeError(`Given concurrencyLimit must be positive and not equal to zero.`);

@@ -25,11 +25,11 @@ export interface SalesforceQueryRequest {
     
     /**
      * @description List of error codes to by-pass (empty by default)
-     * @type {string[]} [byPasses]
+     * @type {string[] | string | undefined} [byPasses]
      * @public
      * @readonly
      */
-    byPasses?: string[];
+    byPasses?: string[] | string | undefined;
     
     /** 
      * @description Unique field name to use for the custom QueryMore (Id by default)
@@ -180,14 +180,14 @@ export interface SalesforceManagerIntf {
      * @description Method to retrieve a list of metadata types by at Scale (using composite tooling api)
      * @param {string} type - Metadata type to retrieve
      * @param {any[]} ids - List of Ids to retrieve
-     * @param {string[]} byPasses - Errors to bypass
+     * @param {string[] | string | undefined} byPasses - Errors to bypass (list of errorCode possible values or string (only one possible value) or a wildcard (all errorCodes are by-passed))
      * @param {SimpleLoggerIntf} logger - Logger to use
      * @returns {Promise<any[]>} Information of the metadata type
      * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @public
      */
-    readMetadataAtScale(type: string, ids: string[], byPasses: string[], logger: SimpleLoggerIntf): Promise<Record<string, unknown>[]>;
+    readMetadataAtScale(type: string, ids: string[], byPasses: string[] | string | undefined, logger: SimpleLoggerIntf): Promise<Record<string, unknown>[]>;
     
     /**
      * @description Method to get the list of sobjects

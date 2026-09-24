@@ -27,6 +27,9 @@ export class SalesforceManagerMock_SoqlQuery extends SalesforceManagerMock_Doing
 
   #soqlQueryResponses: Map<string, any> = new Map();
   #describeGlobal: any[] = [];
+  #describe: Record<string, unknown> = {};
+  #recordCounts: Map<string, number> = new Map();
+  #soqlQueriesRan: string[] = [];
 
   addSoqlQueryResponse(queryMatch: string, response: any[]) {
     this.#soqlQueryResponses.set(queryMatch, response);
@@ -36,9 +39,26 @@ export class SalesforceManagerMock_SoqlQuery extends SalesforceManagerMock_Doing
     this.#describeGlobal = describeGlobal;
   }
 
+  setDescribe(describe: Record<string, unknown>) {
+    this.#describe = describe;
+  }
+
+  setRecordCount(sobjectDevName: string, recordCount: number) {
+    this.#recordCounts.set(sobjectDevName, recordCount);
+  }
+
+  /**
+   * @description All the queries that were sent to this mock, so that a test can verify that a given 
+   *                query was ran (or, more interesting, that it was NOT ran at all).
+   */
+  get soqlQueriesRan(): string[] {
+    return this.#soqlQueriesRan;
+  }
+
   async soqlQuery(queries: any[], _logger: SimpleLoggerIntf) { 
     const soqlQueryResponsesKeys = Array.from(this.#soqlQueryResponses.keys());
     return queries.map((query: { string: string; }) => { 
+      this.#soqlQueriesRan.push(query?.string);
       const key = soqlQueryResponsesKeys.find((p) => query?.string?.indexOf(p) !== -1);
       if (key) {
         const response = this.#soqlQueryResponses.get(key);
@@ -48,4 +68,6 @@ export class SalesforceManagerMock_SoqlQuery extends SalesforceManagerMock_Doing
     });
   }
   async describeGlobal(_logger: SimpleLoggerIntf) { return this.#describeGlobal; }
+  async describe(_sobjectDevName: string, _logger: SimpleLoggerIntf) { return this.#describe; }
+  async recordCount(_sobjectDevName: string, _logger: SimpleLoggerIntf) { return this.#recordCounts.get(_sobjectDevName) ?? 0; }
 }

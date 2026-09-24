@@ -360,7 +360,7 @@ describe('tests.api.unit.Datasets', () => {
         { Field: 'Account.Name', PermissionsRead: true, PermissionsEdit: false, ParentId: '0PS456', Parent: { IsOwnedByProfile: true, ProfileId: '00eABC' }},
         { Field: 'Account.Name', PermissionsRead: false, PermissionsEdit: false, ParentId: '0PS789', Parent: { IsOwnedByProfile: true, ProfileId: 'XYZ' }}
       ]);
-      const results = await dataset.run(sfdcManager, new DataFactoryMock_AllIsOK(), new SimpleLoggerMock_DoingNothing(), new Map([ ['object', 'Account'] ]));
+      const results = await dataset.run(sfdcManager, new DataFactoryMock_AllIsOK(), new SimpleLoggerMock_DoingNothing(), new Map([ ['sobject','Account'] ]));
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(3);
@@ -374,12 +374,92 @@ describe('tests.api.unit.Datasets', () => {
       sfdcManager.addSoqlQueryResponse('FROM EntityDefinition', [
         { DurableId: 'Account', NamespacePrefix: null, DeveloperName: 'Account', QualifiedApiName: 'Account', ExternalSharingModel: 'private', InternalSharingModel: 'private' }
       ]);
-      const result = await dataset.run(sfdcManager, new DataFactoryMock_AllIsOK(), new SimpleLoggerMock_DoingNothing(), new Map([ ['object', 'Account'] ]));
+      const result = await dataset.run(sfdcManager, new DataFactoryMock_AllIsOK(), new SimpleLoggerMock_DoingNothing(), new Map([ ['sobject','Account'] ]));
       expect(result).toBeDefined();
       expect(result instanceof Map).toBeFalsy();
       expect(result instanceof Object).toBeTruthy();
       expect(result).toHaveProperty('id');
       expect(result.id).toBe('Account');
+    });
+
+    it('checks if this dataset sets "last modified record" to "undefined" when the object has no record', async () => {
+      const sfdcManager = new SalesforceManagerMock_SoqlQuery();
+      sfdcManager.setDescribe({ 
+        name: 'Account', label: 'Account', queryable: true, custom: false,
+        fields: [
+          { id: 'Account.CreatedDate', name: 'CreatedDate', type: 'datetime', nillable: false, isIndexed: true },
+          { id: 'Account.CreatedById', name: 'CreatedById', type: 'reference', nillable: false, isIndexed: false },
+          { id: 'Account.LastModifiedDate', name: 'LastModifiedDate', type: 'datetime', nillable: false, isIndexed: true },
+          { id: 'Account.LastModifiedById', name: 'LastModifiedById', type: 'reference', nillable: false, isIndexed: false },
+        ]
+      });
+      sfdcManager.addSoqlQueryResponse('FROM EntityDefinition', [
+        { DurableId: 'Account', NamespacePrefix: null, DeveloperName: 'Account', QualifiedApiName: 'Account', 
+          ExternalSharingModel: 'private', InternalSharingModel: 'private' }
+      ]);
+      const dataFactory = new DataFactoryMock_AllIsOK();
+      const logger = new SimpleLoggerMock_DoingNothing();
+      const parameters = new Map([ ['sobject','Account'] ]);
+      sfdcManager.setRecordCount('Account', 0);
+      const result = await dataset.run(sfdcManager, dataFactory, logger, parameters);
+      expect(result.recordCount).toBe(0);
+      expect(sfdcManager.soqlQueriesRan).toHaveLength(3);
+      expect(result.lastModifiedRecordDate).toBeUndefined();
+    });
+
+    it('checks if this dataset set "last modified record" correctly when the object has count of records > 0', async () => {
+      const sfdcManager = new SalesforceManagerMock_SoqlQuery();
+      sfdcManager.setDescribe({ 
+        name: 'Account', label: 'Account', queryable: true, custom: false,
+        fields: [
+          { id: 'CreatedDate', name: 'CreatedDate', type: 'datetime', nillable: false, isIndexed: true },
+          { id: 'CreatedById', name: 'CreatedById', type: 'reference', nillable: false, isIndexed: false },
+          { id: 'LastModifiedDate', name: 'LastModifiedDate', type: 'datetime', nillable: false, isIndexed: true },
+          { id: 'LastModifiedById', name: 'LastModifiedById', type: 'reference', nillable: false, isIndexed: false },
+        ]
+      });
+      sfdcManager.addSoqlQueryResponse('FROM EntityDefinition', [
+        { DurableId: 'Account', NamespacePrefix: null, DeveloperName: 'Account', QualifiedApiName: 'Account', 
+          ExternalSharingModel: 'private', InternalSharingModel: 'private' }
+      ]);
+      sfdcManager.addSoqlQueryResponse('FROM FieldDefinition', [
+        {  DurableId: 'Account.CreatedDate', QualifiedApiName: 'CreatedDate', Description: 'Created Date', IsIndexed: true },
+        {  DurableId: 'Account.LastModifiedById', QualifiedApiName: 'LastModifiedById', Description: 'Last Modified By', IsIndexed: false },
+        {  DurableId: 'Account.LastModifiedDate', QualifiedApiName: 'LastModifiedDate', Description: 'Last Modified Date', IsIndexed: true },
+        {  DurableId: 'Account.CreatedById', QualifiedApiName: 'CreatedById', Description: 'Created By', IsIndexed: false },
+      ]);
+      const lastModificationDate = Date.parse('2019-03-01T08:30:00.000Z');
+      sfdcManager.addSoqlQueryResponse(' FROM Account ORDER BY ', [
+        { LastModifiedDate: lastModificationDate }
+      ]);
+      const dataFactory = new DataFactoryMock_AllIsOK();
+      const logger = new SimpleLoggerMock_DoingNothing();
+      const parameters = new Map([ ['sobject','Account'] ]);
+      sfdcManager.setRecordCount('Account', 42);
+      const result = await dataset.run(sfdcManager, dataFactory, logger, parameters);
+      expect(result.recordCount).toBe(42);
+      expect(sfdcManager.soqlQueriesRan).toHaveLength(4);
+      expect(sfdcManager.soqlQueriesRan.some((query) => query.includes(
+        'SELECT LastModifiedDate FROM Account ORDER BY LastModifiedDate DESC LIMIT 1'))).toBeTruthy();
+      expect(result.lastModifiedRecordDate).toBe(lastModificationDate);
+    });
+
+    it('checks if this dataset gets the last modification date of a custom object', async () => {
+      const sfdcManager = new SalesforceManagerMock_SoqlQuery();
+      sfdcManager.setDescribe({ name: 'MyObject__c', label: 'My Object', queryable: true, custom: true, fields: [
+        { id: 'LastModifiedDate', name: 'LastModifiedDate', type: 'datetime', nillable: false, isIndexed: true },
+        { id: 'CreatedDate', name: 'CreatedDate', type: 'datetime', nillable: false, isIndexed: true },
+      ] });
+      sfdcManager.setRecordCount('MyObject__c', 0);
+      const lastModifiedDate = Date.parse('2019-03-01T08:30:00.000Z');
+      sfdcManager.addSoqlQueryResponse('FROM EntityDefinition', [
+        { DurableId: '01I000000000001', NamespacePrefix: null, DeveloperName: 'MyObject', QualifiedApiName: 'MyObject__c', 
+          ExternalSharingModel: 'private', InternalSharingModel: 'private', LastModifiedDate: lastModifiedDate }
+      ]);
+      const result = await dataset.run(sfdcManager, new DataFactoryMock_AllIsOK(), new SimpleLoggerMock_DoingNothing(), new Map([ ['sobject','MyObject__c'] ]));
+      expect(result.lastModifiedDate).toBe(lastModifiedDate);
+      // The creation date is asked for that specific custom object, based on the durable id of the entity
+      expect(sfdcManager.soqlQueriesRan.some((query) => query.includes(`FROM EntityDefinition WHERE QualifiedApiName = 'MyObject__c' LIMIT 1`))).toBeTruthy();
     });
   });
 
@@ -419,10 +499,10 @@ describe('tests.api.unit.Datasets', () => {
           queryable: false, replicateable: false, retrieveable: true, searchable: false, triggerable: true, 
           undeletable: false, updateable: false,
           urls: {
-            rowTemplate: "/services/data/v60.0/sobjects/Activation__ChangeEvent/{ID}",
-            eventSchema: "/services/data/v60.0/sobjects/Activation__ChangeEvent/eventSchema",
-            describe: "/services/data/v60.0/sobjects/Activation__ChangeEvent/describe",
-            sobject: "/services/data/v60.0/sobjects/Activation__ChangeEvent"
+            rowTemplate: "/services/data/v66.0/sobjects/Activation__ChangeEvent/{ID}",
+            eventSchema: "/services/data/v66.0/sobjects/Activation__ChangeEvent/eventSchema",
+            describe: "/services/data/v66.0/sobjects/Activation__ChangeEvent/describe",
+            sobject: "/services/data/v66.0/sobjects/Activation__ChangeEvent"
           }
         },
         {
@@ -434,9 +514,9 @@ describe('tests.api.unit.Datasets', () => {
           queryable: true, replicateable: true, retrieveable: true, searchable: false, triggerable: false, 
           undeletable: false, updateable: false,
           urls: {
-            rowTemplate: "/services/data/v60.0/sobjects/Activation__Feed/{ID}",
-            describe: "/services/data/v60.0/sobjects/Activation__Feed/describe",
-            sobject: "/services/data/v60.0/sobjects/Activation__Feed"
+            rowTemplate: "/services/data/v66.0/sobjects/Activation__Feed/{ID}",
+            describe: "/services/data/v66.0/sobjects/Activation__Feed/describe",
+            sobject: "/services/data/v66.0/sobjects/Activation__Feed"
           }
         }, {
           activateable: false, associateEntityType: null, associateParentEntity: null, createable: true, 
@@ -446,13 +526,13 @@ describe('tests.api.unit.Datasets', () => {
           label: "Activation", labelPlural: "Activations", name: "Activation__c", 
           retrieveable: true, searchable: true, triggerable: true, undeletable: true, updateable: true,
           urls: {
-            compactLayouts: "/services/data/v60.0/sobjects/Activation__c/describe/compactLayouts",
-            rowTemplate: "/services/data/v60.0/sobjects/Activation__c/{ID}",
-            approvalLayouts: "/services/data/v60.0/sobjects/Activation__c/describe/approvalLayouts",
-            describe: "/services/data/v60.0/sobjects/Activation__c/describe",
-            quickActions: "/services/data/v60.0/sobjects/Activation__c/quickActions",
-            layouts: "/services/data/v60.0/sobjects/Activation__c/describe/layouts",
-            sobject: "/services/data/v60.0/sobjects/Activation__c"
+            compactLayouts: "/services/data/v66.0/sobjects/Activation__c/describe/compactLayouts",
+            rowTemplate: "/services/data/v66.0/sobjects/Activation__c/{ID}",
+            approvalLayouts: "/services/data/v66.0/sobjects/Activation__c/describe/approvalLayouts",
+            describe: "/services/data/v66.0/sobjects/Activation__c/describe",
+            quickActions: "/services/data/v66.0/sobjects/Activation__c/quickActions",
+            layouts: "/services/data/v66.0/sobjects/Activation__c/describe/layouts",
+            sobject: "/services/data/v66.0/sobjects/Activation__c"
           }
         }, {
           activateable: false, associateEntityType: null, associateParentEntity: null, createable: true, 
@@ -462,13 +542,13 @@ describe('tests.api.unit.Datasets', () => {
           label: "CR Volunteers", labelPlural: "CR Volunteers", name: "CR_Volunteers__c", 
           retrieveable: true, searchable: true, triggerable: true, undeletable: true, updateable: true,
           urls: {
-            compactLayouts: "/services/data/v60.0/sobjects/CR_Volunteers__c/describe/compactLayouts",
-            rowTemplate: "/services/data/v60.0/sobjects/CR_Volunteers__c/{ID}",
-            approvalLayouts: "/services/data/v60.0/sobjects/CR_Volunteers__c/describe/approvalLayouts",
-            describe: "/services/data/v60.0/sobjects/CR_Volunteers__c/describe",
-            quickActions: "/services/data/v60.0/sobjects/CR_Volunteers__c/quickActions",
-            layouts: "/services/data/v60.0/sobjects/CR_Volunteers__c/describe/layouts",
-            sobject: "/services/data/v60.0/sobjects/CR_Volunteers__c"
+            compactLayouts: "/services/data/v66.0/sobjects/CR_Volunteers__c/describe/compactLayouts",
+            rowTemplate: "/services/data/v66.0/sobjects/CR_Volunteers__c/{ID}",
+            approvalLayouts: "/services/data/v66.0/sobjects/CR_Volunteers__c/describe/approvalLayouts",
+            describe: "/services/data/v66.0/sobjects/CR_Volunteers__c/describe",
+            quickActions: "/services/data/v66.0/sobjects/CR_Volunteers__c/quickActions",
+            layouts: "/services/data/v66.0/sobjects/CR_Volunteers__c/describe/layouts",
+            sobject: "/services/data/v66.0/sobjects/CR_Volunteers__c"
           }
         }
       ];
@@ -489,10 +569,10 @@ describe('tests.api.unit.Datasets', () => {
           labelPlural: `${o}s`, layoutable: true, mergeable: false, mruEnabled: true,
           name: `${o}__c`, queryable: true, replicateable: true, retrieveable: true,
           searchable: true, triggerable: true, undeletable: true, updateable: true, urls: {
-            rowTemplate: "/services/data/v60.0/sobjects/${o}__c/{ID}",
-            eventSchema: "/services/data/v60.0/sobjects/${o}__c/eventSchema",
-            describe: "/services/data/v60.0/sobjects/${o}__c/describe",
-            sobject: "/services/data/v60.0/sobjects/${o}__c"
+            rowTemplate: "/services/data/v66.0/sobjects/${o}__c/{ID}",
+            eventSchema: "/services/data/v66.0/sobjects/${o}__c/eventSchema",
+            describe: "/services/data/v66.0/sobjects/${o}__c/describe",
+            sobject: "/services/data/v66.0/sobjects/${o}__c"
           }
         });
       }

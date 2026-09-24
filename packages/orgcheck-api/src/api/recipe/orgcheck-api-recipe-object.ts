@@ -33,6 +33,8 @@ export interface SfdcObjectAsTable {
     description : string;
     keyPrefix: string;
     recordCount: number;
+    lastModifiedRecordDate: number;
+    lastModifiedDate: number;
     isCustom: boolean;
     isFeedEnabled: boolean;
     isMostRecentEnabled: boolean;
@@ -193,6 +195,8 @@ export class RecipeObject implements ServedRecipe<SfdcObject, SfdcObjectAsTable>
             type: mixture.typeRef?.label ?? '',
             keyPrefix: mixture.keyPrefix,
             recordCount: mixture.recordCount,
+            lastModifiedRecordDate: mixture.lastModifiedRecordDate,
+            lastModifiedDate: mixture.lastModifiedDate,
             isCustom: mixture.isCustom,
             isFeedEnabled: mixture.isFeedEnabled,
             isMostRecentEnabled: mixture.isMostRecentEnabled,
@@ -235,6 +239,8 @@ export class RecipeObject implements ServedRecipe<SfdcObject, SfdcObjectAsTable>
                     [ 'Description', `${plate.description ?? ''}` ],
                     [ 'Key Prefix', `${plate.keyPrefix ?? ''}` ],
                     [ 'Record Count (including deleted ones)', `${plate.recordCount}` ],
+                    [ 'Last Modified Record', `${plate.lastModifiedRecordDate}` ],
+                    [ 'Object Last Modified', `${plate.lastModifiedDate}` ],
                     [ 'Is Custom?', `${plate.isCustom?'true':'false'}` ],
                     [ 'Feed Enable?', `${plate.isFeedEnabled?'true':'false'}` ],
                     [ 'Most Recent Enabled?', `${plate.isMostRecentEnabled?'true':'false'}` ],

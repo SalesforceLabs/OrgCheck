@@ -306,6 +306,20 @@ export interface SfdcObject extends DataWithScore {
     recordCount: number;
 
     /**
+     * @description Date/Time when the most recently modified record of this object was last modified. Information stored as a Unix timestamp. Only retrieved when this object has at least one record.
+     * @type {number}
+     * @public
+     */
+    lastModifiedRecordDate: number;
+
+    /**
+     * @description Date/Time when this object was last modified in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    lastModifiedDate: number;
+
+    /**
      * @description Number of ownership based sharing rules
      * @type {number}
      * @public

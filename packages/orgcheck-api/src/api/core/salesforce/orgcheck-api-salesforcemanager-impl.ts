@@ -105,6 +105,30 @@ const MAX_COMPOSITE_REQUEST_SIZE: number = 5;
  */
 const EDITABLE_MANAGEABLE_STATES: string[] = [ 'unmanaged', 'installedEditable' ];
 
+/**
+ * @description Check if a given errorCode can be by-passed
+ * @param {string[] | string | undefined} byPasses - The byPasses array (list of errorCode possible values) or string (only one possible value) or a wildcard (all errorCodes are by-passed)
+ * @param {string} errorCode - The errorCode to check
+ * @returns {boolean} True if the errorCode can be by-passed, false otherwise
+ * @private
+ */
+const IS_THIS_ERROR_CODE_MUST_BE_BYPASSED = (byPasses: string[] | string | undefined, errorCode: string) => {
+    if (byPasses) {
+        if (Array.isArray(byPasses)) {
+            // Is this errorCode included in the byPasses array?
+            return byPasses.includes(errorCode);
+        } else if (byPasses === '*') {
+            // Is the byPasses a wildcard? If so, return true whatever the errorCode is
+            return true;
+        } else {
+            // Otherwise the byPasses a specific errorCode and needs to be check with the errorCode
+            return byPasses === errorCode;
+        }
+    }
+    // If no byPasses are provided, return false whatever the errorCode is
+    return false;
+};
+
 /** 
  * @description Salesforce APIs Manager Implementation with JsForce Connection
  * @public
@@ -365,14 +389,14 @@ export class SalesforceManager implements SalesforceManagerIntf {
     /**
      * @param {boolean | undefined} useTooling - Use the tooling or not
      * @param {string} query - SOQL query string
-     * @param {string[] | undefined} byPasses - List of error codes to by-pass
+     * @param {string[] | string | undefined} byPasses - List of error codes to by-pass (list of errorCode possible values or string (only one possible value) or a wildcard (all errorCodes are by-passed))
      * @param {Function} callback - Callback function
      * @returns {Promise<any[]>} List of records
      * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @private
      */
-    private async _standardSOQLQuery(useTooling: boolean | undefined, query: string, byPasses: string[] | undefined, callback: (nbRecords: number) => void): Promise<Record<string, unknown>[]> {
+    private async _standardSOQLQuery(useTooling: boolean | undefined, query: string, byPasses: string[] | string | undefined, callback: (nbRecords: number) => void): Promise<Record<string, unknown>[]> {
         // Each query can use the tooling or not, se based on that flag we'll use the right JsForce connection
         const conn = useTooling === true ? this._connection.tooling : this._connection;
         // the records to return
@@ -410,7 +434,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
             // return the records
             return allRecords;
         } catch (error) {
-            if (byPasses && byPasses.includes && byPasses.includes(error.errorCode)) {
+            if (IS_THIS_ERROR_CODE_MUST_BE_BYPASSED(byPasses, error.errorCode) === true) {
                 // by pass this error! and return an empty array
                 return [];
             } else {
@@ -418,7 +442,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
                 error.contextInformation = {
                     'SoqlQuery': query ?? '(empty)',
                     'Tooling': useTooling,
-                    'ByPasses': byPasses?.join(', ') ?? '(empty)',
+                    'ByPasses': Array.isArray(byPasses) ? byPasses.join(', ') : byPasses === '*' ? '*' : byPasses ?? '(empty)',
                     'Cause': error?.message ?? '(empty)',
                     'Where': 'SalesforceManagerImpl.soqlQuery/_standardSOQLQuery'
                 };
@@ -618,14 +642,14 @@ export class SalesforceManager implements SalesforceManagerIntf {
             try {
                 records = await this._connection.search(query.string);
             } catch (error) {
-                if (query.byPasses && query.byPasses.includes && query.byPasses.includes(error.errorCode)) {
+                if (IS_THIS_ERROR_CODE_MUST_BE_BYPASSED(query.byPasses, error.errorCode) === true) {
                     // by pass this error! and return an empty array
                     return [];
                 } else {
                     // Add some context information to the error
                     error.contextInformation = {
                         'SoslQuery': query.string ?? '(empty)',
-                        'ByPasses': query.byPasses?.join(', ') ?? '(empty)',
+                        'ByPasses': Array.isArray(query.byPasses) ? query.byPasses.join(', ') : query.byPasses === '*' ? '*' : query.byPasses ?? '(empty)',
                         'Cause': error?.message ?? '(empty)',
                         'Where': 'SalesforceManagerImpl.soslQuery'
                     };
@@ -932,7 +956,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
                     records.push(response.body as Record<string, unknown>); // here only one record per response 
                 } else {
                     const errorCode = (response.body as { errorCode: string }[])[0].errorCode;
-                    if (byPasses && byPasses.includes && byPasses.includes(errorCode) === false) {
+                    if (IS_THIS_ERROR_CODE_MUST_BE_BYPASSED(byPasses, errorCode) === false) {
                         // Throw the error
                         throw new SalesforceError(
                             `There was an error while calling Composite Tooling API to get metadata at scale.`,

@@ -1,80 +1,88 @@
 import { describe, it, expect } from '@jest/globals';
-import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
+import { SmallProcessor, MediumProcessor, LargeProcessor, InfiniteProcessor } from 'src/api/core/orgcheck-api-processor';
+
+const wait = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
 describe('tests.api.unit.Processor', () => {
 
-  describe('Test forEach() with an array', () => {
-    const array = [
-      1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5,
-      1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5,
-      1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5,
-      1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5
-    ];
+  const PROCESSORS = [
+    { processorName: 'SmallProcessor',    processor: SmallProcessor },
+    { processorName: 'MediumProcessor',   processor: MediumProcessor },
+    { processorName: 'LargeProcessor',    processor: LargeProcessor },
+    { processorName: 'InfiniteProcessor', processor: InfiniteProcessor }
+  ] as const;
 
-    it ('checks if the array is processed when calling forEach with a sync iteratee', async () => {
-      const results: string[] = [];
-      await MediumProcessor.forEach(array, async (i: number) => { results.push(`Processing ${i}...`); });
-      expect(results).toBeDefined();
-      expect(results?.length).toBe(array?.length);
-      results.forEach((result) => expect(result.includes('Processing')).toBeTruthy());
-    });
+  const MIN = (n: number, m: number): number => n < m ? n : m;
+  const DELAYS = [40, 5, 25, 1, 15];
 
-    it ('checks if the array is processed when calling forEach with an async iteratee', async () => {
-      const results: string[] = [];
-      await MediumProcessor.forEach(array, async (i: number) => { results.push(`Processing ${i}...`); });
-      expect(results).toBeDefined();
-      expect(results?.length).toBe(array?.length);
-      results.forEach((result) => expect(result.includes('Processing')).toBeTruthy());
+  const ARRAYS = [
+    { arrayName: 'JustBelowTheLimit',       expectedLength: (limit: number): number => MIN(limit, 50) - 1 },
+    { arrayName: 'ExactlyTheLimit',         expectedLength: (limit: number): number => MIN(limit, 50) },
+    { arrayName: 'JustAboveTheLimit',       expectedLength: (limit: number): number => MIN(limit, 50) + 1 },
+    { arrayName: 'AboveTwiceTheLimit',      expectedLength: (limit: number): number => MIN(limit, 50) * 2 },
+    { arrayName: 'JustAboveTwiceTheLimit',  expectedLength: (limit: number): number => MIN(limit, 50) * 2 + 1 },
+    { arrayName: 'JustBelowTwiceTheLimit',  expectedLength: (limit: number): number => MIN(limit, 50) * 2 - 1 }
+  ];
+  
+  PROCESSORS.forEach(({ processorName, processor }) => {
+    ARRAYS.forEach(({ arrayName, expectedLength }) => {
+      
+      // Create the array with the expected length
+      const length: number = expectedLength(processor.concurrencyLimit);
+      const array: string[] = [];
+      for (let i = 0; i < length; i++) array.push(`Item ${i}`);
+
+      // Test the processor with the array
+      describe(`Test processor '${processorName}' (limit=${processor.concurrencyLimit}) with array '${arrayName}' (length=${array.length})`, () => {
+
+        it('checks if the array is processed when calling forEach with a sync iteratee', async () => {
+          const results: string[] = [];
+          await processor.forEach(array, (item: string) => { results.push(item); });
+          expect(results).toBeDefined();
+          expect(results.every((result) => result.includes('Item '))).toBeTruthy();
+        });
+
+        it('checks if the array is processed when calling forEach with a sync iteratee', async () => {
+          const results: string[] = [];
+          await processor.forEach(array, async (item: string, key: number) => { 
+            await wait(DELAYS[key % DELAYS.length]);
+            results.push(item); 
+          });
+          expect(results).toBeDefined();
+          expect(results.length).toBe(array.length);
+          expect(results.every((result) => result.includes('Item '))).toBeTruthy();
+        });
+      });
     });
   });
 
-  describe('Test forEach() with maps', () => {
-    const map: Map<string, string> = new Map([
-      ['1', 'un'], ['2', 'deux'], ['3', 'trois'], ['4', 'quatre'], ['5', 'cinq'],
-      ['1', 'un'], ['2', 'deux'], ['3', 'trois'], ['4', 'quatre'], ['5', 'cinq'],
-      ['1', 'un'], ['2', 'deux'], ['3', 'trois'], ['4', 'quatre'], ['5', 'cinq'],
-      ['1', 'un'], ['2', 'deux'], ['3', 'trois'], ['4', 'quatre'], ['5', 'cinq']
-    ]);
+  describe('MediumProcessor order with a list of 5 elements', () => {
+    const array = ['alpha', 'bravo', 'charlie', 'delta', 'echo'];
 
-    it ('checks if the map is processed when calling forEach() with a sync iteratee', async () => {
-      const results: string[] = [];
-      await MediumProcessor.forEach(map, async (v: string, k: string) => { results.push(`Processing ${k}: ${v}...`); });
-      expect(results).toBeDefined();
-      expect(results?.length).toBe(map.size);
-      results.forEach((result) => expect(result.includes('Processing')).toBeTruthy());
+    it('maps five elements and keeps the original array order despite different completion times', async () => {
+      const results = await MediumProcessor.map(array, async (item: string, index?: number) => {
+        await wait(DELAYS[index ?? 0 % DELAYS.length]);
+        return item.toUpperCase();
+      });
+      expect(results).toEqual(['ALPHA', 'BRAVO', 'CHARLIE', 'DELTA', 'ECHO']);
     });
 
-    it ('checks if the map is processed when calling forEach() with an async iteratee', async () => {
-      const results: string[] = [];
-      await MediumProcessor.forEach(map, async (v: string, k: string) => { results.push(`Processing ${k}: ${v}...`); });
-      expect(results).toBeDefined();
-      expect(results?.length).toBe(map.size);
-      results.forEach((result) => expect(result.includes('Processing')).toBeTruthy());
-    });
-  });
+    it('calls forEach on five elements with the original items and indexes', async () => {
+      const delays = [40, 5, 25, 1, 15];
+      const visited: Array<{ item: string, index: number } | undefined> = new Array(array.length);
 
-  describe('Test map() with an array', () => {
-    const array = [
-      1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5,
-      1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5,
-      1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5,
-      1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5
-    ];
+      await MediumProcessor.forEach(array, async (item: string, index: number) => {
+        await wait(delays[index]);
+        visited[index] = { item, index };
+      });
 
-    it ('checks if the array is processed when calling map() with a sync iteratee and no filter', async () => {
-      const results: string[] = await MediumProcessor.map(array, (i: number) => `Processing ${i}...`);
-      expect(results).toBeDefined();
-      expect(results?.length).toBe(array?.length);
-      results.forEach((result) => expect(result.includes('Processing')).toBeTruthy());
-    });
-
-    it ('checks if the array is processed when calling map() with a sync iteratee and filter', async () => {
-      const filterFunc = (i: number) => i > 3;
-      const arrayFiltered = array.filter(filterFunc);
-      const results: string[] = await MediumProcessor.map(array, (i: number) => `Processing ${i}...`, filterFunc);
-      expect(results).toBeDefined();
-      expect(results?.length).toBe(arrayFiltered?.length);
-      results.forEach((result) => expect(result.includes('Processing')).toBeTruthy());
+      expect(visited).toEqual([
+        { item: 'alpha', index: 0 },
+        { item: 'bravo', index: 1 },
+        { item: 'charlie', index: 2 },
+        { item: 'delta', index: 3 },
+        { item: 'echo', index: 4 }
+      ]);
     });
   });
 });

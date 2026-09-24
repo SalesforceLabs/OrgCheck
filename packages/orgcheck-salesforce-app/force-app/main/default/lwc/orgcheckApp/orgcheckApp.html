@@ -307,6 +307,7 @@
                                         </lightning-layout>
                                         <div class="slds-text-body_small">
                                             <span> | </span>
+                                            <span><a href="#dataInformation-0">Data Information</a> | </span>
                                             <span lwc:if={tableData.object.apexTriggers.hasData}><a href="#apexTriggers-0">Apex Triggers ({tableData.object.apexTriggers.nbAllRows})</a> | </span>
                                             <span lwc:if={tableData.object.workflowRules.hasData}><a href="#workflowRules-0">Workflow Rules ({tableData.object.workflowRules.nbAllRows})</a> | </span>
                                             <span lwc:if={tableData.object.fieldSets.hasData}><a href="#fieldSets-0">Field Sets ({tableData.object.fieldSets.nbAllRows})</a> | </span>
@@ -335,7 +336,6 @@
                                             </div>
                                             <div class="slds-col">
                                                 <div class="slds-has-divider_bottom"><lightning-input type="text" label="Key Prefix" value={tableData.object.keyPrefix} read-only></lightning-input></div>
-                                                <div class="slds-has-divider_bottom"><lightning-input type="number" label="Record Count (including deleted ones)" value={tableData.object.recordCount} read-only></lightning-input></div>
                                             </div>
                                             <div class="slds-col">
                                                 <div class="slds-has-divider_bottom"><lightning-input type="toggle" label="Is Custom?" value={tableData.object.isCustom} disabled></lightning-input></div>
@@ -349,6 +349,20 @@
                                             </div>
                                         </div>
                                         <br /><br />
+                                        <h1 class="slds-text-heading_medium"><a id="dataInformation"></a>Data information</h1>
+                                        <div class="slds-grid slds-gutters">
+                                            <div class="slds-col">
+                                                <div class="slds-has-divider_bottom"><lightning-input type="number" label="Record Count" value={tableData.object.recordCount} read-only></lightning-input></div>
+                                                <div class="slds-has-divider_bottom"><lightning-input type="date" label="Last Record Modified" value={tableData.object.lastModifiedRecordDate} read-only></lightning-input></div>
+                                                <div class="slds-has-divider_bottom"><lightning-input type="date" label="Object Last Modified" value={tableData.object.lastModifiedDate} read-only></lightning-input></div>
+                                            </div>
+                                        </div>
+                                        <br /><br />
+                                        
+                                        lastModifiedRecordDate = {tableData.object.lastModifiedRecordDate}<br />
+                                        lastModifiedDate = {tableData.object.lastModifiedDate}<br />
+                                        
+                                        
                                         <template lwc:if={tableData.object.apexTriggers.hasData}>
                                             <h1 class="slds-text-heading_medium"><a id="apexTriggers"></a>Apex Triggers</h1>
                                             <c-orgcheck-extended-datatable
