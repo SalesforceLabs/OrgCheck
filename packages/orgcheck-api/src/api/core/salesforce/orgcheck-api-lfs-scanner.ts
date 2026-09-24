@@ -60,6 +60,13 @@ export class LFSScanner {
                 // Scan flows
                 const scanResults = lfsCore.scan(lfsFlows);
 
+                // Apply warning severity threshold via the LFS core if available (v6.19+)
+                if (lfsCore.filterByThreshold) {
+                    for (const result of scanResults) {
+                        result.ruleResults = lfsCore.filterByThreshold(result.ruleResults, 'warning');
+                    }
+                }
+
                 // Map results: flowVersionId -> violations
                 results = this.mapResults(scanResults);
             }
@@ -73,15 +80,15 @@ export class LFSScanner {
     /**
      * @description Map LFS scan results to OrgCheck format
      * @param {any[]} scanResults - LFS scan results
-     * @returns {Map<string, string[]>} Map of flow version ID to violations
+     * @returns {Map<string, {name: string, severity: string}[]>} Map of flow version ID to violations
      */
-    static mapResults(scanResults: Record<string, unknown>[]): Map<string, string[]> {
+    static mapResults(scanResults: Record<string, unknown>[]): Map<string, { name: string; severity: string }[]> {
         const violationsMap = new Map();
         for (const result of scanResults) {
-            const ruleResults = result.ruleResults as { occurs: boolean; ruleName: string }[];
+            const ruleResults = result.ruleResults as { occurs: boolean; ruleName: string; severity?: string }[];
             const violations = ruleResults
                 .filter((ruleResult) => ruleResult.occurs === true)
-                .map((ruleResult) => ruleResult.ruleName);
+                .map((ruleResult) => ({ name: ruleResult.ruleName, severity: ruleResult.severity ?? 'warning' }));
             if (violations?.length > 0) {
                 violationsMap.set((result.flow as { uri: string }).uri, violations);
             }
