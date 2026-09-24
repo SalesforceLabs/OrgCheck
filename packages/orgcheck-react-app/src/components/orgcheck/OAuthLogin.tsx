@@ -56,20 +56,17 @@ export default function OAuthLogin({ initialError }: { initialError?: string }) 
 
   return (
     <section className="slds-p-around_large">
-      <article className="slds-card" style={{ maxWidth: '36rem', margin: '0 auto' }}>
+      <article className="slds-card" style={{ maxWidth: '72rem', margin: '0 auto' }}>
         <div className="slds-card__header slds-grid">
           <header className="slds-media slds-media_center slds-has-flexi-truncate">
             <div className="slds-media__body">
               <h2 className="slds-card__header-title">Sign in to Salesforce</h2>
-              <p className="slds-text-body_small slds-m-top_x-small">
-                This app is running outside Salesforce, so it needs a Connected App
-                OAuth login (Authorization Code + PKCE). No client secret is stored
-                in the browser.
-              </p>
             </div>
           </header>
         </div>
         <div className="slds-card__body slds-card__body_inner">
+          <div className="slds-grid slds-gutters slds-wrap">
+            <div className="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
           <form className="slds-form slds-form_stacked" onSubmit={event => void onSubmit(event)}>
             <div className="slds-form-element slds-m-bottom_small">
               <label className="slds-form-element__label" htmlFor="login-kind">
@@ -109,7 +106,7 @@ export default function OAuthLogin({ initialError }: { initialError?: string }) 
             ) : null}
             <div className="slds-form-element slds-m-bottom_small">
               <label className="slds-form-element__label" htmlFor="client-id">
-                Connected App Consumer Key
+                External Client App Consumer Key
               </label>
               <div className="slds-form-element__control">
                 <Input
@@ -125,7 +122,7 @@ export default function OAuthLogin({ initialError }: { initialError?: string }) 
             </div>
             <div className="slds-form-element slds-m-bottom_small">
               <label className="slds-form-element__label" htmlFor="redirect-uri">
-                Callback URL to add on the Connected App
+                Callback URL to add on the External Client App
               </label>
               <div className="slds-form-element__control slds-grid slds-gutters_x-small">
                 <div className="slds-col slds-grow">
@@ -148,40 +145,51 @@ export default function OAuthLogin({ initialError }: { initialError?: string }) 
             <Button type="submit" className="slds-button_stretch" disabled={busy}>
               {busy ? 'Redirecting…' : 'Log in with Salesforce'}
             </Button>
-            <div className="slds-m-top_medium slds-text-body_small">
+          </form>
+            </div>
+            <div className="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-text-body_small">
               <h3 className="slds-text-heading_small slds-m-bottom_x-small">
                 How to create the External Client App
               </h3>
               <p className="slds-m-bottom_small">
                 This app runs in the browser outside Salesforce, so it needs an
-                External Client App (or a Connected App) with OAuth Authorization
-                Code and PKCE. No client secret is stored here.
+                External Client App to be created in your org. You will have to 
+                perform the following steps as a System Admin in your org to 
+                use Org Check React application.
               </p>
-              <p className="slds-m-bottom_xx-small">In Setup, configure OAuth as follows:</p>
-              <ul className="slds-list_dotted slds-m-bottom_small">
-                <li>Enable the OAuth authorization-code flow.</li>
-                <li>Add the callback URL shown above.</li>
-                <li>Require PKCE.</li>
-                <li>Do not require a client secret (this is a public browser app).</li>
-              </ul>
-              <p className="slds-m-bottom_xx-small">Select these OAuth scopes:</p>
-              <ul className="slds-list_dotted slds-m-bottom_small">
-                <li>
-                  <code>Access the identity URL</code>
+              <ol className="slds-list_ordered">
+                <li>As a System Admin, login to Salesforce and go to the setup menu</li>
+                <li>Look for <b>External Client App Manager</b> and select this item in the Setup menu</li>
+                <li>When the page is loaded, click on the <b>New External Client App</b> button </li>
+                <li>A new form is loaded for that purpose</li>
+                <li>In section called <b>Basic information</b>
+                  <ul className="slds-list_dotted">
+                    <li>Set the External Client App Name to <b>Org Check React</b></li>
+                    <li>Set the Contact Email to an email address of your choice</li>
+                    <li>Set the Logo Image URL to <b>https://github.com/SalesforceLabs/OrgCheck/raw/main/docs/assets/pngs/Logo+Mascot-v3.png</b></li>
+                  </ul>
                 </li>
-                <li>
-                  <code>Manage user data via APIs (api)</code>
+                <li>In section called <b>API (Enable OAuth Settings)</b>
+                  <ul className="slds-list_dotted">
+                    <li>Unfold the section</li>
+                    <li>Tick the <b>Enable OAuth</b> checkbox</li>
+                    <li>Copy the callback URL shown above in this login screen and paste it into the <b>Callback URL</b> field</li>
+                    <li>Select the following OAuth scopes:
+                      <ul className="slds-list_dotted">
+                        <li>Access the identity URL service</li>
+                        <li>Manage user data via APIs</li>
+                        <li>Perform requests at any time</li>
+                      </ul>
+                    </li>
+                    <li>Make sure the <b>Require Proof Key for Code Exchange (PKCE)..."</b> checkbox is ticked</li>
+                  </ul>
                 </li>
-                <li>
-                  <code>Perform requests at any time (refresh_token)</code>
-                </li>
-              </ul>
-              <p>
-                Adding localhost to the org CORS allowlist is not enough for the
-                token endpoint. Local development already proxies that call.
-              </p>
+                <li>Hit the <b>create button</b> to create the External Client App in your Salesforce organization.</li>
+                <li>You will be redirected to the External Client App details page.</li>
+                <li>Copy the <b>Consumer Key</b> and paste it into the <b>External Client App Consumer Key</b> field in this login screen.</li>
+              </ol>
             </div>
-          </form>
+          </div>
         </div>
       </article>
     </section>
