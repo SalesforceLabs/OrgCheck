@@ -1,0 +1,80 @@
+.orgcheck-datatable .slds-table > thead > tr > th {
+  cursor: pointer;
+  border-width: var(--slds-g-sizing-border-3, 3px);
+  border-bottom: var(--slds-g-sizing-border-1, 1px) solid
+    var(--slds-g-color-neutral-base-90, var(--slds-g-color-border-1, #c9c9c9));
+}
+
+.orgcheck-datatable .slds-table > thead > tr > th.sorted {
+  background-color: var(--slds-g-color-surface-2, #f3f3f3) !important;
+  background-position: right;
+  background-repeat: no-repeat;
+  background-size: 11px;
+  padding-right: var(--slds-g-sizing-5, 1rem) !important;
+}
+
+.orgcheck-datatable .slds-table > thead > tr > th.sorted-asc {
+  background-image: url(/img/arrowUp.gif);
+}
+
+.orgcheck-datatable .slds-table > thead > tr > th.sorted-desc {
+  background-image: url(/img/arrowDown.gif);
+}
+
+.orgcheck-datatable .slds-table > thead > tr > th.vertical {
+  align-content: center;
+  writing-mode: vertical-lr;
+  background-position-x: left;
+  transform: rotate(180deg);
+  border-bottom: unset;
+  border-top: var(--slds-g-sizing-border-1, 1px) solid
+    var(--slds-g-color-neutral-base-90, var(--slds-g-color-border-1, #c9c9c9));
+  white-space: nowrap;
+}
+
+.orgcheck-datatable.stickytable {
+  max-height: calc(100vh - 200px);
+  overflow: auto;
+}
+
+.orgcheck-datatable .slds-table > thead > tr > th.sticky {
+  position: sticky !important;
+  top: calc(var(--slds-g-spacing-1, 0.25rem) / 2);
+  z-index: 1000;
+  vertical-align: bottom;
+  background-color: var(--slds-g-color-surface-1, #fff);
+}
+
+.orgcheck-datatable.unsettablewidth > table {
+  width: unset;
+}
+
+.orgcheck-datatable.autowidth {
+  width: auto;
+}
+
+.orgcheck-datatable .orgcheck-boolean-toggle_readonly {
+  display: inline-flex;
+  pointer-events: none;
+}
+
+.orgcheck-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.orgcheck-list-item__bullet {
+  flex: 0 0 auto;
+  line-height: inherit;
+}
+
+.orgcheck-list-item__content {
+  min-width: 0;
+}
+
+.orgcheck-list-item__content a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}

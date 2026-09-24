@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="210" version="1.1" id="svg1" inkscape:version="1.4.2 (ebf0e940, 2025-05-08)" sodipodi:docname="Mascot.svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:svg="http://www.w3.org/2000/svg" viewBox="0 0 160 210" data-app="Xyris">
+    <defs id="defs1">
+    </defs>
+    <sodipodi:namedview id="namedview1" pagecolor="#ffffff" bordercolor="#000000" borderopacity="0.25" inkscape:showpageshadow="2" inkscape:pageopacity="0.0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#d1d1d1" inkscape:document-units="mm" inkscape:zoom="0.60623557" inkscape:cx="334.85333" inkscape:cy="567.43618" inkscape:window-width="1216" inkscape:window-height="965" inkscape:window-x="538" inkscape:window-y="1474" inkscape:window-maximized="0" inkscape:current-layer="layer1" showgrid="false">
+    </sodipodi:namedview>
+    <g inkscape:label="OrgChecky" inkscape:groupmode="layer" id="layer1" transform="translate(-14.22596,-16.610137)" transform-origin="left" style="transform-box: fill-box;">
+        <g id="cape-back" inkscape:label="Cape-Back" transform="translate(14.22596,16.610137)" transform-origin="">
+            <path d="M 113.531 201.582 C 64.6989 152.878 39.2849 194.432 35.1009 188.242 C 32.3609 184.185 62.9089 124.912 100.49 105.83 C 121.924 126.9 118.688 172.764 113.574 201.546 Z" fill="#6c2221" stroke="#000000" stroke-width="2" id="cape-back-1" sodipodi:nodetypes="ccccc" transform="translate(-14.22596,-16.610137)" inkscape:label="Cape-Back1" transform-origin="" style="display: inline;">
+            </path>
+        </g>
+        <g id="body" inkscape:label="Body" transform-origin="center" transform="" style="transform-box: fill-box;">
+            <path d="M 95.1101 109.749 C 85.7827 133.174 60.7548 173.841 53.5579 193.899 C 58.0858 204.491 88.1077 213.504 97.959 202.689 C 107.424 188.984 107.849 141.253 104.36 114.695 C 101.137 112.037 96.0356 109.859 95.1111 109.748" fill="#559bbe" stroke="#000000" stroke-width="2" id="body-1" inkscape:label="Body1" transform="" style="display: inline; ">
+            </path>
+            <path d="M 54.5401 193.672 C 55.6445 196.766 61.2815 200.529 63.0094 201.297 C 60.3688 197.501 77.113 157.767 91.5508 139.364 C 106.262 122.156 99.2344 183.883 91.3221 205.644 C 94.1494 204.67 96.5898 203.515 98.2511 200.526 C 105.962 186.655 106.866 145.543 102.747 106.653 C 85.1132 134.827 67.5412 162.451 54.5401 193.672 Z" fill="#4883a1" id="body-shadow" inkscape:label="BodyShadow" transform="" style="display: inline; ">
+            </path>
+            <animateTransform attributeName="transform" type="scale" begin="-0.00001" dur="0.88502" keyTimes="0; 0.5168910685688634; 0.7036997364517251; 1" values="1, 1; 1.05, 1; 1, 1; 1, 1" fill="freeze" additive="sum" calcMode="spline" keySplines="0.55 0.055 0.675 0.19;0 0 1 1;0 0 1 1" repeatCount="indefinite">
+            </animateTransform>
+        </g>
+        <g id="cape-front" inkscape:label="CapeFront" transform="">
+            <path d="M 109.413 213.609 C 116.487 188.669 120.893 124.288 100.49 105.83 C 93.4219 135.073 68.3279 152.274 57.6479 167.435 C 46.9679 182.595 45.2209 221.003 47.1299 224.042 C 37.3449 215.98 20.0379 210.715 16.4719 194.657 C 11.8449 179.453 76.1638 121.945 96.0748 103.461 C 127.07 108.059 125.924 180.295 109.412 213.61" fill="#e6655e" stroke="#000000" stroke-width="2" id="cape-front-1" inkscape:label="CapeFront1" transform="" style="display: inline; ">
+            </path>
+            <path d="M 91.8148 124.381 C 87.5978 121.011 92.7178 113.448 83.4558 118.537 C 81.1778 125.219 37.3388 157.744 36.1358 171.952 C 34.9308 186.159 36.6828 189.148 42.4099 185.745 C 48.1358 182.342 55.2799 169.038 55.2799 169.038 C 50.2909 181.976 45.1618 195.018 45.5728 221.563 C 34.8858 214.438 21.1708 208.686 17.2248 193.857 C 22.2299 168.43 78.5038 123.857 96.0748 103.46 L 99.1208 109.875 Z" fill="#d25d56" id="cape-shadow" inkscape:label="CapeShadow" transform="" style="display: inline; ">
+            </path>
+        </g>
+        <g id="head" inkscape:label="Head" transform-origin="left bottom" transform="rotate(-1)" style="display: inline; transform-box: fill-box;">
+            <path d="M 169.19 79.9853 C 158.332 75.8575 135.659 68.0054 122.704 64.7114 C 74.1562 52.3684 68.5801 110.679 114.068 111.899 C 186.984 109.69 169.19 79.9853 169.19 79.9853 Z" fill="#e9e6d0" stroke="#000000" stroke-width="2" id="skin" sodipodi:nodetypes="cccc" inkscape:label="Skin" transform="">
+            </path>
+            <path d="M 85.1911 78.9844 C 83.5141 105.009 118.627 109.456 148.873 102.984 C 149.866 105.933 149.689 103.304 151.319 106.066 C 144.653 107.815 126.905 110.995 114.099 110.882 C 106.854 110.817 99.7312 107.886 92.9541 104.288 C 84.4681 98.4584 81.8211 85.2754 85.1911 78.9844 Z" fill="#aba898" id="head-shadow" inkscape:label="HeadShadow" transform="">
+            </path>
+            <path d="M 118.313 63.3492 C 80.3606 73.6002 94.7931 106.876 94.7972 106.884 C 95.2432 109.805 113.48 113.948 114.068 111.899 C 104.996 99.3394 117.877 75.0434 134.221 68.2364 C 135.87 65.5604 121.545 62.1432 118.313 63.3492 Z" stroke="#000000" stroke-width="2" id="mask" sodipodi:nodetypes="ccccc" inkscape:label="Mask" transform="">
+            </path>
+            <g id="nose" inkscape:label="Nose" transform-origin="center" transform="" style="transform-box: fill-box;">
+                <path d="M 158.423 75.9584 C 139.454 79.9444 145.112 102.06 148.792 107.404 C 162.877 104.085 176.642 93.6584 169.493 79.4814 Z" fill="#2c2c2c" stroke="#000000" stroke-width="2" id="nose-2" sodipodi:nodetypes="cccc" inkscape:label="Nose2" transform="">
+                </path>
+                <path d="M 150.516 81.5674 C 152.407 78.2574 154.015 78.4024 157.526 76.9144 C 161.456 77.3624 164.609 78.8044 168.538 80.2124 C 169.648 80.6964 171.112 84.1964 170.444 87.1624 C 163.87 84.5153 157.514 81.8083 150.516 81.5674 Z" fill="#bbbbbb" id="nose-1" sodipodi:nodetypes="ccccc" inkscape:label="Nose1" transform="">
+                </path>
+                <animateTransform attributeName="transform" type="rotate" begin="0.5523714940935391" dur="0.7038669895130185" keyTimes="0; 0.22509729482318544; 0.42632041154698147; 0.5760033140298216; 1" values="0; 12; -9; 0; 0" fill="freeze" additive="sum" calcMode="spline" keySplines="0 0 1 1;0 0 1 1;0 0 1 1;0 0 1 1" repeatCount="indefinite">
+                </animateTransform>
+            </g>
+            <g id="right-ear" transform="translate(14.434852,16.610656)" inkscape:label="RightEar" transform-origin="right bottom" style="transform-box: fill-box;">
+                <path d="M 70.3613 60.7977 C 54.3953 44.8007 34.2183 45.1037 39.1753 39.4467 C 46.2073 29.4917 73.1783 55.9187 73.0173 56.2927 Z" fill="#e9e6d0" stroke="#000000" stroke-width="1.948" id="right-ear-3" inkscape:label="RightEar3" transform="">
+                </path>
+                <path fill="#e9e6d0" d="M 71.6203 56.1427 L 75.1483 59.7537 L 71.9423 61.0057 L 68.4143 57.3937 Z" id="right-ear-2" inkscape:label="RightEar2" transform="">
+                </path>
+                <path d="M 40.0723 39.9907 C 50.8423 44.0357 62.6573 48.7957 72.8503 59.1737 L 71.5923 60.6327 C 66.9503 55.9287 56.4933 49.4427 54.7063 48.6817 C 41.8993 43.2217 37.3863 42.2117 40.0723 39.9907 Z" fill="#aba898" id="right-ear-1" inkscape:label="RightEar1" transform="">
+                </path>
+                <animateTransform attributeName="transform" type="rotate" begin="0.4772426285046731" dur="1.5227673714953267" keyTimes="0; 0.37495677685277745; 0.835799215012659; 1" values="0;-35;15;0" fill="freeze" additive="sum" calcMode="spline" keySplines="0.55 0.085 0.68 0.53; 0.42 0 0.58 1; 0 0 1 1" repeatCount="indefinite">
+                </animateTransform>
+            </g>
+            <g id="left-ear" transform="translate(14.435, 16.611)" inkscape:label="LeftEar" transform-origin="right bottom" style="transform-box: fill-box;">
+                <path d="M 90.0583 46.8347 C 85.6703 24.0447 68.6823 14.4027 76.1383 12.3677 C 87.8223 7.82772 95.6303 46.0867 95.2783 46.3157 Z" fill="#e9e6d0" stroke="#000000" stroke-width="2" id="left-ear-3" inkscape:label="LeftEar3" transform="">
+                </path>
+                <rect width="3.993" height="3.3970001" x="109.242" y="-110.655" transform="matrix(0.14446,0.98951,-0.9581,0.28644,-27.736,-31.785)" ry="0" fill="#e9e6d0" id="left-ear-2" inkscape:label="LeftEar2" transform-origin="">
+                </rect>
+                <path d="M 76.3503 13.3527 C 83.1553 22.6277 90.1973 33.2857 93.0573 47.5487 L 91.1283 47.7167 C 89.8133 41.2397 84.9303 30.2457 83.8503 28.6297 C 76.1133 17.0557 72.8863 13.7437 76.3503 13.3527 Z" fill="#aba898" id="left-ear-1" inkscape:label="LeftEar1" transform="">
+                </path>
+                <animateTransform attributeName="transform" type="rotate" begin="0.5455453409571221" dur="1.4544646590428778" keyTimes="0; 0.37139060045052624; 0.8280881213442085; 1" values="0;-21;15;0" fill="freeze" additive="sum" calcMode="spline" keySplines="0.55 0.085 0.68 0.53; 0.42 0 0.58 1; 0 0 1 1" repeatCount="indefinite">
+                </animateTransform>
+            </g>
+            <g id="left-eye" transform="translate(14.434852,16.610656)" inkscape:label="LeftEye" transform-origin="center" style="transform-box: fill-box;">
+                <path d="M 106.598 56.7659 C 105.428 53.4679 104.929 49.8709 106.48 48.9819 C 109.465 48.5639 111.947 51.8439 111.947 51.8439 C 111.137 53.4959 109.217 55.4689 106.598 56.7659 Z" fill="#ffffff" id="left-eye-1" inkscape:label="LeftEye1" transform="">
+                </path>
+                <animateTransform attributeName="transform" type="scale" begin="0.2428093933823529" dur="1.3871109926470593" keyTimes="0; 0.12729450775907228; 0.37891568460496095; 1" values="1, 1; 1, 0; 1, 1; 1, 1" fill="freeze" additive="sum" calcMode="spline" keySplines="0 0 1 1;0 0 1 1;0 0 1 1" repeatCount="indefinite">
+                </animateTransform>
+            </g>
+            <g id="right-eye" transform="translate(14.434852,16.610656)" inkscape:label="RightEye" transform-origin="center" style="transform-box: fill-box;">
+                <path d="M 88.1683 59.8182 C 93.8813 57.4662 99.0583 58.6542 104.481 59.2282 C 103.509 61.9082 100.653 64.2282 96.8413 66.9682 C 91.9013 67.7592 87.6033 63.6842 88.1683 59.8182 Z" fill="#ffffff" id="right-eye-1" inkscape:label="RightEye1" transform="">
+                </path>
+                <animateTransform attributeName="transform" type="scale" begin="0.2428093933823529" dur="1.3871109926470593" keyTimes="0; 0.12729450775907228; 0.37891568460496095; 1" values="1, 1; 1, 0; 1; 1, 1" fill="freeze" additive="sum" calcMode="spline" keySplines="0 0 1 1;0 0 1 1;0 0 1 1" repeatCount="indefinite">
+                </animateTransform>
+            </g>
+            <animateTransform attributeName="transform" type="rotate" begin="0.46450641061452513" dur="1.8859217879148866" keyTimes="0; 0.4926458577346368; 0.9084557800767035; 1" values="0; -5; 3; 0" fill="freeze" additive="sum" calcMode="spline" keySplines="0 0 1 1;0.42 0 0.58 1;0 0 0.58 1" repeatCount="indefinite">
+            </animateTransform>
+        </g>
+    </g>
+</svg>

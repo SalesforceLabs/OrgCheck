@@ -1,0 +1,8 @@
+node_modules
+dist
+build
+.tmp-home
+coverage
+public/jsforce.min.js
+*.tsbuildinfo
+.eslintcache

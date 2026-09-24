@@ -1,0 +1,249 @@
+@import '@salesforce-ux/design-system-2/dist/css/bundled/slds2.cosmos.css';
+@import 'tailwindcss/theme' layer(theme);
+@import 'tailwindcss/utilities' layer(utilities);
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 0.25rem;
+  --background: var(--slds-g-color-surface-2, #f3f3f3);
+  --foreground: var(--slds-g-color-on-surface-1);
+  --card: var(--slds-g-color-surface-container-1, #fff);
+  --card-foreground: var(--slds-g-color-on-surface-1);
+  --popover: var(--slds-g-color-surface-container-1, #fff);
+  --popover-foreground: var(--slds-g-color-on-surface-1);
+  --primary: var(--slds-g-color-accent-1);
+  --primary-foreground: var(--slds-g-color-on-accent-1);
+  --secondary: var(--slds-g-color-surface-container-2, #f3f3f3);
+  --secondary-foreground: var(--slds-g-color-on-surface-1);
+  --muted: var(--slds-g-color-surface-container-2, #f3f3f3);
+  --muted-foreground: var(--slds-g-color-on-surface-3, #5c5c5c);
+  --accent: var(--slds-g-color-accent-container-1, var(--slds-g-color-accent-1));
+  --accent-foreground: var(--slds-g-color-on-accent-1);
+  --destructive: var(--slds-g-color-error-1);
+  --destructive-foreground: var(--slds-g-color-on-error-1, #fff);
+  --border: var(--slds-g-color-border-1, #c9c9c9);
+  --input: var(--slds-g-color-border-1, #c9c9c9);
+  --ring: var(--slds-g-color-accent-1);
+  --chart-1: var(--slds-g-color-accent-1);
+  --chart-2: var(--slds-g-color-success-1, #2e844a);
+  --chart-3: var(--slds-g-color-info-1, #0176d3);
+  --chart-4: var(--slds-g-color-warning-1, #dd7a01);
+  --chart-5: var(--slds-g-color-error-1);
+  --sidebar: var(--slds-g-color-surface-container-1, #fff);
+  --sidebar-foreground: var(--slds-g-color-on-surface-1);
+  --sidebar-primary: var(--slds-g-color-accent-1);
+  --sidebar-primary-foreground: var(--slds-g-color-on-accent-1);
+  --sidebar-accent: var(--slds-g-color-surface-container-2, #f3f3f3);
+  --sidebar-accent-foreground: var(--slds-g-color-on-surface-1);
+  --sidebar-border: var(--slds-g-color-border-1, #c9c9c9);
+  --sidebar-ring: var(--slds-g-color-accent-1);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  background: var(--slds-g-color-surface-2, #f3f3f3);
+  color: var(--slds-g-color-on-surface-1);
+  font-family: var(--slds-g-font-family-base);
+}
+
+.orgcheck-shell {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding-top: 3.125rem;
+  overflow: hidden;
+}
+
+.orgcheck-workspace {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: auto;
+}
+
+.orgcheck-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+.orgcheck-body > .orgcheck-nav-pane {
+  flex: 0 0 18rem;
+  width: 18rem;
+  max-width: 18rem;
+  min-width: 14rem;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.orgcheck-nav-pane__search {
+  flex: 0 0 auto;
+}
+
+.orgcheck-nav-pane__list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.orgcheck-content-pane {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.orgcheck-content-pane > .slds-page-header {
+  flex: 0 0 auto;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.orgcheck-content-pane > .slds-card {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+}
+
+.orgcheck-page-header-filters {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+}
+
+.orgcheck-global-filters {
+  width: 100%;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+}
+
+.orgcheck-global-filters > .slds-col.slds-grow {
+  min-width: 0;
+}
+
+.orgcheck-global-filters .slds-form-element,
+.orgcheck-global-filters .slds-form-element__control,
+.orgcheck-global-filters .slds-select_container {
+  width: 100%;
+  min-width: 0;
+}
+
+.orgcheck-global-filters .slds-select {
+  width: 100%;
+  max-width: 100%;
+}
+
+.orgcheck-global-filters__actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.25rem;
+  padding-bottom: 1px;
+}
+
+.orgcheck-global-filters__actions .slds-button {
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0;
+}
+
+.slds-modal__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.orgcheck-nav-section-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+}
+
+.orgcheck-nav-pane .slds-nav-vertical__section > ul {
+  padding-inline-start: 0.75rem;
+}
+
+.slds-global-header__logo {
+  background-image: none;
+  display: flex;
+  align-items: center;
+  width: 6.5rem;
+  height: 2.5rem;
+  overflow: visible;
+}
+
+.slds-global-header__logo img {
+  display: block;
+  height: 2.25rem;
+  width: auto;
+  max-width: 6.5rem;
+  object-fit: contain;
+}
