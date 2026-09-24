@@ -82,9 +82,16 @@ Build the sf CLI plugin package:
 yarn workspace @orgcheck/sfdx-plugin build
 ```
 
+Run the React app locally (HTTPS on `https://localhost:5173`):
+```bash
+cd packages/orgcheck-react-app
+npm install
+npm run dev
+```
+
 ## Step 4: Update Project Definition
 
-> **Note:** Org Check uses a monorepo. The Salesforce app is in `packages/orgcheck-salesforce-app`. The Org Check API (JavaScript/TypeScript) is in `packages/orgcheck-api`. Run Salesforce CLI commands from `packages/orgcheck-salesforce-app` or adjust paths accordingly.
+> **Note:** Org Check uses a monorepo. The Salesforce LWC app is in `packages/orgcheck-salesforce-app`. The Org Check API (JavaScript/TypeScript) is in `packages/orgcheck-api`. The React app is in `packages/orgcheck-react-app` (install and run it with npm from that folder). Run Salesforce CLI commands from `packages/orgcheck-salesforce-app` or adjust paths accordingly.
 
 Create a fresh `sfdx-project.json` file with your namespace in `packages/orgcheck-salesforce-app`:
 
