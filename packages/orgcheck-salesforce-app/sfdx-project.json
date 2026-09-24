@@ -20,7 +20,7 @@
   ],
   "namespace": "OrgCheck",
   "sfdcLoginUrl": "https://login.salesforce.com",
-  "sourceApiVersion": "64.0",
+  "sourceApiVersion": "66.0",
   "packageAliases": {
     "Org Check": "0HoKB000000PAsc0AG",
     "Org Check@5.7.0-1-main": "04tKB000000DQHzYAO",

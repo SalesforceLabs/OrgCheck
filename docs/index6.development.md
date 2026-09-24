@@ -105,7 +105,7 @@ Create a fresh `sfdx-project.json` file with your namespace in `packages/orgchec
   ],
   "namespace": "<yournamespace>",
   "sfdcLoginUrl": "https://login.salesforce.com",
-  "sourceApiVersion": "64.0"
+  "sourceApiVersion": "66.0"
 }
 ```
 Replace `<namespace>` with your actual namespace.

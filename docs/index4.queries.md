@@ -76,7 +76,7 @@ POST /tooling/composite
 [ 
    { 
       method: 'GET', 
-      url: '/services/data/v60.0/tooling/query?q=SELECT+MetadataComponentId,
+      url: '/services/data/v66.0/tooling/query?q=SELECT+MetadataComponentId,
             +MetadataComponentName,+MetadataComponentType,+RefMetadataComponentId,
             +RefMetadataComponentName,+RefMetadataComponentType+FROM
             +MetadataComponentDependency+WHERE+RefMetadataComponentId+IN
@@ -85,7 +85,7 @@ POST /tooling/composite
    }, 
    { 
       method: 'GET', 
-      url: '/services/data/v60.0/tooling/query?q=SELECT+MetadataComponentId,
+      url: '/services/data/v66.0/tooling/query?q=SELECT+MetadataComponentId,
             +MetadataComponentName,+MetadataComponentType,+RefMetadataComponentId,
             +RefMetadataComponentName,+RefMetadataComponentType+FROM
             +MetadataComponentDependency+WHERE+RefMetadataComponentId+IN
@@ -125,7 +125,7 @@ POST /tooling/composite
 [ 
    { 
       method: 'GET', 
-      url: '/services/data/v60.0/tooling/query?q=SELECT+MetadataComponentId,
+      url: '/services/data/v66.0/tooling/query?q=SELECT+MetadataComponentId,
             +MetadataComponentName,+MetadataComponentType,+RefMetadataComponentId,
             +RefMetadataComponentName,+RefMetadataComponentType+FROM
             +MetadataComponentDependency+WHERE+RefMetadataComponentId+IN
@@ -134,7 +134,7 @@ POST /tooling/composite
    }, 
    { 
       method: 'GET', 
-      url: '/services/data/v60.0/tooling/query?q=SELECT+MetadataComponentId,
+      url: '/services/data/v66.0/tooling/query?q=SELECT+MetadataComponentId,
             +MetadataComponentName,+MetadataComponentType,+RefMetadataComponentId,
             +RefMetadataComponentName,+RefMetadataComponentType+FROM
             +MetadataComponentDependency+WHERE+RefMetadataComponentId+IN
@@ -259,7 +259,7 @@ POST /tooling/composite
 [ 
    { 
       method: 'GET', 
-      url: '/services/data/v60.0/tooling/query?q=SELECT+MetadataComponentId,
+      url: '/services/data/v66.0/tooling/query?q=SELECT+MetadataComponentId,
             +MetadataComponentName,+MetadataComponentType,+RefMetadataComponentId,
             +RefMetadataComponentName,+RefMetadataComponentType+FROM
             +MetadataComponentDependency+WHERE+RefMetadataComponentId+IN
@@ -268,7 +268,7 @@ POST /tooling/composite
    }, 
    { 
       method: 'GET', 
-      url: '/services/data/v60.0/tooling/query?q=SELECT+MetadataComponentId,
+      url: '/services/data/v66.0/tooling/query?q=SELECT+MetadataComponentId,
             +MetadataComponentName,+MetadataComponentType,+RefMetadataComponentId,
             +RefMetadataComponentName,+RefMetadataComponentType+FROM
             +MetadataComponentDependency+WHERE+RefMetadataComponentId+IN
@@ -289,9 +289,9 @@ Below is an example of such a composite query (version and id in `url` will vary
 ```
 POST /tooling/composite
 [ 
-    { method: 'GET', url: '/services/data/v60.0/tooling/sobjects/CustomField/xyz000000000001' }, 
-    { method: 'GET', url: '/services/data/v60.0/tooling/sobjects/CustomField/xyz000000000002' }, 
-    { method: 'GET', url: '/services/data/v60.0/tooling/sobjects/CustomField/xyz000000000003' }, 
+    { method: 'GET', url: '/services/data/v66.0/tooling/sobjects/CustomField/xyz000000000001' }, 
+    { method: 'GET', url: '/services/data/v66.0/tooling/sobjects/CustomField/xyz000000000002' }, 
+    { method: 'GET', url: '/services/data/v66.0/tooling/sobjects/CustomField/xyz000000000003' }, 
     ...
 ]
 ```
@@ -323,7 +323,7 @@ POST /tooling/composite
 [ 
    { 
       method: 'GET', 
-      url: '/services/data/v60.0/tooling/query?q=SELECT+MetadataComponentId,
+      url: '/services/data/v66.0/tooling/query?q=SELECT+MetadataComponentId,
             +MetadataComponentName,+MetadataComponentType,+RefMetadataComponentId,
             +RefMetadataComponentName,+RefMetadataComponentType+FROM
             +MetadataComponentDependency+WHERE+RefMetadataComponentId+IN
@@ -332,7 +332,7 @@ POST /tooling/composite
    }, 
    { 
       method: 'GET', 
-      url: '/services/data/v60.0/tooling/query?q=SELECT+MetadataComponentId,
+      url: '/services/data/v66.0/tooling/query?q=SELECT+MetadataComponentId,
             +MetadataComponentName,+MetadataComponentType,+RefMetadataComponentId,
             +RefMetadataComponentName,+RefMetadataComponentType+FROM
             +MetadataComponentDependency+WHERE+RefMetadataComponentId+IN
@@ -370,7 +370,7 @@ POST /tooling/composite
 [ 
    { 
       method: 'GET', 
-      url: '/services/data/v60.0/tooling/query?q=SELECT+MetadataComponentId,
+      url: '/services/data/v66.0/tooling/query?q=SELECT+MetadataComponentId,
             +MetadataComponentName,+MetadataComponentType,+RefMetadataComponentId,
             +RefMetadataComponentName,+RefMetadataComponentType+FROM
             +MetadataComponentDependency+WHERE+RefMetadataComponentId+IN
@@ -379,7 +379,7 @@ POST /tooling/composite
    }, 
    { 
       method: 'GET', 
-      url: '/services/data/v60.0/tooling/query?q=SELECT+MetadataComponentId,
+      url: '/services/data/v66.0/tooling/query?q=SELECT+MetadataComponentId,
             +MetadataComponentName,+MetadataComponentType,+RefMetadataComponentId,
             +RefMetadataComponentName,+RefMetadataComponentType+FROM
             +MetadataComponentDependency+WHERE+RefMetadataComponentId+IN
@@ -483,9 +483,9 @@ Below is an example of such a composite query (version and id in `url` will vary
 ```
 POST /tooling/composite
 [ 
-    { method: 'GET', url: '/services/data/v60.0/tooling/sobjects/Flow/xyz000000000001' }, 
-    { method: 'GET', url: '/services/data/v60.0/tooling/sobjects/Flow/xyz000000000002' }, 
-    { method: 'GET', url: '/services/data/v60.0/tooling/sobjects/Flow/xyz000000000003' }, 
+    { method: 'GET', url: '/services/data/v66.0/tooling/sobjects/Flow/xyz000000000001' }, 
+    { method: 'GET', url: '/services/data/v66.0/tooling/sobjects/Flow/xyz000000000002' }, 
+    { method: 'GET', url: '/services/data/v66.0/tooling/sobjects/Flow/xyz000000000003' }, 
     ...
 ]
 ```
@@ -966,9 +966,9 @@ Below is an example of such a composite query (version and id in `url` will vary
 ```
 POST /tooling/composite
 [ 
-    { method: 'GET', url: '/services/data/v60.0/tooling/sobjects/Profile/xyz000000000001' }, 
-    { method: 'GET', url: '/services/data/v60.0/tooling/sobjects/Profile/xyz000000000002' }, 
-    { method: 'GET', url: '/services/data/v60.0/tooling/sobjects/Profile/xyz000000000003' }, 
+    { method: 'GET', url: '/services/data/v66.0/tooling/sobjects/Profile/xyz000000000001' }, 
+    { method: 'GET', url: '/services/data/v66.0/tooling/sobjects/Profile/xyz000000000002' }, 
+    { method: 'GET', url: '/services/data/v66.0/tooling/sobjects/Profile/xyz000000000003' }, 
     ...
 ]
 ```
@@ -1055,9 +1055,9 @@ Below is an example of such a composite query (version and id in `url` will vary
 ```
 POST /tooling/composite
 [ 
-    { method: 'GET', url: '/services/data/v60.0/tooling/sobjects/Profile/xyz000000000001' }, 
-    { method: 'GET', url: '/services/data/v60.0/tooling/sobjects/Profile/xyz000000000002' }, 
-    { method: 'GET', url: '/services/data/v60.0/tooling/sobjects/Profile/xyz000000000003' }, 
+    { method: 'GET', url: '/services/data/v66.0/tooling/sobjects/Profile/xyz000000000001' }, 
+    { method: 'GET', url: '/services/data/v66.0/tooling/sobjects/Profile/xyz000000000002' }, 
+    { method: 'GET', url: '/services/data/v66.0/tooling/sobjects/Profile/xyz000000000003' }, 
     ...
 ]
 ```
@@ -1212,9 +1212,9 @@ Below is an example of such a composite query (version and id in `url` will vary
 ```
 POST /tooling/composite
 [
-    { method: 'GET', url: '/services/data/v64.0/tooling/sobjects/WorkflowRule/xyz000000000001' },
-    { method: 'GET', url: '/services/data/v64.0/tooling/sobjects/WorkflowRule/xyz000000000002' },
-    { method: 'GET', url: '/services/data/v64.0/tooling/sobjects/WorkflowRule/xyz000000000003' },
+    { method: 'GET', url: '/services/data/v66.0/tooling/sobjects/WorkflowRule/xyz000000000001' },
+    { method: 'GET', url: '/services/data/v66.0/tooling/sobjects/WorkflowRule/xyz000000000002' },
+    { method: 'GET', url: '/services/data/v66.0/tooling/sobjects/WorkflowRule/xyz000000000003' },
     ...
 ]
 ```
