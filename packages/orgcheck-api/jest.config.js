@@ -1,8 +1,6 @@
 const config = {
-  preset: 'ts-jest',
   transform: {
-    '^.+\\.(ts|tsx)?$': ['ts-jest', { tsconfig: './tsconfig.test.json' }],
-    '^.+\\.(js|jsx)$':  'babel-jest',
+    '^.+\\.(ts|tsx|js|jsx)$': 'babel-jest',
   },
   moduleNameMapper: {
     "^dist/(.*)$": "<rootDir>/dist/$1",

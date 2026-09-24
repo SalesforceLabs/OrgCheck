@@ -1,11 +1,11 @@
 /// <reference types="jest" />
 import type { ExecCmdResult } from '@salesforce/cli-plugins-testkit';
-import { execCmd } from '@salesforce/cli-plugins-testkit';
 
 jest.mock('@salesforce/cli-plugins-testkit', () => ({
   execCmd: jest.fn(),
 }));
 
+const { execCmd } = jest.requireMock('@salesforce/cli-plugins-testkit') as typeof import('@salesforce/cli-plugins-testkit');
 const mockExecCmd = jest.mocked(execCmd);
 
 const mockJsonOutput = {

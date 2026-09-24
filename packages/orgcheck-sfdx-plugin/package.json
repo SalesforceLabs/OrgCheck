@@ -17,12 +17,12 @@
     "@salesforce/cli-plugins-testkit": "^5.3.20",
     "@salesforce/dev-scripts": "^13",
     "@types/jest": "^29.5.14",
+    "esbuild": "^0.25.0",
     "eslint": "^10.1.0",
     "eslint-plugin-sf-plugin": "^1.18.8",
     "jest": "^30.4.2",
     "oclif": "^4.23.0",
     "prettier": "^3.4.2",
-    "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "typescript": "^7.0.2"
   },

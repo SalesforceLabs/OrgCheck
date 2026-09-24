@@ -12,15 +12,9 @@
     "homepage": "https://github.com/SalesforceLabs/OrgCheck",
     "license": "MIT",
     "private": true,
-    "workspaces": {
-        "packages": [
-            "packages/*"
-        ],
-        "nohoist": [
-            "**/@orgcheck/react-app",
-            "**/@orgcheck/react-app/**"
-        ]
-    },
+    "workspaces": [
+        "packages/*"
+    ],
     "devDependencies": {
         "eslint-config-prettier": "^10.1.8",
         "lerna": "^10.0.0"

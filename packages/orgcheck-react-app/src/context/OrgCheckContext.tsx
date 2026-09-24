@@ -72,7 +72,7 @@ type ObjectLike = {
 
 type DataPlate = Table | Table[] | unknown;
 
-type OrgCheckContextValue = {
+export type OrgCheckContextValue = {
   api: ApiIntf | null;
   initializing: boolean;
   needsAuth: boolean;

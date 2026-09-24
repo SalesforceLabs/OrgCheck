@@ -63,6 +63,7 @@ export default function OrgCheckSpinner() {
                     <p className="slds-m-bottom_x-small">{spinner.inProgressMessage}</p>
                     <div
                       className="slds-progress-bar slds-progress-bar_circular"
+                      aria-label={spinner.inProgressMessage || 'Loading progress'}
                       aria-valuemin={0}
                       aria-valuemax={100}
                       aria-valuenow={spinner.inProgressPercentage}
