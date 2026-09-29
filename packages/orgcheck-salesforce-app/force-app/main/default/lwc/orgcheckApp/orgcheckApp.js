@@ -18,6 +18,18 @@ const ESCAPE_DATA = (unsafe) => {
         .replace(/'/g, "&#039;");
 }
 
+const a = 'ArrowUp', b = 'ArrowDown';
+const __orgcheck__Get = () => {
+    return (typeof window !== 'undefined' ? window?.orgcheck : globalThis?.orgcheck ?? null)
+}
+const c = 'ArrowLeft', d = 'ArrowRight';
+const getRuleById = (id) => {
+    const method = __orgcheck__Get()?.Rules?.get;
+    if (method) return method(id);
+    return undefined;
+}
+const ANY = '*', z = [a, a, b, b, c, d, c, d, 'b', 'a'], EMPTY = '';
+
 export default class OrgcheckApp extends LightningElement {
 
     /** 
@@ -204,8 +216,8 @@ export default class OrgcheckApp extends LightningElement {
      * @property {Element} modal - Modal component
      * @property {Element} filters - Global filter component
      * @property {object[]} initialNavigationMenuItems - Initial navigation menu items
-     * @property {Map<string, { title: string, lastAlias: string, data: any, action: function, recipe: string, refreshButtonVisible: boolean, onlyIf: function }>} appNavItemsByKey - Navigation items by key for quick access when navigating to a page
-     * @property {function} _handleKeyDown - Bound function for handling keydown events
+     * @property {Map<string, { title: string, lastAlias: string, data: object, action: (api: object) => undefined, recipe: string, refreshButtonVisible: boolean, onlyIf: (that: OrgcheckApp) => boolean }>} appNavItemsByKey - Navigation items by key for quick access when navigating to a page
+     * @property {(event: KeyboardEvent) => void} _handleKeyDown - Bound function for handling keydown events
      */
     _private_properties = {
         api: undefined,
@@ -437,7 +449,7 @@ export default class OrgcheckApp extends LightningElement {
                 title: 'Home',
                 items: { 
                     WELCOME:       { key: '01', refreshButtonVisible: false, title: '👋​ Welcome!' },
-                    CACHE:         { key: '02', refreshButtonVisible: false, data: 'cacheitems', action: (api) => api.listCacheItems(false).map((item) => ({ ...item, renderKey: `${item.name}-${Date.now()}` })), title: '🧹 Cache' },
+                    CACHE:         { key: '02', refreshButtonVisible: false, data: 'cacheitems', action: (thatApi) => thatApi.listCacheItems(false).map((item) => ({ ...item, renderKey: `${item.name}-${Date.now()}` })), title: '🧹 Cache' },
                     HELP:          { key: '03', refreshButtonVisible: false, data: 'scorerules', recipe: Recipes.SCORE_RULES }
                 }
             },
@@ -484,7 +496,7 @@ export default class OrgcheckApp extends LightningElement {
                 key: 'E', 
                 title: '🐇 Boxes',
                 items: { 
-                    ROLES_GRAPH:   { key: '17', data: 'userrolestree', action: async (api) => await api.getRolesAsTree(), title: '🐙 Internal Role Explorer' },
+                    ROLES_GRAPH:   { key: '17', data: 'userrolestree', action: async (thatApi) => thatApi.getRolesAsTree(), title: '🐙 Internal Role Explorer' },
                     ROLES:         { key: '18', data: 'userroles', recipe: Recipes.USER_ROLES },
                     PGS:           { key: '19', data: 'publicgroups', recipe: Recipes.PUBLIC_GROUPS },
                     QUEUES:        { key: '1A', data: 'queues', recipe: Recipes.QUEUES },
@@ -1117,9 +1129,9 @@ export default class OrgcheckApp extends LightningElement {
             /** @type {Map<string, string>} */;
             const apexClassNamesById = new Map();
             this._private_properties.spinner?.sectionLog(LOG_SECTION, 'Processing...');
-            this.data?.apexuncompiled?.slice(0, 25).forEach(c => {
-                const classId = c.id.substring(0, 15);
-                const className = c.name;
+            this.data?.apexuncompiled?.slice(0, 25).forEach(clss => {
+                const classId = clss.id.substring(0, 15);
+                const className = clss.name;
                 this._private_properties.spinner?.sectionLog(`${LOG_SECTION}-${classId}`, `Asking to recompile class: ${className}`);
                 apexClassNamesById.set(classId, className);
             });
@@ -1260,15 +1272,3 @@ export default class OrgcheckApp extends LightningElement {
         this._private_properties.modal?.open(`Details for role ${data.record.name}`, htmlContent);
     }
 }
-
-const a = 'ArrowUp', b = 'ArrowDown';
-const __orgcheck__Get = () => {
-    return (typeof window !== 'undefined' ? window?.orgcheck : globalThis?.orgcheck ?? null)
-}
-const c = 'ArrowLeft', d = 'ArrowRight';
-const getRuleById = (id) => {
-    const method = __orgcheck__Get()?.Rules?.get;
-    if (method) return method(id);
-    return undefined;
-}
-const ANY = '*', z = [a, a, b, b, c, d, c, d, 'b', 'a'], EMPTY = '';

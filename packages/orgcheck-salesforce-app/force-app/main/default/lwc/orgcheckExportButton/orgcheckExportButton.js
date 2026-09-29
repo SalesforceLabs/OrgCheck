@@ -2,6 +2,16 @@ import { LightningElement, api } from 'lwc';
 import OrgCheckStaticResource from '@salesforce/resourceUrl/OrgCheck_SR';
 import { loadScript } from 'lightning/platformResourceLoader';
 
+const __orgcheck__Get = () => {
+    return (typeof window !== 'undefined' ? window?.orgcheck : globalThis?.orgcheck ?? null)
+}
+
+const __orgcheck__GenerateXlsx = (source) => {
+    const method = __orgcheck__Get()?.TableUtils?.exportAsXls;
+    if (method) return method(source);
+    return undefined;
+}
+
 export default class OrgcheckExportButton extends LightningElement {
 
     /**
@@ -97,15 +107,4 @@ export default class OrgcheckExportButton extends LightningElement {
             this.isExporting = false;
         }
     }
-}
-
-
-const __orgcheck__Get = () => {
-    return (typeof window !== 'undefined' ? window?.orgcheck : globalThis?.orgcheck ?? null)
-}
-
-const __orgcheck__GenerateXlsx = (source) => {
-    const method = __orgcheck__Get()?.TableUtils?.exportAsXls;
-    if (method) return method(source);
-    return undefined;
 }

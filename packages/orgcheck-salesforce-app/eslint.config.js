@@ -2,6 +2,7 @@
 
 const { defineConfig, globalIgnores } = require('eslint/config');
 const salesforceLwcConfig = require('@salesforce/eslint-config-lwc/recommended');
+const babelParser = require('@babel/eslint-parser');
 const globals = require('globals');
 const jsdocPlugIn = require('eslint-plugin-jsdoc');
 const jestPlugIn = require('eslint-plugin-jest');
@@ -51,5 +52,13 @@ module.exports = defineConfig([
       'force-app/main/default/lwc/**/__tests__/*.test.js',
     ],
     extends: [ jestPlugIn.configs['flat/recommended'] ]
-  }
+  },
+  { // Babel 8 parser: LWC config still ships @babel/eslint-parser 7, which crashes on ESLint 10
+    files: [
+      'force-app/main/default/lwc/**/*.js',
+    ],
+    languageOptions: {
+      parser: babelParser,
+    },
+  },
 ]);

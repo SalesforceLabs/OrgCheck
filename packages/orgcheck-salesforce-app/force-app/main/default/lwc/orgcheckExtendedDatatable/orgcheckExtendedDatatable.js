@@ -2,6 +2,9 @@ import { LightningElement, api, track } from 'lwc';
 import OrgCheckStaticResource from '@salesforce/resourceUrl/OrgCheck_SR';
 import { loadScript } from 'lightning/platformResourceLoader';
 
+const __orgcheck__Get = () => {
+    return (typeof window !== 'undefined' ? window?.orgcheck : globalThis?.orgcheck ?? null)
+}
 
 export default class OrgcheckExtentedDatatable extends LightningElement {
 
@@ -471,8 +474,4 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
             this.visibleRows = allVisibleRows;
         }
     }
-}
-
-const __orgcheck__Get = () => {
-    return (typeof window !== 'undefined' ? window?.orgcheck : globalThis?.orgcheck ?? null)
 }

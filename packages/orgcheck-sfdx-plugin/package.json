@@ -17,14 +17,15 @@
     "@salesforce/cli-plugins-testkit": "^5.3.20",
     "@salesforce/dev-scripts": "^13",
     "@types/jest": "^29.5.14",
+    "@typescript/native": "npm:typescript@^7.0.2",
     "esbuild": "^0.25.0",
-    "eslint": "^10.1.0",
+    "eslint": "^10.11.0",
     "eslint-plugin-sf-plugin": "^1.18.8",
     "jest": "^30.4.2",
     "oclif": "^4.23.0",
     "prettier": "^3.4.2",
     "ts-node": "^10.9.2",
-    "typescript": "^7.0.2"
+    "typescript": "npm:@typescript/typescript6@^6.0.2"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -54,22 +55,21 @@
     "flexibleTaxonomy": true
   },
   "scripts": {
-    "lint": "eslint \"src/**/*.ts\" \"tests/**/*.ts\" --color --cache --cache-location .eslintcache --no-error-on-unmatched-pattern",
-    "clean": "rm -rf lib tsconfig.tsbuildinfo && sf-clean all",
-    "compile": "yarn clean && tsc -p tsconfig.json --pretty",
-    "build": "yarn compile && yarn lint",
-    "npm:publish:sfdx-plugin": "yarn build && yarn version --patch && yarn oclif manifest && npm pack --ignore-scripts && npm publish --access public --ignore-scripts",
+    "verify": "yarn scan:lint",
+    "build": "yarn build:clean && yarn build:compile",
+    "test": "yarn test:compile && yarn test:nut",
+    "deploy": "yarn npm:publish:sfdx-plugin",
+    "scan:lint": "eslint \"src/**/*.ts\" \"tests/**/*.ts\" --color --cache --cache-location .eslintcache --no-error-on-unmatched-pattern",
+    "build:clean": "rm -rf lib tsconfig.tsbuildinfo && sf-clean all",
+    "build:compile": "tsc -p tsconfig.json --pretty",
+    "test:compile": "tsc -p \"./tests\" --pretty",
+    "test:nut": "jest",
+    "npm:publish:sfdx-plugin": "yarn version --patch && yarn oclif manifest && npm pack --ignore-scripts && npm publish --access public --ignore-scripts",
     "docs": "sf-docs",
     "format": "prettier --write \"+(src|test|schemas)/**/*.+(ts|js|json)|command-snapshot.json\"",
     "link-check": "node -e \"process.exit(process.env.CI ? 0 : 1)\" || linkinator \"**/*.md\" --skip \"CHANGELOG.md|node_modules|tests/|confluence.internal.salesforce.com|my.salesforce.com|localhost|%s\" --markdown --retry --directory-listing --verbosity error",
     "postpack": "sf-clean --ignore-signing-artifacts",
     "prepack": "yarn build && oclif manifest",
-    "test": "yarn test:compile && yarn lint && yarn test:nut",
-    "test:compile": "tsc -p \"./tests\" --pretty",
-    "test:nut": "yarn compile && jest",
-    "test:command-reference": "node --loader ts-node/esm --no-warnings=ExperimentalWarning \"./bin/dev.js\" commandreference:generate --erroronwarnings",
-    "test:deprecation-policy": "yarn compile && node --loader ts-node/esm --no-warnings=ExperimentalWarning \"./bin/dev.js\" snapshot:compare",
-    "test:json-schema": "node --loader ts-node/esm --no-warnings=ExperimentalWarning \"./bin/dev.js\" schema:compare",
     "version": "oclif readme"
   },
   "publishConfig": {

@@ -60,8 +60,13 @@ export default class OrgcheckModal extends LightningElement {
             this._errorChainsAsMap.clear();
         }
         errors.forEach((error) => {
-            for (let e = error; e !== undefined; e = e.cause) {
+            /** @type {Error | undefined} */
+            let e = error;
+            while (e !== undefined) {
                 this._errorChainsAsMap.set(e.message, e);
+                /** @type {unknown} */
+                const cause = e.cause;
+                e = cause instanceof Error ? cause : undefined;
             }
         });
         /** @type {{ index: number, message: string, body: string }[]} */ const errorChains = [];
@@ -69,7 +74,10 @@ export default class OrgcheckModal extends LightningElement {
             errorChains.push({ 
                 index: errorChains.length,
                 message: key, 
-                body: JSON.stringify(error, (key, value) => key != 'cause' ? value : undefined, 2) 
+                body: JSON.stringify(error, (k, v) => { 
+                        if (k !== 'cause') return v; 
+                        return undefined; 
+                    }, 2)
             });
         });
         this.errorChains = errorChains;

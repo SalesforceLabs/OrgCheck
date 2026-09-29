@@ -16,7 +16,7 @@ describe('tests.api.unit.RecipeCollections', () => {
         expect(recipes?.length).toBeDefined();
         const data = new Map();
         recipes.forEach((recipe) => {
-          data.set(recipe , new Array());
+          data.set(recipe, []);
         });
       });
     });

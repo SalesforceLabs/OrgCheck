@@ -5,7 +5,7 @@ import * as XLSX from 'xlsx';
 describe('tests.ui.unit.Exporter', () => {
 
     describe('Test Exporter', () => {
-        // @ts-ignore    
+        // @ts-expect-error SheetJS is attached to globalThis for the exporter at runtime
         globalThis.XLSX = XLSX;
 
         it('checks if exporter throws an exception if empty source (exception from SheetJS)', () => {
