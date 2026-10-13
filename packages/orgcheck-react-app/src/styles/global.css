@@ -114,6 +114,11 @@ body {
   height: auto;
 }
 
+.orgcheck-workspace:not(:has(.orgcheck-body)) {
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
 .orgcheck-body {
   flex: 1 1 auto;
   min-height: 0;
@@ -142,6 +147,7 @@ body {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .orgcheck-content-pane {
@@ -164,6 +170,7 @@ body {
   min-width: 0;
   min-height: 0;
   overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .orgcheck-page-header-filters {

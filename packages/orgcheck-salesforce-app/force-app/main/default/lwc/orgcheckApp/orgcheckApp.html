@@ -13,10 +13,9 @@
             </div>
         </div>
     </span>
-    <div style="padding-bottom: 12px">
-        <lightning-layout>
-            <!-- Logo and versions -->
-            <lightning-layout-item padding="around-small">
+    <div class="orgcheck-app-frame">
+        <div class="orgcheck-app-header">
+            <div class="orgcheck-app-header__intro">
                 <div class="slds-media" tabindex="0">
                     <div class="slds-media__figure">
                         <object data={logoURL} type="image/svg+xml" style="width: 4rem; height: 2.9rem;"><img src={logoURL} width="4rem" height="2.9rem" alt="Org Check Logo" /></object>
@@ -24,30 +23,25 @@
                     <div class="slds-media__body">
                         <div class="slds-page-header__name">
                             <div class="slds-page-header__name-title">
-                                <h1><span class="slds-page-header__title slds-truncate">Welcome in Org Check ({orgCheckVersion})</span></h1>
+                                <h1><span class="slds-page-header__title">Welcome in Org Check ({orgCheckVersion})</span></h1>
                                 Monitor your org seamlessly (using Salesforce API v{salesforceApiVersion}.0)
                                 <span lwc:if={isLoading}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="/img/loading.gif" alt="[loading]" />&nbsp;<font color="orange"><b>Please wait while loading...</b></font></span>
-                                <br />
                             </div>
                         </div>
                     </div>
                 </div>
-            </lightning-layout-item>
-            <lightning-layout-item padding="around-small" alignment-bump="left">
-                <!-- Separator -->
-                <lightning-icon icon-name="utility:threedots_vertical" alternative-text="separator" title="separator" class="slds-var-m-left_x-small"></lightning-icon>
-                <!-- Org information -->
-                <div class="slds-var-m-left_x-small" style="text-align: center; display: inline-table; vertical-align: middle;">
+            </div>
+            <div class="orgcheck-app-header__meta">
+                <lightning-icon icon-name="utility:threedots_vertical" alternative-text="separator" title="separator" class="orgcheck-header-separator"></lightning-icon>
+                <div class="orgcheck-header-badges">
                     <lightning-badge label={orgInformation.name}></lightning-badge>
-                    <br />
                     <lightning-badge label={orgInformation.type} class={orgInformation.theme}></lightning-badge>
                     <template lwc:if={orgLimit.hasInformation}>
-                        &nbsp;
                         <lightning-badge label={orgLimit.usage} class={orgLimit.theme}></lightning-badge>
                     </template>
                 </div>
-            </lightning-layout-item>
-        </lightning-layout>
+            </div>
+        </div>
         <!-- Spinner and modal utilities -->
         <c-orgcheck-spinner></c-orgcheck-spinner>
         <c-orgcheck-modal></c-orgcheck-modal>
@@ -124,16 +118,18 @@
         </div>
         <!-- The navigation, title, filters and content (only if the use was accepted!!) -->
         <div data-key="orgcheck-main" class="slds-hide">
-            <lightning-layout>
+            <div class="orgcheck-split">
                 <!-- The left part with the navigation menu in form of a tree -->
-                <lightning-layout-item padding="around-small" size="2">
-                    <lightning-input type="search" variant="label-hidden" name="search" onchange={handleNavigationMenuSearch}></lightning-input>
-                    <lightning-tree items={navigationMenuItems} selected-item={navigationMenuSelected} onselect={handleNavigationMenuSelect}></lightning-tree>
-                </lightning-layout-item>
+                <div class="orgcheck-nav">
+                    <lightning-input type="search" variant="label-hidden" name="search" onchange={handleNavigationMenuSearch} class="orgcheck-nav__search"></lightning-input>
+                    <div class="orgcheck-nav__scroll">
+                        <lightning-tree items={navigationMenuItems} selected-item={navigationMenuSelected} onselect={handleNavigationMenuSelect}></lightning-tree>
+                    </div>
+                </div>
                 <!-- The right part with the title, the filters and the content -->
-                <lightning-layout-item size="10">
+                <div class="orgcheck-content">
                     <!-- Top header with title and filters -->
-                    <lightning-layout vertical-align="center" class="contentTitle">
+                    <lightning-layout vertical-align="center" class="contentTitle orgcheck-content__header">
                         <!-- The title -->
                         <lightning-layout-item padding="around-small">
                             <h1 class="slds-text-heading_large">
@@ -144,25 +140,26 @@
                             &nbsp;&nbsp;&nbsp;
                             <ul class="slds-button-group-row">
                                 <li class="slds-button-group-item">
-                                    <lightning-button-icon 
-                                        lwc:if={showRefreshButton} 
-                                        icon-name="utility:sync" 
-                                        alternative-text="Refresh data" 
-                                        title="Refresh the current data being displayed" 
-                                        variant="border-filled" 
+                                    <lightning-button-icon
+                                        lwc:if={showRefreshButton}
+                                        icon-name="utility:sync"
+                                        alternative-text="Refresh data"
+                                        title="Refresh the current data being displayed"
+                                        variant="border-filled"
                                         onclick={handleRefreshCurrentData} ></lightning-button-icon>
                                 </li>
                             </ul>
                         </lightning-layout-item>
                         <!-- The global filters -->
                         <lightning-layout-item alignment-bump="left">
-                            <c-orgcheck-global-filters 
+                            <c-orgcheck-global-filters
                                 dropdown-alignment="right"
-                                onvalidatechange={handleFiltersValidated} 
+                                onvalidatechange={handleFiltersValidated}
                                 onrefresh={handleFiltersRefreshed}></c-orgcheck-global-filters>
                         </lightning-layout-item>
                     </lightning-layout>
                     <!-- The content -->
+                    <div class="orgcheck-content__scroll">
                     <lightning-card>
                         <div data-key="orgcheck-content">
                             <div data-key="01" class="slds-hide slds-var-p-horizontal_small">
@@ -1235,8 +1232,9 @@
                             </div>
                         </div>
                     </lightning-card>
-                </lightning-layout-item>
-            </lightning-layout>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </template>

@@ -1,3 +1,148 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    min-height: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.orgcheck-app-frame {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    box-sizing: border-box;
+    padding-bottom: 0.75rem;
+    container-type: inline-size;
+    container-name: orgcheck;
+}
+
+.orgcheck-app-frame > :not([data-key="orgcheck-main"]) {
+    flex: 0 0 auto;
+}
+
+[data-key="orgcheck-main"]:not(.slds-hide) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.orgcheck-split {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: stretch;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.orgcheck-nav {
+    flex: 0 0 16.6667%;
+    min-width: 12rem;
+    max-width: 22rem;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 0.75rem;
+    box-sizing: border-box;
+}
+
+.orgcheck-nav__search {
+    flex: 0 0 auto;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.orgcheck-nav__scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.orgcheck-content {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.orgcheck-content__header {
+    flex: 0 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.orgcheck-content__scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+}
+
+.orgcheck-app-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.orgcheck-app-header__intro {
+    flex: 1 1 22rem;
+    min-width: min(100%, 16rem);
+}
+
+.orgcheck-app-header__intro .slds-page-header__title {
+    white-space: normal;
+}
+
+.orgcheck-app-header__meta {
+    display: flex;
+    align-items: center;
+    flex: 0 1 auto;
+    gap: 0.5rem;
+    max-width: 100%;
+}
+
+.orgcheck-header-badges {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.35rem;
+    max-width: 100%;
+}
+
+.orgcheck-header-badges lightning-badge {
+    max-width: 100%;
+}
+
+@container orgcheck (max-width: 64rem) {
+    .orgcheck-app-header__intro,
+    .orgcheck-app-header__meta {
+        flex-basis: 100%;
+    }
+
+    .orgcheck-header-separator {
+        display: none;
+    }
+
+    .orgcheck-header-badges {
+        justify-content: flex-start;
+    }
+}
+
 .viewCacheItem {
     border: var(--slds-g-sizing-border-3, 3px) solid var(--slds-g-color-border-1, #e5e5e5);
     border-radius: var(--slds-g-radius-border-3, 1rem);
