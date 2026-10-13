@@ -19,3 +19,4 @@ yarn.lock
 
 #org check generated files
 dist/
+orgcheck-api-*.tgz

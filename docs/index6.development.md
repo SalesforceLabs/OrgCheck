@@ -67,31 +67,11 @@ You need two developer orgs:
 
 ## Step 3: Build packages in the monorepo
 
-Build the Org Check API package first (produces `packages/orgcheck-api/dist/orgcheck.js`):
 ```bash
-yarn workspace @orgcheck/api build
-```
-
-Build the Salesforce static resource package:
-```bash
-yarn workspace @orgcheck/salesforce-app build
-```
-
-Build the sf CLI plugin package:
-```bash
-yarn workspace @orgcheck/sfdx-plugin build
-```
-
-Run the React app locally (HTTPS on `https://localhost:5173`):
-```bash
-cd packages/orgcheck-react-app
-npm install
-npm run dev
+npx lerna run build
 ```
 
 ## Step 4: Update Project Definition
-
-> **Note:** Org Check uses a monorepo. The Salesforce LWC app is in `packages/orgcheck-salesforce-app`. The Org Check API (JavaScript/TypeScript) is in `packages/orgcheck-api`. The React app is in `packages/orgcheck-react-app` (install and run it with npm from that folder). Run Salesforce CLI commands from `packages/orgcheck-salesforce-app` or adjust paths accordingly.
 
 Create a fresh `sfdx-project.json` file with your namespace in `packages/orgcheck-salesforce-app`:
 
@@ -125,14 +105,7 @@ Alternatively, you can also create and test the OrgCheck App as a Managed packag
 sf package create --name "Org Check" --package-type Managed --path force-app --target-dev-hub <devhubalias>
 ```
 
-## Step 6: Build everything locally
-
-From the root of the main repo, launch the following command to build the api, the static resource in the salesforce app and the sf plugin locally:
-```bash
-npx lerna run build
-```
-
-## Step 7: Create a Package Version
+## Step 6: Create a Package Version
 
 Create a package version with the generated **Package Id**:
 
@@ -142,7 +115,7 @@ sf package version create --package "Org Check" --installation-key-bypass --wait
 
 Note the **Subscriber Package Version Id** from the output.
 
-## Step 8: Optional - Create a Scratch Org
+## Step 7: Optional - Create a Scratch Org
 
 If you want to use a scratch org, create it using:
 
@@ -150,7 +123,7 @@ If you want to use a scratch org, create it using:
 sf org create scratch --definition-file orgs/dev.json --alias <scratchorgalias> --target-dev-hub <devhubalias> --wait 10
 ```
 
-## Step 9: Deploy the Package
+## Step 8: Deploy the Package
 
 Deploy the package to your org using the **Subscriber Package Version Id**.
 
@@ -164,7 +137,7 @@ Alternatively, you can use the corresponding **alias** of the version id, which 
 sf package install --package <namespace>@1.2.3.4 --target-org <scratchorgalias> --wait 10
 ```
 
-## Step 10: Optional - Run Org Check from Salesforce CLI
+## Step 9: Optional - Run Org Check from Salesforce CLI
 
 From the repo root, you can test the plugin commands:
 
