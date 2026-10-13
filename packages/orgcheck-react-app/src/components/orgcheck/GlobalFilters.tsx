@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Check, RefreshCw, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useOrgCheck, type OrgFilters } from '@/context/OrgCheckContext';
@@ -8,13 +8,16 @@ export default function GlobalFilters() {
   const { filters, filterOptions, filtersReady, applyFilters, refreshFilters } =
     useOrgCheck();
   const [draft, setDraft] = useState<OrgFilters>(filters);
-  useEffect(() => {
+  const [syncedFilters, setSyncedFilters] = useState(filters);
+  if (filters !== syncedFilters) {
+    setSyncedFilters(filters);
     setDraft(filters);
-  }, [filters]);
+  }
+  const currentDraft = filters !== syncedFilters ? filters : draft;
   const changed =
-    draft.package !== filters.package ||
-    draft.sobjectType !== filters.sobjectType ||
-    draft.sobjectApiName !== filters.sobjectApiName;
+    currentDraft.package !== filters.package ||
+    currentDraft.sobjectType !== filters.sobjectType ||
+    currentDraft.sobjectApiName !== filters.sobjectApiName;
   const originallyChanged =
     filters.package !== ANY ||
     filters.sobjectType !== ANY ||
@@ -33,7 +36,7 @@ export default function GlobalFilters() {
                 id="orgcheck-filter-package"
                 className="slds-select"
                 disabled={!filtersReady}
-                value={draft.package}
+                value={currentDraft.package}
                 onChange={event =>
                   setDraft(current => ({ ...current, package: event.target.value }))
                 }
@@ -62,7 +65,7 @@ export default function GlobalFilters() {
                 id="orgcheck-filter-type"
                 className="slds-select"
                 disabled={!filtersReady}
-                value={draft.sobjectType}
+                value={currentDraft.sobjectType}
                 onChange={event =>
                   setDraft(current => ({ ...current, sobjectType: event.target.value }))
                 }
@@ -88,7 +91,7 @@ export default function GlobalFilters() {
                 id="orgcheck-filter-object"
                 className="slds-select"
                 disabled={!filtersReady}
-                value={draft.sobjectApiName}
+                value={currentDraft.sobjectApiName}
                 onChange={event =>
                   setDraft(current => ({
                     ...current,
@@ -113,7 +116,7 @@ export default function GlobalFilters() {
             title="Apply these filters"
             aria-label="Apply these filters"
             disabled={!filtersReady}
-            onClick={() => void applyFilters(draft)}
+            onClick={() => void applyFilters(currentDraft)}
           >
             <Check width={14} height={14} />
           </Button>

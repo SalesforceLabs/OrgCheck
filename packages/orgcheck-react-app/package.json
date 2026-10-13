@@ -9,14 +9,23 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "node scripts/copy-vendor.mjs && vite",
-    "dev:design": "node scripts/copy-vendor.mjs && vite --mode design",
-    "build": "node scripts/copy-vendor.mjs && tsc -p tsconfig.json --noEmit && vite build",
-    "build:e2e": "npm run build && node scripts/rewrite-e2e-assets.mjs",
-    "lint": "eslint .",
-    "preview": "vite preview",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "verify": "yarn verify:lint",
+    "build": "yarn build:vite",
+    "test": "yarn test:vitest",
+    "run": "yarn run:preview",
+
+    "verify:lint": "eslint .",
+
+    "build:vite": "node scripts/copy-vendor.mjs && tsc -p tsconfig.json --noEmit && vite build",
+    "build:vite:e2e": "npm run build && node scripts/rewrite-e2e-assets.mjs",    
+
+    "test:vitest": "vitest run",
+    "test:vitest:watch": "vitest",
+
+    "run:dev": "node scripts/copy-vendor.mjs && vite",
+    "run:dev:design": "node scripts/copy-vendor.mjs && vite --mode design",
+    "run:preview": "vite preview",
+
     "graphql:codegen": "graphql-codegen",
     "graphql:schema": "node scripts/get-graphql-schema.mjs"
   },

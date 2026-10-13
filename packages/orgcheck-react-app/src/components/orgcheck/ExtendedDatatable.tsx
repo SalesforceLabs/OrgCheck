@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { ChevronDown, ChevronsDown, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,6 +55,24 @@ function cloneTable(table: OrgTable): OrgTable {
   };
 }
 
+type TableViewState = {
+  table: unknown;
+  search: string;
+  initialRowCount: number;
+  working: OrgTable | undefined;
+  visibleCount: number;
+};
+
+function prepareTable(table: unknown, search: string): OrgTable | undefined {
+  if (!table || typeof table !== 'object' || !('rows' in table)) {
+    return undefined;
+  }
+  const cloned = cloneTable(table as OrgTable);
+  TableUtils.sort(cloned, cloned.orderIndex, cloned.orderSort);
+  TableUtils.filter(cloned, search);
+  return cloned;
+}
+
 export default function ExtendedDatatable({
   table,
   emptyMessage = 'No data to show.',
@@ -71,26 +89,37 @@ export default function ExtendedDatatable({
   onViewScore,
   extraActions,
 }: ExtendedDatatableProps) {
-  const [working, setWorking] = useState<OrgTable | undefined>();
   const [search, setSearch] = useState('');
-  const [visibleCount, setVisibleCount] = useState(infiniteScrollingInitialNbRows);
+  const [view, setView] = useState<TableViewState>(() => ({
+    table,
+    search: '',
+    initialRowCount: infiniteScrollingInitialNbRows,
+    working: prepareTable(table, ''),
+    visibleCount: infiniteScrollingInitialNbRows,
+  }));
   const [dependency, setDependency] = useState<{
     whatId: string;
     whatName: string;
     dependencies: unknown;
   } | null>(null);
 
-  useEffect(() => {
-    if (!table || typeof table !== 'object' || !('rows' in (table as object))) {
-      setWorking(undefined);
-      return;
-    }
-    const cloned = cloneTable(table as OrgTable);
-    TableUtils.sort(cloned, cloned.orderIndex, cloned.orderSort);
-    TableUtils.filter(cloned, search);
-    setWorking(cloned);
-    setVisibleCount(infiniteScrollingInitialNbRows);
-  }, [infiniteScrollingInitialNbRows, search, table]);
+  const inputsChanged =
+    view.table !== table ||
+    view.search !== search ||
+    view.initialRowCount !== infiniteScrollingInitialNbRows;
+  let working = view.working;
+  let visibleCount = view.visibleCount;
+  if (inputsChanged) {
+    working = prepareTable(table, search);
+    visibleCount = infiniteScrollingInitialNbRows;
+    setView({
+      table,
+      search,
+      initialRowCount: infiniteScrollingInitialNbRows,
+      working,
+      visibleCount,
+    });
+  }
 
   const rows: TableRowView[] = useMemo(() => {
     if (!working) return [];
@@ -206,17 +235,19 @@ export default function ExtendedDatatable({
                     column.orientation === 'vertical' && 'vertical'
                   )}
                   onClick={() => {
-                    if (!working) return;
-                    const next = cloneTable(working);
-                    if (next.orderIndex === index) {
-                      next.orderSort = next.orderSort === 'asc' ? 'desc' : 'asc';
-                    } else {
-                      next.orderIndex = index;
-                      next.orderSort = 'asc';
-                    }
-                    TableUtils.sort(next, next.orderIndex, next.orderSort);
-                    TableUtils.filter(next, search);
-                    setWorking(next);
+                    setView(current => {
+                      if (!current.working) return current;
+                      const next = cloneTable(current.working);
+                      if (next.orderIndex === index) {
+                        next.orderSort = next.orderSort === 'asc' ? 'desc' : 'asc';
+                      } else {
+                        next.orderIndex = index;
+                        next.orderSort = 'asc';
+                      }
+                      TableUtils.sort(next, next.orderIndex, next.orderSort);
+                      TableUtils.filter(next, current.search);
+                      return { ...current, working: next };
+                    });
                   }}
                   onKeyDown={event => {
                     if (event.key === 'Enter' || event.key === ' ') {
@@ -260,14 +291,23 @@ export default function ExtendedDatatable({
           <Button
             variant="outline"
             onClick={() =>
-              setVisibleCount(count =>
-                Math.min(count + infiniteScrollingAdditionalNbRows, visibleRows.length)
-              )
+              setView(current => ({
+                ...current,
+                visibleCount: Math.min(
+                  current.visibleCount + infiniteScrollingAdditionalNbRows,
+                  visibleRows.length
+                ),
+              }))
             }
           >
             <ChevronDown /> More rows
           </Button>
-          <Button variant="outline" onClick={() => setVisibleCount(visibleRows.length)}>
+          <Button
+            variant="outline"
+            onClick={() =>
+              setView(current => ({ ...current, visibleCount: visibleRows.length }))
+            }
+          >
             <ChevronsDown /> All rows
           </Button>
         </div>

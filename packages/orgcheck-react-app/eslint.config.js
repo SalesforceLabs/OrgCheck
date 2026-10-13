@@ -112,24 +112,38 @@ const config = [
       },
     },
   },
-  // Test files
+  // Test and Vitest files are excluded from tsconfig.json, so type-aware
+  // linting has to use the project that actually includes them.
   {
     files: [
       '**/*.test.{ts,tsx}',
+      '**/__tests__/**/*.{ts,tsx}',
       '**/test/**/*.{ts,tsx}',
       'src/test/**/*.{ts,tsx}',
+      'vitest.setup.ts',
+      'vitest-env.d.ts',
     ],
     languageOptions: {
       parser: tsparser,
+      parserOptions: {
+        project: './tsconfig.vitest.json',
+      },
       globals: {
         ...globals.browser,
         ...globals.node,
+        ...globals.vitest,
         global: 'writable',
         JSX: 'readonly',
       },
     },
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
+  {
+    files: ['vitest-env.d.ts'],
+    rules: {
+      '@typescript-eslint/no-empty-object-type': 'off',
     },
   },
 ];

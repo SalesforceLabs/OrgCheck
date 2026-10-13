@@ -1,7 +1,7 @@
 import { isLocalSalesforceDevHost, rememberSalesforceInstanceUrl } from '@/lib/oauth';
 import { setOrgInstanceUrl } from '@/lib/org-instance-url';
 import { createOrgScopedStorage } from '@/lib/org-cache-storage';
-import * as XLSX from 'xlsx';
+import 'xlsx/dist/xlsx.mini.min.js';
 import * as fflate from 'fflate';
 import {
   ApiFactory,
@@ -64,7 +64,11 @@ function attachGlobals(): void {
       'jsforce browser bundle is not loaded. Ensure public/jsforce.min.js is included before the app.'
     );
   }
-  root.XLSX = XLSX;
+  const sheetJs = (globalThis as typeof globalThis & { XLSX?: unknown }).XLSX;
+  if (!sheetJs) {
+    throw new Error('XLSX library is not available.');
+  }
+  root.XLSX = sheetJs;
   root.fflate = fflate;
 }
 

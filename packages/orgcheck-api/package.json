@@ -29,17 +29,22 @@
         "typescript-eslint": "^8.56.0"
     },
     "scripts": {
-        "verify": "yarn scan:lint && yarn scan:code-analyzer",
-        "build": "yarn js:build && yarn pack",
+        "verify": "yarn verify:lint && yarn verify:code-analyzer",
+        "build": "yarn build:js && yarn build:pack",
         "test": "yarn test:unit",
-        "deploy": "yarn npm:publish:api",
+        "deploy": "yarn deploy:npm:publish",
+
         "postpack": "mv orgcheck-api-*.tgz dist/",
-        "scan:lint": "eslint",
-        "scan:code-analyzer": "sf code-analyzer run --target ./src --output-file /tmp/orgcheck-api-scan.html; open /tmp/orgcheck-api-scan.html",
+        
+        "verify:lint": "eslint",
+        "verify:code-analyzer": "sf code-analyzer run --target ./src --severity-threshold Low --view detail ",
+
+        "build:js": "rollup -c rollup.config.mjs && jest \".*bundled.*\" ",
+        "build:pack": "npm pack --ignore-scripts",
+        
         "test:unit": "jest \".*unit.*\" ",
-        "pack": "npm pack --ignore-scripts",
-        "js:build": "rollup -c rollup.config.mjs && jest \".*bundled.*\" ",
-        "npm:publish:api": "yarn version --pack && npm publish --access public --ignore-scripts"
+        
+        "deploy:npm:publish": "yarn version --pack && npm publish --access public --ignore-scripts"
     },
     "main": "./dist/orgcheck.js",
     "types": "./dist/orgcheck.d.ts",

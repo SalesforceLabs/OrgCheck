@@ -14,11 +14,11 @@
 }
 
 .orgcheck-datatable .slds-table > thead > tr > th.sorted-asc {
-  background-image: url(/img/arrowUp.gif);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 11 11'%3E%3Cpath fill='%23706e6b' d='M5.5 1 10 9H1z'/%3E%3C/svg%3E");
 }
 
 .orgcheck-datatable .slds-table > thead > tr > th.sorted-desc {
-  background-image: url(/img/arrowDown.gif);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 11 11'%3E%3Cpath fill='%23706e6b' d='M1 2h9L5.5 10z'/%3E%3C/svg%3E");
 }
 
 .orgcheck-datatable .slds-table > thead > tr > th.vertical {

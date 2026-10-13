@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { Suspense, useMemo, useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router';
 import { ChevronDown, ChevronRight, RefreshCw, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,8 +10,23 @@ import TermsAcceptance from '@/components/orgcheck/TermsAcceptance';
 import OAuthLogin from '@/components/orgcheck/OAuthLogin';
 import { useOrgCheck } from '@/context/OrgCheckContext';
 import { NAVIGATION, findPageByPath } from '@/lib/navigation';
+import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
 import logoUrl from '@/assets/orgcheck/Logo.svg';
+
+function PageOutlet() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center p-6">
+          <Spinner className="size-6" />
+        </div>
+      }
+    >
+      <Outlet />
+    </Suspense>
+  );
+}
 
 export default function AppLayout() {
   const location = useLocation();
@@ -199,7 +214,7 @@ export default function AppLayout() {
       <OrgCheckModal />
 
       {isCallback ? (
-        <Outlet />
+        <PageOutlet />
       ) : needsAuth ? (
         <div className="orgcheck-workspace slds-brand-band slds-brand-band_cover slds-brand-band_medium slds-template_default">
           <OAuthLogin />
@@ -348,7 +363,7 @@ export default function AppLayout() {
                 </div>
                 <article className="slds-card slds-m-top_small">
                   <div className="slds-card__body slds-card__body_inner">
-                    <Outlet />
+                    <PageOutlet />
                   </div>
                 </article>
               </main>

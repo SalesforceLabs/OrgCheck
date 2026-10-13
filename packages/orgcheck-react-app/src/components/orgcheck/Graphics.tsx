@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -26,7 +26,6 @@ export default function Graphics({
   hierarchyShowLevel = false,
 }: GraphicsProps) {
   const hostRef = useRef<HTMLDivElement>(null);
-  const [legend, setLegend] = useState<HierarchyLegendItem[]>(hierarchyBoxColorLegend);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -39,7 +38,6 @@ export default function Graphics({
     const boxVerticalPadding = 5;
     const boxHorizontalPadding = 50;
     const boxTextPadding = 3;
-    setLegend(hierarchyBoxColorLegend);
 
     type NodeData = Record<string, unknown>;
     const root = d3.hierarchy(source as NodeData);
@@ -160,7 +158,7 @@ export default function Graphics({
       </CardContent>
       {source !== undefined && type === 'hierarchy' ? (
         <CardFooter className="flex flex-wrap gap-4">
-          {legend.map(item => (
+          {hierarchyBoxColorLegend.map(item => (
             <span key={item.name} className="flex items-center gap-2 text-sm">
               <span
                 className="inline-block size-4 rounded-sm"

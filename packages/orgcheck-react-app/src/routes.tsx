@@ -1,15 +1,17 @@
+import { lazy } from 'react';
 import type { RouteObject } from 'react-router';
 import AppLayout from '@/appLayout';
-import Welcome from '@/pages/Welcome';
-import Cache from '@/pages/Cache';
-import RecipePage from '@/pages/RecipePage';
-import GlobalView from '@/pages/GlobalView';
-import ObjectDescription from '@/pages/ObjectDescription';
-import FieldPermissions from '@/pages/FieldPermissions';
-import RoleHierarchy from '@/pages/RoleHierarchy';
-import NotFound from '@/pages/NotFound';
-import OAuthCallback from '@/pages/OAuthCallback';
 import { NAVIGATION } from '@/lib/navigation';
+
+const Welcome = lazy(() => import('@/pages/Welcome'));
+const Cache = lazy(() => import('@/pages/Cache'));
+const RecipePage = lazy(() => import('@/pages/RecipePage'));
+const GlobalView = lazy(() => import('@/pages/GlobalView'));
+const ObjectDescription = lazy(() => import('@/pages/ObjectDescription'));
+const FieldPermissions = lazy(() => import('@/pages/FieldPermissions'));
+const RoleHierarchy = lazy(() => import('@/pages/RoleHierarchy'));
+const NotFound = lazy(() => import('@/pages/NotFound'));
+const OAuthCallback = lazy(() => import('@/pages/OAuthCallback'));
 
 function pageElement(kind: string) {
   switch (kind) {

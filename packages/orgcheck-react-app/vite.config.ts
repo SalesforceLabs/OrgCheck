@@ -13,6 +13,27 @@ const schemaPath = resolve(__dirname, '../orgcheck-salesforce-app/schema.graphql
 const schemaExists = existsSync(schemaPath);
 const orgCheckApiSrc = resolve(__dirname, '../orgcheck-api/src');
 
+const sldsSvgPlaceholder = resolve(__dirname, 'src/assets/slds-placeholder.svg');
+const sldsPngPlaceholder = resolve(__dirname, 'src/assets/slds-placeholder.png');
+
+function keepXlsxMiniSideEffects(): import('vite').Plugin {
+  return {
+    name: 'keep-xlsx-mini-side-effects',
+    enforce: 'pre',
+    async resolveId(source, importer, options) {
+      if (source !== 'xlsx/dist/xlsx.mini.min.js') return null;
+      const resolved = await this.resolve(source, importer, {
+        ...options,
+        skipSelf: true,
+      });
+      if (!resolved) return null;
+      return typeof resolved === 'string'
+        ? { id: resolved, moduleSideEffects: true }
+        : { ...resolved, moduleSideEffects: true };
+    },
+  };
+}
+
 function orgCheckApiSrcAlias(): import('vite').Plugin {
   return {
     name: 'orgcheck-api-src-alias',
@@ -255,6 +276,7 @@ export default defineConfig(() => {
   return {
     base: './',
     plugins: [
+      keepXlsxMiniSideEffects(),
       orgCheckApiSrcAlias(),
       orgCheckLocalOAuth(),
       basicSsl(),
@@ -278,6 +300,9 @@ export default defineConfig(() => {
       outDir: resolve(__dirname, 'dist'),
       assetsDir: 'assets',
       sourcemap: false,
+      // The app shell loads @orgcheck/api and the SheetJS mini build at startup.
+      // After route splitting, that shell is about 995 kB.
+      chunkSizeWarningLimit: 995,
     },
 
     define: {
@@ -300,7 +325,7 @@ export default defineConfig(() => {
     },
 
     optimizeDeps: {
-      include: ['d3', 'xlsx', 'fflate'],
+      include: ['d3', 'xlsx/dist/xlsx.mini.min.js', 'fflate'],
       esbuildOptions: {
         define: {
           global: 'globalThis',
@@ -329,6 +354,14 @@ export default defineConfig(() => {
         {
           find: '@assets',
           replacement: path.resolve(__dirname, './src/assets'),
+        },
+        {
+          find: /^.*(?:einstein-header-background|einstein-figure)\.svg$/,
+          replacement: sldsSvgPlaceholder,
+        },
+        {
+          find: /^.*(?:bg-info@2x|group_avatar_96|group_avatar_160|group_avatar_200|profile_avatar_96|profile_avatar_160|profile_avatar_200)\.png$/,
+          replacement: sldsPngPlaceholder,
         },
       ],
     },
