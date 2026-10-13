@@ -928,6 +928,7 @@ const ALL_SCORE_RULES: ScoreRule[] = [
         applicable: [ DataAliases.SfdcFlow ],
         category: SCORE_RULE_CATEGORIES.USER_ADOPTION
     },
+    // Continuing with the rules (IDs 126-150)
     { 
         id: 126,
         description: 'Not referenced anywhere for flow (excluding Screen Flows)',
@@ -952,6 +953,14 @@ const ALL_SCORE_RULES: ScoreRule[] = [
         badField: 'nbInactiveValidationRules',
         applicable: [ DataAliases.SfdcObject ],
         category: SCORE_RULE_CATEGORIES.USELESS
+    }, {
+        id: 129,
+        description: 'Release update to be reviewed at a certain due date',
+        formula: ((d: SfdcReleaseUpdate) => d?.isReleased === false && d?.dueDate && d.completionPercentage < 1) as (data: unknown) => boolean,
+        errorMessage: `This release update (not yet released) needs to be reviewed at a certain due date. Some steps are remaining, please complete them before due date.`,
+        badField: 'dueDate',
+        applicable: [ DataAliases.SfdcReleaseUpdate ],
+        category: SCORE_RULE_CATEGORIES.SECURITY
     }
 ];
 Object.freeze(ALL_SCORE_RULES);
