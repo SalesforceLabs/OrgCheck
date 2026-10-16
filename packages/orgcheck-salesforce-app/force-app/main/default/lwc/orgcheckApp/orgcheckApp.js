@@ -30,6 +30,44 @@ const getRuleById = (id) => {
 }
 const ANY = '*', z = [a, a, b, b, c, d, c, d, 'b', 'a'], EMPTY = '';
 
+/**
+ * @description Inner HTML for a role box in the hierarchy graphic
+ * @param {number} depth - The depth of the current role in the hierarchy
+ * @param {object} data - The data of the current role
+ * @returns {string} The inner HTML to display in the role box
+ */
+export const buildRoleBoxInnerHtml = (depth, data) => {
+    if (depth === 0) return `<center><b>Role Hierarchy</b></center>`;
+    return `<center><b>${ESCAPE_DATA(data.record.name)}</b><br />${ESCAPE_DATA(data.record.apiname)}</center>`;
+};
+
+/**
+ * @description Modal HTML for a role box click
+ * @param {number} depth - The depth of the current role in the hierarchy
+ * @param {object} data - The data of the current role
+ * @returns {string|undefined} The modal HTML, or undefined for the root node
+ */
+export const buildRoleBoxOnClickHtml = (depth, data) => {
+    if (depth === 0) return undefined;
+    let htmlContent = `Role Name: <b>${ESCAPE_DATA(data.record.name)}</b><br />`;
+    htmlContent += `Salesforce Id: <b>${ESCAPE_DATA(data.record.id)}</b><br />`;
+    htmlContent += `Developer Name: <b>${ESCAPE_DATA(data.record.apiname)}</b><br />`;
+    htmlContent += '<br />';
+    htmlContent += `Level in hierarchy: <b>${depth}</b><br />`;
+    htmlContent += '<br />';
+    htmlContent += `This role has ${data.record.activeMembersCount} active user(s)<br /><ul>`;
+    data.record.activeMemberRefs?.forEach(activeMember => { htmlContent += `<li>${ESCAPE_DATA(activeMember.name)}</li>`; });
+    htmlContent += '</ul><br />';
+    if (data.record.parentRef) {
+        htmlContent += `Parent Role Name: <b>${ESCAPE_DATA(data.record.parentRef.name)}</b><br />`;
+        htmlContent += `Parent Salesforce Id: <b>${ESCAPE_DATA(data.record.parentRef.id)}</b><br />`;
+        htmlContent += `Parent Developer Name: <b>${ESCAPE_DATA(data.record.parentRef.apiname)}</b><br />`;
+    } else {
+        htmlContent += 'No parent';
+    }
+    return htmlContent;
+};
+
 export default class OrgcheckApp extends LightningElement {
 
     /** 
@@ -604,30 +642,6 @@ export default class OrgcheckApp extends LightningElement {
      * @type {boolean}
      */ 
     isObjectSpecified;
-
-    // ----------------------------------------------------------------------------------------------------------------
-    // ----------------------------------------------------------------------------------------------------------------
-    // Some other getter for the UI
-    // ----------------------------------------------------------------------------------------------------------------
-    // ----------------------------------------------------------------------------------------------------------------
-
-    /**
-     * @description Do we show the "Apex Uncompiled" button in the Apex tab (depends on the size of apexUncompiledTableData)
-     * @type {boolean}
-     * @public
-     */ 
-    get isThereAnyApexUncompiled() {
-        return this.tabs.selectedSubTab === this._private_properties.appNavigation.CODE.items.UNCOMPILEDS.key && this.apexUncompiledTableData?.length > 0 || false;
-    }
-
-    /**
-     * @description Whether the Cache tab has any non-empty items to show as cards
-     * @type {boolean}
-     * @public
-     */
-    get hasCacheItems() {
-        return Array.isArray(this.tableData?.cacheitems) && this.tableData.cacheitems.length > 0;
-    }
 
     // ----------------------------------------------------------------------------------------------------------------
     // ----------------------------------------------------------------------------------------------------------------
@@ -1240,10 +1254,7 @@ export default class OrgcheckApp extends LightningElement {
      * @returns {string} The inner HTML to display in the role box
      * @public
      */
-    roleBoxInnerHtmlDecorator = (depth, data) => {
-        if (depth === 0) return `<center><b>Role Hierarchy</b></center>`;
-        return `<center><b>${ESCAPE_DATA(data.record.name)}</b><br />${ESCAPE_DATA(data.record.apiname)}</center>`;
-    }
+    roleBoxInnerHtmlDecorator = buildRoleBoxInnerHtml;
 
     /** 
      * @description OnClick handler when clikcing in a role box
@@ -1252,23 +1263,7 @@ export default class OrgcheckApp extends LightningElement {
      * @public
      */ 
     roleBoxOnClickDecorator = (depth, data) => {
-        if (depth === 0) return;
-        let htmlContent = `Role Name: <b>${ESCAPE_DATA(data.record.name)}</b><br />`;
-        htmlContent += `Salesforce Id: <b>${ESCAPE_DATA(data.record.id)}</b><br />`;
-        htmlContent += `Developer Name: <b>${ESCAPE_DATA(data.record.apiname)}</b><br />`;
-        htmlContent += '<br />';
-        htmlContent += `Level in hierarchy: <b>${depth}</b><br />`;
-        htmlContent += '<br />';
-        htmlContent += `This role has ${data.record.activeMembersCount} active user(s)<br /><ul>`;
-        data.record.activeMemberRefs?.forEach(activeMember => { htmlContent += `<li>${ESCAPE_DATA(activeMember.name)}</li>`; });
-        htmlContent += '</ul><br />';
-        if (data.record.parentRef) {
-            htmlContent += `Parent Role Name: <b>${ESCAPE_DATA(data.record.parentRef.name)}</b><br />`;
-            htmlContent += `Parent Salesforce Id: <b>${ESCAPE_DATA(data.record.parentRef.id)}</b><br />`;
-            htmlContent += `Parent Developer Name: <b>${ESCAPE_DATA(data.record.parentRef.apiname)}</b><br />`;
-        } else {
-            htmlContent += 'No parent';
-        }
-        this._private_properties.modal?.open(`Details for role ${data.record.name}`, htmlContent);
+        const htmlContent = buildRoleBoxOnClickHtml(depth, data);
+        if (htmlContent) this._private_properties.modal?.open(`Details for role ${data.record.name}`, htmlContent);
     }
 }

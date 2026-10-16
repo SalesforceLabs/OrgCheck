@@ -23,8 +23,8 @@
                     <div class="slds-media__body">
                         <div class="slds-page-header__name">
                             <div class="slds-page-header__name-title">
-                                <h1><span class="slds-page-header__title">Welcome in Org Check ({orgCheckVersion})</span></h1>
-                                Monitor your org seamlessly (using Salesforce API v{salesforceApiVersion}.0)
+                                <h1><span class="slds-page-header__title">Welcome in Org Check { orgCheckVersion ? '('+orgCheckVersion+')' : '' }</span></h1>
+                                Monitor your org seamlessly { salesforceApiVersion ? '(using Salesforce API v' + salesforceApiVersion + '.0)' : '' }
                                 <span lwc:if={isLoading}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="/img/loading.gif" alt="[loading]" />&nbsp;<font color="orange"><b>Please wait while loading...</b></font></span>
                             </div>
                         </div>
@@ -197,7 +197,7 @@
                                         <lightning-button label="Clear" variant="destructive" onclick={handleRemoveAllCache}></lightning-button>
                                     </lightning-layout-item>
                                 </lightning-layout>
-                                <template lwc:if={hasCacheItems}>
+                                <template lwc:if="{tableData?.cacheitems?.length > 0}">
                                     <lightning-layout multiple-rows>
                                         <template for:each={tableData.cacheitems} for:item="item">
                                             <lightning-layout-item size="2" large-device-size="3" medium-device-size="4" small-device-size="12" key={item.renderKey} padding="around-small">
@@ -355,11 +355,7 @@
                                             </div>
                                         </div>
                                         <br /><br />
-                                        
-                                        lastModifiedRecordDate = {tableData.object.lastModifiedRecordDate}<br />
-                                        lastModifiedDate = {tableData.object.lastModifiedDate}<br />
-                                        
-                                        
+
                                         <template lwc:if={tableData.object.apexTriggers.hasData}>
                                             <h1 class="slds-text-heading_medium"><a id="apexTriggers"></a>Apex Triggers</h1>
                                             <c-orgcheck-extended-datatable
