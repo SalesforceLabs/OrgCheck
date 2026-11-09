@@ -46,10 +46,10 @@ Either way, Org Check is meant to be **easy to install and easy to use**:
   <div class="tile">
     <h2> How to get help and support? </h2>
     <ul>
-      <li><a href="https://sfdc.co/OrgCheck-Community">Trailblazer Community</a>
-      <li><a href="https://www.linkedin.com/company/orgchecksfdc">LinkedIn</a>
-      <li><a href="https://www.sfdc.co/OrgCheck-Repository">Source</a>
-      <li><a href="https://www.sfdc.co/OrgCheck-Backlog">Issues & Ideas</a>
+      <li><a href="https://sfdc.co/OrgCheck-Community">Trailblazer Community</a></li>
+      <li><a href="https://www.linkedin.com/company/orgchecksfdc">LinkedIn</a></li>
+      <li><a href="https://www.sfdc.co/OrgCheck-Repository">Source</a></li>
+      <li><a href="https://www.sfdc.co/OrgCheck-Backlog">Issues & Ideas</a></li>
     </ul>
   </div>
   <div class="tile">
