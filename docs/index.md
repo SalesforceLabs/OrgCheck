@@ -26,34 +26,34 @@ Either way, Org Check is meant to be **easy to install and easy to use**:
 
 <div class="tiles">
   <div class="tile">
-    <h2>See the app!</h2>
-    <p><img src="../images/screenshots/OrgCheck-Screenshot-Home.png"></p>
-    <p>Go to: <a href="./preview">Application Preview</a></p>
+    <h2>Want to preview the app!</h2>
+    <p>Go to: <a href="./preview">Preview</a></p>
+    <p><img src="./images/screenshots/OrgCheck-Screenshot-Home.png"></p>
   </div>
   <div class="tile">
     <h2>Security team has questions?</h2>
-    <p>Go to: <a href="./security">Security FAQ</a></p>
+    <p>Please review our list of questions and answers related to security in our <a href="./security">Security FAQ</a>!</p>
   </div>
   <div class="tile"> 
     <h2>Install the salesforce app</h2>
     <ul>
-      <li>Go to the AppExchange</li>
-      <li>Search for "Org Check"</li>
-      <li>Install in your org or Try it in your sandboxes!</li>
+      <li>Go to AppExchange</li>
+      <li>Search "Org Check"</li>
+      <li>Install or Try it</li>
     </ul>
-    <p>For any questions, please go to: <a href="./faq">FAQ</a></p>
+    <p>For any installation questions, please visit our <a href="./faq">FAQ</a>!</p>
   </div>
   <div class="tile">
     <h2>Install the sf plugin</h2>
     <ul>
       <li>From a terminal, type <code>sf plugins install @orgcheck/sfdx-plugin</code></li>
     </ul>
-    <p>For any questions, please go to: <a href="./faq">FAQ</a></p>
+    <p>For any installation questions, please visit our <a href="./faq">FAQ</a>!</p>
   </div>
   <div class="tile">
     <h2>Help & Support</h2>
     <ul>
-      <li><a href="https://sfdc.co/OrgCheck-Community">Trailblazer Community</a></li>
+      <li><a href="https://sfdc.co/OrgCheck-Community">Trailblazer</a></li>
       <li><a href="https://www.linkedin.com/company/orgchecksfdc">LinkedIn</a></li>
       <li><a href="https://www.sfdc.co/OrgCheck-Repository">Source</a></li>
       <li><a href="https://www.sfdc.co/OrgCheck-Backlog">Issues & Ideas</a></li>
