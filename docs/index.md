@@ -32,7 +32,7 @@ Either way, Org Check is meant to be **easy to install and easy to use**:
   </div>
   <div class="tile">
     <h2>Security team has questions?</h2>
-    <p>Go to: <a href="./security">Security FAQ</a>
+    <p>Go to: <a href="./security">Security FAQ</a></p>
   </div>
   <div class="tile"> 
     <h2>Install the salesforce app</h2>
