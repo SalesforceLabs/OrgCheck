@@ -26,22 +26,29 @@ Either way, Org Check is meant to be **easy to install and easy to use**:
 
 <div class="tiles">
   <div class="tile">
-    <h2> Show me the salesforce app </h2>
-    Some screenshots of the salesforce application, go to: <a href="./preview">Application Preview</a>
+    <h2>Want to see the salesforce app?</h2>
+    <p><img src="./images/screenshots/OrgCheck-Screenshot-Home.png"></p>
+    <p>Go to: <a href="./preview">Application Preview</a></p>
   </div>
   <div class="tile">
-    <h2> Frequently Asked Question by Security teams </h2>
-    For any questions asked by your security team, go to: <a href="./security">Security FAQ</a>
+    <h2>Questions from Security teams?</h2>
+    <p>Go to: <a href="./security">Security FAQ</a>
   </div>
   <div class="tile"> 
-    <h2> How do I install the Org Check salesforce application? </h2>
-    Go to the AppExchange, Search for "Org Check" and Install in you org or try it in your sandboxes!<br />
-    For any questions, please go to: <a href="./faq">FAQ</a>
+    <h2>How to install the salesforce app? </h2>
+    <ul>
+      <li>Go to the AppExchange</li>
+      <li>Search for "Org Check"</li>
+      <li>Install in your org or Try it in your sandboxes!</li>
+    </ul>
+    <p>For any questions, please go to: <a href="./faq">FAQ</a></p>
   </div>
   <div class="tile">
     <h2> How do I install the Org Check sf plugin? </h2>
-    From a terminal, type <code>sf plugins install @orgcheck/sfdx-plugin</code>code>
-    For any questions, please go to: <a href="./faq">FAQ</a>
+    <ul>
+      <li>From a terminal, type <code>sf plugins install @orgcheck/sfdx-plugin</code></li>
+    </ul>
+    <p>For any questions, please go to: <a href="./faq">FAQ</a></p>
   </div>
   <div class="tile">
     <h2> How to get help and support? </h2>
@@ -54,7 +61,7 @@ Either way, Org Check is meant to be **easy to install and easy to use**:
   </div>
   <div class="tile">
     <h2> I am a developer, how do I contribute? </h2>
-    Go to <a href="./development">Development Setup Guide</a> for the information you need.    
+    <p>Go to <a href="./development">Development Setup Guide</a> for the information you need.</p>
   </div>
 </div>
 
