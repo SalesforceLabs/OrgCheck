@@ -40,17 +40,17 @@ Either way, Org Check is meant to be **easy to install and easy to use**:
   </div>
   <div class="tile">
     <h2> How do I install the Org Check sf plugin? </h2>
-    Open a terminal and type `sf plugins install @orgcheck/sfdx-plugin` 
-    For other questions, please go to: <a href="./faq">FAQ</a>
+    From a terminal, type <code>sf plugins install @orgcheck/sfdx-plugin</code>code>
+    For any questions, please go to: <a href="./faq">FAQ</a>
   </div>
   <div class="tile">
     <h2> How to get help and support? </h2>
-    
-- [Trailblazer Community](https://sfdc.co/OrgCheck-Community)
-- [LinkedIn](https://www.linkedin.com/company/orgchecksfdc)
-- [Source code](https://www.sfdc.co/OrgCheck-Repository)
-- [Log issues or ideas](https://www.sfdc.co/OrgCheck-Backlog)
-
+    <ul>
+      <li><a href="https://sfdc.co/OrgCheck-Community">Trailblazer Community</a>
+      <li><a href="https://www.linkedin.com/company/orgchecksfdc">LinkedIn</a>
+      <li><a href="https://www.sfdc.co/OrgCheck-Repository">Source</a>
+      <li><a href="https://www.sfdc.co/OrgCheck-Backlog">Issues & Ideas</a>
+    </ul>
   </div>
   <div class="tile">
     <h2> I am a developer, how do I contribute? </h2>
