@@ -26,16 +26,16 @@ Either way, Org Check is meant to be **easy to install and easy to use**:
 
 <div class="tiles">
   <div class="tile">
-    <h2>Want to see the salesforce app?</h2>
-    <p><img src="./images/screenshots/OrgCheck-Screenshot-Home.png"></p>
+    <h2>See the app!</h2>
+    <p><img src="../images/screenshots/OrgCheck-Screenshot-Home.png"></p>
     <p>Go to: <a href="./preview">Application Preview</a></p>
   </div>
   <div class="tile">
-    <h2>Questions from Security teams?</h2>
+    <h2>Security team has questions?</h2>
     <p>Go to: <a href="./security">Security FAQ</a>
   </div>
   <div class="tile"> 
-    <h2>How to install the salesforce app? </h2>
+    <h2>Install the salesforce app</h2>
     <ul>
       <li>Go to the AppExchange</li>
       <li>Search for "Org Check"</li>
@@ -44,14 +44,14 @@ Either way, Org Check is meant to be **easy to install and easy to use**:
     <p>For any questions, please go to: <a href="./faq">FAQ</a></p>
   </div>
   <div class="tile">
-    <h2> How do I install the Org Check sf plugin? </h2>
+    <h2>Install the sf plugin</h2>
     <ul>
       <li>From a terminal, type <code>sf plugins install @orgcheck/sfdx-plugin</code></li>
     </ul>
     <p>For any questions, please go to: <a href="./faq">FAQ</a></p>
   </div>
   <div class="tile">
-    <h2> How to get help and support? </h2>
+    <h2>Help & Support</h2>
     <ul>
       <li><a href="https://sfdc.co/OrgCheck-Community">Trailblazer Community</a></li>
       <li><a href="https://www.linkedin.com/company/orgchecksfdc">LinkedIn</a></li>
@@ -60,7 +60,7 @@ Either way, Org Check is meant to be **easy to install and easy to use**:
     </ul>
   </div>
   <div class="tile">
-    <h2> I am a developer, how do I contribute? </h2>
+    <h2>We want you!</h2>
     <p>Go to <a href="./development">Development Setup Guide</a> for the information you need.</p>
   </div>
 </div>
