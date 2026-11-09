@@ -23,6 +23,32 @@ header > h1 {
     display: none;
 }
 
+.tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.tile {
+    border: 1px solid #e1e4e8;
+    border-top: 4px solid #159957;
+    border-radius: 6px;
+    padding: 0.25rem 1rem 0.5rem;
+    background: #fff;
+}
+
+.tile h2 { 
+    margin-top: 0.75rem; 
+    font-size: 1.15rem; 
+    border: 0; 
+}
+
+.tile img { 
+    max-width: 100%; 
+    height: auto; 
+}
+
 @media print, screen and (max-width: 960px) {
     section {
         width: 100% !important;
