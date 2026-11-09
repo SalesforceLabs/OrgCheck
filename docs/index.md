@@ -26,50 +26,43 @@ Either way, Org Check is meant to be **easy to install and easy to use**:
 
 <div class="tiles">
   <div class="tile">
-    
-## Show me the salesforce app ##
-Some screenshots of the salesforce application, go to: [Application Preview](preview)!
-    
+    <h2> Show me the salesforce app </h2>
+    Some screenshots of the salesforce application, go to: <a href="./preview">Application Preview</a>
   </div>
   <div class="tile">
-    
-## Frequently Asked Question by Security teams ##
-For any questions asked by your security team, go to: [Security FAQ](security)!
-    
+    <h2> Frequently Asked Question by Security teams </h2>
+    For any questions asked by your security team, go to: <a href="./security">Security FAQ</a>
+  </div>
+  <div class="tile"> 
+    <h2> How do I install the Org Check salesforce application? </h2>
+    Go to the AppExchange, Search for "Org Check" and Install in you org or try it in your sandboxes!<br />
+    For any questions, please go to: <a href="./faq">FAQ</a>
   </div>
   <div class="tile">
-    
-## How do I install the Org Check salesforce application? ##
-Go to the AppExchange, Search for "Org Check" and Install in you org or try it in your sandboxes!
-For any questions, please go to: [FAQ](faq)
-    
+    <h2> How do I install the Org Check sf plugin? </h2>
+    Open a terminal and type `sf plugins install @orgcheck/sfdx-plugin` 
+    For other questions, please go to: <a href="./faq">FAQ</a>
   </div>
   <div class="tile">
+    <h2> How to get help and support? </h2>
     
-## How do I install the Org Check sf plugin? ##
-Open a terminal and type `sf plugins install @orgcheck/sfdx-plugin`
-For other questions, please go to: [FAQ](faq)
-    
-  </div>
-  <div class="tile">
-    
-## How to get help and support? ##
 - [Trailblazer Community](https://sfdc.co/OrgCheck-Community)
 - [LinkedIn](https://www.linkedin.com/company/orgchecksfdc)
 - [Source code](https://www.sfdc.co/OrgCheck-Repository)
 - [Log issues or ideas](https://www.sfdc.co/OrgCheck-Backlog)
-    
+
   </div>
   <div class="tile">
-    
-## I am a developer, how do I contribute? ##
-Go to [Development Setup Guide](development) for the information you need.
-    
+    <h2> I am a developer, how do I contribute? </h2>
+    Go to <a href="./development">Development Setup Guide</a> for the information you need.    
   </div>
 </div>
 
 
-##Useful references##
+
+
+
+## Useful references
 - [Salesforce Help article mentioning Org Check as an alternative to Salesforce Optimizer](https://help.salesforce.com/s/articleView?id=004980242&type=1)
 - [Youtube Video: "Optimizer Is Sunsetting: Learn How To Use Org Check!" by Kate Lessard](https://www.youtube.com/watch?v=DwHchT_uFGQ)
 - [Article on  Salesforce's Ben: "Free technical debt analysis"](https://www.salesforceben.com/salesforce-org-check-free-technical-debt-analysis)
