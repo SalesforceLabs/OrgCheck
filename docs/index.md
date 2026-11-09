@@ -26,52 +26,48 @@ Either way, Org Check is meant to be **easy to install and easy to use**:
 
 <div class="tiles">
   <div class="tile">
-    **Show me the app**
-    <img width="300" src="./images/screenshots/OrgCheck-Screenshot-Home.png" alt="Home Page tab screenshot" />
+    <h2>Show me the salesforce app</h2>
+    Some screenshots of the salesforce application, go to: [Application Preview](preview)!
   </div>
   <div class="tile">
-    **Frequently Asked Question by Security teams**
+    <h2>Frequently Asked Question by Security teams</h2>
     For any questions asked by your security team, go to: [Security FAQ](security)!
   </div>
   <div class="tile">
-    **How do I install the Org Check salesforce application?**
-    - Go to the AppExchange
-    - Search for "Org Check"
-    - Install in you org or try it in your sandboxes!
+    <h2>How do I install the Org Check salesforce application?</h2>
+    Go to the AppExchange, Search for "Org Check" and Install in you org or try it in your sandboxes!
+    For any questions, please go to: [FAQ](faq)
+  </div>
+  <div class="tile">
+    <h2>How do I install the Org Check sf plugin?</h2>
+    Open a terminal and type `sf plugins install @orgcheck/sfdx-plugin`
     For other questions, please go to: [FAQ](faq)
   </div>
   <div class="tile">
-    **How do I install the Org Check sf plugin?**
-    - Open a terminal
-    - Type `sf plugins install @orgcheck/sfdx-plugin`
-    For other questions, please go to: [FAQ](faq)
+    <h2>How to get help and support?</h2>
+    [Trailblazer Community](https://sfdc.co/OrgCheck-Community)
+    [LinkedIn](https://www.linkedin.com/company/orgchecksfdc)
+    [Source code](https://www.sfdc.co/OrgCheck-Repository)
+    [Log issues or ideas](https://www.sfdc.co/OrgCheck-Backlog)
   </div>
   <div class="tile">
-    **How to get help and support?**
-    - Join us on the Trailblazer Community at: [sfdc.co/OrgCheck-Community](https://sfdc.co/OrgCheck-Community)
-    - Join us on LinkedIn at: [@OrgCheckSFDC](https://www.linkedin.com/company/orgchecksfdc)
-    - Source code is available for anyone at: [sfdc.co/OrgCheck-Repository](https://www.sfdc.co/OrgCheck-Repository)
-    - Issues or ideas are welcome and can be logged by anyone at: [sfdc.co/OrgCheck-Backlog](https://www.sfdc.co/OrgCheck-Backlog)
-  </div>
-  <div class="tile">
-    **Useful references**
-    - [Salesforce Help article mentioning Org Check as an alternative to Salesforce Optimizer](https://help.salesforce.com/s/articleView?id=004980242&type=1)
-    - [Youtube Video: "Optimizer Is Sunsetting: Learn How To Use Org Check!" by Kate Lessard](https://www.youtube.com/watch?v=DwHchT_uFGQ)
-    - [Article on  Salesforce's Ben: "Free technical debt analysis"](https://www.salesforceben.com/salesforce-org-check-free-technical-debt-analysis)
-    - [Article on Pablo Gonzalez blog: "10 Salesforce Open-source Projects for DevOps Engineers"](https://www.pablogonzalez.io/top-10-salesforce-open-source-projects-for-devops/#4-orgcheck)
-    - [Youtube Video: "Reduce Technical Debt with Org Check"](https://www.youtube.com/watch?v=gjv6q-AR1m0)
-    - [Article on Medium: "How to contin uously monitor, balance, challenge, and reduce Technical Debt in a Salesforce org?"](https://medium.com/@vfinet/how-to-continuously-monitor-balance-challenge-and-reduce-technical-debt-in-a-salesforce-org-8809cef4ce4a)
-    - [Article on Medium:  "Five concrete actions to reduce technical debt related to Apex Classes"](https://medium.com/@vfinet/five-concret-actions-to-reduce-technical-debt-related-to-apex-classes-reduce-technical-debt-f71a31e4b30c)
-    - [Youtube Video: "Org Check Review by Ike Wagh"](https://www.youtube.com/watch?v=IG4zzqVsO_8)
-    - [Salesforce Labs Live! "How to Reduce Technical Debt from your Salesforce Environment (Ep.1)"](https://www.youtube.com/watch?v=ZCJ_NH-29I0)
-    - [Albanian Dreamin21: "Org Check presentation" by Sara Sali and Vincent Finet](https://dreamin21.sfalbania.al/schedule/schedule-fullwidth-filterable/)
-    - [Article on Unofficial SF: "Analyze your org with Org Check"](https://unofficialsf.com/from-vincent-finet-analyze-your-org-with-orgcheck/)
-    - [Article on Salesforce's Ben: "Free ways to monitor your Salesforce org"](https://www.salesforceben.com/free-ways-to-monitor-your-salesforce-org/)
-  </div>
-  <div class="tile">
-    **I am a developer, how do I contribute?**
-    - To set up a development environment and deploy Org Check as your own unlocked package, follow the steps outlined in the [Development Setup Guide](development).
-    - Once done when you want to send a Pull Request just do so from Github and we will review it.
-    - Please note that you will need to sign the Salesforce CLA to do this.
+    <h2>I am a developer, how do I contribute?</h2>
+    Go to [Development Setup Guide](development) for the information you need.
   </div>
 </div>
+
+
+##Useful references##
+- [Salesforce Help article mentioning Org Check as an alternative to Salesforce Optimizer](https://help.salesforce.com/s/articleView?id=004980242&type=1)
+- [Youtube Video: "Optimizer Is Sunsetting: Learn How To Use Org Check!" by Kate Lessard](https://www.youtube.com/watch?v=DwHchT_uFGQ)
+- [Article on  Salesforce's Ben: "Free technical debt analysis"](https://www.salesforceben.com/salesforce-org-check-free-technical-debt-analysis)
+- [Article on Pablo Gonzalez blog: "10 Salesforce Open-source Projects for DevOps Engineers"](https://www.pablogonzalez.io/top-10-salesforce-open-source-projects-for-devops/#4-orgcheck)
+- [Youtube Video: "Reduce Technical Debt with Org Check"](https://www.youtube.com/watch?v=gjv6q-AR1m0)
+- [Article on Medium: "How to contin uously monitor, balance, challenge, and reduce Technical Debt in a Salesforce org?"](https://medium.com/@vfinet/how-to-continuously-monitor-balance-challenge-and-reduce-technical-debt-in-a-salesforce-org-8809cef4ce4a)
+- [Article on Medium:  "Five concrete actions to reduce technical debt related to Apex Classes"](https://medium.com/@vfinet/five-concret-actions-to-reduce-technical-debt-related-to-apex-classes-reduce-technical-debt-f71a31e4b30c)
+- [Youtube Video: "Org Check Review by Ike Wagh"](https://www.youtube.com/watch?v=IG4zzqVsO_8)
+- [Salesforce Labs Live! "How to Reduce Technical Debt from your Salesforce Environment (Ep.1)"](https://www.youtube.com/watch?v=ZCJ_NH-29I0)
+- [Albanian Dreamin21: "Org Check presentation" by Sara Sali and Vincent Finet](https://dreamin21.sfalbania.al/schedule/schedule-fullwidth-filterable/)
+- [Article on Unofficial SF: "Analyze your org with Org Check"](https://unofficialsf.com/from-vincent-finet-analyze-your-org-with-orgcheck/)
+- [Article on Salesforce's Ben: "Free ways to monitor your Salesforce org"](https://www.salesforceben.com/free-ways-to-monitor-your-salesforce-org/)
+
