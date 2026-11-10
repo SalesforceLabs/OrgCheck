@@ -27,7 +27,7 @@ Keep in mind that Org Check is not a Salesforce product. It has not been officia
 
 <div class="tiles">
   <div class="tile">
-    <h2>Take a tour of the sf app</h2>
+    <h2>🎬​ Preview the sf app</h2>
     <p>Go to: <a href="./preview">Preview</a></p>
     <p><img src="./images/screenshots/OrgCheck-Screenshot-Home.png"></p>
   </div>
