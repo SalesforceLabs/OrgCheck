@@ -28,21 +28,21 @@ Keep in mind that Org Check is not a Salesforce product. It has not been officia
 <div class="tiles">
   <div class="tile">
     <h2>🎬​ Preview the sf app</h2>
-    <p>Go to: <a href="./preview">Preview</a></p>
+    <p>Go to: <a href="./preview">🎬​ Preview</a></p>
     <p><img src="./images/screenshots/OrgCheck-Screenshot-Home.png"></p>
   </div>
   <div class="tile">
-    <h2>My security team has questions...</h2>
-    <p>Please review our list of questions and answers related to security in our <a href="./security">Security Questions</a>!</p>
+    <h2>⁉️ My security team has questions...</h2>
+    <p>Please review our list of questions and answers related to security in our <a href="./security">🔐 Security Questions</a>!</p>
   </div>
   <div class="tile"> 
-    <h2>🙋‍♀️ Install Org Check</h2>
+    <h2>🎯​ Install Org Check</h2>
     <p><b>Salesforce App</b>: Go to AppExchange, search "Org Check" then Install or Try it!</p>
     <p><b>sf CLI plug-in</b>: From a terminal, type <code>sf plugins install @orgcheck/sfdx-plugin</code></p>
-    <p>For any installation questions, please visit our <a href="./faq">FAQ</a>!</p>
+    <p>For any installation questions, please visit our <a href="./faq">🙋‍♀️ FAQ</a>!</p>
   </div>
   <div class="tile">
-    <h2>Help & Support</h2>
+    <h2>🆘 Help & Support</h2>
     <ul>
       <li><a href="https://sfdc.co/OrgCheck-Community" target="_blank">Trailblazer</a></li>
       <li><a href="https://www.linkedin.com/company/orgchecksfdc" target="_blank">LinkedIn</a></li>
