@@ -48,7 +48,7 @@ Keep in mind that Org Check is not a Salesforce product. It has not been officia
   <div class="tile">
     <h2>Help & Support</h2>
     <ul>
-      <li>a href="https://sfdc.co/OrgCheck-Community">Trailblazer</a></li>
+      <li><a href="https://sfdc.co/OrgCheck-Community">Trailblazer</a></li>
       <li><a href="https://www.linkedin.com/company/orgchecksfdc">LinkedIn</a></li>
       <li><a href="https://www.sfdc.co/OrgCheck-Repository">Source</a></li>
       <li><a href="https://www.sfdc.co/OrgCheck-Backlog">Issues & Ideas</a></li>
@@ -59,7 +59,7 @@ Keep in mind that Org Check is not a Salesforce product. It has not been officia
     <p>Go to <a href="./development">Development Setup Guide</a> for the information you need.</p>
   </div>
 </div>
-
+<br /><br />
 
 
 
