@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Queries
+title: 📝 Queries
 permalink: /queries/
 ---
 
