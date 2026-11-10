@@ -51,16 +51,16 @@ Keep in mind that Org Check is not a Salesforce product. It has not been officia
     </ul>
   </div>
   <div class="tile">
-    <h2>API calls done by Org Check</h2>
-    <p>Want to review all the API requests that Org Check performs, please visit our <a href="./queries">Queries</a> listing.</p>
+    <h2>🔥 API calls done by Org Check</h2>
+    <p>Want to review all the API requests that Org Check performs, please visit our <a href="./queries">📝 Queries</a> listing.</p>
   </div>
   <div class="tile">
-    <h2>Hardcoded URLs</h2>
-    <p>If you wonder how do we detect Hardcoded URLs, please visit our <a href="./hardcodedurls">Hardcoded URLs</a> page</p>
+    <h2>😱 Hardcoded URLs</h2>
+    <p>If you wonder how do we detect Hardcoded URLs, please visit our <a href="./hardcodedurls">😱 Hardcoded URLs</a> page</p>
   </div>
   <div class="tile">
-    <h2>We want you!</h2>
-    <p>Go to <a href="./development">Development Setup Guide</a> for the information you need.</p>
+    <h2>🫵 We want you!</h2>
+    <p>Go to <a href="./development">👩🏽‍💻 Development Setup Guide</a> for the information you need.</p>
   </div>
 </div>
 <br /><br />
