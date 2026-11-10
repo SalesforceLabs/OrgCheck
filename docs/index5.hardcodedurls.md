@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Hardcoded URLs
+title: 😱 Hardcoded URLs
 permalink: /hardcodedurls/
 ---
 
