@@ -27,7 +27,7 @@ Keep in mind that Org Check is not a Salesforce product. It has not been officia
 
 <div class="tiles">
   <div class="tile">
-    <h2>🎬​ Preview the sf app</h2>
+    <h2>❤️‍🔥 Preview the sf app</h2>
     <p>Go to: <a href="./preview">🎬​ Preview</a></p>
     <p><img src="./images/screenshots/OrgCheck-Screenshot-Home.png"></p>
   </div>
@@ -44,10 +44,10 @@ Keep in mind that Org Check is not a Salesforce product. It has not been officia
   <div class="tile">
     <h2>🆘 Help & Support</h2>
     <ul>
-      <li><a href="https://sfdc.co/OrgCheck-Community" target="_blank">Trailblazer</a></li>
-      <li><a href="https://www.linkedin.com/company/orgchecksfdc" target="_blank">LinkedIn</a></li>
-      <li><a href="https://www.sfdc.co/OrgCheck-Repository" target="_blank">Source</a></li>
-      <li><a href="https://www.sfdc.co/OrgCheck-Backlog" target="_blank">Issues & Ideas</a></li>
+      <li><a href="https://sfdc.co/OrgCheck-Community" target="_blank">🌲 Trailblazer</a></li>
+      <li><a href="https://www.linkedin.com/company/orgchecksfdc" target="_blank">🎉 LinkedIn</a></li>
+      <li><a href="https://www.sfdc.co/OrgCheck-Repository" target="_blank">♨️ Source</a></li>
+      <li><a href="https://www.sfdc.co/OrgCheck-Backlog" target="_blank">💼 Issues & 💡 Ideas</a></li>
     </ul>
   </div>
   <div class="tile">
@@ -60,7 +60,7 @@ Keep in mind that Org Check is not a Salesforce product. It has not been officia
   </div>
   <div class="tile">
     <h2>🫵 We want you!</h2>
-    <p>Go to <a href="./development">👩🏽‍💻 Development Setup Guide</a> for the information you need.</p>
+    <p>Go to <a href="./development">👩🏽‍💻 Dev Guide</a> for the information you need.</p>
   </div>
 </div>
 <br /><br />
