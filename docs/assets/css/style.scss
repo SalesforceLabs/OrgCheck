@@ -25,17 +25,17 @@ header > h1 {
 
 .tiles {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 1rem;
     margin-top: 1.5rem;
 }
 
 .tile {
     border: 1px solid #e1e4e8;
-    border-top: 4px solid #159957;
+    border-top: 4px solid #d25d56;
     border-radius: 6px;
     padding: 0.25rem 1rem 0.5rem;
-    background: #fff;
+    background: #f2fbff;
 }
 
 .tile h2 { 
