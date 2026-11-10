@@ -36,7 +36,7 @@ Keep in mind that Org Check is not a Salesforce product. It has not been officia
     <p>Please review our list of questions and answers related to security in our <a href="./security">Security Questions</a>!</p>
   </div>
   <div class="tile"> 
-    <h2>Install Org Check</h2>
+    <h2>🙋‍♀️ Install Org Check</h2>
     <p><b>Salesforce App</b>: Go to AppExchange, search "Org Check" then Install or Try it!</p>
     <p><b>sf CLI plug-in</b>: From a terminal, type <code>sf plugins install @orgcheck/sfdx-plugin</code></p>
     <p>For any installation questions, please visit our <a href="./faq">FAQ</a>!</p>
