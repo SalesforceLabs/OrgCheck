@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Security Questions
+title: 🔐 Security Questions
 permalink: /security/
 ---
 
