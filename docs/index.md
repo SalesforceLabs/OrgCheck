@@ -20,9 +20,10 @@ Either way, Org Check is meant to be **easy to install and easy to use**:
 - If you want to use the sf plugin: you just need to install the plugin from your sf CLI locally
 - No custom object will be added, no external connection, all stays in your computer (browser or terminal) and your org.
 - Org Check is free of use: open sourced, available on the AppExchange (thanks to the great program called **Salesforce Labs** at Salesforce) and on the NPMjs website.
-- Please use [this deck](http://sfdc.co/OrgCheck-Presentation) with your colleagues, company or customers to present the application before installing it and using it for your org.
-- Keep in mind that Org Check is not a Salesforce product. It has not been officially tested or documented by Salesforce. Also Salesforce support is not available for Org Check. Support is based on open source participation and requests are managed (as we can) via GitHub at (https://github.com/SalesforceLabs/OrgCheck/issues).
 
+Please use [this deck](http://sfdc.co/OrgCheck-Presentation) with your colleagues, company or customers to present the application before installing it and using it for your org.
+
+Keep in mind that Org Check is not a Salesforce product. It has not been officially tested or documented by Salesforce. Also Salesforce support is not available for Org Check. Support is based on open source participation and requests are managed (as we can) via GitHub at (https://github.com/SalesforceLabs/OrgCheck/issues).
 
 <div class="tiles">
   <div class="tile">
@@ -36,28 +37,20 @@ Either way, Org Check is meant to be **easy to install and easy to use**:
   </div>
   <div class="tile"> 
     <h2>Install the salesforce app</h2>
-    <ul>
-      <li>Go to AppExchange</li>
-      <li>Search "Org Check"</li>
-      <li>Install or Try it</li>
-    </ul>
+    <p>Go to AppExchange, search "Org Check" then Install or Try it!</p>
     <p>For any installation questions, please visit our <a href="./faq">FAQ</a>!</p>
   </div>
   <div class="tile">
     <h2>Install the sf plugin</h2>
-    <ul>
-      <li>From a terminal, type <code>sf plugins install @orgcheck/sfdx-plugin</code></li>
-    </ul>
+    <p>From a terminal, type <code>sf plugins install @orgcheck/sfdx-plugin</code></p>
     <p>For any installation questions, please visit our <a href="./faq">FAQ</a>!</p>
   </div>
   <div class="tile">
     <h2>Help & Support</h2>
-    <ul>
-      <li><a href="https://sfdc.co/OrgCheck-Community">Trailblazer</a></li>
-      <li><a href="https://www.linkedin.com/company/orgchecksfdc">LinkedIn</a></li>
-      <li><a href="https://www.sfdc.co/OrgCheck-Repository">Source</a></li>
-      <li><a href="https://www.sfdc.co/OrgCheck-Backlog">Issues & Ideas</a></li>
-    </ul>
+    <p><a href="https://sfdc.co/OrgCheck-Community">Trailblazer</a></p>
+    <p><a href="https://www.linkedin.com/company/orgchecksfdc">LinkedIn</a></p>
+    <p><a href="https://www.sfdc.co/OrgCheck-Repository">Source</a></p>
+    <p><a href="https://www.sfdc.co/OrgCheck-Backlog">Issues & Ideas</a></p>
   </div>
   <div class="tile">
     <h2>We want you!</h2>
