@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Preview
+title: 🎬​ Preview
 permalink: /preview/
 ---
 
