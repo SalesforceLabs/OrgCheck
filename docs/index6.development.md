@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Development guide
+title: 👩🏽‍💻 Development guide
 permalink: /development/
 ---
 
