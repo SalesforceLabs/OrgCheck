@@ -138,7 +138,7 @@ export default class OrgcheckApp extends LightningElement {
      * @type {string} 
      * @public
      */
-    orgCheckVersion;
+    orgCheckVersion = '';
 
     /**
      * @description Numerical representation of the Salesforce API Version we use in Org 
@@ -147,6 +147,15 @@ export default class OrgcheckApp extends LightningElement {
      * @public
      */
     salesforceApiVersion;
+
+    /**
+     * @description Parenthesized Salesforce API version shown in the header, or an empty string when unknown
+     * @returns {string}
+     * @public
+     */
+    get salesforceApiVersionLabel() {
+        return this.salesforceApiVersion ? `(using Salesforce API v${this.salesforceApiVersion}.0)` : '';
+    }
 
     /**
      * @description Information about the salesforce organization we are connected to -- will 
@@ -197,6 +206,15 @@ export default class OrgcheckApp extends LightningElement {
      * @type {{[key: string]: object}}
      */
     @track tableData = { };
+
+    /**
+     * @description Whether the cache view has at least one cached item to display
+     * @returns {boolean}
+     * @public
+     */
+    get hasCacheItems() {
+        return (this.tableData?.cacheitems?.length ?? 0) > 0;
+    }
 
     /**
      * @description Exports data
@@ -428,7 +446,7 @@ export default class OrgcheckApp extends LightningElement {
             try {
                 // Get the version of Org Check because we want to display it in the headers
                 this._private_properties.spinner?.sectionLog(SECTION_04, `Get the version of Org Check...`);
-                this.orgCheckVersion = this._private_properties.api?.version;
+                this.orgCheckVersion = this._private_properties.api?.version ?? '';
                 // Get the Salesforce API version we are using because we want to display it in the headers
                 this._private_properties.spinner?.sectionLog(SECTION_04, `Get the Salesforce API version used that Org Check is using...`);
                 this.salesforceApiVersion = this._private_properties.api?.salesforceApiVersion;
