@@ -145,4 +145,4 @@ Clear all local cache items for this org
 
 # check.clear-all-cache.examples
 - Clear all cache items for this org
-  sf check clear--all-cache --target-org MyOrg
+  sf check clear-all-cache --target-org MyOrg
