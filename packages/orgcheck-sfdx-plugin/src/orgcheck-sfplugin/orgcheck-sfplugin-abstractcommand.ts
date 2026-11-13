@@ -318,7 +318,7 @@ export abstract class OrgCheckSfPluginAbstractCommand extends SfCommand<CheckRes
 
     // The output without the references between items (circular), as JSON.
     // Used by the JSON file and by the '--json' flag.
-    const outputAsJson = (isJsonFileSpecified || this.jsonEnabled()) ? stringifyWithoutReferences(output) : '';
+    const outputAsJson = isJsonFileSpecified || this.jsonEnabled() ? stringifyWithoutReferences(output) : '';
 
     // Here we are asked to output the JSON into a file
     if (isJsonFileSpecified) {
@@ -404,7 +404,7 @@ export abstract class OrgCheckSfPluginAbstractCommand extends SfCommand<CheckRes
     }
 
     // With '--json', the result is printed as JSON: return it without the circular references
-    return this.jsonEnabled() ? JSON.parse(outputAsJson) as CheckResult : output;
+    return this.jsonEnabled() ? (JSON.parse(outputAsJson) as CheckResult) : output;
   }
 }
 
@@ -416,7 +416,7 @@ export abstract class OrgCheckSfPluginAbstractCommand extends SfCommand<CheckRes
  */
 const stringifyWithoutReferences = (data: unknown): string => {
   return JSON.stringify(data, (key: string, value: unknown) => (key.endsWith('Refs') ? undefined : value), 2);
-}
+};
 
 const createFile = (filename: string, content: string | Buffer) => {
   writeFileSync(filename, content, { flag: 'w' });
