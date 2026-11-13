@@ -24,6 +24,26 @@ export class OrgCheckSfPluginLoggerSetup implements orgcheck.LoggerSetup {
     this.spinner.status = msg;
   }
 
+  /**
+   * @description Debug message. Called by @orgcheck/api 8.0.1, the published version.
+   * @param {string} section - the name of the operation
+   * @param {string} [message] - the message to log for debugging
+   */
+  public messageSilentlyLogged(section: string, message?: string): void {
+    this.logger.debug(`[${section}] ${message ?? ''}`);
+  }
+
+  /**
+   * @description The operation ended with one error. Called by @orgcheck/api 8.0.1, the published
+   *   version, which calls endedWithError (singular) and not endedWithErrors.
+   * @param {string} section - the name of the operation
+   * @param {Error | string} [error] - the error
+   */
+  public endedWithError(section: string, error?: Error | string): void {
+    this.logger.warn(`[${section}] ${error}`);
+    if (error) this.failures.push(error);
+  }
+
   public endedWithErrors(section: string, errors?: Error []): void {
     this.logger.warn(`[${section}] ${errors}`);
     if (errors) this.failures.push(... errors);
