@@ -313,12 +313,16 @@ export abstract class OrgCheckSfPluginAbstractCommand extends SfCommand<CheckRes
     const isCsvFileSpecified  = flags['csv-file'] !== undefined;
     const isNoFileSpecified = !isJsonFileSpecified && !isXlsxFileSpecified && !isCsvFileSpecified;
 
+    // The output without the references between items (circular), as JSON.
+    // Used by the JSON file and by the '--json' flag.
+    const outputAsJson = (isJsonFileSpecified || this.jsonEnabled()) ? stringifyWithoutReferences(output) : '';
+
     // Here we are asked to output the JSON into a file
     if (isJsonFileSpecified) {
       const jsonFilename = flags['json-file'];
       try {
         // Export JSON file
-        createFile(jsonFilename, JSON.stringify(output, (key, value) => { if (key.endsWith('Refs')) return undefined; return value; }, 2));
+        createFile(jsonFilename, outputAsJson);
         // Log the success
         this.logSuccess(`File ${jsonFilename} created successfully with JSON format.`);
       } catch (error) {
@@ -388,8 +392,19 @@ export abstract class OrgCheckSfPluginAbstractCommand extends SfCommand<CheckRes
 
     this.spinner.stop();
 
-    return output;
+    // With '--json', the result is printed as JSON: return it without the circular references
+    return this.jsonEnabled() ? JSON.parse(outputAsJson) as CheckResult : output;
   }
+}
+
+/**
+ * @description Serialize to JSON without the references between items (keys ending with 'Refs').
+ *   These references make the data circular, which breaks JSON.stringify and the '--json' output.
+ * @param {unknown} data - The data to serialize
+ * @returns {string} The JSON string
+ */
+const stringifyWithoutReferences = (data: unknown): string => {
+  return JSON.stringify(data, (key: string, value: unknown) => (key.endsWith('Refs') ? undefined : value), 2);
 }
 
 const createFile = (filename: string, content: string | Buffer) => {
