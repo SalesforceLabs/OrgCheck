@@ -131,8 +131,8 @@ const ALL_SCORE_RULES: ScoreRule[] = [
         category: SCORE_RULE_CATEGORIES.DEPENDENCY
     }, {
         id: 2,
-        description: 'No reference anywhere for apex class',
-        formula: ((d: SfdcApexClass) => d?.isTest === false && d?.dependencies?.hadError === false && IS_EMPTY(d.dependencies?.referenced)) as (data: unknown) => boolean, 
+        description: 'No reference anywhere for apex class (schedulable classes excluded)',
+        formula: ((d: SfdcApexClass) => d?.isTest === false && d?.isSchedulable !== true && d?.dependencies?.hadError === false && IS_EMPTY(d.dependencies?.referenced)) as (data: unknown) => boolean, 
         errorMessage: `This apex class is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.`,
         badField: 'dependencies.referenced.length',
         applicable: [ DataAliases.SfdcApexClass ],

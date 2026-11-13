@@ -74,4 +74,37 @@ describe('orgcheck-api-scorerules', () => {
             });
         });
     });
+
+    describe('Schedulable apex classes are judged only by whether they are scheduled', () => {
+
+        const ruleById = (id: number): ScoreRule => {
+            const rule = SecretSauce.AllScoreRules.find((candidate: ScoreRule) => candidate.id === id);
+            if (!rule) throw new Error(`Score rule #${id} was not found`);
+            return rule;
+        };
+
+        const unusedRule = ruleById(2);
+        const scheduledRule = ruleById(9);
+
+        const apexClass = (overrides: Record<string, unknown>) => ({
+            isTest: false,
+            isSchedulable: false,
+            isScheduled: false,
+            dependencies: { hadError: false, referenced: [] },
+            ...overrides
+        });
+
+        it('does not flag a Schedulable class with no references as unused', () => {
+            expect(unusedRule.formula(apexClass({ isSchedulable: true }))).toBe(false);
+        });
+
+        it('still flags a non-test, non-Schedulable class with no references as unused', () => {
+            expect(unusedRule.formula(apexClass({ isSchedulable: false }))).toBe(true);
+        });
+
+        it('flags an unscheduled Schedulable class and leaves a scheduled one alone', () => {
+            expect(scheduledRule.formula(apexClass({ isSchedulable: true, isScheduled: false }))).toBe(true);
+            expect(scheduledRule.formula(apexClass({ isSchedulable: true, isScheduled: true }))).toBe(false);
+        });
+    });
 });
