@@ -20,6 +20,8 @@ export class ApexClassesTableDefinition implements TableDefinition {
         { label: 'Intf.',                  type: ColumnType.CHK,  data: { value: 'isInterface' }},
         { label: 'Enum',                   type: ColumnType.CHK,  data: { value: 'isEnum' }},
         { label: 'Schdl.',                 type: ColumnType.CHK,  data: { value: 'isSchedulable' }},
+        { label: 'REST',                   type: ColumnType.CHK,  data: { value: 'isRestResource' }},
+        { label: 'SOAP',                   type: ColumnType.CHK,  data: { value: 'isSoapService' }},
         { label: 'Access',                 type: ColumnType.TXT,  data: { value: 'specifiedAccess' }},
         { label: 'Implements',             type: ColumnType.TXTS, data: { values: 'interfaces', value: '.' }},
         { label: 'Extends',                type: ColumnType.TXT,  data: { value: 'extends' }},

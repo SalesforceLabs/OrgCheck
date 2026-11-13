@@ -109,6 +109,8 @@ export class DatasetApexClasses implements Dataset {
                     isEnum: false,
                     isInterface: false,
                     isSchedulable: false,
+                    isRestResource: false,
+                    isSoapService: false,
                     isScheduled: false,
                     length: record?.lengthWithoutComments,
                     needsRecompilation: (!record.SymbolTable ? true : false),
@@ -128,11 +130,16 @@ export class DatasetApexClasses implements Dataset {
                 apexClass.innerClassesCount = (symbolTable.innerClasses as unknown[] | undefined)?.length || 0;
                 apexClass.interfaces = (symbolTable.interfaces as string[] | undefined) ?? [];
                 apexClass.isSchedulable = (symbolTable.interfaces as string[] | undefined)?.includes('System.Schedulable') ?? false;
-                apexClass.methodsCount = (symbolTable.methods as unknown[] | undefined)?.length || 0;
+                const methods = (symbolTable.methods as Array<{ modifiers?: string[] }> | undefined) ?? [];
+                apexClass.methodsCount = methods.length;
+                apexClass.isSoapService = methods.some((method) =>
+                    (method?.modifiers ?? []).some((modifier) => modifier?.toLowerCase() === 'webservice')
+                );
                 apexClass.extends = symbolTable.parentClass as string;
                 if (symbolTable.tableDeclaration) {
                     const tableDeclaration = symbolTable.tableDeclaration as Record<string, unknown>;
                     apexClass.annotations = ((tableDeclaration.annotations as Array<{ name?: string }> | undefined) ?? []).map((a) => a?.name ?? '');
+                    apexClass.isRestResource = apexClass.annotations.some((name) => name?.toLowerCase() === 'restresource');
                     await MediumProcessor.forEach(tableDeclaration.modifiers as string[], async (m: string) => {
                         switch (m) {
                             case 'with sharing':      apexClass.specifiedSharing = 'with';      break;

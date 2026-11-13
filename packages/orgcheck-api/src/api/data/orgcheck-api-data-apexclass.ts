@@ -178,6 +178,20 @@ export interface SfdcApexClass extends DataWithScoreAndDependencies {
     isSchedulable: boolean;
 
     /**
+     * @description Is this class an Apex REST service (`@RestResource`)?
+     * @type {boolean}
+     * @public
+     */
+    isRestResource: boolean;
+
+    /**
+     * @description Does this class expose at least one SOAP `webservice` method?
+     * @type {boolean}
+     * @public
+     */
+    isSoapService: boolean;
+
+    /**
      * @description Is this Schedulable class even scheduled in this org?
      * @type {boolean}
      * @public

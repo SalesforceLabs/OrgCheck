@@ -49,6 +49,8 @@ Notes:
 | Intf. | Boolean | Indicates if it's an interface |
 | Enum | Boolean | Indicates if it's an enum |
 | Schdl. | Boolean | Indicates if it's schedulable |
+| REST | Boolean | Indicates if the class is an Apex REST service (`@RestResource`) |
+| SOAP | Boolean | Indicates if the class exposes at least one SOAP `webservice` method |
 | Access | String | Access level |
 | Implements | List of strings | Interfaces implemented |
 | Extends | String | Class extended |

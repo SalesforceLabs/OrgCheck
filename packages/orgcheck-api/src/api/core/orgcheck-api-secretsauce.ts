@@ -131,9 +131,9 @@ const ALL_SCORE_RULES: ScoreRule[] = [
         category: SCORE_RULE_CATEGORIES.DEPENDENCY
     }, {
         id: 2,
-        description: 'No reference anywhere for apex class (schedulable classes excluded)',
-        formula: ((d: SfdcApexClass) => d?.isTest === false && d?.isSchedulable !== true && d?.dependencies?.hadError === false && IS_EMPTY(d.dependencies?.referenced)) as (data: unknown) => boolean, 
-        errorMessage: `This apex class is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.`,
+        description: 'No reference anywhere for apex class (schedulable, REST and SOAP services excluded)',
+        formula: ((d: SfdcApexClass) => d?.isTest === false && d?.isSchedulable !== true && d?.isRestResource !== true && d?.isSoapService !== true && d?.dependencies?.hadError === false && IS_EMPTY(d.dependencies?.referenced)) as (data: unknown) => boolean, 
+        errorMessage: `This apex class is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org. Schedulable classes, @RestResource classes, and classes with webservice methods are left out, because their callers live outside the org.`,
         badField: 'dependencies.referenced.length',
         applicable: [ DataAliases.SfdcApexClass ],
         category: SCORE_RULE_CATEGORIES.DEPENDENCY

@@ -75,7 +75,7 @@ describe('orgcheck-api-scorerules', () => {
         });
     });
 
-    describe('Schedulable apex classes are judged only by whether they are scheduled', () => {
+    describe('Apex entry points are not flagged as unused just because nothing in the org references them', () => {
 
         const ruleById = (id: number): ScoreRule => {
             const rule = SecretSauce.AllScoreRules.find((candidate: ScoreRule) => candidate.id === id);
@@ -89,6 +89,8 @@ describe('orgcheck-api-scorerules', () => {
         const apexClass = (overrides: Record<string, unknown>) => ({
             isTest: false,
             isSchedulable: false,
+            isRestResource: false,
+            isSoapService: false,
             isScheduled: false,
             dependencies: { hadError: false, referenced: [] },
             ...overrides
@@ -98,8 +100,13 @@ describe('orgcheck-api-scorerules', () => {
             expect(unusedRule.formula(apexClass({ isSchedulable: true }))).toBe(false);
         });
 
+        it('does not flag a REST or SOAP service with no references as unused', () => {
+            expect(unusedRule.formula(apexClass({ isRestResource: true }))).toBe(false);
+            expect(unusedRule.formula(apexClass({ isSoapService: true }))).toBe(false);
+        });
+
         it('still flags a non-test, non-Schedulable class with no references as unused', () => {
-            expect(unusedRule.formula(apexClass({ isSchedulable: false }))).toBe(true);
+            expect(unusedRule.formula(apexClass({ isSchedulable: false, isRestResource: false, isSoapService: false }))).toBe(true);
         });
 
         it('flags an unscheduled Schedulable class and leaves a scheduled one alone', () => {

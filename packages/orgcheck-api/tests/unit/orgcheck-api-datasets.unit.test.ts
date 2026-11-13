@@ -128,12 +128,39 @@ describe('tests.api.unit.Datasets', () => {
           Name: 'TestD',
           SymbolTable: { tableDeclaration: { modifiers: [ 'testMethod' ] }},
           Body: "@isTest(SeeAllData=true) \nprivate class TestD {\n public static void test() {\n}\n}"
+        },
+        {
+          Id: '06',
+          Name: 'AccountRest',
+          SymbolTable: {
+            tableDeclaration: { modifiers: [ 'global', 'with sharing' ], annotations: [{ name: 'RestResource' }] },
+            methods: [{ name: 'doGet', modifiers: [ 'global', 'static' ] }]
+          },
+          Body: "@RestResource(urlMapping='/Account/*') \nglobal with sharing class AccountRest {\n @HttpGet global static void doGet() {\n}\n}"
+        },
+        {
+          Id: '07',
+          Name: 'AccountSoap',
+          SymbolTable: {
+            tableDeclaration: { modifiers: [ 'global' ], annotations: [] },
+            methods: [{ name: 'sayHello', modifiers: [ 'global', 'static', 'webservice' ] }]
+          },
+          Body: "global class AccountSoap {\n webservice static String sayHello(String name) {\n return name;\n}\n}"
+        },
+        {
+          Id: '08',
+          Name: 'PlainClass',
+          SymbolTable: {
+            tableDeclaration: { modifiers: [ 'public' ], annotations: [{ name: 'Deprecated' }] },
+            methods: [{ name: 'run', modifiers: [ 'public', 'static' ] }]
+          },
+          Body: "public class PlainClass {\n public static void run() {\n}\n}"
         }
       ])
       const results: Map<string, any> = await dataset.run(sfdcManager, new DataFactoryMock_AllIsOK(), new SimpleLoggerMock_DoingNothing());
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
-      expect(results.size).toBe(5);
+      expect(results.size).toBe(8);
       expect(results.get('01').name).toBe('TestA');
       expect(results.get('01').isTest).toBeTruthy();
       expect(results.get('01').isTestSeeAllData).toBeFalsy();
@@ -154,6 +181,12 @@ describe('tests.api.unit.Datasets', () => {
       expect(results.get('05').isTest).toBeTruthy();
       expect(results.get('05').isTestSeeAllData).toBeTruthy();
       expect(results.get('05').nbSystemAsserts).toBe(0);
+      expect(results.get('06').isRestResource).toBeTruthy();
+      expect(results.get('06').isSoapService).toBeFalsy();
+      expect(results.get('07').isRestResource).toBeFalsy();
+      expect(results.get('07').isSoapService).toBeTruthy();
+      expect(results.get('08').isRestResource).toBeFalsy();
+      expect(results.get('08').isSoapService).toBeFalsy();
     });
   });
 
