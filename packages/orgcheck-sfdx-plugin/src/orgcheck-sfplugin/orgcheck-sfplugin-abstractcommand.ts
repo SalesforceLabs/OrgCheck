@@ -313,6 +313,9 @@ export abstract class OrgCheckSfPluginAbstractCommand extends SfCommand<CheckRes
     const isCsvFileSpecified  = flags['csv-file'] !== undefined;
     const isNoFileSpecified = !isJsonFileSpecified && !isXlsxFileSpecified && !isCsvFileSpecified;
 
+    // Files that could not be created: the command fails at the end if there is any
+    const exportErrors: string[] = [];
+
     // The output without the references between items (circular), as JSON.
     // Used by the JSON file and by the '--json' flag.
     const outputAsJson = (isJsonFileSpecified || this.jsonEnabled()) ? stringifyWithoutReferences(output) : '';
@@ -328,6 +331,7 @@ export abstract class OrgCheckSfPluginAbstractCommand extends SfCommand<CheckRes
       } catch (error) {
         // Log the error if any
         this.logToStderr(`File ${jsonFilename} not created due to the following error: ${error}`)
+        exportErrors.push(`${jsonFilename} (${error})`);
       }
     }
 
@@ -352,6 +356,7 @@ export abstract class OrgCheckSfPluginAbstractCommand extends SfCommand<CheckRes
         } catch (error) {
           // Log the error if any
           this.logToStderr(`File ${xlsxFilename} not created due to the following error: ${error}`)
+          exportErrors.push(`${xlsxFilename} (${error})`);
         }
       }
 
@@ -379,6 +384,7 @@ export abstract class OrgCheckSfPluginAbstractCommand extends SfCommand<CheckRes
         } catch (error) {
           // Log the error if any
           this.logToStderr(`File ${csvFilename} not created due to the following error: ${error}`)
+          exportErrors.push(`${csvFilename} (${error})`);
         }
       }
 
@@ -391,6 +397,11 @@ export abstract class OrgCheckSfPluginAbstractCommand extends SfCommand<CheckRes
     }
 
     this.spinner.stop();
+
+    // A file that was asked for but not created is a failure (non-zero exit code)
+    if (exportErrors.length > 0) {
+      this.error(`The following file(s) could not be created: ${exportErrors.join(', ')}`, { exit: 1 });
+    }
 
     // With '--json', the result is printed as JSON: return it without the circular references
     return this.jsonEnabled() ? JSON.parse(outputAsJson) as CheckResult : output;
