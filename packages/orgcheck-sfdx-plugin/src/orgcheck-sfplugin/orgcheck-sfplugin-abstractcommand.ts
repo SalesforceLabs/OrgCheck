@@ -7,6 +7,12 @@ import { OrgCheckSfPluginLoggerSetup } from './orgcheck-sfplugin-logger-setup.js
 import { OrgCheckSfPluginStorageSetup } from './orgcheck-sfplugin-storage-setup.js';
 
 /**
+ * @description Wildcard used by Org Check recipes to mean "all values"
+ * @type {string}
+ */
+const ALL_FILTER_VALUES: string = '*';
+
+/**
  * @description Import messages directory from meta URL and load them
  */
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -285,23 +291,26 @@ export abstract class OrgCheckSfPluginAbstractCommand extends SfCommand<CheckRes
     
     } else {
       // else just call the generic receipe from API
+      const packageFilter: string = flags['package'] ?? ALL_FILTER_VALUES;
+      const sobjectTypeFilter: string = flags['sobject-type'] ?? ALL_FILTER_VALUES;
+      const sobjectFilter: string = flags['sobject'] ?? ALL_FILTER_VALUES;
 
       if (flags['invalidate-cache']) {
         this.spinner.status = 'Running cache invalitation...';
         orgcheckApi.cleanData(
           recipe,
-          flags['package'] ?? '',
-          flags['sobject-type'] ?? '',
-          flags['sobject'] ?? ''
+          packageFilter,
+          sobjectTypeFilter,
+          sobjectFilter
         );
       }
 
       this.spinner.status = 'Running data preparation...';
       const mixture = await orgcheckApi.prepareData(
         recipe,
-        flags['package'] ?? '',
-        flags['sobject-type'] ?? '',
-        flags['sobject'] ?? ''
+        packageFilter,
+        sobjectTypeFilter,
+        sobjectFilter
       );
       
       output.action = recipe;

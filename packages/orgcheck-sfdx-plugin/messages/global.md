@@ -16,13 +16,13 @@ Name of the check (or action) you would like to perform on this org
 In production orgs, you need to explicitly accept the terms before using Org Check in this environment.
 
 # flags.sobject.summary
-Filter by SObject API name
+Filter by SObject API name. When omitted, all sobjects are included.
 
 # flags.sobject-type.summary
-Filter by SObject type (Custom, Standard, or both)
+Filter by SObject type (Custom, Standard, or both). When omitted, all sobject types are included.
 
 # flags.package.summary
-Filter by package/namespace
+Filter by package/namespace. When omitted, all packages are included. An empty value means unpackaged only.
 
 # flags.csv-file.summary
 Filename of the CSV output
