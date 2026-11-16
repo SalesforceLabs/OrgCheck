@@ -1,6 +1,6 @@
 {
     "name": "@orgcheck/api",
-    "version": "8.0.1",
+    "version": "8.0.2",
     "license": "MIT",
     "private": false,
     "devDependencies": {
@@ -33,18 +33,13 @@
         "build": "yarn build:js && yarn build:pack",
         "test": "yarn test:unit",
         "deploy": "yarn deploy:npm:publish",
-
         "postpack": "mv orgcheck-api-*.tgz dist/",
-        
         "verify:lint": "eslint",
         "verify:code-analyzer": "sf code-analyzer run --target ./src --severity-threshold Low --view detail ",
-
         "build:js": "rollup -c rollup.config.mjs && jest \".*bundled.*\" ",
         "build:pack": "npm pack --ignore-scripts",
-        
         "test:unit": "jest \".*unit.*\" ",
-        
-        "deploy:npm:publish": "yarn version --pack && npm publish --access public --ignore-scripts"
+        "deploy:npm:publish": "yarn version --patch && npm publish --access public --ignore-scripts"
     },
     "main": "./dist/orgcheck.js",
     "types": "./dist/orgcheck.d.ts",
