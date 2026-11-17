@@ -68,7 +68,7 @@
     "test:compile": "tsc -p \"./tests\" --pretty",
     "test:nut": "jest",
     
-    "deploy:npm:publish": "yarn version --patch && yarn oclif manifest && npm pack --ignore-scripts && npm publish --access public --ignore-scripts",
+    "deploy:npm:publish": "yarn oclif manifest && node ../../scripts/publish-if-changed.mjs",
 
     "docs": "sf-docs",
     "format": "prettier --write \"+(src|test|schemas)/**/*.+(ts|js|json)|command-snapshot.json\"",

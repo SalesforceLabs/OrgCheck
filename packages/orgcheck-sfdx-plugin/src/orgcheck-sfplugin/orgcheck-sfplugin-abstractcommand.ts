@@ -5,6 +5,7 @@ import orgcheck from '@orgcheck/api';
 import { OrgCheckSfPluginLoadThirdParties } from './orgcheck-sfplugin-thirdparties.js';
 import { OrgCheckSfPluginLoggerSetup } from './orgcheck-sfplugin-logger-setup.js';
 import { OrgCheckSfPluginStorageSetup } from './orgcheck-sfplugin-storage-setup.js';
+import { ifCurrentVersionIsNPMVersion } from './orgcheck-sfplugin-version-check.js';
 
 /**
  * @description Wildcard used by Org Check recipes to mean "all values"
@@ -204,6 +205,11 @@ export abstract class OrgCheckSfPluginAbstractCommand extends SfCommand<CheckRes
    * @public
    */
   public async run(): Promise<CheckResult> {
+    
+    if (await ifCurrentVersionIsNPMVersion(this.ctor.plugin?.version) === false) {
+      this.warn('Your version of the Org Check plugin is not the latest version available. Please update to the latest version.');
+    }
+
     const { flags } = await this.parseFlags();
 
     // Initialize some variables
