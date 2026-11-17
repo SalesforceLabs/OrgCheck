@@ -1,6 +1,6 @@
 {
     "name": "@orgcheck/api",
-    "version": "8.0.3",
+    "version": "8.0.4",
     "license": "MIT",
     "private": false,
     "devDependencies": {
