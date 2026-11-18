@@ -6,7 +6,7 @@ import { SalesforceError, SalesforceManagerIntf, SalesforceMetadataRequest, Sale
 import { SecretSauce } from 'src/api/core/orgcheck-api-secretsauce';
 import { SalesforceManagerSetup } from 'src/api/core/setup/orgcheck-api-setup-salesforcemanager';
 import { LargeProcessor } from 'src/api/core/orgcheck-api-processor';
-import { DataDependencies, DataDependency } from 'src/api/core/data/orgcheck-api-data-dependencies';
+import { DataDependencies } from 'src/api/core/data/orgcheck-api-data-dependencies';
 
 /**
  * @description JsForce Query Result
@@ -670,18 +670,22 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @see SalesforceManagerIntf.dependenciesQuery
      * @param {string[]} ids - List of salesforce IDs
      * @param {SimpleLoggerIntf} logger - Logger
+     * @param {Function | undefined} extender - Function to extend the dependencies
      * @returns {Promise<{ records: any>, errors: Array<string> }[]} Dependencies data
      * @throws {SalesforceError} If an error occurs during the query
      * @public
      * @async
      */
-    async dependenciesQuery(ids: string[], logger: SimpleLoggerIntf): Promise<DataDependencies> {
+    async dependenciesQuery(ids: string[], logger: SimpleLoggerIntf, extender: (
+        addUsing: (id: string, usedId: string, usedName: string, usedType: string) => void, 
+        addReferenced: (id: string, referencingId: string, referencingName: string, referencingType: string) => void
+    ) => void | undefined): Promise<DataDependencies> {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         // Now we can start, log some message
         logger?.log(`Starting to call Tooling API for dependency API call of ${ids?.length ?? 0} item(s)...`);
         // if no ids then just return empty structure and basta!
-        if ((ids?.length ?? 0) === 0) return { records: [], errors: [] };
+        if ((ids?.length ?? 0) === 0) return { items: new Map(), relationships: [], errors: [] };
         // Let's start with ids
         const bodies: { allOrNone: boolean, compositeRequest: { method: string, url: string, referenceId: string }[] }[] = [];
         let currentBody: { allOrNone: boolean, compositeRequest: { method: string, url: string, referenceId: string }[]} | undefined;
@@ -738,34 +742,42 @@ export class SalesforceManager implements SalesforceManagerIntf {
             allResults.push(...(results.filter((result) => result !== undefined) as DapiCompositeResult[]));
         }
         logger?.log(`Got all the results`);
-        const dependenciesRecords: DataDependency[] = []; // dependencies records
+        const dependencyItems: Map<string, { id: string, name: string, type: string, url: string }> = new Map();
+        const dependencyRelationShips: { id: string, refId: string }[] = [];
+        const deduplicationSet: Set<string> = new Set();
+        const __deduplicate__ = (key: string): boolean => {
+            if (deduplicationSet.has(key)) return false;
+            deduplicationSet.add(key);
+            return true;
+        };
+        const addRelationShip = (id: string, refId: string): void => {
+            if (__deduplicate__(`${id}-${refId}`) === true) {
+                dependencyRelationShips.push({ id: id, refId: refId });
+            }
+        };
+        const addItem = (id: string, name: string, type: string): void => {
+            if (__deduplicate__(id) === true) {
+                dependencyItems.set(id, { id: id, name: name, type: type, url: this.setupUrl(id, type) });
+            }
+        };
         const idsInError: string[] = []; // ids contained in a batch that has an error
-        const duplicateCheck = new Set(); // Using a set to filter duplicates
         allResults.forEach((result) => {
             result.compositeResponse.forEach((response) => {
                 if (response.httpStatusCode === 200) {
                     const successBody = response.body as { records: Record<string, unknown>[] };
                     logger?.log(`✅ DependenciesQuery status=200 records=${successBody?.records?.length ?? 0}`);
-                    dependenciesRecords.push(... successBody.records // multiple response in one batch
-                        .map((r: Record<string, unknown>) => { // Duplicates will be "null" and will get removed in further filter() call 
-                            const id = this.caseSafeId(r.MetadataComponentId as string);
-                            const refId = this.caseSafeId(r.RefMetadataComponentId as string);
-                            const key = `${id}-${refId}`;
-                            if (duplicateCheck.has(key)) return null;
-                            duplicateCheck.add(key);
-                            return {
-                                id: id,
-                                name: r.MetadataComponentName as string, 
-                                type: r.MetadataComponentType as string,
-                                url: this.setupUrl(id, r.MetadataComponentType as string),
-                                refId: refId, 
-                                refName: r.RefMetadataComponentName as string,
-                                refType: r.RefMetadataComponentType as string,
-                                refUrl: this.setupUrl(refId, r.RefMetadataComponentType as string)
-                            }
-                        })
-                        .filter((r) => r !== null) as DataDependency[] // Remove duplicates
-                    ); 
+                    // multiple response in one batch
+                    successBody.records.forEach((r: Record<string, unknown>) => { 
+                        // Manipulate only ID15s
+                        const id = this.caseSafeId(r.MetadataComponentId as string);
+                        const refId = this.caseSafeId(r.RefMetadataComponentId as string);
+                        // Add the dependency relationship to the list
+                        addRelationShip(id, refId);
+                        // Add the dependency item to the list
+                        addItem(id, r.MetadataComponentName as string, r.MetadataComponentType as string);
+                        // Add the referenced dependency item to the list
+                        addItem(refId, r.RefMetadataComponentName as string, r.RefMetadataComponentType as string);
+                    });
                 } else {
                     const errorCode = (response.body as { errorCode: string }[])[0].errorCode;
                     if (errorCode === 'UNKNOWN_EXCEPTION') {
@@ -789,7 +801,21 @@ export class SalesforceManager implements SalesforceManagerIntf {
                 }
             });
         });
-        return { records: dependenciesRecords, errors: idsInError };
+        if (extender) {
+            extender(
+                // addUsing function to add a "using item" to the dependencies records
+                (id, usedId, usedName, usedType) => {
+                    addRelationShip(id, usedId);
+                    addItem(usedId, usedName, usedType);
+                },
+                // addReferenced function to add a "referencing item" to the dependencies records
+                (id, referencingId, referencingName, referencingType) => {
+                    addRelationShip(referencingId, id);
+                    addItem(referencingId, referencingName, referencingType);
+                }
+            );
+        }
+        return { items: dependencyItems, relationships: dependencyRelationShips, errors: idsInError };
     }
 
     /**

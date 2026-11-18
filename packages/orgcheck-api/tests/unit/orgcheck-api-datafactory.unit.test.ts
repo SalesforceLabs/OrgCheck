@@ -28,7 +28,7 @@ describe('orgcheck-api-datafactory', () => {
             try {
                 factory.createWithScore({
                     properties: {},
-                    dependencyData: { records: [], errors: []},
+                    dependencyData: { items: new Map(), relationships: [], errors: []},
                     dependencyIdFields: []
                 });
             } catch (error) {
@@ -45,7 +45,7 @@ describe('orgcheck-api-datafactory', () => {
         it('should pass with data with score and with dependencies', () => {
             const data = factory.createWithScore({ 
                 properties: {},
-                dependencyData: { records: [], errors: []},
+                dependencyData: { items: new Map(), relationships: [], errors: []},
                 dependencyIdFields: []
             });
             const properties = Object.keys(data);
@@ -81,7 +81,7 @@ describe('orgcheck-api-datafactory', () => {
             try {
                 factory.createWithScore({
                     properties: {},
-                    dependencyData: { records: [], errors: []},
+                    dependencyData: { items: new Map(), relationships: [], errors: []},
                     dependencyIdFields: []
                 });
             } catch (error) {

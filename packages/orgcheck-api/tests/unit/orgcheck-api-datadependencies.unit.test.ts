@@ -15,46 +15,63 @@ const LAYOUT_002      = { id: 'Id007', name: 'layout-007',      type: LAYOUT_TYP
 const LAYOUT_003      = { id: 'Id008', name: 'layout-008',      type: LAYOUT_TYPE,      url: '#' };
 const LAYOUT_004      = { id: 'Id009', name: 'layout-009',      type: LAYOUT_TYPE,      url: '#' };
 
-const CREATE_DEPENDENCY_RELATIONSHIP = (item: any, refItem: any) => { return { 
-  id: item.id, name: item.name,  type: item.type,  url: item.url,
-  refId: refItem.id, refName: refItem.name, refType: refItem.type, refUrl: refItem.url 
-}}
-
 /*
-  -- Let's build a commun use case for dependencies relationships called RELATIONSHIP_001 --
+  -- Let's build a commun use case for dependencies relationships called DEPENDENCIES_USECASE_001 --
   APEXCLASS_001   { uses: [ APEXCLASS_002, CUSTOMFIELD_001 ], referenced: [ APEXCLASS_003, CUSTOMFIELD_002 ] }
   APEXCLASS_002   { uses: [ APEXCLASS_003 ],                  referenced: [ APEXCLASS_001 ] }
   APEXCLASS_003   { uses: [ APEXCLASS_001 ],                  referenced: [ APEXCLASS_002 ] }
   CUSTOMFIELD_001 { uses: [ CUSTOMFIELD_002 ],                referenced: [ APEXCLASS_001 ] }
   CUSTOMFIELD_002 { uses: [ APEXCLASS_001 ],                  referenced: [ CUSTOMFIELD_001 ] }
 */
-const RELATIONSHIP_001 = [ 
-  CREATE_DEPENDENCY_RELATIONSHIP(APEXCLASS_001, APEXCLASS_002), // apex class 001 references apex class 002
-  CREATE_DEPENDENCY_RELATIONSHIP(APEXCLASS_001, CUSTOMFIELD_001), // apex class 001 references custom field 001
-  CREATE_DEPENDENCY_RELATIONSHIP(APEXCLASS_003, APEXCLASS_001), // apex class 001 is referenced by apex class 003
-  CREATE_DEPENDENCY_RELATIONSHIP(CUSTOMFIELD_002, APEXCLASS_001), // apex class 001 is referenced by custom field 002
-  CREATE_DEPENDENCY_RELATIONSHIP(APEXCLASS_002, APEXCLASS_003), // apex class 002 references apex class 003
-  CREATE_DEPENDENCY_RELATIONSHIP(CUSTOMFIELD_001, CUSTOMFIELD_002) // custom field 001 references custom field 002
-]
+const DEPENDENCIES_USECASE_001 = {
+  items: new Map([
+    [ APEXCLASS_001.id, APEXCLASS_001 ],
+    [ APEXCLASS_002.id, APEXCLASS_002 ],
+    [ APEXCLASS_003.id, APEXCLASS_003 ],
+    [ CUSTOMFIELD_001.id, CUSTOMFIELD_001 ],
+    [ CUSTOMFIELD_002.id, CUSTOMFIELD_002 ],
+  ]),
+  relationships: [
+    { id: APEXCLASS_001.id,   refId: APEXCLASS_002.id },
+    { id: APEXCLASS_001.id,   refId: CUSTOMFIELD_001.id },
+    { id: APEXCLASS_003.id,   refId: APEXCLASS_001.id },
+    { id: CUSTOMFIELD_002.id, refId: APEXCLASS_001.id },
+    { id: APEXCLASS_002.id,   refId: APEXCLASS_003.id },
+    { id: CUSTOMFIELD_001.id, refId: CUSTOMFIELD_002.id },
+  ]
+}
 
 /*
-  -- Let's build a use case to cover ticket #465 called RELATIONSHIP_002 --
+  -- Let's build a use case to cover ticket #465 called DEPENDENCIES_USECASE_002 --
   CUSTOMFIELD_001 { uses: [], referenced: [ LAYOUT_001, LAYOUT_002, LAYOUT_003, LAYOUT_004, APEXCLASS_001 ] }
 */
-const RELATIONSHIP_002 = [ 
-  CREATE_DEPENDENCY_RELATIONSHIP(LAYOUT_001, CUSTOMFIELD_001), // custom field 001 referenced by page layout 1
-  CREATE_DEPENDENCY_RELATIONSHIP(LAYOUT_002, CUSTOMFIELD_001), // custom field 001 referenced by page layout 2
-  CREATE_DEPENDENCY_RELATIONSHIP(LAYOUT_003, CUSTOMFIELD_001), // custom field 001 referenced by page layout 3
-  CREATE_DEPENDENCY_RELATIONSHIP(LAYOUT_004, CUSTOMFIELD_001), // custom field 001 referenced by page layout 4
-  CREATE_DEPENDENCY_RELATIONSHIP(APEXCLASS_001, CUSTOMFIELD_001), // custom field 001 referenced by apex class 1
-]
+const DEPENDENCIES_USECASE_002 = {
+  items: new Map([
+    [ LAYOUT_001.id, LAYOUT_001 ],
+    [ LAYOUT_002.id, LAYOUT_002 ],
+    [ LAYOUT_003.id, LAYOUT_003 ],
+    [ LAYOUT_004.id, LAYOUT_004 ],
+    [ APEXCLASS_001.id, APEXCLASS_001 ],
+    [ CUSTOMFIELD_001.id, CUSTOMFIELD_001 ],
+  ]),
+  relationships: [
+    { id: LAYOUT_001.id, refId: CUSTOMFIELD_001.id },
+    { id: LAYOUT_002.id, refId: CUSTOMFIELD_001.id },
+    { id: LAYOUT_003.id, refId: CUSTOMFIELD_001.id },
+    { id: LAYOUT_004.id, refId: CUSTOMFIELD_001.id },
+    { id: APEXCLASS_001.id, refId: CUSTOMFIELD_001.id },
+  ]
+}
 
 describe('tests.api.unit.DataDependencies', () => {
 
   describe('Using a predefined set of relationship (001), make sure the using, referenced and refByTypes properties for Apex Class 001 are well defined', () => {
 
     // In the relationShip 001, ApexClass001 uses ApexClass002 and CustomField001 and is referenced in ApexClass003 and CustomField002.
-    const dataDep = DataDependenciesFactory.create({ records: RELATIONSHIP_001, errors: [] }, [ APEXCLASS_001.id ]);
+    const dataDep = DataDependenciesFactory.create({ 
+      items: DEPENDENCIES_USECASE_001.items, 
+      relationships: DEPENDENCIES_USECASE_001.relationships, 
+      errors: [] }, [ APEXCLASS_001.id ]);
     
     it('checks if using property is well defined', () => {
       const using = dataDep.using;
@@ -86,7 +103,10 @@ describe('tests.api.unit.DataDependencies', () => {
   describe('Using a predefined set of relationship (001), make sure the using, referenced and refByTypes properties for Apex Class 002 are well defined', () => {
 
     // In the relationShip 001, ApexClass002 uses ApexClass003 and is referenced in ApexClass001.
-    const dataDep = DataDependenciesFactory.create({ records: RELATIONSHIP_001, errors: [] }, [ APEXCLASS_002.id ]);
+    const dataDep = DataDependenciesFactory.create({ 
+      items: DEPENDENCIES_USECASE_001.items, 
+      relationships: DEPENDENCIES_USECASE_001.relationships, 
+      errors: [] }, [ APEXCLASS_002.id ]);
 
     it('checks if using property is well defined', () => {
       const using = dataDep.using;
@@ -115,7 +135,10 @@ describe('tests.api.unit.DataDependencies', () => {
   describe('Using a predefined set of relationship (001), make sure the using, referenced and refByTypes properties for Custom Field 001 are well defined', () => {
 
     // In the relationShip 001, CustomField001 uses CustomField002 and is referenced in ApexClass001.
-    const dataDep = DataDependenciesFactory.create({ records: RELATIONSHIP_001, errors: [] }, [ CUSTOMFIELD_001.id ]);
+    const dataDep = DataDependenciesFactory.create({ 
+      items: DEPENDENCIES_USECASE_001.items, 
+      relationships: DEPENDENCIES_USECASE_001.relationships, 
+      errors: [] }, [ CUSTOMFIELD_001.id ]);
 
     it('checks if using property is well defined', () => {
       const using = dataDep.using;
@@ -144,7 +167,10 @@ describe('tests.api.unit.DataDependencies', () => {
   describe('Using a predefined set of relationship (002), make sure the using, referenced and refByTypes properties for Custom Field 001 are well defined', () => {
 
     // In the relationShip 002, CustomField001 uses nothing and is referenced in 4 page layouts and in ApexClass001.
-    const dataDep = DataDependenciesFactory.create({ records: RELATIONSHIP_002, errors: [] }, [ CUSTOMFIELD_001.id ]);
+    const dataDep = DataDependenciesFactory.create({ 
+      items: DEPENDENCIES_USECASE_002.items, 
+      relationships: DEPENDENCIES_USECASE_002.relationships, 
+      errors: [] }, [ CUSTOMFIELD_001.id ]);
 
     it('checks if using property is well defined', () => {
       const using = dataDep.using;

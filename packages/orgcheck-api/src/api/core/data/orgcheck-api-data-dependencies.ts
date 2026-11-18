@@ -1,7 +1,28 @@
-/**
- * @description Dependency between two items
- */
-export interface DataDependency {
+export interface DataDependencies {
+
+    /**
+     * @description Map of dependency items by their Salesforce ID (id15)
+     * @type {Map<string, DataDependencyItem>}
+     * @public
+     */
+    items: Map<string, DataDependencyItem>;
+
+    /**
+     * @description List of dependencies between items
+     * @type {DataDependencyRelationShip[]}
+     * @public
+     */
+    relationships: DataDependencyRelationShip[];
+    
+    /** 
+     * @description List of errors from system, if any
+     * @type {string[]} 
+     * @public
+     */
+    errors: string[];
+}
+
+export interface DataDependencyRelationShip {
 
     /**
      * @description Salesforce ID of the item
@@ -11,70 +32,11 @@ export interface DataDependency {
     id: string;
 
     /**
-     * @description Name of the item
-     * @type {string}
-     * @public
-     */
-    name: string;
-
-    /**
-     * @description Type of the item
-     * @type {string}
-     * @public
-     */
-    type: string;
-
-    /**
-     * @description Salesforce Setup URL of the item
-     * @type {string}
-     * @public
-     */
-    url: string;
-
-    /**
      * @description Salesforce ID of the referenced item
      * @type {string}
      * @public
      */
     refId: string;
-
-    /**
-     * @description Name of the referenced item
-     * @type {string}
-     * @public
-     */
-    refName: string;
-
-    /**
-     * @description Type of the referenced item
-     * @type {string}
-     * @public
-     */
-    refType: string;
-
-    /**
-     * @description Salesforce Setup URL of the referenced item
-     * @type {string}
-     * @public
-     */
-    refUrl: string;
-}
-
-export interface DataDependencies {
-
-    /** 
-     * @description List of dependencies between items
-     * @type {DataDependency[]} 
-     * @public
-     */
-    records: DataDependency[];
-    
-    /** 
-     * @description List of errors from system, if any
-     * @type {string[]} 
-     * @public
-     */
-    errors: string[];
 }
 
 /**

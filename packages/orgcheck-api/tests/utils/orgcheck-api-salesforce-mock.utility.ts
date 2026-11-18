@@ -1,3 +1,4 @@
+import { DataDependencies } from 'src/api/core/data/orgcheck-api-data-dependencies';
 import { SimpleLoggerIntf } from 'src/api/core/logger/orgcheck-api-logger';
 import { SalesforceUsageInformation } from 'src/api/core/salesforce/orgcheck-api-salesforce-watchdog';
 import { SalesforceManagerIntf, SalesforceMetadataRequest, SalesforceQueryRequest } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
@@ -13,7 +14,7 @@ export class SalesforceManagerMock_DoingNothing implements SalesforceManagerIntf
       yellowThresholdPercentage: 0, redThresholdPercentage: 0, isGreenZone: true, isYellowZone: false,isRedZone: false }; }
     async soqlQuery(_queries: SalesforceQueryRequest | any[], _logger: SimpleLoggerIntf): Promise<Array<Array<any>>> { return [[]]; }
     async soslQuery(_queries: SalesforceQueryRequest | any[], _logger: SimpleLoggerIntf): Promise<Array<Array<any>>> { return [[]]; }
-    async dependenciesQuery(_ids: string[], _logger: SimpleLoggerIntf): Promise<{ records: Array<any>; errors: Array<string>; }> { return { records: [], errors: [] }; }
+    async dependenciesQuery(_ids: string[], _logger: SimpleLoggerIntf): Promise<DataDependencies> { return { items: new Map(), relationships: [], errors: [] }; }
     async readMetadata(_metadatas: SalesforceMetadataRequest[], _expandWildcard: boolean, _logger: SimpleLoggerIntf): Promise<Map<string, Array<any>>> { return new Map(); }
     async readMetadataAtScale(_type: string, _ids: any[], _byPasses: string[], _logger: SimpleLoggerIntf): Promise<any[]> { return []; }
     async describeGlobal(_logger: SimpleLoggerIntf): Promise<any[]> { return []; }
