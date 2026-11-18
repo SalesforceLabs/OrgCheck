@@ -27,11 +27,9 @@ export class DatasetPageLayouts implements Dataset {
                     'FROM Layout '
         }, {
             tooling: true,
-            string: 'SELECT LayoutId, COUNT(ProfileId) CountAssignment '+
+            string: 'SELECT LayoutId, ProfileId, Profile.Name '+
                     'FROM ProfileLayout '+
-                    'WHERE Profile.Name != null ' +
-                    'GROUP BY LayoutId ',
-            queryMoreField: 'CreatedDate'
+                    'WHERE Profile.Name != null ',
         }], logger);
 
         // Init the factory and records
@@ -44,9 +42,36 @@ export class DatasetPageLayouts implements Dataset {
         // Get the page layout Ids
         const pageLayoutIds = await MediumProcessor.map(pageLayoutRecords, (record: Record<string, unknown>) => sfdcManager.caseSafeId(record.Id as string))
 
-        // Then retreive dependencies
+        // Set a map of list of profiles assigned to each page layout
+        logger?.log(`Parsing ${pageLayoutProfileAssignRecords?.length} page layout assignments...`);
+        const pageLayoutAssignments: Map<string, Map<string, string>> = new Map();
+        await MediumProcessor.forEach(pageLayoutProfileAssignRecords, async (record: Record<string, unknown>) => {
+
+            // Get the ID15 of this page layout
+            const layoutId = sfdcManager.caseSafeId(record.LayoutId as string);
+
+            // Initiate the list of Profiles assigned to this Page Layout
+            if (pageLayoutAssignments.has(layoutId) === false) {
+                pageLayoutAssignments.set(layoutId, new Map());
+            }
+
+            // Add the profile to the list
+            pageLayoutAssignments.get(layoutId)?.set(
+                record.ProfileId as string, 
+                (record.Profile as Record<string, string> | undefined)?.Name as string
+            );
+        });
+
+        // Retreive dependencies
         logger?.log(`Retrieving dependencies of ${pageLayoutRecords?.length} page layouts...`);
-        const pageLayoutDependencies = await sfdcManager.dependenciesQuery(pageLayoutIds, logger);
+        const pageLayoutDependencies = await sfdcManager.dependenciesQuery(pageLayoutIds, logger, (addUsing, addReferenced) => {
+            // Add the profile assignments to the dependencies
+            pageLayoutAssignments.forEach((profiles: Map<string, string>, pageLayoutId: string) => {
+                profiles.forEach((profileName, profileId) => {
+                    addReferenced(pageLayoutId, profileId, profileName, SalesforceMetadataTypes.PROFILE);
+                });
+            });
+        });
 
         logger?.log(`Parsing ${pageLayoutRecords?.length} page layouts...`);
         const pageLayouts: Map<string, SfdcPageLayout> = new Map(await MediumProcessor.map(pageLayoutRecords, (record: Record<string, unknown>) => {
@@ -62,7 +87,7 @@ export class DatasetPageLayouts implements Dataset {
                     package: (record.NamespacePrefix || ''),
                     objectId: (record.EntityDefinition as Record<string, string> | undefined)?.QualifiedApiName as string,
                     type: record.LayoutType,
-                    profileAssignmentCount: 0,
+                    profileAssignmentCount: pageLayoutAssignments.get(id)?.size ?? 0,
                     createdDate: record.CreatedDate, 
                     lastModifiedDate: record.LastModifiedDate,
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.PAGE_LAYOUT, (record.EntityDefinition as Record<string, string> | undefined)?.DurableId)
@@ -77,21 +102,6 @@ export class DatasetPageLayouts implements Dataset {
             if (!record.EntityDefinition) return false; // ignore if no EntityDefinition linked
             return true;
         }));
-
-        logger?.log(`Parsing ${pageLayoutProfileAssignRecords?.length} page layout assignment counts...`);
-        await MediumProcessor.forEach(pageLayoutProfileAssignRecords, async (record: Record<string, unknown>) => {
-
-            // Get the ID15 of this page layout
-            const id = sfdcManager.caseSafeId(record.LayoutId as string);
-
-            // Get the page layout
-            const pageLayout = pageLayouts.get(id);
-            if (pageLayout) {
-
-                // Set the assignment count
-                pageLayout.profileAssignmentCount += record.CountAssignment as number;
-            }
-        });
 
         // Get information about the previous identified page layouts using metadata api
         logger?.log(`Calling Tooling API Composite to get more information about these ${pageLayoutIds?.length} page layouts...`);
