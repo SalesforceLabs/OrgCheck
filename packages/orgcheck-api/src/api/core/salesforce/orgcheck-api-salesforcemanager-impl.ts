@@ -670,13 +670,13 @@ export class SalesforceManager implements SalesforceManagerIntf {
      * @see SalesforceManagerIntf.dependenciesQuery
      * @param {string[]} ids - List of salesforce IDs
      * @param {SimpleLoggerIntf} logger - Logger
-     * @param {Function | undefined} extender - Function to extend the dependencies
+     * @param {Function | undefined} [extender] - Function to extend the dependencies
      * @returns {Promise<{ records: any>, errors: Array<string> }[]} Dependencies data
      * @throws {SalesforceError} If an error occurs during the query
      * @public
      * @async
      */
-    async dependenciesQuery(ids: string[], logger: SimpleLoggerIntf, extender: (
+    async dependenciesQuery(ids: string[], logger: SimpleLoggerIntf, extender?: (
         addUsing: (id: string, usedId: string, usedName: string, usedType: string) => void, 
         addReferenced: (id: string, referencingId: string, referencingName: string, referencingType: string) => void
     ) => void | undefined): Promise<DataDependencies> {

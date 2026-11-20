@@ -157,13 +157,13 @@ export interface SalesforceManagerIntf {
     /**
      * @param {string[]} ids - Array of Salesforce Ids
      * @param {SimpleLoggerIntf} logger - Logger to use
-     * @param {Function | undefined} extender - Function to extend the dependencies
+     * @param {Function | undefined} [extender] - Function to extend the dependencies
      * @returns {Promise<{ records: any[], errors: string[] }>} Dependency data
      * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @public
      */
-    dependenciesQuery(ids: string[], logger: SimpleLoggerIntf, extender: (
+    dependenciesQuery(ids: string[], logger: SimpleLoggerIntf, extender?: (
         addUsing: (id: string, usedId: string, usedName: string, usedType: string) => void, 
         addReferenced: (id: string, referencingId: string, referencingName: string, referencingType: string) => void
     ) => void | undefined): Promise<DataDependencies>
