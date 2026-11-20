@@ -62,7 +62,7 @@
 
     "verify:lint": "eslint \"src/**/*.ts\" \"tests/**/*.ts\" --color --cache --cache-location .eslintcache --no-error-on-unmatched-pattern",
     
-    "build:clean": "rm -rf lib tsconfig.tsbuildinfo && sf-clean all",
+    "build:clean": "node ../../scripts/remove-folder.mjs lib && node ../../scripts/remove-files.mjs tsconfig.tsbuildinfo && sf-clean all",
     "build:compile": "tsc -p tsconfig.json --pretty",
     
     "test:compile": "tsc -p \"./tests\" --pretty",
