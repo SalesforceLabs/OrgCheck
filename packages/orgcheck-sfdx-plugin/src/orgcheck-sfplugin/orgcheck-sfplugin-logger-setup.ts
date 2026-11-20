@@ -61,9 +61,8 @@ export class OrgCheckSfPluginLoggerSetup implements orgcheck.LoggerSetup {
     this.sections.delete(section);
   }
 
-  public canBeInterrupted(section: string, interruptCallback: () => void): void {
-    this.logger.info(`[${section}] CAN BE INTERRUPTED`);
-    interruptCallback();
-    this.logger.info(`[${section}] WAS INTERRUPTED`);
+  public canBeInterrupted(section: string, _interruptCallback: () => void): void {
+    // The API asks after 60s. The CLI has no interrupt control, so the run continues.
+    this.logger.info(`[${section}] LONG_RUNNING_TASK_WARNING: This task is taking a long time... but we continue anyway!`);
   }
 }
