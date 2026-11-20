@@ -49,6 +49,9 @@
     "commands": "./lib/commands",
     "bin": "sf",
     "topicSeparator": " ",
+    "hooks": {
+      "init": "./lib/hooks/init/check-topic.js"
+    },
     "devPlugins": [
       "@oclif/plugin-help"
     ],
