@@ -1,0 +1,31 @@
+name: Verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    name: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Salesforce CLI
+        uses: salesforcecli/action-setup@v2
+        with:
+          install: sf
+
+      - name: Install Code Analyzer
+        run: sf plugins install @salesforce/plugin-code-analyzer
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Verify every package
+        run: npx lerna run verify
