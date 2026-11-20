@@ -36,6 +36,10 @@ export async function ifCurrentVersionIsNPMVersion(currentVersion: string | unde
     if (currentVersion === lastestVersion) {
       return true;
     }
-  } catch (error) {}
+  } catch (error) {
+    if (console && console.error) {
+      console.error(error);
+    }
+  }
   return false;
 }
