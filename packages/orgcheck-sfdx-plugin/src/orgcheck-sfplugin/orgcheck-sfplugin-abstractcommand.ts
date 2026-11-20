@@ -208,6 +208,8 @@ export abstract class OrgCheckSfPluginAbstractCommand extends SfCommand<CheckRes
     
     if (await ifCurrentVersionIsNPMVersion(this.ctor.plugin?.version) === false) {
       this.warn('Your version of the Org Check plugin is not the latest version available. Please update to the latest version.');
+    } else {
+      this.logSuccess(`Your version of the Org Check plugin ${this.ctor.plugin?.version} is the latest version available.`);
     }
 
     const { flags } = await this.parseFlags();
