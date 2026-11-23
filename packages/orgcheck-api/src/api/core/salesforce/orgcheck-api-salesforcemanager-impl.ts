@@ -805,13 +805,13 @@ export class SalesforceManager implements SalesforceManagerIntf {
             extender(
                 // addUsing function to add a "using item" to the dependencies records
                 (id, usedId, usedName, usedType) => {
-                    addRelationShip(id, usedId);
-                    addItem(usedId, usedName, usedType);
+                    addRelationShip(this.caseSafeId(id), this.caseSafeId(usedId));
+                    addItem(this.caseSafeId(usedId), usedName, usedType);
                 },
                 // addReferenced function to add a "referencing item" to the dependencies records
                 (id, referencingId, referencingName, referencingType) => {
-                    addRelationShip(referencingId, id);
-                    addItem(referencingId, referencingName, referencingType);
+                    addRelationShip(this.caseSafeId(referencingId), this.caseSafeId(id));
+                    addItem(this.caseSafeId(referencingId), referencingName, referencingType);
                 }
             );
         }
