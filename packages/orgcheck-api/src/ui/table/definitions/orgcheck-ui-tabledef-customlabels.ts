@@ -3,6 +3,7 @@ import { TableDefinition } from 'src/ui/table/orgcheck-ui-table-definition';
 import { SortOrder } from 'src/ui/table/orgcheck-ui-table-sortorder';
 import { TableColumn } from 'src/ui/table/column/orgcheck-ui-table-column';
 import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
+import { DataDependencyItemStatus } from 'src/api/core/data/orgcheck-api-data-dependencies';
 
 export class CustomLabelsTableDefinition implements TableDefinition {
     
@@ -11,23 +12,25 @@ export class CustomLabelsTableDefinition implements TableDefinition {
      * @type {TableColumn[]}
      */
     columns: TableColumn[] = [
-        { label: '#',                   type: ColumnType.IDX },
-        { label: 'Score',               type: ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-        { label: 'Name',                type: ColumnType.URL, data: { value: 'url', label: 'name' }},
-        { label: 'Package',             type: ColumnType.TXT, data: { value: 'package' }},
-        { label: 'Label',               type: ColumnType.TXT, data: { value: 'label' }},
-        { label: 'Category',            type: ColumnType.TXT, data: { value: 'category' }},
-        { label: 'Language',            type: ColumnType.TXT, data: { value: 'language' }},
-        { label: 'Protected?',          type: ColumnType.CHK, data: { value: 'isProtected' }},
-        { label: 'Using',               type: ColumnType.NUM, data: { value: 'dependencies.using.length' }},
-        { label: 'Referenced in',       type: ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
-        { label: 'Ref. in Layout?',     type: ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${SalesforceMetadataTypes.PAGE_LAYOUT}`}},
-        { label: 'Ref. in Apex Class?', type: ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${SalesforceMetadataTypes.APEX_CLASS}`}},
-        { label: 'Ref. in Flow?',       type: ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${SalesforceMetadataTypes.FLOW_VERSION}`}},
-        { label: 'Dependencies',        type: ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
-        { label: 'Created date',        type: ColumnType.DTM, data: { value: 'createdDate' }},
-        { label: 'Modified date',       type: ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-        { label: 'Value',               type: ColumnType.TXT, data: { value: 'value'}, modifier: { maximumLength: 45, preformatted: true }}
+        { label: '#',                      type: ColumnType.IDX },
+        { label: 'Score',                  type: ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+        { label: 'Name',                   type: ColumnType.URL, data: { value: 'url', label: 'name' }},
+        { label: 'Package',                type: ColumnType.TXT, data: { value: 'package' }},
+        { label: 'Label',                  type: ColumnType.TXT, data: { value: 'label' }},
+        { label: 'Category',               type: ColumnType.TXT, data: { value: 'category' }},
+        { label: 'Language',               type: ColumnType.TXT, data: { value: 'language' }},
+        { label: 'Protected?',             type: ColumnType.CHK, data: { value: 'isProtected' }},
+        { label: 'Using',                  type: ColumnType.NUM, data: { value: 'dependencies.using.length' }},
+        { label: 'Referenced in',          type: ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
+        { label: 'Ref. in Layout?',        type: ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${SalesforceMetadataTypes.PAGE_LAYOUT}`}},
+        { label: 'Ref. in Apex Class?',    type: ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${SalesforceMetadataTypes.APEX_CLASS}`}},
+        { label: 'Ref. in Active Flow?',   type: ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${SalesforceMetadataTypes.FLOW_VERSION}-${DataDependencyItemStatus.ACTIVE}` }}, 
+        { label: 'Ref. in Draft Flow?',    type: ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${SalesforceMetadataTypes.FLOW_VERSION}-${DataDependencyItemStatus.DRAFT}` }}, 
+        { label: 'Ref. in Inactive Flow?', type: ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${SalesforceMetadataTypes.FLOW_VERSION}-${DataDependencyItemStatus.INACTIVE}` }}, 
+        { label: 'Dependencies',           type: ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
+        { label: 'Created date',           type: ColumnType.DTM, data: { value: 'createdDate' }},
+        { label: 'Modified date',          type: ColumnType.DTM, data: { value: 'lastModifiedDate' }},
+        { label: 'Value',                  type: ColumnType.TXT, data: { value: 'value'}, modifier: { maximumLength: 45, preformatted: true }}
     ];
 
     /**

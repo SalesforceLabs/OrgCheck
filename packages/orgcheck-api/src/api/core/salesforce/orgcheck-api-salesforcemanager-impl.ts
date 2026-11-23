@@ -6,7 +6,7 @@ import { SalesforceError, SalesforceManagerIntf, SalesforceMetadataRequest, Sale
 import { SecretSauce } from 'src/api/core/orgcheck-api-secretsauce';
 import { SalesforceManagerSetup } from 'src/api/core/setup/orgcheck-api-setup-salesforcemanager';
 import { LargeProcessor } from 'src/api/core/orgcheck-api-processor';
-import { DataDependencies } from 'src/api/core/data/orgcheck-api-data-dependencies';
+import { DataDependencies, DataDependencyItem, DataDependencyItemStatus } from 'src/api/core/data/orgcheck-api-data-dependencies';
 
 /**
  * @description JsForce Query Result
@@ -57,6 +57,13 @@ interface JsForceLib {
 const MAX_IDS_IN_DAPI_REQUEST_SIZE: number = 100;
 
 /**
+ * @description Maximum number of Ids that is contained per classical SOQL query (the real limit is in number of characters 
+ *              of the query, so we can include way more ids than in a DAPI query)
+ * @private
+ */
+const MAX_IDS_IN_SOQL_REQUEST_SIZE: number = 2000;
+
+/**
  * @description When requesting a lot of dependencies, we will start the nth first, wait for all them to finish, 
  *                  and continue with the next batch
  * @private
@@ -97,6 +104,18 @@ const MAX_MEMBERS_IN_METADATAAPI_REQUEST_SIZE: number = 10;
  * @see https://developer.salesforce.com/docs/atlas.en-us.232.0.api_rest.meta/api_rest/resources_composite_composite.htm
  */
 const MAX_COMPOSITE_REQUEST_SIZE: number = 5;
+
+/**
+ * @description One sub request of a composite request
+ * @private
+ */
+type CompositeSubRequest = { method: string; url: string; referenceId: string; body?: Record<string, unknown> };
+
+/**
+ * @description Body of a composite request
+ * @private
+ */
+type CompositeBody = { allOrNone: boolean; compositeRequest: CompositeSubRequest[] };
 
 /**
  * @description List of the ManageableState values of an item that can still be modified 
@@ -667,6 +686,55 @@ export class SalesforceManager implements SalesforceManagerIntf {
     }
 
     /**
+     * @description Run composite requests (tooling API) by waves of `batchSize` requests: we start the first ones, 
+     *              wait for all of them to finish, and continue with the next wave. Requests in error are logged 
+     *              and skipped (their result is not part of the returned list).
+     * @param {CompositeBody[]} bodies - Bodies of the composite requests to run
+     * @param {number} batchSize - Number of composite requests per wave
+     * @param {string} label - Label used in the logs
+     * @param {SimpleLoggerIntf} logger - Logger
+     * @returns {Promise<R[]>} Results of the successful composite requests
+     * @private
+     * @async
+     */
+    private async _runCompositeBodies<R>(bodies: CompositeBody[], batchSize: number, label: string, logger: SimpleLoggerIntf): Promise<R[]> {
+        let nbPending = bodies.length, nbDone = 0, nbErrors = 0, batchCount = 0;
+        const allResults: R[] = [];
+        for (const bodiesInBatch of SPLIT_IN_CHUNKS(bodies, batchSize)) {
+            batchCount++;
+            const results = await LargeProcessor.runAll<R | undefined>(bodiesInBatch.map((body) => async () => {
+                try {
+                    // Call the tooling composite request
+                    const result = await this._connection.tooling.request({
+                        url: `/services/data/v${this.apiVersion}.0/tooling/composite`, 
+                        method: 'POST',
+                        body: JSON.stringify(body), 
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
+                    this._watchDog?.afterRequest(); // if limit has been reached, we reject the promise with a specific error and stop the process
+                    // Update the stats
+                    nbDone++;
+                    // Returning this result
+                    return result as R;
+                } catch (error) {
+                    logger?.log(`${label} batch error: ${JSON.stringify(error ?? {})}`);
+                    // Update the stats
+                    nbErrors++;
+                    // Returning undefined (it will be filtered out afterwards)
+                    return undefined;
+                } finally {
+                    // Update the stats
+                    nbPending--;
+                    logger?.log(`${label} progress: 🧮 Total=${bodies.length}, ✅ BatchesDone=${batchCount}, 🏃‍♀️‍➡️ Pending=${nbPending}, ✅ Done=${nbDone}, ❌ Errors=${nbErrors}`);
+                }
+            }));
+            allResults.push(...(results.filter((result) => result !== undefined) as R[])); // only add the non empty results
+        }
+        return allResults;
+    }
+
+    /**
      * @see SalesforceManagerIntf.dependenciesQuery
      * @param {string[]} ids - List of salesforce IDs
      * @param {SimpleLoggerIntf} logger - Logger
@@ -687,15 +755,10 @@ export class SalesforceManager implements SalesforceManagerIntf {
         // if no ids then just return empty structure and basta!
         if ((ids?.length ?? 0) === 0) return { items: new Map(), relationships: [], errors: [] };
         // Let's start with ids
-        const bodies: { allOrNone: boolean, compositeRequest: { method: string, url: string, referenceId: string }[] }[] = [];
-        let currentBody: { allOrNone: boolean, compositeRequest: { method: string, url: string, referenceId: string }[]} | undefined;
-        for (let i = 0; i < ids?.length; i += MAX_IDS_IN_DAPI_REQUEST_SIZE) {
-            if (!currentBody || currentBody.compositeRequest?.length === MAX_COMPOSITE_REQUEST_SIZE) {
-                currentBody = { allOrNone: false, compositeRequest: [] };
-                bodies.push(currentBody);
-            }
-            const subsetIds = `'${ids.slice(i, i + MAX_IDS_IN_DAPI_REQUEST_SIZE).join("','")}'`;
-            currentBody.compositeRequest.push({
+        // One sub request per chunk of ids (max MAX_IDS_IN_DAPI_REQUEST_SIZE), then sub requests are grouped by composite request
+        const subRequests: CompositeSubRequest[] = SPLIT_IN_CHUNKS(ids, MAX_IDS_IN_DAPI_REQUEST_SIZE).map((idsChunk, chunkIndex) => {
+            const subsetIds = `'${idsChunk.join("','")}'`;
+            return {
                 method: 'GET',
                 url: `/services/data/v${this.apiVersion}.0/tooling/query?q=`+ // here we need to have the full URI
                         'SELECT MetadataComponentId, MetadataComponentName, MetadataComponentType, '+
@@ -703,48 +766,17 @@ export class SalesforceManager implements SalesforceManagerIntf {
                         'FROM MetadataComponentDependency '+
                         `WHERE RefMetadataComponentId IN (${subsetIds}) `+
                         `OR MetadataComponentId IN (${subsetIds}) `,
-                referenceId: `chunk${i}`
-            });
-        }
+                referenceId: `chunk${chunkIndex * MAX_IDS_IN_DAPI_REQUEST_SIZE}`
+            };
+        });
+        const bodies: CompositeBody[] = SPLIT_IN_CHUNKS(subRequests, MAX_COMPOSITE_REQUEST_SIZE).map((compositeRequest) => ({ allOrNone: false, compositeRequest }));
         type DapiCompositeResult = { compositeResponse: { httpStatusCode: number, body: { records: Record<string, unknown>[] } | { errorCode: string }[] }[] };
-        let nbPending = bodies?.length, nbDone = 0, nbErrors = 0, batchCount = 0;
-        const allResults: DapiCompositeResult[] = [];
-        for (let i = 0; i < bodies?.length; i += MAX_DAPI_TOOLING_BATCH_SIZE) {
-            const bodiesInBatch = bodies.slice(i, i + MAX_DAPI_TOOLING_BATCH_SIZE);
-            batchCount++;
-            const results = await LargeProcessor.runAll<DapiCompositeResult | undefined>(bodiesInBatch.map((body) => async () => {
-                try {
-                    // Call the tooling composite request
-                    const results = await this._connection.tooling.request({
-                        url: `/services/data/v${this.apiVersion}.0/tooling/composite`, 
-                        method: 'POST',
-                        body: JSON.stringify(body), 
-                        headers: { 'Content-Type': 'application/json' }
-                    });
-                    // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
-                    this._watchDog?.afterRequest(); // if limit has been reached, we reject the promise with a specific error and stop the process
-                    // Update the stats
-                    nbDone++;
-                    // Returning this results
-                    return results as DapiCompositeResult;
-                } catch (error) {
-                    logger?.log(`DependenciesQuery batch error: ${JSON.stringify(error ?? {})}`);
-                    // Update the stats
-                    nbErrors++;
-                    // Returning undefined (it will be filtered out afterwards)
-                    return undefined;
-                } finally {
-                    // Update the stats
-                    nbPending--;
-                    logger?.log(`DependenciesQuery progress: 🔜 Total=${bodies?.length}, ✅ BatchesDone=${batchCount}, 🏃‍♀️‍➡️ Pending=${nbPending}, ✅ Done=${nbDone}, ❌ Errors=${nbErrors}`);
-                }
-            }));
-            allResults.push(...(results.filter((result) => result !== undefined) as DapiCompositeResult[]));
-        }
+        const allResults = await this._runCompositeBodies<DapiCompositeResult>(bodies, MAX_DAPI_TOOLING_BATCH_SIZE, 'DependenciesQuery', logger);
         logger?.log(`Got all the results`);
-        const dependencyItems: Map<string, { id: string, name: string, type: string, url: string }> = new Map();
+        const dependencyItems: Map<string, DataDependencyItem> = new Map();
         const dependencyRelationShips: { id: string, refId: string }[] = [];
         const deduplicationSet: Set<string> = new Set();
+        const flowVersionIds: Set<string> = new Set();
         const __deduplicate__ = (key: string): boolean => {
             if (deduplicationSet.has(key)) return false;
             deduplicationSet.add(key);
@@ -757,7 +789,16 @@ export class SalesforceManager implements SalesforceManagerIntf {
         };
         const addItem = (id: string, name: string, type: string): void => {
             if (__deduplicate__(id) === true) {
-                dependencyItems.set(id, { id: id, name: name, type: type, url: this.setupUrl(id, type) });
+                if (type === SalesforceMetadataTypes.FLOW_VERSION) {
+                    flowVersionIds.add(id);
+                }
+                dependencyItems.set(id, { 
+                    id: id, 
+                    name: name, 
+                    type: type, 
+                    status: DataDependencyItemStatus.NOT_SPECIFIED,
+                    url: this.setupUrl(id, type) 
+                });
             }
         };
         const idsInError: string[] = []; // ids contained in a batch that has an error
@@ -814,6 +855,38 @@ export class SalesforceManager implements SalesforceManagerIntf {
                     addItem(this.caseSafeId(referencingId), referencingName, referencingType);
                 }
             );
+        }
+        // Additional processing for flow versions
+        if (flowVersionIds.size > 0) {
+            const flowVersions = await this.soqlQuery(
+                SPLIT_IN_CHUNKS(Array.from(flowVersionIds), MAX_IDS_IN_SOQL_REQUEST_SIZE).map((idsChunk) => ({
+                    string: `SELECT Id, VersionNumber, Status `+
+                            `FROM Flow `+
+                            `WHERE Id IN ('${idsChunk.join("','")}')`,
+                    tooling: true,
+                })), logger);
+            const flowVersionRecords = flowVersions.flat();
+            flowVersionRecords.forEach((record) => {
+                const id = this.caseSafeId(record.Id as string);
+                const flowVersionItem = dependencyItems.get(id);
+                if (flowVersionItem) {
+                    flowVersionItem.name = `${flowVersionItem.name} (${record.VersionNumber} - ${record.Status})`;
+                    // See https://developer.salesforce.com/docs/platform/api-tooling/references/tooling-objects/tooling-flow.html)
+                    switch (record.Status) {
+                        case 'Active': 
+                            flowVersionItem.status = DataDependencyItemStatus.ACTIVE; 
+                            break;
+                        case 'Draft': 
+                        case 'InvalidDraft':
+                        case 'UnderReview': 
+                            flowVersionItem.status = DataDependencyItemStatus.DRAFT; 
+                            break;
+                        case 'Obsolete': 
+                            flowVersionItem.status = DataDependencyItemStatus.INACTIVE; 
+                            break;
+                    }
+                }
+            })
         }
         return { items: dependencyItems, relationships: dependencyRelationShips, errors: idsInError };
     }
@@ -875,10 +948,8 @@ export class SalesforceManager implements SalesforceManagerIntf {
             // The API call to Metadata.Read will be done in slice, if for one type we have more than a certain amount 
             // of members we will do more queries
             logger?.log(`Looping Type=${metadata.type} Members=${metadata.members?.length ?? 0}`);
-            while (metadata.members?.length > 0) {
-                // Slice the members in batch of MAX_MEMBERS_IN_METADATAAPI_REQUEST_SIZE
-                const currentMembers = metadata.members.splice(0, MAX_MEMBERS_IN_METADATAAPI_REQUEST_SIZE); // get the first members
-                // These first members have been removed from metadata.members (so next time we don't see them anymore
+            // Slice the members in batch of MAX_MEMBERS_IN_METADATAAPI_REQUEST_SIZE
+            SPLIT_IN_CHUNKS(metadata.members, MAX_MEMBERS_IN_METADATAAPI_REQUEST_SIZE).forEach((currentMembers) => {
                 tasks.push(async () => {
                     logger?.log(`Metadata.read Type=${metadata.type} Members=${currentMembers.length}`);
                     try {
@@ -892,7 +963,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
                         // Add some context information to the error
                         error.contextInformation = {
                             'Type': metadata.type ?? '(empty)',
-                            'PendingMembers': JSON.stringify(metadata?.members ?? []) || '[]',
+                            'AllMembers': JSON.stringify(metadata?.members ?? []) || '[]',
                             'MembersInProcess': JSON.stringify(currentMembers ?? []) || '[]',
                             'Cause': error?.message ?? '(empty)',
                             'Where': 'SalesforceManagerImpl.readMetadata'
@@ -901,7 +972,7 @@ export class SalesforceManager implements SalesforceManagerIntf {
                         throw error;
                     }
                 });
-            }
+            });
         }); // Promises are ready to be run
         logger?.log(`Calling metadata.read promises Count=${tasks?.length}`);
         await LargeProcessor.runAll<void>(tasks); // response will be updated in the promises
@@ -927,54 +998,15 @@ export class SalesforceManager implements SalesforceManagerIntf {
         logger?.log(`Reading metadata at scale for type=${type} and ${ids?.length ?? 0} id(s).`);
         // if no ids then just return empty array and basta!
         if ((ids?.length ?? 0) === 0) return [];
-        const bodies: { allOrNone: boolean; compositeRequest: { method: string; url: string; referenceId: string }[] }[] = [];
-        let currentBody: { allOrNone: boolean; compositeRequest: { method: string; url: string; referenceId: string }[] } | undefined;
-        ids.forEach((id, i) => {
-            if (!currentBody || currentBody.compositeRequest?.length === MAX_COMPOSITE_REQUEST_SIZE) {
-                currentBody = { allOrNone: false, compositeRequest: [] };
-                bodies.push(currentBody);
-            }
-            currentBody.compositeRequest.push({ 
-                method: 'GET',
-                url: `/services/data/v${this.apiVersion}.0/tooling/sobjects/${type}/${id}`, // here we need to have the full URI
-                referenceId: `chunk${i}`
-            });
-        });
+        // One sub request per id (the API reads one record at a time), then sub requests are grouped by composite request
+        const subRequests: CompositeSubRequest[] = ids.map((id, i) => ({ 
+            method: 'GET',
+            url: `/services/data/v${this.apiVersion}.0/tooling/sobjects/${type}/${id}`, // here we need to have the full URI
+            referenceId: `chunk${i}`
+        }));
+        const bodies: CompositeBody[] = SPLIT_IN_CHUNKS(subRequests, MAX_COMPOSITE_REQUEST_SIZE).map((compositeRequest) => ({ allOrNone: false, compositeRequest }));
         type AtScaleCompositeResult = { compositeResponse: { httpStatusCode: number, body: Record<string, unknown> | { errorCode: string }[] }[] };
-        let nbPending = bodies?.length, nbDone = 0, nbErrors = 0, batchCount = 0;
-        const allResults: AtScaleCompositeResult[] = [];
-        for (let i = 0; i < bodies?.length; i += MAX_ATSCALE_TOOLING_BATCH_SIZE) {
-            const bodiesInBatch = bodies.slice(i, i + MAX_ATSCALE_TOOLING_BATCH_SIZE);
-            batchCount++;
-            const results = await LargeProcessor.runAll<AtScaleCompositeResult | undefined>(bodiesInBatch.map((body) => async () => {
-                try {
-                    // Call the tooling composite request
-                    const results = await this._connection.tooling.request({
-                        url: `/services/data/v${this.apiVersion}.0/tooling/composite`, 
-                        method: 'POST',
-                        body: JSON.stringify(body), 
-                        headers: { 'Content-Type': 'application/json' }
-                    });    
-                    // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
-                    this._watchDog?.afterRequest(); // if limit has been reached, we reject the promise with a specific error and stop the process
-                    // Update the stats
-                    nbDone++;
-                    // Returning this results
-                    return results as AtScaleCompositeResult;
-                } catch (error) {
-                    logger?.log(`ReadMetadataAtScale batch error: ${JSON.stringify(error ?? {})}`);
-                    // Update the stats
-                    nbErrors++;
-                    // In case of error we return undefined specifically
-                    return undefined;
-                } finally {
-                    // Update the stats
-                    nbPending--;
-                    logger?.log(`ReadMetadataAtScale progress: 🧮 Total=${bodies?.length}, ✅ BatchesDone=${batchCount}, 🏃‍♀️‍➡️ Pending=${nbPending}, ✅ Done=${nbDone}, ❌ Errors=${nbErrors}`);
-                }
-            }));
-            allResults.push(...(results.filter((result) => result !== undefined) as AtScaleCompositeResult[])); // only add the non empty results
-        }
+        const allResults = await this._runCompositeBodies<AtScaleCompositeResult>(bodies, MAX_ATSCALE_TOOLING_BATCH_SIZE, 'ReadMetadataAtScale', logger);
         const records: Record<string, unknown>[] = [];
         allResults.forEach((result) => {
             result.compositeResponse.forEach((response) => {
@@ -1129,38 +1161,31 @@ export class SalesforceManager implements SalesforceManagerIntf {
         // Check another time the limit
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         const timestamp = Date.now();
-        const bodies: { allOrNone: boolean; compositeRequest: { method: string; url: string; referenceId: string; body?: Record<string, unknown> }[] }[] = [];
-        let currentBody: { allOrNone: boolean; compositeRequest: { method: string; url: string; referenceId: string; body?: Record<string, unknown> }[] } | undefined;
-        let countBatches = 0;
-        apexClasses.filter(apexClass => apexClass.Body).forEach((apexClass) => {
-            if (!currentBody || currentBody.compositeRequest?.length === MAX_COMPOSITE_REQUEST_SIZE) {
-                countBatches++;
-                currentBody = {
-                    allOrNone: false,
-                    compositeRequest: [
-                        {
-                            method: 'POST',
-                            url: `/services/data/v${this.apiVersion}.0/tooling/sobjects/MetadataContainer`,
-                            referenceId: 'container',
-                            body: { Name : `container-${timestamp}-${countBatches}` }
-                        },
-                        {
-                            method: 'POST',
-                            url: `/services/data/v${this.apiVersion}.0/tooling/sobjects/ContainerAsyncRequest`,
-                            referenceId: 'request',
-                            body: { MetadataContainerId: '@{container.id}', IsCheckOnly: true }
-                        }
-                    ]
-                };
-                bodies.push(currentBody);
-            }
-            currentBody.compositeRequest.push({ 
-                method: 'POST',
-                url: `/services/data/v${this.apiVersion}.0/tooling/sobjects/ApexClassMember`, 
-                referenceId: apexClass.Id as string,
-                body: { MetadataContainerId: '@{container.id}', ContentEntityId: apexClass.Id, Body: apexClass.Body }
-            });
-        });
+        // Each composite request starts with 2 sub requests (container and request), the remaining slots are for the classes
+        const nbClassesPerBody = MAX_COMPOSITE_REQUEST_SIZE - 2;
+        const bodies: CompositeBody[] = SPLIT_IN_CHUNKS(apexClasses.filter(apexClass => apexClass.Body), nbClassesPerBody).map((classesChunk, chunkIndex) => ({
+            allOrNone: false,
+            compositeRequest: [
+                {
+                    method: 'POST',
+                    url: `/services/data/v${this.apiVersion}.0/tooling/sobjects/MetadataContainer`,
+                    referenceId: 'container',
+                    body: { Name : `container-${timestamp}-${chunkIndex + 1}` }
+                },
+                {
+                    method: 'POST',
+                    url: `/services/data/v${this.apiVersion}.0/tooling/sobjects/ContainerAsyncRequest`,
+                    referenceId: 'request',
+                    body: { MetadataContainerId: '@{container.id}', IsCheckOnly: true }
+                },
+                ...classesChunk.map((apexClass): CompositeSubRequest => ({ 
+                    method: 'POST',
+                    url: `/services/data/v${this.apiVersion}.0/tooling/sobjects/ApexClassMember`, 
+                    referenceId: apexClass.Id as string,
+                    body: { MetadataContainerId: '@{container.id}', ContentEntityId: apexClass.Id, Body: apexClass.Body }
+                }))
+            ]
+        }));
         const responses = await LargeProcessor.runAll<unknown>(bodies.map((body) => async () => {
             // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
             this._watchDog?.afterRequest(); // if limit has been reached, we reject the promise with a specific error and stop the process
@@ -1206,6 +1231,26 @@ export class SalesforceManager implements SalesforceManagerIntf {
         return finalResult;
     }
 }
+
+/**
+ * @description Split a list of items into sub lists (chunks) of at most `chunkSize` items. 
+ *              Typically used when one operation applies too many ids but the target API only accepts 
+ *              a limited number of ids (or characters) per call.
+ * @param {T[]} items - Items to split (undefined or empty gives no chunk)
+ * @param {number} chunkSize - Maximum number of items per chunk (must be a positive integer)
+ * @returns {T[][]} List of chunks, order of the items is preserved
+ * @private
+ */
+const SPLIT_IN_CHUNKS = <T>(items: T[] | undefined, chunkSize: number): T[][] => {
+    if (Number.isInteger(chunkSize) === false || chunkSize < 1) {
+        throw new TypeError(`Given chunkSize must be a positive integer.`);
+    }
+    const chunks: T[][] = [];
+    for (let i = 0; i < (items?.length ?? 0); i += chunkSize) {
+        chunks.push((items as T[]).slice(i, i + chunkSize));
+    }
+    return chunks;
+};
 
 /** 
  * @description Metadata API returns an array or a single object!

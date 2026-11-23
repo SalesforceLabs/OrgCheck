@@ -1,4 +1,4 @@
-import { DataDependenciesForOneItem, DataDependencies, DataDependencyItem } from 'src/api/core/data/orgcheck-api-data-dependencies';
+import { DataDependenciesForOneItem, DataDependencies, DataDependencyItem, DataDependencyItemStatus } from 'src/api/core/data/orgcheck-api-data-dependencies';
 
 /**
  * @description Factory of dependencies
@@ -30,10 +30,14 @@ export class DataDependenciesFactory {
         const referenced = data.relationships.filter((e) => whatIds.includes(e.refId)).map((n) => {
             const item = data.items.get(n.id);
             if (item) {
-                if (refByTypes[item.type] === undefined) {
-                    refByTypes[item.type] = 1;
+                let key = item.type;
+                if (item.status !== DataDependencyItemStatus.NOT_SPECIFIED) {
+                    key += `-${item.status}`;
+                }
+                if (refByTypes[key] === undefined) {
+                    refByTypes[key] = 1;
                 } else {
-                    refByTypes[item.type]++;
+                    refByTypes[key]++;
                 }
             }
             return item;

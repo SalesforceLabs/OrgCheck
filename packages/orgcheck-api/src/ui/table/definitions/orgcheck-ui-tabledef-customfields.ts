@@ -3,6 +3,7 @@ import { TableDefinition } from 'src/ui/table/orgcheck-ui-table-definition';
 import { SortOrder } from 'src/ui/table/orgcheck-ui-table-sortorder';
 import { TableColumn } from 'src/ui/table/column/orgcheck-ui-table-column';
 import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
+import { DataDependencyItemStatus } from 'src/api/core/data/orgcheck-api-data-dependencies';
 
 class AbstractCustomFieldsTableDefinition implements TableDefinition {
     
@@ -12,33 +13,35 @@ class AbstractCustomFieldsTableDefinition implements TableDefinition {
      */
     constructor(isObjectInformationNeeded: boolean) {
         this.columns = [
-            { label: '#',                   type: ColumnType.IDX },
-            { label: 'Score',               type: ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Field',               type: ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'Label',               type: ColumnType.TXT, data: { value: 'label' }},
-            { label: 'Package',             type: ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Editable?',           type: ColumnType.CHK, data: { value: 'isEditable' }},
-            { label: 'Type',                type: ColumnType.TXT, data: { value: 'type' }},
-            { label: 'Length',              type: ColumnType.TXT, data: { value: 'length' }},
-            { label: 'Unique?',             type: ColumnType.CHK, data: { value: 'isUnique' }},
-            { label: 'Encrypted?',          type: ColumnType.CHK, data: { value: 'isEncrypted' }},
-            { label: 'External?',           type: ColumnType.CHK, data: { value: 'isExternalId' }},
-            { label: 'Indexed?',            type: ColumnType.CHK, data: { value: 'isIndexed' }},
-            { label: 'Restricted?',         type: ColumnType.CHK, data: { value: 'isRestrictedPicklist' }},
-            { label: 'Tooltip',             type: ColumnType.TXT, data: { value: 'tooltip' }, modifier: { maximumLength: 45, valueIfEmpty: 'No tooltip.' }},
-            { label: 'Formula',             type: ColumnType.TXT, data: { value: 'formula' }, modifier: { maximumLength: 100 , preformatted: true }},
-            { label: 'Hardcoded URLs',      type: ColumnType.TXTS, data: { values: 'hardCodedURLs', value: '.' }},
-            { label: 'Hardcoded IDs',       type: ColumnType.TXTS, data: { values: 'hardCodedIDs', value: '.' }},
-            { label: 'Default Value',       type: ColumnType.TXT, data: { value: 'defaultValue' }},
-            { label: 'Using',               type: ColumnType.NUM, data: { value: 'dependencies.using.length' }},
-            { label: 'Referenced in',       type: ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
-            { label: 'Ref. in Layout?',     type: ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${SalesforceMetadataTypes.PAGE_LAYOUT}` }}, 
-            { label: 'Ref. in Apex Class?', type: ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${SalesforceMetadataTypes.APEX_CLASS}` }}, 
-            { label: 'Ref. in Flow?',       type: ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${SalesforceMetadataTypes.FLOW_VERSION}` }}, 
-            { label: 'Dependencies',        type: ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
-            { label: 'Created date',        type: ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date',       type: ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Description',         type: ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
+            { label: '#',                      type: ColumnType.IDX },
+            { label: 'Score',                  type: ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Field',                  type: ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'Label',                  type: ColumnType.TXT, data: { value: 'label' }},
+            { label: 'Package',                type: ColumnType.TXT, data: { value: 'package' }},
+            { label: 'Editable?',              type: ColumnType.CHK, data: { value: 'isEditable' }},
+            { label: 'Type',                   type: ColumnType.TXT, data: { value: 'type' }},
+            { label: 'Length',                 type: ColumnType.TXT, data: { value: 'length' }},
+            { label: 'Unique?',                type: ColumnType.CHK, data: { value: 'isUnique' }},
+            { label: 'Encrypted?',             type: ColumnType.CHK, data: { value: 'isEncrypted' }},
+            { label: 'External?',              type: ColumnType.CHK, data: { value: 'isExternalId' }},
+            { label: 'Indexed?',               type: ColumnType.CHK, data: { value: 'isIndexed' }},
+            { label: 'Restricted?',            type: ColumnType.CHK, data: { value: 'isRestrictedPicklist' }},
+            { label: 'Tooltip',                type: ColumnType.TXT, data: { value: 'tooltip' }, modifier: { maximumLength: 45, valueIfEmpty: 'No tooltip.' }},
+            { label: 'Formula',                type: ColumnType.TXT, data: { value: 'formula' }, modifier: { maximumLength: 100 , preformatted: true }},
+            { label: 'Hardcoded URLs',         type: ColumnType.TXTS, data: { values: 'hardCodedURLs', value: '.' }},
+            { label: 'Hardcoded IDs',          type: ColumnType.TXTS, data: { values: 'hardCodedIDs', value: '.' }},
+            { label: 'Default Value',          type: ColumnType.TXT, data: { value: 'defaultValue' }},
+            { label: 'Using',                  type: ColumnType.NUM, data: { value: 'dependencies.using.length' }},
+            { label: 'Referenced in',          type: ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
+            { label: 'Ref. in Layout?',        type: ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${SalesforceMetadataTypes.PAGE_LAYOUT}` }}, 
+            { label: 'Ref. in Apex Class?',    type: ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${SalesforceMetadataTypes.APEX_CLASS}` }}, 
+            { label: 'Ref. in Active Flow?',   type: ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${SalesforceMetadataTypes.FLOW_VERSION}-${DataDependencyItemStatus.ACTIVE}` }}, 
+            { label: 'Ref. in Draft Flow?',    type: ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${SalesforceMetadataTypes.FLOW_VERSION}-${DataDependencyItemStatus.DRAFT}` }}, 
+            { label: 'Ref. in Inactive Flow?', type: ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${SalesforceMetadataTypes.FLOW_VERSION}-${DataDependencyItemStatus.INACTIVE}` }}, 
+            { label: 'Dependencies',           type: ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
+            { label: 'Created date',           type: ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',          type: ColumnType.DTM, data: { value: 'lastModifiedDate' }},
+            { label: 'Description',            type: ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
         ];
         if (isObjectInformationNeeded === true) {
             this.columns.splice(6, 0, // between editable and type

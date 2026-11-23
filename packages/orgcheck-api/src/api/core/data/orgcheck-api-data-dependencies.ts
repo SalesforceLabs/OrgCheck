@@ -39,6 +39,13 @@ export interface DataDependencyRelationShip {
     refId: string;
 }
 
+export enum DataDependencyItemStatus {
+    NOT_SPECIFIED = 'Not specified',
+    ACTIVE = 'Active',
+    INACTIVE = 'Inactive',
+    DRAFT = 'Draft',
+}
+
 /**
  * @description Dependency item using or referencing our dear main item
  */
@@ -64,7 +71,14 @@ export interface DataDependencyItem {
      * @public
      */
     type: string;
-    
+
+    /**
+     * @description Status of the item
+     * @type {DataDependencyItemStatus}
+     * @public
+     */
+    status: DataDependencyItemStatus;
+
     /**
      * @description URL of the item
      * @type {string}
