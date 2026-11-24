@@ -7,6 +7,8 @@ import { MediumProcessor } from 'src/api/core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from 'src/api/core/salesforce/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from 'src/api/core/salesforce/orgcheck-api-salesforcemanager';
 
+const STATICRESOURCE_IN_FORMULA_REGEX = new RegExp("/resource/(?<staticResource>[A-Za-z0-9_]+)", 'ig');
+
 export class DatasetStaticResources implements Dataset {
 
     /**
@@ -24,17 +26,75 @@ export class DatasetStaticResources implements Dataset {
             string: 'SELECT Id, Name, ContentType, CreatedDate, LastModifiedDate, '+
                         'Description, NamespacePrefix '+
                     'FROM StaticResource '
+        }, {
+            string: 'SELECT DurableId, Publisher.IsSalesforce '+
+                    'FROM FieldDefinition '+
+                    `WHERE DataType = 'Formula (Text)' `+
+                    `AND EntityDefinition.QualifiedApiName LIKE '%' `,
+            queryMoreField: 'DurableId', // FieldDefinition does not support calling QueryMore, use the custom instead
+            tooling: true
         }], logger);
 
         // Init the factory and records and records
         const staticResourceDataFactory = dataFactory.getInstance(DataAliases.SfdcStaticResource);
         const staticResourceRecords = results[0];
+        const textFormulaFieldRecords = results[1];
+
+        logger?.log(`Mapping ${staticResourceRecords?.length} static resources ids and names...`);
+        const srIdByName: Map<string, string> = new Map(await MediumProcessor.map(staticResourceRecords, async (record: Record<string, unknown>) => {
+            const name = record.Name as string;
+            const packageName = record.NamespacePrefix as string;
+            const developerName = packageName ? `${packageName}__${name}` : name;
+            return [ developerName, sfdcManager.caseSafeId(record.Id as string)];
+        }));
+
+        // List text formula fields that may be using static resources in their formula
+        const textFormulaFieldIds = textFormulaFieldRecords.map((formulaField: Record<string, unknown>) => {
+            if ((formulaField.Publisher as Record<string, unknown>)?.IsSalesforce === false) {
+                const durableId = formulaField.DurableId as string;
+                if (durableId && durableId.split) {
+                    return durableId.split('.').pop() as string;
+                }
+            }
+            return undefined;
+        }).filter((id: string | undefined) => id !== undefined);
+        const srFieldRelationships = new Map<string, Set<{id: string, name: string}>>();
+        (await sfdcManager.readMetadataAtScale('CustomField', textFormulaFieldIds, undefined, logger))
+            .forEach((field) => {
+                const formula = (field?.Metadata as Record<string, unknown>)?.formula as string;
+                if (formula) {
+                    Array.from(formula.matchAll(STATICRESOURCE_IN_FORMULA_REGEX))
+                        .map((m: RegExpMatchArray) => m?.groups?.['staticResource'] as string)
+                        .filter((staticResource: string | undefined) => staticResource !== undefined)
+                        .forEach((staticResource: string) => {
+                            if (srIdByName.has(staticResource) === true) {
+                                const srId = srIdByName.get(staticResource) as string;
+                                if (srFieldRelationships.has(srId) === false) {
+                                    srFieldRelationships.set(srId, new Set());
+                                }
+                                srFieldRelationships.get(srId)?.add({
+                                    id: field.Id as string, 
+                                    name: field.DeveloperName as string
+                                });
+                            }
+                        });
+                }
+            });
 
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${staticResourceRecords?.length} static resources...`);
         const staticResourceDependencies = await sfdcManager.dependenciesQuery(
-            await MediumProcessor.map(staticResourceRecords, (record: Record<string, unknown>) => sfdcManager.caseSafeId(record.Id as string)), 
-            logger
+            await MediumProcessor.map(staticResourceRecords, (record: Record<string, unknown>) => {
+                return sfdcManager.caseSafeId(record.Id as string);
+            }), 
+            logger,
+            (addUsing, addReferenced) => {
+                srFieldRelationships.forEach((fields: Set<{id: string, name: string}>, staticResource: string) => {
+                    fields.forEach((field: {id: string, name: string}) => {
+                        addReferenced(staticResource, field.id, field.name, SalesforceMetadataTypes.CUSTOM_FIELD);
+                    });
+                });
+            }
         );
 
         logger?.log(`Parsing ${staticResourceRecords?.length} static resources...`);
