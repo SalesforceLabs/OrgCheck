@@ -70,8 +70,9 @@ export class TableFactory {
             if (value1 && typeof value1 === 'string') value1 = value1.toUpperCase();
             if (value2 && typeof value2 === 'string') value2 = value2.toUpperCase();
             // Empty values are always placed last, whatever the sort direction
-            const isEmpty1 = !value1 && value1 !== 0;
-            const isEmpty2 = !value2 && value2 !== 0;
+            // (note: 0 and false are real values, not empty ones)
+            const isEmpty1 = !value1 && value1 !== 0 && value1 !== false;
+            const isEmpty2 = !value2 && value2 !== 0 && value2 !== false;
             if (isEmpty1 && isEmpty2) return 0;
             if (isEmpty1) return 1;
             if (isEmpty2) return -1;

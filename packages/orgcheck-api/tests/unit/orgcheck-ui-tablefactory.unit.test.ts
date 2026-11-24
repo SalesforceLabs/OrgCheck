@@ -74,4 +74,19 @@ describe('tests.ui.unit.TableFactory', () => {
             expect(values.slice(2).every((v) => v === '' || v === undefined)).toBe(true);
         });
     });
+
+    describe('sort on a boolean column (see ColumnType.CHK)', () => {
+
+        it('sorts false before true in ASC order, with empty values last', () => {
+            const table = buildTable(ColumnType.CHK, [true, undefined, false, true, false]);
+            TableFactory.sort(table, 0, SortOrder.ASC);
+            expect(sortedValues(table)).toEqual([false, false, true, true, undefined]);
+        });
+
+        it('sorts true before false in DESC order, with empty values last', () => {
+            const table = buildTable(ColumnType.CHK, [true, undefined, false, true, false]);
+            TableFactory.sort(table, 0, SortOrder.DESC);
+            expect(sortedValues(table)).toEqual([true, true, false, false, undefined]);
+        });
+    });
 });
