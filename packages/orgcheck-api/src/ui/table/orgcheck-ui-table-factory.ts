@@ -4,6 +4,7 @@ import { SortOrder } from 'src/ui/table/orgcheck-ui-table-sortorder';
 import { TableDefinition } from 'src/ui/table/orgcheck-ui-table-definition';
 import { RowsFactory } from 'src/ui/table/row/orgcheck-ui-table-rowsfactory';
 import { SecretSauce } from 'src/api/core/orgcheck-api-secretsauce';
+import { DataDependenciesForOneItem } from 'src/api/core/data/orgcheck-api-data-dependencies';
 
 export class TableFactory {
 
@@ -52,6 +53,7 @@ export class TableFactory {
         if (! column) return;
         const iOrder = order === SortOrder.ASC ? 1 : -1;
         const isIterative = column.type == ColumnType.OBJS || column.type == ColumnType.TXTS || column.type == ColumnType.URLS;
+        const isDependency = column.type == ColumnType.DEP;
         const property = column.type == ColumnType.URL ? 'label' : 'value';
         let index = 0;
         let value1: unknown, value2: unknown;
@@ -63,6 +65,11 @@ export class TableFactory {
             if (isIterative === true) {
                 value1 = (data1?.['values'] as unknown[] | undefined)?.length || 0;
                 value2 = (data2?.['values'] as unknown[] | undefined)?.length || 0;
+            } else if (isDependency === true) {
+                // The cell value is an object, so we sort on the total number of dependencies
+                // (undefined if there are none or if there was an error, so these rows are considered empty)
+                value1 = DEPENDENCY_COUNT(data1?.[property]);
+                value2 = DEPENDENCY_COUNT(data2?.[property]);
             } else {
                 value1 = data1?.[property];
                 value2 = data2?.[property];
@@ -205,6 +212,17 @@ export class TableFactory {
     }
 }
 
+
+/**
+ * @description Total number of dependencies (using + referenced) of the given dependencies cell value
+ * @param {unknown} value - Value of a dependencies cell (see DataDependenciesForOneItem)
+ * @returns {number | undefined} The total count, or undefined if there is no dependency (or an error)
+ */
+const DEPENDENCY_COUNT = (value: unknown): number | undefined => {
+    const dep = value as Partial<DataDependenciesForOneItem> | undefined;
+    const count = (dep?.using?.length ?? 0) + (dep?.referenced?.length ?? 0);
+    return count > 0 ? count : undefined;
+};
 
 const STRING_MATCHER = (value: unknown, searchingValue: string) => {
     return `${value}`.toUpperCase().indexOf(searchingValue) >= 0;

@@ -89,4 +89,40 @@ describe('tests.ui.unit.TableFactory', () => {
             expect(sortedValues(table)).toEqual([true, true, false, false, undefined]);
         });
     });
+
+    describe('sort on a dependencies column (see ColumnType.DEP)', () => {
+
+        const item = (id: string) => ({ id, name: id, type: 'Test', url: '' });
+        const dependencies = (nbUsing: number, nbReferenced: number, hadError = false) => ({
+            hadError,
+            using: Array.from({ length: nbUsing }, (_, i) => item(`u${i}`)),
+            referenced: Array.from({ length: nbReferenced }, (_, i) => item(`r${i}`)),
+            referencedByTypes: {}
+        });
+        // Total dependency count of each sorted row, or null if the row has no dependency (or an error)
+        const counts = (table: any): (number | null)[] => sortedValues(table).map((v: any) => {
+            const count = (v?.using?.length ?? 0) + (v?.referenced?.length ?? 0);
+            return count > 0 ? count : null;
+        });
+        const values = () => [
+            dependencies(2, 1),        // 3
+            dependencies(0, 0),        // none
+            dependencies(1, 0),        // 1
+            dependencies(0, 0, true),  // error
+            undefined,                 // no value at all
+            dependencies(4, 2)         // 6
+        ];
+
+        it('sorts by total number of dependencies in ASC order, with none/error rows last', () => {
+            const table = buildTable(ColumnType.DEP, values());
+            TableFactory.sort(table, 0, SortOrder.ASC);
+            expect(counts(table)).toEqual([1, 3, 6, null, null, null]);
+        });
+
+        it('sorts by total number of dependencies in DESC order, with none/error rows last', () => {
+            const table = buildTable(ColumnType.DEP, values());
+            TableFactory.sort(table, 0, SortOrder.DESC);
+            expect(counts(table)).toEqual([6, 3, 1, null, null, null]);
+        });
+    });
 });

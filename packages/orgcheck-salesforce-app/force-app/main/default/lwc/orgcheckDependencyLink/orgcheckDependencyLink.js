@@ -45,6 +45,16 @@ export default class OrgcheckDependencyLink extends LightningElement {
     }
 
     /**
+     * @description Label of the link, including the number of dependencies (like "Dependencies (12)")
+     * @type {string}
+     * @public
+     */
+    get dependenciesLabel() {
+        // Non-breaking space: lightning-button resets white-space internally, so CSS cannot prevent the wrap
+        return `Dependencies\u00A0(${this.numberOfDependencies})`;
+    }
+
+    /**
      * @description Event when a user click on the view button
      * @public
      */

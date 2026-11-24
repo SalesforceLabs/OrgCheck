@@ -30,6 +30,7 @@ export default function DependencyLink({
       <Button
         variant="link"
         size="sm"
+        className="whitespace-nowrap"
         onClick={() =>
           onView({
             whatId: whatId ?? '',
@@ -38,18 +39,18 @@ export default function DependencyLink({
           })
         }
       >
-        Dependencies
+        Dependencies ({count})
         <Search />
       </Button>
     );
   }
   if (hadError) {
     return (
-      <Button variant="destructive" size="sm" disabled>
+      <Button variant="destructive" size="sm" className="whitespace-nowrap" disabled>
         Error
         <TriangleAlert />
       </Button>
     );
   }
-  return <span className="text-muted-foreground text-xs">No dependency</span>;
+  return <span className="text-muted-foreground text-xs whitespace-nowrap">No dependency</span>;
 }
