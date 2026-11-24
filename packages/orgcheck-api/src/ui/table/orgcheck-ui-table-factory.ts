@@ -69,8 +69,13 @@ export class TableFactory {
             }
             if (value1 && typeof value1 === 'string') value1 = value1.toUpperCase();
             if (value2 && typeof value2 === 'string') value2 = value2.toUpperCase();
-            if (!value1 && value1 !== 0) return iOrder;
-            if (!value2 && value2 !== 0) return -iOrder;
+            // Empty values are always placed last, whatever the sort direction
+            const isEmpty1 = !value1 && value1 !== 0;
+            const isEmpty2 = !value2 && value2 !== 0;
+            if (isEmpty1 && isEmpty2) return 0;
+            if (isEmpty1) return 1;
+            if (isEmpty2) return -1;
+            // In other cases, we sort the values as numerical values according to the iOrder value
             return ((value1 as string | number) < (value2 as string | number) ? -iOrder : iOrder);
         }).forEach((row) => { 
             if (row.isVisible === true) {
