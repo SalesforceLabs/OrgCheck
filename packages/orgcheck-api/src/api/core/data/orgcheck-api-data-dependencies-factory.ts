@@ -31,7 +31,7 @@ export class DataDependenciesFactory {
             const item = data.items.get(n.id);
             if (item) {
                 let key = item.type;
-                if (item.status !== DataDependencyItemStatus.NOT_SPECIFIED) {
+                if (item.status !== DataDependencyItemStatus.NOT_SPECIFIED && item.status !== undefined) {
                     key += `-${item.status}`;
                 }
                 if (refByTypes[key] === undefined) {

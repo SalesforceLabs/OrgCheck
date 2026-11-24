@@ -75,9 +75,10 @@ export interface DataDependencyItem {
     /**
      * @description Status of the item
      * @type {DataDependencyItemStatus}
+     * @optional
      * @public
      */
-    status: DataDependencyItemStatus;
+    status?: DataDependencyItemStatus;
 
     /**
      * @description URL of the item
