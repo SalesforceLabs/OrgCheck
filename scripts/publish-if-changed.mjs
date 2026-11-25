@@ -89,6 +89,7 @@ function publish(pkg, dryRun) {
         console.log(`Dry run: leaving ${pkg.name} at ${pkg.version} and skipping publish.`);
         return;
     }
+    assertNextTagIsFree(pkg);
     const version = run('yarn', ['version', '--patch']);
     if (version.status !== 0) {
         process.exitCode = version.status ?? 1;
@@ -97,6 +98,26 @@ function publish(pkg, dryRun) {
     const published = run('npm', ['publish', '--access', 'public', '--ignore-scripts']);
     if (published.status !== 0) {
         process.exitCode = published.status ?? 1;
+    }
+}
+
+// `yarn version` commits the bump first and only then creates the git tag. If the tag already exists
+// it fails after the commit, leaving a dangling bump commit. Fail early, before anything changes.
+function assertNextTagIsFree(pkg) {
+    const match = /^(\d+)\.(\d+)\.(\d+)$/.exec(pkg.version);
+    if (!match) {
+        return;
+    }
+    const next = `${match[1]}.${match[2]}.${Number(match[3]) + 1}`;
+    const prefixResult = run('yarn', ['--silent', 'config', 'get', 'version-tag-prefix'], { capture: true });
+    const prefix = prefixResult.status === 0 ? prefixResult.stdout.trim() : '';
+    const tag = `${prefix || 'v'}${next}`;
+    const existing = run('git', ['rev-parse', '-q', '--verify', `refs/tags/${tag}`], { capture: true });
+    if (existing.status === 0) {
+        throw new Error(
+            `Git tag ${tag} already exists, so ${pkg.name} cannot be bumped to ${next}. ` +
+            `Delete or rename the stale tag, or fix the version, then run the deploy again.`
+        );
     }
 }
 
@@ -120,7 +141,8 @@ function pack(spec, destination) {
     mkdirSync(destination, { recursive: true });
     const args = ['pack', '--json', '--ignore-scripts', '--pack-destination', destination];
     if (spec) {
-        args.push(spec);
+        // Compare against the version just published, even if the user's .npmrc has min-release-age set.
+        args.push('--min-release-age=0', spec);
     }
     const result = run('npm', args, { capture: true });
     if (result.status !== 0) {

@@ -73,7 +73,7 @@
     "link-check": "node -e \"process.exit(process.env.CI ? 0 : 1)\" || linkinator \"**/*.md\" --skip \"CHANGELOG.md|node_modules|tests/|confluence.internal.salesforce.com|my.salesforce.com|localhost|%s\" --markdown --retry --directory-listing --verbosity error",
     "postpack": "sf-clean --ignore-signing-artifacts",
     "prepack": "yarn build && oclif manifest",
-    "version": "oclif readme"
+    "version": "oclif manifest && oclif readme"
   },
   "publishConfig": {
     "access": "public"
