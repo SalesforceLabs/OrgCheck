@@ -8,8 +8,7 @@
 ## About Org Check:
 - [Website](https://SalesforceLabs.github.io/OrgCheck/)
 - [LinkedIn](https://www.linkedin.com/company/orgchecksfdc/)
-- [AppExchange](https://sfdc.co/OrgCheck-InstallToday-AppExchange)
-- [NPMjs](https://www.npmjs.com/package/@orgcheck/sfdx-plugin)
+- [sf CLI plugin package on NPMjs](https://www.npmjs.com/package/@orgcheck/sfdx-plugin)
 - [FAQ](https://SalesforceLabs.github.io/OrgCheck/faq/)
 
 
