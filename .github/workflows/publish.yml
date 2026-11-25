@@ -1,0 +1,65 @@
+name: Publish to npm
+
+# Publishes one package to npm using GitHub trusted publishing (OIDC): no npm token and no OTP.
+# Run it manually from the Actions tab, and only from the main branch.
+# Bump the version locally first (yarn deploy), then push the commit and tag to main.
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: Package to publish
+        required: true
+        type: choice
+        options:
+          - api
+          - sfdx-plugin
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: publish ${{ inputs.package }}
+    runs-on: ubuntu-latest
+    # The "npm-publish" environment must only allow the main branch (see repository settings).
+    # The npm trusted publisher is configured to require this environment.
+    environment: npm-publish
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Refuse to publish from anything but main
+        run: |
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "Publishing is only allowed from main (got $GITHUB_REF)"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      # Trusted publishing requires npm 11.5.1 or newer.
+      - name: Upgrade npm
+        run: npm install -g npm@latest
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build @orgcheck/api
+        if: inputs.package == 'api'
+        working-directory: packages/orgcheck-api
+        run: yarn build:js
+
+      - name: Build @orgcheck/sfdx-plugin
+        if: inputs.package == 'sfdx-plugin'
+        working-directory: packages/orgcheck-sfdx-plugin
+        run: yarn build && yarn oclif manifest
+
+      - name: Publish
+        working-directory: packages/orgcheck-${{ inputs.package }}
+        run: npm publish --provenance --access public --ignore-scripts

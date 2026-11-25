@@ -95,10 +95,8 @@ function publish(pkg, dryRun) {
         process.exitCode = version.status ?? 1;
         return;
     }
-    const published = run('npm', ['publish', '--access', 'public', '--ignore-scripts']);
-    if (published.status !== 0) {
-        process.exitCode = published.status ?? 1;
-    }
+    // npm publish is done by the "Publish to npm" GitHub workflow (main only, trusted publishing).
+    console.log(`${pkg.name} is now at ${pkg.version}. Push the commit and tag to main, then run the "Publish to npm" workflow.`);
 }
 
 // `yarn version` commits the bump first and only then creates the git tag. If the tag already exists
